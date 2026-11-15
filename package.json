@@ -36,7 +36,7 @@
     },
     "dependencies": {
         "@fontsource-variable/roboto-flex": "^5.2.8",
-        "@inertiajs/vue3": "^2.3.29",
+        "@inertiajs/vue3": "^3.11.0",
         "@vueuse/core": "^15.0.0",
         "class-variance-authority": "^0.7.1",
         "clsx": "^2.1.1",
