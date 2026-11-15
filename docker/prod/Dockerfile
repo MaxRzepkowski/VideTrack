@@ -1,6 +1,6 @@
 # Base images pinned by digest, so a rebuild is the build that was tested;
 # bump the tag and the digest together.
-FROM dunglas/frankenphp:1-php8.4@sha256:08af88488ce218936d530b80f6f55dc2afe4d0d91f13f9e6ae350a9e7752128e AS base
+FROM dunglas/frankenphp:1-php8.4@sha256:8f0d509ad824fa86da88b55c5ea9f1605380f423ab55ec3a72864cc223491bfd AS base
 
 COPY --from=mlocati/php-extension-installer@sha256:4fd45396c16685266d32bf147a24ecd5e81029d3820295895bf4a90131190ac9 /usr/bin/install-php-extensions /usr/local/bin/
 
@@ -33,7 +33,7 @@ RUN mkdir -p storage/framework/cache storage/framework/sessions storage/framewor
     && composer dump-autoload --optimize \
     && rm -rf resources/js resources/css package.json package-lock.json vite.config.ts tsconfig.json
 
-FROM --platform=$BUILDPLATFORM node:22-alpine@sha256:0e1754758c2df4cfa3e68d59e2e1b7374bb7fd9ea6328eaaacf15cc934af8202 AS frontend
+FROM --platform=$BUILDPLATFORM node:26-alpine@sha256:6bd9ab43c0ec0190ca7b2d193906cb8b7edf6e7f4afa43ddeccd6452710bffb5 AS frontend
 
 WORKDIR /app
 COPY package.json package-lock.json ./
