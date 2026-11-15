@@ -24,16 +24,13 @@ createApp({}).use(i18nVue, {
 
 globalThis.route = route as typeof globalThis.route;
 config.global.mocks.route = route;
-// A page's <Head> writes through the manager the Inertia app installs; a
-// mounted page has no app around it, so its title goes nowhere.
-config.global.mocks.$headManager = {
-    createProvider: () => ({ preferredAttribute: () => 'inertia', reconnect: () => undefined, update: () => undefined, disconnect: () => undefined }),
-};
-
-// usePage() answers from the test's page; the rest of Inertia stays real.
+// usePage() and <Head> are stand-ins, the rest of Inertia is real: usePage()
+// answers from the test's page, and <Head> writes through the head manager
+// the Inertia app sets up, which a mounted page has none of.
 vi.mock('@inertiajs/vue3', async (importOriginal) => ({
     ...(await importOriginal<typeof import('@inertiajs/vue3')>()),
     usePage: () => testPage,
+    Head: Object.assign(() => null, { props: { title: String } }),
 }));
 
 // The library store follows the test's page, as it follows the real one.
