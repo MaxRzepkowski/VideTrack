@@ -25,7 +25,9 @@ class MediaItemFactory extends Factory
             'provider_ref' => (string) fake()->unique()->numberBetween(1, 9_999_999),
             'title' => fake()->sentence(3),
             'year' => fake()->numberBetween(1970, 2026),
-            'release_date' => fake()->dateTimeBetween('-30 years', '-1 month')->format('Y-m-d'),
+            // Relative to the test clock, not the machine's: Faker reads the real
+            // time, and a frozen "today" behind it would draw a release yet to air.
+            'release_date' => fake()->dateTimeBetween(now()->subYears(30), now()->subMonth())->format('Y-m-d'),
             'runtime' => fake()->numberBetween(20, 180),
         ];
     }
