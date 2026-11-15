@@ -11,27 +11,26 @@
         "types": "vue-tsc --noEmit"
     },
     "devDependencies": {
-        "@eslint/js": "^9.19.0",
         "@tailwindcss/vite": "^4.1.0",
         "@types/node": "^26.6.6",
         "@vitejs/plugin-vue": "^6.0.11",
         "@vitest/coverage-v8": "^5.1.0",
-        "@vue/eslint-config-typescript": "^14.3.0",
-        "@vue/test-utils": "^2.5.1",
-        "eslint": "^9.17.0",
+        "@vue/eslint-config-typescript": "^14.9.0",
+        "@vue/test-utils": "^2.6.0",
+        "eslint": "^10.15.0",
         "eslint-config-prettier": "^10.0.1",
-        "eslint-plugin-vue": "^9.32.0",
+        "eslint-plugin-vue": "^10.12.1",
         "happy-dom": "^21.0.4",
         "laravel-vite-plugin": "^3.2.1",
         "prettier": "^3.10.1",
         "prettier-plugin-organize-imports": "^4.1.0",
         "prettier-plugin-tailwindcss": "^0.8.1",
         "tailwindcss": "^4.1.0",
-        "typescript": "^5.2.2",
-        "typescript-eslint": "^8.23.0",
+        "typescript": "^6.0.3",
+        "typescript-eslint": "^8.72.2",
         "vite": "^8.3.8",
         "vitest": "^5.1.0",
-        "vue-tsc": "^2.2.0"
+        "vue-tsc": "^3.3.14"
     },
     "dependencies": {
         "@fontsource-variable/roboto-flex": "^5.2.8",
@@ -48,5 +47,9 @@
         "vue": "^3.5.13",
         "vue-sonner": "^2.0.9",
         "ziggy-js": "^2.4.2"
+    },
+    "overrides": {
+        "glob": "^14.0.2",
+        "minimatch": "^11.0.5"
     }
 }
