@@ -127,7 +127,10 @@ jobs:
     needs: [check, audit, gitleaks, smoke]
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    # arm64 is built under emulation: once the base layers are cached a build
+    # takes minutes, but the first one, or one after a new base image,
+    # compiles the PHP extensions and needs the room.
+    timeout-minutes: 120
     permissions:
       contents: read
       packages: write

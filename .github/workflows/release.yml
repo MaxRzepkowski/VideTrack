@@ -40,7 +40,8 @@ jobs:
     needs: release-please
     if: needs.release-please.outputs.created == 'true'
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    # As for `edge`: the arm64 base layers may have to be compiled anew.
+    timeout-minutes: 150
     permissions:
       contents: read
       packages: write
