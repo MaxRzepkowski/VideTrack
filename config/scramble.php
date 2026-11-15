@@ -46,6 +46,14 @@ return [
     ],
 
     /*
+     * Scramble's dev tools only serve its docs page, which the instance does
+     * not have; on by default under APP_DEBUG, they would add a route of their own.
+     */
+    'dev_tools' => [
+        'enabled' => false,
+    ],
+
+    /*
      * The spec's title; the export reads it from Scramble's UI settings.
      */
     'ui' => [

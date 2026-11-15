@@ -55,4 +55,5 @@ test('the spec says every call carries a bearer token', function () {
 test('the instance serves no docs pages, only the API itself', function () {
     $this->get('/docs/api')->assertNotFound();
     $this->get('/docs/api.json')->assertNotFound();
+    $this->get('/_scramble/dev-tools/devtools.js')->assertNotFound();
 });
