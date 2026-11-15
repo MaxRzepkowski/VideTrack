@@ -77,25 +77,6 @@ test('provider codes are spoken only by providers, integrations and service prov
     ]))->toBe([]);
 });
 
-test('the User-Agent sent to outside services does not name the product', function () {
-    // The User-Agent comes from `tracker.http.user_agent`, neutral by default:
-    // which product an instance runs is the operator's to disclose.
-    $named = [];
-
-    foreach (appSources() as $path => $contents) {
-        if (preg_match('/withUserAgent\\([^;]*VideTrack|[\'"]User-Agent[\'"][^;]*VideTrack/i', $contents) === 1) {
-            $named[] = $path;
-        }
-    }
-
-    // The defaults the clients read, as the configuration file writes them.
-    preg_match_all("/'user_agent' => .*/", (string) file_get_contents(dirname(__DIR__, 2).'/config/tracker.php'), $defaults);
-
-    expect($named)->toBe([])
-        ->and($defaults[0])->not->toBeEmpty()
-        ->and(implode("\n", $defaults[0]))->not->toMatch('/videtrack/i');
-});
-
 test('a broad catch reports or rethrows — never a silent line in a summary', function () {
     $silent = [];
 

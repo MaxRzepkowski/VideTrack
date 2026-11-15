@@ -314,7 +314,7 @@ class SimklClient
     {
         return [
             'client_id' => $this->clientId(),
-            'app-name' => 'media-tracker',
+            'app-name' => 'videtrack',
             'app-version' => config()->string('tracker.version'),
         ];
     }
