@@ -24,7 +24,7 @@ export default defineConfig(({ mode }) => {
         },
         plugins: [
             laravel({
-                input: ['resources/js/app.ts', 'resources/js/api-docs.ts'],
+                input: ['resources/js/app.ts'],
                 refresh: true,
             }),
             tailwindcss(),

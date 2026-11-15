@@ -14,6 +14,7 @@ import { trans } from 'laravel-vue-i18n';
 const props = defineProps<{
     tokens: ApiTokenItem[];
     createdToken: string | null;
+    docsUrl: string;
 }>();
 
 const form = useForm({
@@ -65,7 +66,12 @@ function abilityLabel(abilities: string[]): string {
             <div class="space-y-6">
                 <HeadingSmall :title="trans('common.api')" :description="trans('integrations.access_tokens_for_your_own_scripts')" />
 
-                <a :href="route('scramble.docs.ui')" class="text-brand-soft inline-block text-base font-medium hover:underline">
+                <a
+                    :href="props.docsUrl"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="text-brand-soft inline-block text-base font-medium hover:underline"
+                >
                     {{ trans('integrations.api_documentation') }}
                 </a>
 

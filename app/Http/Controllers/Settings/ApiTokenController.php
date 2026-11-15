@@ -35,6 +35,7 @@ class ApiTokenController extends Controller
                 ->all(),
             // Shown once, right after creation: the database keeps only its hash.
             'createdToken' => session('created_token'),
+            'docsUrl' => config('tracker.api_docs_url'),
         ]);
     }
 

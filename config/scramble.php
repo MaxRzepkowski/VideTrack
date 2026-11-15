@@ -1,6 +1,5 @@
 <?php
 
-use Dedoc\Scramble\Http\Middleware\RestrictedDocsAccess;
 use Dedoc\Scramble\SecurityDocumentation\MiddlewareAuthSecurityStrategy;
 
 return [
@@ -28,19 +27,10 @@ return [
     'api_domain' => null,
 
     /*
-     * The path where your OpenAPI specification will be exported.
+     * Where `scramble:export` writes the spec: the copy committed with the
+     * source, which clients read before they reach an instance.
      */
-    'export_path' => 'api.json',
-
-    /*
-     * Cache configuration for the generated OpenAPI document.
-     *
-     * Use `scramble:cache` to warm the cache and `scramble:clear` to invalidate it.
-     */
-    'cache' => [
-        'key' => 'scramble.openapi',
-        'store' => 'file',
-    ],
+    'export_path' => 'docs/api/openapi.json',
 
     'info' => [
         /*
@@ -50,30 +40,17 @@ return [
         'version' => env('APP_VERSION', 'dev'),
 
         /*
-         * Description rendered on the home page of the API documentation (`/docs/api`).
+         * Description at the top of the exported spec (`docs/api/openapi.json`).
          */
         'description' => 'Token-authenticated REST surface of a VideTrack instance. Create a token in Settings → API; send it as `Authorization: Bearer <token>`. A token carries `read` and optionally `write`. Answers are camelCase under `data` (with `meta` where there is something to count or page); a position carries the user\'s state as `state`, and a write that changes a position adds `states`: every state it touched, keyed `type:ref`. Request fields are snake_case.',
     ],
 
+    /*
+     * The spec's title; the export reads it from Scramble's UI settings.
+     */
     'ui' => [
         'title' => 'VideTrack API',
     ],
-
-    /*
-     * Load Scramble's development tools on documentation pages. An explicit
-     * SCRAMBLE_DEV_TOOLS value takes precedence over APP_DEBUG.
-     */
-    'dev_tools' => [
-        'enabled' => env('SCRAMBLE_DEV_TOOLS', env('APP_DEBUG', false)),
-    ],
-
-    /*
-     * The viewer: Scalar, bundled with the app (resources/js/api-docs.ts),
-     * where its options live. The app's own `scramble::scalar` view hands it
-     * the document and nothing else, so the package's defaults for this
-     * renderer (a CDN, a hosted proxy) reach no page.
-     */
-    'renderer' => 'scalar',
 
     /*
      * The list of servers of the API. By default, when `null`, server URL will be created from
@@ -89,7 +66,11 @@ return [
      * ],
      * ```
      */
-    'servers' => null,
+    'servers' => [
+        // Every instance has its own address; a tool reading the spec is
+        // pointed at the default install and the reader sets their own.
+        'Your instance' => 'http://localhost:8080/api/v1',
+    ],
 
     /**
      * Determines how Scramble stores the descriptions of enum cases.
@@ -126,11 +107,6 @@ return [
      *  `{"name":"foo", "schema": {"type":"object", "properties":{"bar":{"type": "int"}}, "required": ["bar"]}, "required":true}`.
      */
     'flatten_deep_query_parameters' => true,
-
-    'middleware' => [
-        'web',
-        RestrictedDocsAccess::class,
-    ],
 
     'extensions' => [],
 

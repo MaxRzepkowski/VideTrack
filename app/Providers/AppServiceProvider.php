@@ -5,9 +5,9 @@ namespace App\Providers;
 use App\Catalog\ProviderCacheContext;
 use App\Library\LibraryProjector;
 use App\Library\MutationContext;
-use App\Models\User;
 use App\Policies\PersonalAccessTokenPolicy;
 use App\Support\PublicUrl;
+use Dedoc\Scramble\Scramble;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Contracts\Auth\CanResetPassword;
@@ -28,6 +28,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+        // Scramble only writes the spec (`scramble:export`); the instance
+        // serves no docs pages, so the package's routes stay off.
+        Scramble::ignoreDefaultRoutes();
+
         // Shared, request-scoped flag the cache decorator reads to bypass the
         // response cache when a manual refresh needs genuinely fresh data.
         $this->app->singleton(ProviderCacheContext::class);
@@ -129,11 +133,6 @@ class AppServiceProvider extends ServiceProvider
 
         // Sanctum's model lives outside App\Models, so discovery misses it.
         Gate::policy(PersonalAccessToken::class, PersonalAccessTokenPolicy::class);
-
-        // The interactive API docs describe this instance's own surface. Anyone
-        // signed in can mint a token, so anyone signed in reads what it does;
-        // a guest gets nothing.
-        Gate::define('viewApiDocs', fn (?User $user): bool => $user !== null);
     }
 
     /** Requests a minute, from `tracker.rate_limits`. */

@@ -30,6 +30,13 @@ return [
     'source_url' => env('SOURCE_URL', 'https://github.com/MaxRzepkowski/VideTrack'),
 
     /*
+    | The API reference linked from Settings → API. It lives with the source, so
+    | a fork on another host or branch points it at its own copy.
+    */
+
+    'api_docs_url' => env('API_DOCS_URL', 'https://github.com/MaxRzepkowski/VideTrack/blob/main/docs/api.md'),
+
+    /*
     |--------------------------------------------------------------------------
     | How the instance names itself to outside services
     |--------------------------------------------------------------------------

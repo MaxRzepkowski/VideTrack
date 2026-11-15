@@ -40,22 +40,6 @@ export function jsonFetch(url: string, { method = 'GET', body, signal }: JsonFet
 }
 
 /**
- * A request built by someone else's code (the API docs' "Try it"), sent as
- * this page's session: its cookies and the XSRF token Laravel reads on writes.
- * The URL there is editable, so the token goes only to this origin.
- */
-export function sessionFetch(input: string | URL | Request, init: RequestInit = {}): Promise<Response> {
-    const headers = new Headers(init.headers ?? (input instanceof Request ? input.headers : undefined));
-    const url = new URL(input instanceof Request ? input.url : input, window.location.href);
-
-    if (url.origin === window.location.origin) {
-        headers.set('X-XSRF-TOKEN', xsrfToken());
-    }
-
-    return fetch(input, { ...init, headers, credentials: 'same-origin' });
-}
-
-/**
  * What to tell the user about a request the server turned down, in its own
  * words where it gave any: a refusal (422) names its reason, an expired
  * session or a stale form token (401, 419) asks for a reload — trying again
