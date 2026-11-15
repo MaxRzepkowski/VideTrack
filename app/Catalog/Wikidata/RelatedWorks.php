@@ -162,7 +162,11 @@ final readonly class RelatedWorks
         foreach ($this->wikidata->select($sparql, self::TIMEOUT_SECONDS) as $row) {
             $hub = $this->entity($row, 's');
 
-            foreach ($hub === null ? [] : $this->screenWorks($row, TitleRelation::SameUniverse) as $key => $work) {
+            if ($hub === null) {
+                continue;
+            }
+
+            foreach ($this->screenWorks($row, TitleRelation::SameUniverse) as $key => $work) {
                 $members[$hub][$key] = $work;
             }
         }

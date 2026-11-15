@@ -162,7 +162,7 @@ final readonly class BuildFollowingPanel
                 // muted rows visible: muting a series is a lasting "not
                 // interested", and the page is where it gets undone.
                 if ($follow->list !== null) {
-                    $cover = $covers[$follow->list_id] ?? ['posterPath' => null, 'count' => 0];
+                    $cover = $covers[$follow->list->id] ?? ['posterPath' => null, 'count' => 0];
                     // A bell on a list is only ever on a collection.
                     $source = $follow->list->collectionSource() ?? throw new LogicException('A followed list is a collection.');
 

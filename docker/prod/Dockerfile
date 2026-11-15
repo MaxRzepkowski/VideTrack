@@ -1,6 +1,6 @@
 # Base images pinned by digest, so a rebuild is the build that was tested;
 # bump the tag and the digest together.
-FROM dunglas/frankenphp:1-php8.4@sha256:8f0d509ad824fa86da88b55c5ea9f1605380f423ab55ec3a72864cc223491bfd AS base
+FROM dunglas/frankenphp:1-php8.5@sha256:667c5fffd348d9c3c260803d75956f1d9aace7e4b7331d8893de6f101d7e0e57 AS base
 
 COPY --from=mlocati/php-extension-installer@sha256:4fd45396c16685266d32bf147a24ecd5e81029d3820295895bf4a90131190ac9 /usr/bin/install-php-extensions /usr/local/bin/
 

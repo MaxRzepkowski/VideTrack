@@ -14,7 +14,7 @@
     "license": "AGPL-3.0-or-later",
     "homepage": "https://github.com/MaxRzepkowski/VideTrack",
     "require": {
-        "php": "^8.4",
+        "php": "^8.5",
         "dedoc/scramble": "^0.13.45",
         "inertiajs/inertia-laravel": "^2.0",
         "laravel/framework": "^12.0",
