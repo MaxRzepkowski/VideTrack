@@ -2,6 +2,10 @@
 
 $version = env('APP_VERSION', 'dev');
 
+$source = env('SOURCE_URL', 'https://github.com/MaxRzepkowski/VideTrack');
+
+$userAgent = "VideTrack/{$version} (+{$source})";
+
 $locales = [
     'en' => ['language' => 'en-US', 'region' => 'US'],
     'pl' => ['language' => 'pl-PL', 'region' => 'PL'],
@@ -27,7 +31,7 @@ return [
     | a modified version.
     */
 
-    'source_url' => env('SOURCE_URL', 'https://github.com/MaxRzepkowski/VideTrack'),
+    'source_url' => $source,
 
     /*
     | The API reference linked from Settings → API. It lives with the source, so
@@ -42,14 +46,13 @@ return [
     |--------------------------------------------------------------------------
     |
     | The User-Agent of every request to a provider or an integration. Some
-    | services refuse the HTTP library's default, so a client name and version
-    | are sent; which product runs here is nobody's business until the
-    | operator says so, hence a neutral default.
+    | services refuse the HTTP library's default, and the ones that publish a
+    | policy ask for a client name, its version and a page about it.
     |
     */
 
     'http' => [
-        'user_agent' => env('HTTP_USER_AGENT', 'media-tracker/'.$version),
+        'user_agent' => env('HTTP_USER_AGENT', $userAgent),
     ],
 
     /*
@@ -158,7 +161,7 @@ return [
         'base_url' => env('WIKIDATA_BASE_URL', 'https://query.wikidata.org'),
         // Wikidata asks for a descriptive client with a way to reach its
         // operator; an instance that queries it heavily sets its own.
-        'user_agent' => env('WIKIDATA_USER_AGENT', env('HTTP_USER_AGENT', 'media-tracker/'.$version)),
+        'user_agent' => env('WIKIDATA_USER_AGENT', env('HTTP_USER_AGENT', $userAgent)),
         'cache' => [
             'query' => 60 * 60 * 24, // seconds
             // A failed/timed-out lookup is negative-cached for this long so a

@@ -245,7 +245,7 @@ test('an approved code becomes a connection named after the Simkl account', func
     Http::assertSent(fn (Request $request) => str_contains($request->url(), '/users/settings')
         && $request->method() === 'GET'
         && $request['client_id'] === 'simkl-client'
-        && $request['app-name'] === 'media-tracker'
+        && $request['app-name'] === 'videtrack'
         && $request['app-version'] === '1.2.3'
         && $request->header('Authorization') === ['Bearer simkl_at_new']);
 });
