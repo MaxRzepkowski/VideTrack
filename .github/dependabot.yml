@@ -5,8 +5,8 @@
 # reaches us; security updates skip the wait.
 #
 # Titles follow the commit convention the changelog is read from: what ships
-# to users is `fix(deps)` (it earns a patch release), the tooling around it is
-# `build(deps)` or `ci(deps)` (no release).
+# to users is `deps:` (a patch release, listed under Dependencies, apart from
+# real fixes), the tooling around it is `build:` or `ci(deps)` (no release).
 version: 2
 
 updates:
@@ -19,9 +19,8 @@ updates:
     cooldown:
       default-days: 3
     commit-message:
-      prefix: fix
+      prefix: deps
       prefix-development: build
-      include: scope
     groups:
       laravel:
         patterns: ['laravel/*', 'inertiajs/*']
@@ -41,9 +40,8 @@ updates:
     cooldown:
       default-days: 3
     commit-message:
-      prefix: fix
+      prefix: deps
       prefix-development: build
-      include: scope
     ignore:
       # typescript-eslint accepts TypeScript below 6.1, so a newer TypeScript
       # breaks the lint gate. Drop this once typescript-eslint widens its range.
@@ -83,8 +81,7 @@ updates:
     cooldown:
       default-days: 3
     commit-message:
-      prefix: fix
-      include: scope
+      prefix: deps
     groups:
       base-images:
         patterns: ['*']
@@ -99,4 +96,3 @@ updates:
       default-days: 3
     commit-message:
       prefix: build
-      include: scope
