@@ -27,7 +27,7 @@ import {
     type WhenMode,
 } from '@/lib/watchedModal';
 import { trans, transChoice } from 'laravel-vue-i18n';
-import { Check, ChevronDown, CircleCheck, CircleOff, Pause, Plus, RotateCcw, Trash2 } from 'lucide-vue-next';
+import { Check, ChevronDown, CircleCheck, CircleOff, Pause, Plus, RotateCcw, Trash2 } from '@lucide/vue';
 import { computed, ref, watch } from 'vue';
 
 // THE status modal (attempt model): one surface for everything that writes

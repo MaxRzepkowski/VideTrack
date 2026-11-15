@@ -4,7 +4,7 @@ import { useEntityFollow } from '@/composables/useEntityFollow';
 import { useMediaModals } from '@/composables/useMediaModals';
 import type { Creator } from '@/lib/creators';
 import { trans, transChoice } from 'laravel-vue-i18n';
-import { Bell, BellRing, List } from 'lucide-vue-next';
+import { Bell, BellRing, List } from '@lucide/vue';
 import { computed } from 'vue';
 
 // A creator's two actions — its lists, then the bell — as the creator page

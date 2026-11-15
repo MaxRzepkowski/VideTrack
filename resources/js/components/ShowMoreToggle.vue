@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { cn } from '@/lib/utils';
 import { trans } from 'laravel-vue-i18n';
-import { ChevronDown, ChevronUp, LoaderCircle } from 'lucide-vue-next';
+import { ChevronDown, ChevronUp, LoaderCircle } from '@lucide/vue';
 import { computed, useAttrs } from 'vue';
 
 /**

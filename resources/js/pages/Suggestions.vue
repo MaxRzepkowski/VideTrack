@@ -7,7 +7,7 @@ import { mediaImage } from '@/lib/images';
 import type { SuggestionShelf } from '@/types/suggestions';
 import { Head, Link } from '@inertiajs/vue3';
 import { trans, transChoice } from 'laravel-vue-i18n';
-import { ChevronRight, Sparkles } from 'lucide-vue-next';
+import { ChevronRight, Sparkles } from '@lucide/vue';
 
 /**
  * The kinds of suggestion that have something for the user. Each opens its

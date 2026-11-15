@@ -15,7 +15,7 @@ import { mediaImage, mediaImageSrcSet } from '@/lib/images';
 import type { CompanyDetails, DetailRow, PersonDetails } from '@/types/media';
 import { Head, Link } from '@inertiajs/vue3';
 import { trans } from 'laravel-vue-i18n';
-import { Building2, Tv, User } from 'lucide-vue-next';
+import { Building2, Tv, User } from '@lucide/vue';
 import { computed } from 'vue';
 
 // The page of a person, a studio or publisher, or a TV network: one layout —

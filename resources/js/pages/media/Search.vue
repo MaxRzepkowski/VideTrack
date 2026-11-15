@@ -13,7 +13,7 @@ import type { MediaSummary } from '@/types/media';
 import { Head, router } from '@inertiajs/vue3';
 import { useDebounceFn } from '@vueuse/core';
 import { trans } from 'laravel-vue-i18n';
-import { Search as SearchIcon } from 'lucide-vue-next';
+import { Search as SearchIcon } from '@lucide/vue';
 import { ref, watch } from 'vue';
 
 const props = defineProps<{

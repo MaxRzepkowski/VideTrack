@@ -12,7 +12,7 @@ import { mediaUrl } from '@/lib/urls';
 import type { MediaSummary } from '@/types/media';
 import { Link } from '@inertiajs/vue3';
 import { trans } from 'laravel-vue-i18n';
-import { Bell, BellRing, Building2, List, RadioTower, User } from 'lucide-vue-next';
+import { Bell, BellRing, Building2, List, RadioTower, User } from '@lucide/vue';
 import { computed } from 'vue';
 
 // A person, a studio / publisher or a network as a card — search results,

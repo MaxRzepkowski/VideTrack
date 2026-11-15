@@ -6,7 +6,7 @@ import { mediaUrl } from '@/lib/urls';
 import type { MediaSummary } from '@/types/media';
 import { Link } from '@inertiajs/vue3';
 import { trans, transChoice } from 'laravel-vue-i18n';
-import { Layers } from 'lucide-vue-next';
+import { Layers } from '@lucide/vue';
 import { computed } from 'vue';
 
 // A summary of type `collection`: a provider collection (film saga, book or

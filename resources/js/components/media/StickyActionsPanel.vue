@@ -5,7 +5,7 @@ import { useMediaModals } from '@/composables/useMediaModals';
 import { trackedBecause } from '@/lib/tracking';
 import type { MediaSummary } from '@/types/media';
 import { trans, transChoice } from 'laravel-vue-i18n';
-import { Bell, BellOff, BellRing, Heart, List, Star } from 'lucide-vue-next';
+import { Bell, BellOff, BellRing, Heart, List, Star } from '@lucide/vue';
 import { computed } from 'vue';
 
 const props = withDefaults(

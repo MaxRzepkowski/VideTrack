@@ -1,7 +1,7 @@
 import { pageLocale } from '@/lib/pageContext';
 import type { MediaSummary, ProgressUnit } from '@/types/media';
+import { BookImage, BookOpen, BookOpenText, Building2, Clapperboard, Gamepad2, Tv, type LucideIcon } from '@lucide/vue';
 import { trans, transChoice } from 'laravel-vue-i18n';
-import { BookImage, BookOpen, BookOpenText, Building2, Clapperboard, Gamepad2, Tv, type LucideIcon } from 'lucide-vue-next';
 
 /**
  * One source of truth per media type: label, glyph and colour. A new type is

@@ -6,7 +6,7 @@ import { videoEmbedUrl, videoThumbnail } from '@/lib/videos';
 import type { VideoKind } from '@/types/generated';
 import type { VideoData } from '@/types/media';
 import { trans } from 'laravel-vue-i18n';
-import { Play } from 'lucide-vue-next';
+import { Play } from '@lucide/vue';
 import { computed, ref } from 'vue';
 
 const props = defineProps<{

@@ -5,7 +5,7 @@ import { lightboxOrigin, useLightbox, type LightboxOrigin } from '@/composables/
 import { withCount } from '@/lib/format';
 import { mediaImage, mediaImageSrcSet } from '@/lib/images';
 import { trans } from 'laravel-vue-i18n';
-import { ChevronLeft, ChevronRight, X } from 'lucide-vue-next';
+import { ChevronLeft, ChevronRight, X } from '@lucide/vue';
 import { DialogClose, DialogContent as DialogContentRaw, DialogOverlay, DialogPortal, DialogRoot, DialogTitle as DialogTitleRaw } from 'radix-vue';
 import { computed, ref } from 'vue';
 

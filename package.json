@@ -35,11 +35,11 @@
     "dependencies": {
         "@fontsource-variable/roboto-flex": "^5.2.8",
         "@inertiajs/vue3": "^3.11.0",
+        "@lucide/vue": "^1.73.0",
         "@vueuse/core": "^15.0.0",
         "class-variance-authority": "^0.7.1",
         "clsx": "^2.1.1",
         "laravel-vue-i18n": "^2.8.0",
-        "lucide-vue-next": "^0.468.0",
         "radix-vue": "^1.9.11",
         "simple-icons": "^16.26.0",
         "tailwind-merge": "^3.7.0",

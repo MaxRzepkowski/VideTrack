@@ -7,7 +7,7 @@ import { mediaUrl } from '@/lib/urls';
 import type { MediaSummary } from '@/types/media';
 import { Link } from '@inertiajs/vue3';
 import { trans } from 'laravel-vue-i18n';
-import { ArrowUp } from 'lucide-vue-next';
+import { ArrowUp } from '@lucide/vue';
 import { computed } from 'vue';
 
 const props = withDefaults(

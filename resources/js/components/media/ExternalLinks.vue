@@ -2,7 +2,7 @@
 import { brandFor } from '@/lib/serviceGlyphs';
 import { safeUrl } from '@/lib/url';
 import { trans } from 'laravel-vue-i18n';
-import { ExternalLink, Globe } from 'lucide-vue-next';
+import { ExternalLink, Globe } from '@lucide/vue';
 import { computed } from 'vue';
 
 // One dedicated icon per external service, from the app's one map of brand

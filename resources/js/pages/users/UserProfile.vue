@@ -13,7 +13,7 @@ import { inRegistryOrder } from '@/lib/mediaTypes';
 import type { MediaSummary, ProfileData, WatchStats } from '@/types/media';
 import { Head, Link } from '@inertiajs/vue3';
 import { trans, transChoice } from 'laravel-vue-i18n';
-import { ChartNoAxesColumnIncreasing, ChevronRight, Heart } from 'lucide-vue-next';
+import { ChartNoAxesColumnIncreasing, ChevronRight, Heart } from '@lucide/vue';
 import { computed } from 'vue';
 
 const props = defineProps<{

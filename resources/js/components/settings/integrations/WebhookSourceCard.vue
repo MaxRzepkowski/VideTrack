@@ -6,7 +6,7 @@ import { glyphFor } from '@/lib/serviceGlyphs';
 import type { ScrobbleSourceData } from '@/types/integrations';
 import { router } from '@inertiajs/vue3';
 import { trans, transChoice } from 'laravel-vue-i18n';
-import { ChevronDown, Server } from 'lucide-vue-next';
+import { ChevronDown, Server } from '@lucide/vue';
 
 /**
  * One connectable source, rendered from what the scrobble registry says

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { trans } from 'laravel-vue-i18n';
-import { CloudOff } from 'lucide-vue-next';
+import { CloudOff } from '@lucide/vue';
 
 // The page is being served from the local database because the metadata
 // provider did not answer. It is honestly poorer than the live one — no

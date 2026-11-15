@@ -5,7 +5,7 @@ import { navHref, USER_PANELS, userPanel, type UserPanel } from '@/lib/navigatio
 import type { ProfileData } from '@/types/media';
 import { Link } from '@inertiajs/vue3';
 import { trans } from 'laravel-vue-i18n';
-import { Lock } from 'lucide-vue-next';
+import { Lock } from '@lucide/vue';
 import { computed, nextTick, onMounted, ref, watch } from 'vue';
 
 const props = withDefaults(

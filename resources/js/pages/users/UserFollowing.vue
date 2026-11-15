@@ -21,7 +21,7 @@ import type { ProfileData, UserStatesMap } from '@/types/media';
 import type { PageInfo } from '@/types/pagination';
 import { Head, router } from '@inertiajs/vue3';
 import { trans, transChoice } from 'laravel-vue-i18n';
-import { X } from 'lucide-vue-next';
+import { X } from '@lucide/vue';
 import { computed } from 'vue';
 
 // MediaCard and the creator cards read userStates and creatorStates from the

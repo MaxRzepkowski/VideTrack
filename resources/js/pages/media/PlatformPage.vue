@@ -10,7 +10,7 @@ import type { PlatformDetails } from '@/types/generated';
 import type { MediaSummary } from '@/types/media';
 import { Head } from '@inertiajs/vue3';
 import { trans } from 'laravel-vue-i18n';
-import { Gamepad2 } from 'lucide-vue-next';
+import { Gamepad2 } from '@lucide/vue';
 import { computed, ref, watch } from 'vue';
 
 // A platform's page: what machine it is, then its games one shelf at a time —

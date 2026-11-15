@@ -6,7 +6,7 @@ import type { CalendarPreview } from '@/lib/calendarPreview';
 import { isLive } from '@/lib/liveEvents';
 import { Link } from '@inertiajs/vue3';
 import { trans } from 'laravel-vue-i18n';
-import { X } from 'lucide-vue-next';
+import { X } from '@lucide/vue';
 import { computed } from 'vue';
 
 // The box a calendar card opens on hover (a tap on a phone): a release and an

@@ -5,7 +5,7 @@ import { SELECT_CLASS_ON_CARD } from '@/lib/ui';
 import { safeUrl } from '@/lib/url';
 import type { GameStore, StoreLink } from '@/types/generated';
 import { trans } from 'laravel-vue-i18n';
-import { ShoppingBag } from 'lucide-vue-next';
+import { ShoppingBag } from '@lucide/vue';
 import { computed, ref } from 'vue';
 
 // Where a game can be had, as a film's "Where to watch" card says where it

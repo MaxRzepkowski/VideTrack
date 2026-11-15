@@ -5,7 +5,7 @@ import { formatDateTime } from '@/lib/format';
 import { formatProgress, positionText, progressFromInput, progressInputMax, progressInputStep, progressToInput } from '@/lib/progress';
 import type { MediaSummary, PlayEntry } from '@/types/media';
 import { trans } from 'laravel-vue-i18n';
-import { Check, Pencil, Trash2 } from 'lucide-vue-next';
+import { Check, Pencil, Trash2 } from '@lucide/vue';
 import { computed, ref } from 'vue';
 
 // The attempt list: every completion and drop with its date, each one

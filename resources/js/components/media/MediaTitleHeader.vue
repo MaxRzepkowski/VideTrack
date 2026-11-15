@@ -12,7 +12,7 @@ import type { TitleExtra } from '@/types/extras';
 import type { CertificationRow, Chip, DetailRow, MediaDetails } from '@/types/media';
 import { Link } from '@inertiajs/vue3';
 import { trans } from 'laravel-vue-i18n';
-import { Star } from 'lucide-vue-next';
+import { Star } from '@lucide/vue';
 import { computed } from 'vue';
 
 const props = withDefaults(

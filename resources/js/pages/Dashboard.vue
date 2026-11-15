@@ -22,7 +22,7 @@ import { isPositionCounter } from '@/lib/progress';
 import type { CalendarDay, PlayingEntry, UpNextEntry, WatchStats } from '@/types/media';
 import { Head, Link } from '@inertiajs/vue3';
 import { trans } from 'laravel-vue-i18n';
-import { BookOpenText, CalendarDays, ChartNoAxesColumnIncreasing, Gamepad2, ListVideo, Search } from 'lucide-vue-next';
+import { BookOpenText, CalendarDays, ChartNoAxesColumnIncreasing, Gamepad2, ListVideo, Search } from '@lucide/vue';
 import { computed, ref } from 'vue';
 
 const props = defineProps<{

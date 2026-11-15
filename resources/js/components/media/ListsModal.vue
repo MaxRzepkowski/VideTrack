@@ -6,7 +6,7 @@ import type { SharedData } from '@/types';
 import type { UserList } from '@/types/media';
 import { usePage } from '@inertiajs/vue3';
 import { trans } from 'laravel-vue-i18n';
-import { Check, Plus } from 'lucide-vue-next';
+import { Check, Plus } from '@lucide/vue';
 import { computed, ref, watch } from 'vue';
 
 const { modals, close } = useMediaModals();

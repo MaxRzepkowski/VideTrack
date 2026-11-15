@@ -3,7 +3,7 @@ import { useMediaActions } from '@/composables/useMediaActions';
 import { episodeCode } from '@/lib/format';
 import type { MediaSummary } from '@/types/media';
 import { trans } from 'laravel-vue-i18n';
-import { CircleCheck } from 'lucide-vue-next';
+import { CircleCheck } from '@lucide/vue';
 import { computed } from 'vue';
 
 // The "watch next" shortcut as its own block below the status card and the

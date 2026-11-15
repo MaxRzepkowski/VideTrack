@@ -15,7 +15,7 @@ import type { EpisodeImage } from '@/types';
 import type { CountdownEntry } from '@/types/media';
 import { Link } from '@inertiajs/vue3';
 import { trans } from 'laravel-vue-i18n';
-import { CalendarDays } from 'lucide-vue-next';
+import { CalendarDays } from '@lucide/vue';
 import { computed } from 'vue';
 
 const props = defineProps<{ entry: CountdownEntry }>();

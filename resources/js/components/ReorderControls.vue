@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { trans } from 'laravel-vue-i18n';
-import { ChevronDown, ChevronsDown, ChevronsUp, ChevronUp } from 'lucide-vue-next';
+import { ChevronDown, ChevronsDown, ChevronsUp, ChevronUp } from '@lucide/vue';
 
 // The touch- and keyboard-friendly side of a hand-arranged order: step a card
 // up or down, or jump it to either end. Drag & drop does not fire on touch.

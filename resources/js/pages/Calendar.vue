@@ -9,7 +9,7 @@ import { SELECT_CLASS } from '@/lib/ui';
 import type { CalendarMonth } from '@/types/media';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { trans } from 'laravel-vue-i18n';
-import { CalendarDays, CalendarPlus, ChevronLeft, ChevronRight, Download } from 'lucide-vue-next';
+import { CalendarDays, CalendarPlus, ChevronLeft, ChevronRight, Download } from '@lucide/vue';
 import { computed, onBeforeUnmount } from 'vue';
 
 const props = defineProps<{

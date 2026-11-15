@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { countryName, formatCalendarDate, relativeTime, todayDateKey, withCount } from '@/lib/format';
 import type { ReleaseEntry } from '@/types/media';
 import { trans, transChoice } from 'laravel-vue-i18n';
-import { Clapperboard, Disc, MonitorPlay } from 'lucide-vue-next';
+import { Clapperboard, Disc, MonitorPlay } from '@lucide/vue';
 import { computed, ref } from 'vue';
 
 const props = defineProps<{

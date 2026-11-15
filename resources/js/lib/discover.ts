@@ -1,7 +1,7 @@
 import { MEDIA_TYPE_META } from '@/lib/mediaTypes';
 import type { DiscoverActiveFilters } from '@/types/media';
+import { Users, type LucideIcon } from '@lucide/vue';
 import { trans } from 'laravel-vue-i18n';
-import { Users, type LucideIcon } from 'lucide-vue-next';
 
 /** Not a media type: the people grid shares the discover type select. */
 export const DISCOVER_PEOPLE = 'person';
