@@ -1,0 +1,97 @@
+# Weekly update pull requests, grouped so a week brings a handful of PRs, not
+# dozens (a dependency lands in the first group that matches it). Majors come
+# one by one: they are the ones that need reading. A new release waits three
+# days first, so a hijacked or broken publish is usually pulled before it
+# reaches us; security updates skip the wait.
+#
+# Titles follow the commit convention the changelog is read from: what ships
+# to users is `fix(deps)` (it earns a patch release), the tooling around it is
+# `build(deps)` or `ci(deps)` (no release).
+version: 2
+
+updates:
+  - package-ecosystem: composer
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: '05:00'
+    cooldown:
+      default-days: 3
+    commit-message:
+      prefix: fix
+      prefix-development: build
+      include: scope
+    groups:
+      laravel:
+        patterns: ['laravel/*', 'inertiajs/*']
+        update-types: [minor, patch]
+      development:
+        dependency-type: development
+        update-types: [minor, patch]
+      production:
+        update-types: [minor, patch]
+
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: '05:00'
+    cooldown:
+      default-days: 3
+    commit-message:
+      prefix: fix
+      prefix-development: build
+      include: scope
+    groups:
+      vue-and-inertia:
+        patterns: ['vue', 'vue-tsc', '@vue/*', '@inertiajs/*', '@vitejs/*', 'vite']
+        update-types: [minor, patch]
+      development:
+        dependency-type: development
+        update-types: [minor, patch]
+      production:
+        update-types: [minor, patch]
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: '05:00'
+    cooldown:
+      default-days: 3
+    commit-message:
+      prefix: ci
+      include: scope
+    groups:
+      actions:
+        patterns: ['*']
+
+  - package-ecosystem: docker
+    directory: /docker/prod
+    schedule:
+      interval: weekly
+      day: monday
+      time: '05:00'
+    cooldown:
+      default-days: 3
+    commit-message:
+      prefix: fix
+      include: scope
+    groups:
+      base-images:
+        patterns: ['*']
+
+  - package-ecosystem: docker
+    directory: /docker/dev
+    schedule:
+      interval: weekly
+      day: monday
+      time: '05:00'
+    cooldown:
+      default-days: 3
+    commit-message:
+      prefix: build
+      include: scope
