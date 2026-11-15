@@ -1,8 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- Any deprecation fails the run, whoever raises it: ours is fixed at once,
+     a package's means the package is due an update. -->
 <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
          bootstrap="vendor/autoload.php"
          colors="true"
+         failOnDeprecation="true"
+         failOnPhpunitDeprecation="true"
+         displayDetailsOnTestsThatTriggerDeprecations="true"
+         displayDetailsOnPhpunitDeprecations="true"
 >
     <testsuites>
         <testsuite name="Unit">
@@ -22,6 +28,7 @@
     </source>
     <php>
         <ini name="memory_limit" value="2G"/>
+        <ini name="error_reporting" value="-1"/>
         <env name="APP_ENV" value="testing"/>
         <!-- Pinned rather than read from the developer's .env: encryption,
              the clock's zone and the language of every text a test reads. -->
