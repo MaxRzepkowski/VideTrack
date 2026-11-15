@@ -44,6 +44,11 @@ updates:
       prefix: fix
       prefix-development: build
       include: scope
+    ignore:
+      # typescript-eslint accepts TypeScript below 6.1, so a newer TypeScript
+      # breaks the lint gate. Drop this once typescript-eslint widens its range.
+      - dependency-name: typescript
+        versions: ['>=6.1']
     groups:
       vue-and-inertia:
         patterns: ['vue', 'vue-tsc', '@vue/*', '@inertiajs/*', '@vitejs/*', 'vite']
