@@ -49,5 +49,6 @@ and list management.
 
 ## Full reference
 
-[`openapi.json`](api/openapi.json) (OpenAPI 3.1). Anyone signed in gets an interactive version
-at `/docs/api`.
+[`openapi.json`](api/openapi.json) (OpenAPI 3.1). Open it in any OpenAPI tool (Swagger Editor,
+Postman, Bruno, Insomnia) to browse every endpoint; to try one, set the server to your instance's
+address followed by `/api/v1`.

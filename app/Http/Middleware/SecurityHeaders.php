@@ -33,7 +33,6 @@ class SecurityHeaders
             'Referrer-Policy' => 'strict-origin-when-cross-origin',
             'X-Permitted-Cross-Domain-Policies' => 'none',
             'Permissions-Policy' => 'camera=(), microphone=(), geolocation=(), payment=(), usb=()',
-            // The API docs too: their viewer is served from this origin.
             'Content-Security-Policy' => $this->contentSecurityPolicy(),
         ];
 

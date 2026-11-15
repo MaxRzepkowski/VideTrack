@@ -110,6 +110,7 @@ Everything is optional except `TMDB_API_KEY`. A media type exists only when its 
 | `INTEGRATION_PRIVATE_HOSTS` | | private-network hosts an ordinary account may connect an integration to (an administrator may use any), comma-separated: `tracearr.lan,192.168.1.20` |
 | `LOG_CHANNEL` / `LOG_LEVEL` | `stderr` / `warning` | `stderr` writes to `docker logs`; `daily` or `single` write a file on the storage volume |
 | `SOURCE_URL` | this repository | where About links for the source code; point it at your fork when you run a modified version (AGPL-3.0, section 13) |
+| `API_DOCS_URL` | `docs/api.md` in this repository | the API reference linked from Settings → API; point it at your fork's copy |
 | `HTTP_USER_AGENT` | `media-tracker/<version>` | how the instance names itself to providers and integrations |
 | `WIKIDATA_USER_AGENT` | same as above | Wikidata asks heavy clients for a descriptive name with a contact |
 | `SCROBBLE_COMPLETION_THRESHOLD` | `85` | percent of a title a media server must report before a stop counts as watched |

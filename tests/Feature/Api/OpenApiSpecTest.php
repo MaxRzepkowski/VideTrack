@@ -1,7 +1,5 @@
 <?php
 
-use App\Models\User;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Route;
 
 /**
@@ -54,13 +52,7 @@ test('the spec says every call carries a bearer token', function () {
         ->and($spec['security'] ?? [])->not->toBeEmpty();
 });
 
-test('the interactive docs are for anyone signed in, not for guests', function () {
-    // The guest case goes through the real route: the gate refuses before
-    // anything is generated. The signed-in case is asserted on the gate alone —
-    // rendering the docs parses the whole codebase, which is far too expensive
-    // to do inside the test suite.
-    $this->get('/docs/api')->assertForbidden();
-
-    expect(Gate::forUser(User::factory()->create())->allows('viewApiDocs'))->toBeTrue()
-        ->and(Gate::forUser(null)->allows('viewApiDocs'))->toBeFalse();
+test('the instance serves no docs pages, only the API itself', function () {
+    $this->get('/docs/api')->assertNotFound();
+    $this->get('/docs/api.json')->assertNotFound();
 });

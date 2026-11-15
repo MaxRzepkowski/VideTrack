@@ -13,6 +13,7 @@ test('the api settings page renders with an empty list', function () {
             ->component('settings/Api')
             ->where('tokens', [])
             ->where('createdToken', null)
+            ->where('docsUrl', config('tracker.api_docs_url'))
         );
 });
 

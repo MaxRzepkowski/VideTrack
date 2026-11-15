@@ -1,4 +1,4 @@
-import { failureOf, jsonFetch, refusalOf, sessionFetch } from '@/lib/http';
+import { failureOf, jsonFetch, refusalOf } from '@/lib/http';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const fetchMock = vi.fn(() => Promise.resolve(new Response('{}')));
@@ -57,34 +57,6 @@ describe('jsonFetch', () => {
         await jsonFetch('/search', { signal: controller.signal });
 
         expect(sent().init.signal).toBe(controller.signal);
-    });
-});
-
-describe('sessionFetch', () => {
-    it("sends the session and the decoded XSRF token, keeping the caller's headers", async () => {
-        await sessionFetch('/api/v1/me', { method: 'POST', headers: { Accept: 'application/json' } });
-
-        const [url, init] = fetchMock.mock.calls[0] as unknown as [string, RequestInit & { headers: Headers }];
-        expect(url).toBe('/api/v1/me');
-        expect(init.method).toBe('POST');
-        expect(init.credentials).toBe('same-origin');
-        expect(init.headers.get('Accept')).toBe('application/json');
-        expect(init.headers.get('X-XSRF-TOKEN')).toBe('abc==');
-    });
-
-    it('keeps the token from a request to another origin', async () => {
-        await sessionFetch('https://elsewhere.example.com/api', { method: 'POST' });
-
-        const [, init] = fetchMock.mock.calls[0] as unknown as [string, RequestInit & { headers: Headers }];
-        expect(init.headers.has('X-XSRF-TOKEN')).toBe(false);
-    });
-
-    it('keeps the headers of a Request passed on its own', async () => {
-        await sessionFetch(new Request(new URL('/api/v1/me', window.location.href), { headers: { Authorization: 'Bearer t' } }));
-
-        const [, init] = fetchMock.mock.calls[0] as unknown as [Request, RequestInit & { headers: Headers }];
-        expect(init.headers.get('Authorization')).toBe('Bearer t');
-        expect(init.headers.get('X-XSRF-TOKEN')).toBe('abc==');
     });
 });
 
