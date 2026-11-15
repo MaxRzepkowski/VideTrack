@@ -134,7 +134,7 @@ class MediaItem extends Model
      * The name a reader of `$locale` knows the title by: their language's
      * version, else the fallback language's, else the row's own — the one
      * version of a provider without languages, or of a row that holds no
-     * language versions.
+     * language versions. The same walk in SQL: ReaderTitleSql.
      */
     public function titleIn(string $locale): string
     {

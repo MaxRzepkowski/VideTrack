@@ -51,7 +51,10 @@ final readonly class PlayCost
      * The same cost as an SQL expression over a play joined with its item
      * and its title (the projection's root), with its bindings.
      *
-     * @return array{0: string, 1: list<string>}
+     * @param  literal-string  $plays
+     * @param  literal-string  $items
+     * @param  literal-string  $titles
+     * @return array{0: literal-string, 1: list<string>}
      */
     public function sql(string $plays = 'plays', string $items = 'media_items', string $titles = 'roots'): array
     {
@@ -61,21 +64,16 @@ final readonly class PlayCost
         $logged = "coalesce({$plays}.amount, 0)";
         $viewing = "case when {$plays}.outcome = ? then coalesce({$plays}.amount, {$items}.runtime, {$titles}.runtime, 0) else {$logged} end";
 
-        $sql = sprintf(
-            'case when %s.type not in (%s) then 0 when %s.type in (%s) then %s else %s end',
-            $items,
-            $this->placeholders($counting),
-            $items,
-            $this->placeholders($progress),
-            $logged,
-            $viewing,
-        );
+        $sql = "case when {$items}.type not in ({$this->placeholders($counting)}) then 0"
+            ." when {$items}.type in ({$this->placeholders($progress)}) then {$logged}"
+            ." else {$viewing} end";
 
         return [$sql, [...$counting, ...$progress, PlayOutcome::Completed->value]];
     }
 
     /**
      * @param  list<string>  $values
+     * @return literal-string
      */
     private function placeholders(array $values): string
     {

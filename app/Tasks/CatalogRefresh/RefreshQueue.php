@@ -95,7 +95,7 @@ final readonly class RefreshQueue
     {
         return $this->dueNow($skipProviders)
             ->with('item')
-            ->orderByRaw($this->urgency())
+            ->orderByRaw(...$this->urgency())
             ->orderBy('due_at')
             ->orderBy('media_item_id')
             ->limit($limit)
@@ -182,11 +182,21 @@ final readonly class RefreshQueue
                 ->whereNotIn('provider', $skipProviders));
     }
 
-    /** RefreshReason::rank() as SQL, so the order is the enum's alone. */
-    private function urgency(): string
+    /**
+     * RefreshReason::rank() as SQL, so the order is the enum's alone.
+     *
+     * @return array{0: literal-string, 1: list<int|string>}
+     */
+    private function urgency(): array
     {
-        $cases = array_map(fn (RefreshReason $reason): string => "when '{$reason->value}' then {$reason->rank()}", RefreshReason::cases());
+        $reasons = RefreshReason::cases();
+        $bindings = [];
 
-        return 'case reason '.implode(' ', $cases).' end';
+        foreach ($reasons as $reason) {
+            $bindings[] = $reason->value;
+            $bindings[] = $reason->rank();
+        }
+
+        return ['case reason '.implode(' ', array_fill(0, count($reasons), 'when ? then ?')).' end', $bindings];
     }
 }

@@ -92,13 +92,18 @@ final readonly class ListPositions
             return;
         }
 
-        // Plain integers, so they go into the CASE as they are.
-        $case = 'case id';
+        $bindings = [];
 
         foreach ($moved as $id => $position) {
-            $case .= ' when '.(int) $id.' then '.(int) $position;
+            $bindings[] = $id;
+            $bindings[] = $position;
         }
 
-        $model->newQuery()->whereKey(array_keys($moved))->update(['position' => DB::raw($case.' end')]);
+        // A scalar subquery, so the CASE carries its values as bindings;
+        // its `id` is the row being updated.
+        $case = $model->getConnection()->query()
+            ->selectRaw('case id '.implode(' ', array_fill(0, count($moved), 'when ? then ?')).' end', $bindings);
+
+        $model->newQuery()->whereKey(array_keys($moved))->update(['position' => $case]);
     }
 }
