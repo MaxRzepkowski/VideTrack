@@ -4,10 +4,10 @@ namespace App\Actions\Media;
 
 use App\Catalog\Data\MediaSummary;
 use App\Catalog\MediaItemSummaries;
+use App\Catalog\ReaderTitleSql;
 use App\Library\LibraryHolders;
 use App\Models\MediaItem;
 use App\Models\User;
-use App\Support\Locales;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\App;
 
@@ -40,41 +40,25 @@ final readonly class SearchLibrary
         }
 
         $pattern = $this->escapeLike($term);
-        $items = MediaItem::query();
-        $name = $this->readerTitle($items, App::getLocale());
+        $locale = App::getLocale();
 
-        return array_values($items
+        return array_values(MediaItem::query()
             ->whereIn('id', $this->holders->rootsHeldBy($user->id))
             // The name on the reader's card, or the row's own: a title is
             // found by either of the names it is known by.
             ->where(fn (Builder $where) => $where
-                ->whereRaw("{$name} like ? escape '\\'", ['%'.$pattern.'%'])
+                ->whereRaw(new ReaderTitleSql($locale, "%s like ? escape '\\'"), ['%'.$pattern.'%'])
                 ->orWhereRaw("title like ? escape '\\'", ['%'.$pattern.'%']))
             // A prefix match is what was meant far more often than a hit in the
             // middle of a title ("matrix" → "The Matrix" before "Dual Matrix").
-            ->orderByRaw("case when {$name} like ? escape '\\' then 0 else 1 end", [$pattern.'%'])
-            ->orderByRaw($name)
+            // orderBy() takes no bindings, so the prefix joins the order's own.
+            ->orderBy(new ReaderTitleSql($locale, "case when %s like ? escape '\\' then 0 else 1 end"))
+            ->addBinding($pattern.'%', 'order')
+            ->orderBy(new ReaderTitleSql($locale))
             ->limit($limit)
             ->get()
             ->map(fn (MediaItem $item): MediaSummary => MediaItemSummaries::summary($item))
             ->all());
-    }
-
-    /**
-     * The SQL for the name a reader of `$locale` sees — the walk of
-     * MediaItem::titleIn(): their language, the fallback one, the row's own.
-     *
-     * @param  Builder<MediaItem>  $items
-     */
-    private function readerTitle(Builder $items, string $locale): string
-    {
-        $grammar = $items->getQuery()->getGrammar();
-
-        return sprintf(
-            'coalesce(%s, %s, title)',
-            $grammar->wrap("localized_titles->{$locale}->title"),
-            $grammar->wrap('localized_titles->'.Locales::fallback().'->title'),
-        );
     }
 
     /**

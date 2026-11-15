@@ -84,6 +84,25 @@ final class WireShapeTranspiler extends TranspilePhpStanTypeToTypeScriptNodeActi
         return $object;
     }
 
+    /**
+     * A short name the class's file imports means that import. The stock
+     * lookup asks for a global class of the name first, so a global one
+     * (`Directory`, or `SortDirection` from PHP 8.6 and its polyfill) would
+     * shadow the imported enum.
+     */
+    protected function resolveClass(string $className, ?PhpClassNode $phpClassNode): ?string
+    {
+        if ($phpClassNode !== null && ! str_contains($className, '\\')) {
+            $imported = $this->findClassNameFqcnAction->execute($phpClassNode, $className);
+
+            if ($imported !== null && $imported !== $className && (class_exists($imported) || interface_exists($imported))) {
+                return $imported;
+            }
+        }
+
+        return parent::resolveClass($className, $phpClassNode);
+    }
+
     protected function genericNode(GenericTypeNode $node, ?PhpClassNode $phpClassNode): TypeScriptNode
     {
         $of = $node->genericTypes[0] ?? null;

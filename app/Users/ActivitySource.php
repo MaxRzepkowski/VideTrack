@@ -43,7 +43,11 @@ enum ActivitySource: string
         return $this === self::Plays;
     }
 
-    /** The column an entry is dated by: a play's watch, a rating's last edit, a favorite's creation. */
+    /**
+     * The column an entry is dated by: a play's watch, a rating's last edit, a favorite's creation.
+     *
+     * @return literal-string
+     */
     public function dateColumn(): string
     {
         return match ($this) {

@@ -92,10 +92,7 @@ final readonly class ImportRunner
         // A file can bring thousands of plays on a few hundred titles: each
         // title is projected once, when the run ends, not once per play.
         return $this->projector->deferring($user, function () use ($user, $source, $input, $selection, $progress): ImportOutcome {
-            // withLocale() hands back whatever the closure returned.
-            $outcome = $this->withLocale($user->preferredLocale(), fn (): ImportOutcome => $this->runIn($user, $source, $input, $selection, $progress));
-
-            return $outcome instanceof ImportOutcome ? $outcome : throw new LogicException('An import run ends in an outcome.');
+            return $this->withLocale($user->preferredLocale(), fn (): ImportOutcome => $this->runIn($user, $source, $input, $selection, $progress));
         });
     }
 

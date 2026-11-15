@@ -77,6 +77,16 @@ test('a class that writes its own wire form is typed as that form', function () 
         TS);
 });
 
+test('a name the file imports wins over a global class of the same name', function () {
+    expect(generatedFrom('ShadowedName'))->toBe(<<<'TS'
+        export type Directory = 'up' | 'down';
+        export type Listing = {
+        readonly dir: Directory,
+        };
+
+        TS);
+});
+
 test('a marked class that does not describe what it sends stops the generation', function () {
     expect(fn () => generatedFrom('Undescribed'))->toThrow(
         LogicException::class,
