@@ -1,0 +1,56 @@
+{
+  "shows": [
+    {
+      "added_to_watchlist_at": "2026-05-15T00:13:18Z",
+      "last_watched_at": "2026-05-15T00:13:18Z",
+      "user_rated_at": "2026-05-15T00:20:00Z",
+      "user_rating": 9,
+      "status": "watching",
+      "last_watched": "S01E02",
+      "next_to_watch": "S01E03",
+      "watched_episodes_count": 2,
+      "total_episodes_count": 73,
+      "not_aired_episodes_count": 0,
+      "show": {
+        "title": "Game of Thrones",
+        "poster": "57/5742576cd8f59fcb0",
+        "year": 2011,
+        "runtime": 52,
+        "ids": { "simkl": 17465, "slug": "game-of-thrones", "imdb": "tt0944947", "tvdb": "121361", "tmdb": "1399" }
+      },
+      "seasons": [
+        {
+          "number": 1,
+          "episodes": [
+            { "number": 1, "watched_at": "2026-05-14T20:00:00Z", "ids": { "tvdb_id": 3254641 } },
+            { "number": 2, "watched_at": "2026-05-15T00:13:18Z", "ids": { "tvdb_id": 3436411 } }
+          ]
+        }
+      ]
+    },
+    {
+      "added_to_watchlist_at": "2026-04-10T05:42:42Z",
+      "last_watched_at": null,
+      "user_rated_at": null,
+      "user_rating": null,
+      "status": "plantowatch",
+      "last_watched": null,
+      "next_to_watch": "S01E01",
+      "watched_episodes_count": 0,
+      "total_episodes_count": 62,
+      "not_aired_episodes_count": 0,
+      "show": {
+        "title": "The Walking Dead",
+        "year": 2010,
+        "ids": { "simkl": 49108, "slug": "the-walking-dead", "imdb": "tt1520211", "tvdb": "153021" }
+      }
+    },
+    {
+      "added_to_watchlist_at": "2026-04-10T05:42:42Z",
+      "last_watched_at": null,
+      "status": "hold",
+      "user_rating": null,
+      "show": { "title": "No Ids Show", "year": 2020, "ids": { "simkl": 1, "slug": "no-ids-show" } }
+    }
+  ]
+}

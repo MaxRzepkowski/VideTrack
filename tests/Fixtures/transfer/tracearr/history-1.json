@@ -1,0 +1,37 @@
+{
+  "data": [
+    {
+      "id": "c0000000-0000-4000-8000-000000000001",
+      "server_id": "s0000000-0000-4000-8000-000000000001", "server_name": "Home", "server_type": "jellyfin",
+      "state": "stopped", "media_type": "movie", "media_title": "The Matrix", "show_title": null,
+      "season_number": null, "episode_number": null, "year": 1999,
+      "duration_ms": 8160000, "progress_ms": 8100000, "total_duration_ms": 8160000, "percent_complete": 99,
+      "started_at": "2026-09-20T19:00:00.000Z", "stopped_at": "2026-09-20T21:16:00.000Z",
+      "watched": true, "segment_count": 1,
+      "media_id": "m0000000-0000-4000-8000-000000000001", "show_media_id": null,
+      "imdb_id": "tt0133093", "tmdb_id": 603, "tvdb_id": null,
+      "rating_key": "4711", "reference_id": "c0000000-0000-4000-8000-000000000001",
+      "user": { "id": "7d9c1b8e-0000-4000-8000-000000000001", "server_user_id": "su-1", "username": "alex", "thumb_url": null, "avatar_url": null }
+    },
+    {
+      "id": "c0000000-0000-4000-8000-000000000002",
+      "server_id": "s0000000-0000-4000-8000-000000000001", "server_name": "Home", "server_type": "jellyfin",
+      "state": "stopped", "media_type": "episode", "media_title": "Winter Is Coming", "show_title": "Game of Thrones",
+      "season_number": 1, "episode_number": 1, "year": 2011,
+      "started_at": "2026-09-21T20:00:00.000Z", "stopped_at": "2026-09-21T21:01:00.000Z",
+      "watched": true, "segment_count": 2,
+      "media_id": "m0000000-0000-4000-8000-000000000011", "show_media_id": "m0000000-0000-4000-8000-000000000010",
+      "imdb_id": "tt1480055", "tmdb_id": 63056, "tvdb_id": 3254641,
+      "user": { "id": "7d9c1b8e-0000-4000-8000-000000000001", "server_user_id": "su-1", "username": "alex" }
+    },
+    {
+      "id": "c0000000-0000-4000-8000-000000000003",
+      "server_type": "plex", "state": "stopped", "media_type": "track", "media_title": "Song", "show_title": null,
+      "season_number": null, "episode_number": null, "year": 2020,
+      "started_at": "2026-09-21T10:00:00.000Z", "stopped_at": "2026-09-21T10:04:00.000Z",
+      "watched": true, "media_id": null, "show_media_id": null, "imdb_id": null, "tmdb_id": null, "tvdb_id": null,
+      "user": { "id": "7d9c1b8e-0000-4000-8000-000000000001", "username": "alex" }
+    }
+  ],
+  "meta": { "nextCursor": "eyJzIjoiMjAyNi0wOS0yMSJ9", "pageSize": 100 }
+}

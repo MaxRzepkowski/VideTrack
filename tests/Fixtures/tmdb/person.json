@@ -1,0 +1,58 @@
+{
+    "id": 6384,
+    "name": "Keanu Reeves",
+    "biography": "Keanu Charles Reeves is a Canadian actor.",
+    "birthday": "1964-09-02",
+    "deathday": null,
+    "place_of_birth": "Beirut, Lebanon",
+    "known_for_department": "Acting",
+    "profile_path": "/keanu.jpg",
+    "also_known_as": ["Киану Ривз"],
+    "homepage": null,
+    "external_ids": { "imdb_id": "nm0000206", "instagram_id": null },
+    "combined_credits": {
+        "cast": [
+            {
+                "id": 603,
+                "media_type": "movie",
+                "title": "The Matrix",
+                "character": "Neo",
+                "release_date": "1999-03-30",
+                "poster_path": "/matrix-poster.jpg",
+                "vote_average": 8.2,
+                "popularity": 90.5
+            },
+            {
+                "id": 245,
+                "media_type": "movie",
+                "title": "John Wick",
+                "character": "John Wick",
+                "release_date": "2014-10-22",
+                "poster_path": "/wick.jpg",
+                "vote_average": 7.4,
+                "popularity": 95.1
+            },
+            {
+                "id": 777,
+                "media_type": "movie",
+                "title": "Hidden Gem",
+                "character": "Someone",
+                "poster_path": null,
+                "popularity": 1.0
+            }
+        ],
+        "crew": [
+            {
+                "id": 245891,
+                "media_type": "movie",
+                "title": "Man of Tai Chi",
+                "job": "Director",
+                "department": "Directing",
+                "release_date": "2013-07-04",
+                "poster_path": "/taichi.jpg",
+                "vote_average": 6.0,
+                "popularity": 12.3
+            }
+        ]
+    }
+}

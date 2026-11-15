@@ -1,0 +1,52 @@
+{
+  "anime": [
+    {
+      "added_to_watchlist_at": "2026-05-15T00:13:09Z",
+      "last_watched_at": "2026-05-15T00:13:09Z",
+      "user_rated_at": null,
+      "user_rating": 8,
+      "status": "completed",
+      "last_watched": null,
+      "next_to_watch": null,
+      "watched_episodes_count": 2,
+      "total_episodes_count": 2,
+      "not_aired_episodes_count": 0,
+      "show": {
+        "title": "Attack on Titan",
+        "year": 2013,
+        "ids": { "simkl": 39687, "slug": "attack-on-titan", "mal": "16498", "anidb": "9541", "anilist": "16498", "kitsu": "7442" }
+      },
+      "anime_type": "tv",
+      "mapped_tvdb_seasons": [1],
+      "seasons": [
+        {
+          "number": 1,
+          "episodes": [
+            { "number": 1, "watched_at": "2026-05-10T18:00:00Z", "tvdb": { "season": 1, "episode": 1 }, "ids": { "tvdb_id": 4561771 } },
+            { "number": 2, "watched_at": "2026-05-11T18:00:00Z", "tvdb": { "season": 1, "episode": 2 }, "ids": { "tvdb_id": 4561772 } }
+          ]
+        }
+      ]
+    },
+    {
+      "added_to_watchlist_at": "2026-03-01T10:00:00Z",
+      "last_watched_at": "2026-03-02T21:00:00Z",
+      "user_rated_at": null,
+      "user_rating": null,
+      "status": "completed",
+      "show": {
+        "title": "Princess Mononoke",
+        "year": 1997,
+        "ids": { "simkl": 38212, "slug": "princess-mononoke", "mal": "164", "anidb": "7" }
+      },
+      "anime_type": "movie"
+    },
+    {
+      "added_to_watchlist_at": "2026-03-01T10:00:00Z",
+      "last_watched_at": null,
+      "status": "plantowatch",
+      "show": { "title": "Unknown Anime", "year": 2024, "ids": { "simkl": 5, "mal": "99999" } },
+      "anime_type": "tv"
+    }
+  ]
+}

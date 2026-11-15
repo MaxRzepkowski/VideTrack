@@ -1,0 +1,70 @@
+/*
+ * The API docs viewer in the app's colours. The viewer runs with no theme of
+ * its own ('none'), so every variable it reads is set here, from the tokens
+ * in app.css. `inline` writes each token's value: this page does not load the
+ * app stylesheet, so the tokens' own variables are not there to point at.
+ */
+@reference './app.css';
+
+:root,
+:host {
+    --scalar-text-decoration: underline;
+    --scalar-text-decoration-hover: underline;
+}
+
+.dark-mode {
+    --scalar-font: --theme(--font-sans inline);
+    --scalar-font-code: --theme(--font-mono inline);
+
+    --scalar-background-1: --theme(--color-surface-base inline);
+    --scalar-background-2: --theme(--color-surface inline);
+    --scalar-background-3: --theme(--color-surface-raised inline);
+    --scalar-background-card: --theme(--color-surface inline);
+    --scalar-background-accent: color-mix(in oklab, --theme(--color-brand inline) 18%, transparent);
+
+    --scalar-color-1: --theme(--color-ink inline);
+    --scalar-color-2: --theme(--color-ink-secondary inline);
+    --scalar-color-3: --theme(--color-ink-muted inline);
+    --scalar-color-accent: --theme(--color-brand-soft inline);
+    --scalar-color-disabled: --theme(--color-ink-faint inline);
+    --scalar-color-ghost: --theme(--color-ink-faint inline);
+    --scalar-border-color: --theme(--color-line inline);
+
+    --scalar-color-green: --theme(--color-success inline);
+    --scalar-color-red: --theme(--color-danger inline);
+    --scalar-color-yellow: --theme(--color-rating-gold inline);
+    --scalar-color-blue: --theme(--color-media-movie inline);
+    --scalar-color-orange: --theme(--color-status-onhold inline);
+    --scalar-color-purple: --theme(--color-brand-soft inline);
+    --scalar-color-query: --theme(--color-action-watchlist inline);
+
+    --scalar-link-color: --theme(--color-brand-soft inline);
+    --scalar-link-color-hover: --theme(--color-ink inline);
+
+    --scalar-button-1: --theme(--color-brand inline);
+    --scalar-button-1-hover: --theme(--color-brand-strong inline);
+    --scalar-button-1-color: --theme(--color-on-accent inline);
+
+    --scalar-tooltip-background: --theme(--color-surface-overlay inline);
+    --scalar-tooltip-color: --theme(--color-ink inline);
+
+    --scalar-color-alert: --theme(--color-status-onhold inline);
+    --scalar-color-danger: --theme(--color-danger inline);
+    --scalar-background-alert: color-mix(in oklab, --theme(--color-status-onhold inline) 8%, var(--scalar-background-1));
+    --scalar-background-danger: --theme(--color-danger-surface inline);
+
+    --scalar-sidebar-background-1: --theme(--color-surface-toolbar inline);
+    --scalar-sidebar-color-1: var(--scalar-color-1);
+    --scalar-sidebar-color-2: var(--scalar-color-2);
+    --scalar-sidebar-border-color: --theme(--color-line-subtle inline);
+    --scalar-sidebar-item-hover-background: var(--scalar-background-2);
+    --scalar-sidebar-item-hover-color: var(--scalar-color-1);
+    --scalar-sidebar-item-active-background: var(--scalar-background-accent);
+    --scalar-sidebar-color-active: var(--scalar-color-1);
+    --scalar-sidebar-indent-border: var(--scalar-sidebar-border-color);
+    --scalar-sidebar-indent-border-hover: --theme(--color-line-strong inline);
+    --scalar-sidebar-indent-border-active: var(--scalar-color-accent);
+    --scalar-sidebar-search-background: var(--scalar-background-2);
+    --scalar-sidebar-search-color: var(--scalar-color-3);
+    --scalar-sidebar-search-border-color: var(--scalar-border-color);
+}

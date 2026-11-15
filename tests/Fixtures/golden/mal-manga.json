@@ -1,0 +1,81 @@
+{
+    "@class": "MediaDetails",
+    "summary": {
+        "@class": "MediaSummary",
+        "type": "manga",
+        "ref": "2",
+        "provider": "mal",
+        "title": "Berserk",
+        "year": 1989,
+        "posterPath": "https://cdn.myanimelist.net/images/manga/1/157897l.webp",
+        "backdropPath": null,
+        "communityRating": 9.5,
+        "releaseDate": "1989-08-25",
+        "releaseTime": null,
+        "number": null,
+        "totalRuntime": null,
+        "seasonNumber": null,
+        "runtime": null,
+        "overview": null,
+        "releaseKind": null,
+        "platform": null,
+        "releaseStatus": null,
+        "extra": {
+            "chapters": 380
+        },
+        "progressTotal": 380,
+        "episodeType": null,
+        "authors": [
+            "Kentarou Miura"
+        ],
+        "episodeBadge": null,
+        "creatorKind": null,
+        "makes": null,
+        "votes": null,
+        "releasePrecision": "day",
+        "alternativeTitles": []
+    },
+    "tagline": null,
+    "overview": "Guts, a former mercenary now known as the Black Swordsman, is out for revenge.",
+    "runtime": null,
+    "genres": [
+        "Action",
+        "Adventure",
+        "Fantasy"
+    ],
+    "status": "publishing",
+    "originalLanguage": null,
+    "certification": null,
+    "certifications": [],
+    "releases": [],
+    "platformReleases": [],
+    "keywords": [],
+    "externalLinks": {
+        "mal": "https://myanimelist.net/manga/2"
+    },
+    "extra": {
+        "chapters": 380,
+        "volumes": 42,
+        "mangaFormat": "manga",
+        "magazine": "Young Animal",
+        "readersCount": 793550,
+        "ratingsCount": 372275
+    },
+    "children": [],
+    "cast": [],
+    "crew": [],
+    "videos": [],
+    "backdrops": [],
+    "posters": [
+        "https://cdn.myanimelist.net/images/manga/1/157897l.webp"
+    ],
+    "logos": [],
+    "related": [],
+    "similar": [],
+    "localizedTitles": [],
+    "wikidataId": null,
+    "collection": null,
+    "lastEpisodeToAir": null,
+    "nextEpisodeToAir": null,
+    "adult": false
+}

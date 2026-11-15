@@ -1,0 +1,55 @@
+<?php
+
+namespace App\Integrations\Anime;
+
+use App\Catalog\Providers\Concerns\SendsHttpRequests;
+use App\Catalog\Providers\Concerns\ThrottlesRequests;
+use App\Support\Payload;
+
+/** A user's AniList lists, in one GraphQL request. */
+final class AnilistClient
+{
+    use ReadsAnimeLists;
+    use SendsHttpRequests;
+    use ThrottlesRequests;
+
+    /** AniList allows 30 requests a minute; an import sends one. */
+    private const RATE_LIMIT_PER_MINUTE = 25;
+
+    /**
+     * The `data` of a GraphQL answer to `$query` for this user.
+     *
+     * @return array<array-key, mixed>
+     *
+     * @throws AnimeListUnavailable|AnimeListRefused|AnimeListNotFound
+     */
+    public function query(string $query, string $username): array
+    {
+        $response = $this->send('AniList', fn () => $this->throttle('anilist-api', self::RATE_LIMIT_PER_MINUTE, 60, 250_000), fn () => $this->httpClient()
+            ->post(config()->string('tracker.imports.anilist_url'), [
+                'query' => $query,
+                'variables' => ['userName' => $username],
+            ]));
+
+        $body = Payload::map($response->json());
+        $error = Payload::string(Payload::list($body['errors'] ?? null)[0] ?? [], 'message');
+
+        if ($error === 'User not found') {
+            throw new AnimeListNotFound('import.anime_list_no_user', ['service' => 'AniList', 'username' => $username]);
+        }
+
+        if ($error === 'Private User') {
+            throw new AnimeListRefused('import.anime_list_private', ['service' => 'AniList', 'username' => $username]);
+        }
+
+        $this->refuseFailed('AniList', $response);
+
+        $data = $body['data'] ?? null;
+
+        if (! is_array($data)) {
+            throw new AnimeListUnavailable('import.service_answered_try_later', ['service' => 'AniList', 'status' => $response->status()]);
+        }
+
+        return $data;
+    }
+}

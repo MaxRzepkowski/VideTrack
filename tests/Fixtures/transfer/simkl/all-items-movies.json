@@ -1,0 +1,33 @@
+{
+  "movies": [
+    {
+      "added_to_watchlist_at": "2026-04-10T20:13:02Z",
+      "last_watched_at": "1994-09-01T16:00:00Z",
+      "user_rated_at": "2026-04-10T20:14:00Z",
+      "user_rating": 10,
+      "status": "completed",
+      "watched_episodes_count": 0,
+      "total_episodes_count": 0,
+      "not_aired_episodes_count": 0,
+      "movie": {
+        "title": "The Godfather",
+        "poster": "10/102447562f6b49ff3a",
+        "year": 1972,
+        "runtime": 175,
+        "ids": { "simkl": 53434, "slug": "the-godfather", "imdb": "tt0068646", "tmdb": "238", "tvdb": "275" }
+      }
+    },
+    {
+      "added_to_watchlist_at": "2026-05-01T08:00:00Z",
+      "last_watched_at": null,
+      "user_rated_at": null,
+      "user_rating": null,
+      "status": "plantowatch",
+      "movie": {
+        "title": "Superman",
+        "year": 2025,
+        "ids": { "simkl": 2059585, "slug": "superman", "tmdb": "1061474" }
+      }
+    }
+  ]
+}

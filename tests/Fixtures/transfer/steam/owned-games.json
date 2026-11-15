@@ -1,0 +1,11 @@
+{
+  "response": {
+    "game_count": 4,
+    "games": [
+      { "appid": 367520, "name": "Hollow Knight", "playtime_forever": 2710, "playtime_2weeks": 0, "img_icon_url": "abc", "rtime_last_played": 1704067200 },
+      { "appid": 1030300, "name": "Hollow Knight: Silksong", "playtime_forever": 0, "img_icon_url": "def", "rtime_last_played": 0 },
+      { "appid": 440, "name": "Team Fortress 2", "playtime_forever": 500, "img_icon_url": "ghi" },
+      { "appid": 999999, "name": "Some Soundtrack", "playtime_forever": 3, "rtime_last_played": 1672531200 }
+    ]
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "action": "stop",
+  "media_type": "movie",
+  "title": "The Matrix",
+  "show_name": "",
+  "year": "1999",
+  "season": "",
+  "episode": "",
+  "ids": {
+    "tmdb": "603",
+    "imdb": "tt0133093",
+    "tvdb": ""
+  },
+  "progress": "40",
+  "username": "alex",
+  "occurred_at": "1790024400"
+}

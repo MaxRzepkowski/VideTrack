@@ -1,0 +1,27 @@
+# VideTrack for self-hosting: one container (web, queue and scheduler) with
+# SQLite. Put this file and `.env` (from env.example) in one directory, then:
+#
+#   docker compose up -d
+#
+# Settings come from `.env` next to this file; the image holds sensible
+# defaults for everything else.
+services:
+  videtrack:
+    # "latest" is the newest release. Pin a version ("0.1") to choose when
+    # to upgrade; see docs/upgrading.md.
+    image: ghcr.io/maxrzepkowski/videtrack:${VIDETRACK_VERSION:-latest}
+    env_file: .env
+    ports:
+      # Loopback only: a reverse proxy on this machine serves it with TLS.
+      # Without a proxy (a home network), use "8080:80" instead.
+      - "127.0.0.1:8080:80"
+    volumes:
+      # The database, its pre-upgrade backups and the generated app key.
+      - videtrack-data:/data
+      # Uploaded avatars, exports and caches.
+      - videtrack-storage:/app/storage
+    restart: unless-stopped
+
+volumes:
+  videtrack-data:
+  videtrack-storage:

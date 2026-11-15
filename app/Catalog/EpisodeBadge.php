@@ -1,0 +1,34 @@
+<?php
+
+namespace App\Catalog;
+
+use Spatie\TypeScriptTransformer\Attributes\TypeScript;
+
+/** What an episode opens or closes in its show: the chip its card carries. */
+#[TypeScript]
+enum EpisodeBadge: string
+{
+    case SeriesPremiere = 'series_premiere';
+    case SeasonPremiere = 'season_premiere';
+    case MidSeasonFinale = 'mid_season_finale';
+    case SeriesFinale = 'series_finale';
+    case SeasonFinale = 'season_finale';
+
+    /**
+     * The badge from what a provider tells about one episode: the episode
+     * opening a numbered season premieres it (specials never do, the first
+     * season premieres the series), and the provider's episode type names a
+     * break or a finale, the series finale when the show ended with it.
+     */
+    public static function of(?EpisodeType $type, int $seasonNumber, bool $opensSeason, bool $closesEndedShow): ?self
+    {
+        return match (true) {
+            $opensSeason && $seasonNumber === 1 => self::SeriesPremiere,
+            $opensSeason && $seasonNumber !== 0 => self::SeasonPremiere,
+            $type === EpisodeType::MidSeason => self::MidSeasonFinale,
+            $type === EpisodeType::Finale && $closesEndedShow => self::SeriesFinale,
+            $type === EpisodeType::Finale => self::SeasonFinale,
+            default => null,
+        };
+    }
+}

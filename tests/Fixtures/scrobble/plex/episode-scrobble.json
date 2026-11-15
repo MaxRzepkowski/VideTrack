@@ -1,0 +1,26 @@
+{
+  "event": "media.scrobble",
+  "user": true,
+  "owner": true,
+  "Account": {
+    "id": 1,
+    "title": "alex"
+  },
+  "Server": {
+    "title": "plex",
+    "uuid": "1a2b3c"
+  },
+  "Metadata": {
+    "librarySectionType": "show",
+    "ratingKey": "5678",
+    "type": "episode",
+    "title": "Winter Is Coming",
+    "grandparentTitle": "Game of Thrones",
+    "parentIndex": 1,
+    "index": 1,
+    "year": 2011,
+    "duration": 3600000,
+    "guid": "plex://episode/5d9c08254eefaa001f5d6dcb",
+    "Guid": [{ "id": "imdb://tt1480055" }, { "id": "tmdb://63056" }, { "id": "tvdb://3254641" }]
+  }
+}

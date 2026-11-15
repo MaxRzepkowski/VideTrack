@@ -1,0 +1,71 @@
+{
+    "data": {
+        "series_by_pk": {
+            "id": 127396,
+            "name": "Middle Earth",
+            "description": "<p>Tolkien's <i>legendarium</i>.</p>",
+            "book_series": [
+                {
+                    "position": 0,
+                    "book": {
+                        "id": 386446,
+                        "title": "The Silmarillion",
+                        "release_date": "1977-09-15",
+                        "release_year": 1977,
+                        "rating": 3.95,
+                        "cached_image": { "url": "https://assets.hardcover.app/edition/30893217/silmarillion.jpg", "color": "#24302b" },
+                        "cached_contributors": [{ "author": { "id": 656983, "name": "J.R.R. Tolkien" }, "contribution": null }]
+                    }
+                },
+                {
+                    "position": 1,
+                    "book": {
+                        "id": 2459845,
+                        "title": "The Hobbit, or There and Back Again",
+                        "release_date": "1937-09-21",
+                        "release_year": 1937,
+                        "rating": 4.31,
+                        "cached_image": { "url": "https://assets.hardcover.app/edition/17456445/hobbit.jpg", "color": "#c58f27" },
+                        "cached_contributors": [{ "author": { "id": 656983, "name": "J.R.R. Tolkien" }, "contribution": null }]
+                    }
+                },
+                {
+                    "position": 1.5,
+                    "book": {
+                        "id": 431190,
+                        "title": "The Adventures of Tom Bombadil",
+                        "release_date": "1962-11-22",
+                        "release_year": 1962,
+                        "rating": 3.58,
+                        "cached_image": { "url": "https://assets.hardcover.app/edition/31007553/bombadil.jpg", "color": "#5c7a3a" },
+                        "cached_contributors": [{ "author": { "id": 656983, "name": "J.R.R. Tolkien" }, "contribution": null }]
+                    }
+                },
+                {
+                    "position": 2,
+                    "book": {
+                        "id": 386447,
+                        "title": "The Fellowship of the Ring",
+                        "release_date": "1954-07-29",
+                        "release_year": 1954,
+                        "rating": 4.37,
+                        "cached_image": {},
+                        "cached_contributors": [{ "author": { "id": 656983, "name": "J.R.R. Tolkien" }, "contribution": null }]
+                    }
+                },
+                {
+                    "position": 3,
+                    "book": {
+                        "id": 386448,
+                        "title": "The Two Towers",
+                        "release_date": "1954-11-11",
+                        "release_year": 1954,
+                        "rating": 4.45,
+                        "cached_image": { "url": "https://assets.hardcover.app/edition/30893221/two-towers.jpg", "color": "#3b2f25" },
+                        "cached_contributors": [{ "author": { "id": 656983, "name": "J.R.R. Tolkien" }, "contribution": null }]
+                    }
+                }
+            ]
+        }
+    }
+}

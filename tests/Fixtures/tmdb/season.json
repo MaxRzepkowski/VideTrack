@@ -1,0 +1,54 @@
+{
+    "id": 3627,
+    "name": "Season 1",
+    "overview": "Trouble is brewing in the Seven Kingdoms of Westeros.",
+    "air_date": "2011-04-17",
+    "season_number": 1,
+    "poster_path": "/got-s1.jpg",
+    "vote_average": 8.3,
+    "episodes": [
+        {
+            "id": 63056,
+            "episode_number": 1,
+            "name": "Winter Is Coming",
+            "overview": "Jon Arryn, the Hand of the King, is dead.",
+            "air_date": "2011-04-17",
+            "runtime": 62,
+            "still_path": "/got-s1e1.jpg",
+            "vote_average": 8.1
+        },
+        {
+            "id": 63057,
+            "episode_number": 2,
+            "name": "The Kingsroad",
+            "overview": "While Bran recovers from his fall, Ned takes only his daughters to King's Landing.",
+            "air_date": "2011-04-24",
+            "runtime": 56,
+            "still_path": "/got-s1e2.jpg",
+            "vote_average": 7.9
+        }
+    ],
+    "videos": { "results": [] },
+    "aggregate_credits": {
+        "cast": [
+            {
+                "id": 22970,
+                "name": "Peter Dinklage",
+                "profile_path": "/peter.jpg",
+                "order": 0,
+                "roles": [{ "character": "Tyrion Lannister", "episode_count": 10 }],
+                "total_episode_count": 10
+            }
+        ],
+        "crew": [
+            {
+                "id": 9813,
+                "name": "David Benioff",
+                "department": "Writing",
+                "profile_path": null,
+                "jobs": [{ "job": "Writer", "episode_count": 10 }],
+                "total_episode_count": 10
+            }
+        ]
+    }
+}

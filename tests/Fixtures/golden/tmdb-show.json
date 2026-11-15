@@ -1,0 +1,411 @@
+{
+    "@class": "MediaDetails",
+    "summary": {
+        "@class": "MediaSummary",
+        "type": "show",
+        "ref": "1399",
+        "provider": "tmdb",
+        "title": "Game of Thrones",
+        "year": 2011,
+        "posterPath": "/got-poster.jpg",
+        "backdropPath": "/got-backdrop.jpg",
+        "communityRating": 8.5,
+        "releaseDate": "2011-04-17",
+        "releaseTime": null,
+        "number": null,
+        "totalRuntime": null,
+        "seasonNumber": null,
+        "runtime": null,
+        "overview": null,
+        "releaseKind": null,
+        "platform": null,
+        "releaseStatus": null,
+        "extra": [],
+        "progressTotal": null,
+        "episodeType": null,
+        "authors": [],
+        "episodeBadge": null,
+        "creatorKind": null,
+        "makes": null,
+        "votes": null,
+        "releasePrecision": "day",
+        "alternativeTitles": []
+    },
+    "tagline": "Winter is coming.",
+    "overview": "Seven noble families fight for control of the mythical land of Westeros.",
+    "runtime": 60,
+    "genres": [
+        "Sci-Fi & Fantasy",
+        "Drama"
+    ],
+    "status": "ended",
+    "originalLanguage": "en",
+    "certification": "TV-MA",
+    "certifications": [
+        {
+            "@class": "CertificationData",
+            "region": "US",
+            "code": "TV-MA",
+            "meaning": "Designed to be viewed by adults and may be unsuitable for children under 17."
+        },
+        {
+            "@class": "CertificationData",
+            "region": "PL",
+            "code": "18",
+            "meaning": "Suitable only for adults."
+        }
+    ],
+    "releases": [],
+    "platformReleases": [],
+    "keywords": [
+        {
+            "@class": "KeywordData",
+            "name": "war",
+            "ref": "6091"
+        }
+    ],
+    "externalLinks": {
+        "homepage": "https://www.hbo.com/game-of-thrones",
+        "tmdb": "https://www.themoviedb.org/tv/1399",
+        "imdb": "https://www.imdb.com/title/tt0944947/"
+    },
+    "extra": {
+        "createdBy": [
+            {
+                "@class": "CreatorLink",
+                "name": "David Benioff",
+                "kind": "person",
+                "ref": "9813",
+                "provider": "tmdb",
+                "logoPath": null
+            },
+            {
+                "@class": "CreatorLink",
+                "name": "D. B. Weiss",
+                "kind": "person",
+                "ref": "228068",
+                "provider": "tmdb",
+                "logoPath": null
+            }
+        ],
+        "networks": [
+            {
+                "@class": "CreatorLink",
+                "name": "HBO",
+                "kind": "network",
+                "ref": "49",
+                "provider": "tmdb",
+                "logoPath": "/hbo.png"
+            }
+        ],
+        "studios": [],
+        "seasonCount": 2,
+        "episodeCount": 20,
+        "imdbId": "tt0944947",
+        "tvdbId": null,
+        "logoPath": "/got-logo.png",
+        "originalTitle": null,
+        "originCountry": [
+            "US"
+        ],
+        "spokenLanguages": [
+            "English",
+            "Dothraki"
+        ],
+        "showType": "Scripted",
+        "screenedTheatrically": [
+            {
+                "seasonNumber": 2,
+                "episodeNumber": 5
+            },
+            {
+                "seasonNumber": 4,
+                "episodeNumber": 1
+            }
+        ],
+        "alternativeTitles": [],
+        "certificationRegion": "US",
+        "certificationMeaning": "Designed to be viewed by adults and may be unsuitable for children under 17.",
+        "certificationDescriptors": []
+    },
+    "children": [
+        {
+            "@class": "MediaSummary",
+            "type": "season",
+            "ref": "1399:0",
+            "provider": "tmdb",
+            "title": "Specials",
+            "year": 2010,
+            "posterPath": "/got-poster.jpg",
+            "backdropPath": null,
+            "communityRating": null,
+            "releaseDate": "2010-12-05",
+            "releaseTime": null,
+            "number": 0,
+            "totalRuntime": null,
+            "seasonNumber": null,
+            "runtime": null,
+            "overview": null,
+            "releaseKind": null,
+            "platform": null,
+            "releaseStatus": null,
+            "extra": {
+                "episodeCount": 2
+            },
+            "progressTotal": null,
+            "episodeType": null,
+            "authors": [],
+            "episodeBadge": null,
+            "creatorKind": null,
+            "makes": null,
+            "votes": null,
+            "releasePrecision": "day",
+            "alternativeTitles": []
+        },
+        {
+            "@class": "MediaSummary",
+            "type": "season",
+            "ref": "1399:1",
+            "provider": "tmdb",
+            "title": "Season 1",
+            "year": 2011,
+            "posterPath": "/got-s1.jpg",
+            "backdropPath": null,
+            "communityRating": 8.3,
+            "releaseDate": "2011-04-17",
+            "releaseTime": null,
+            "number": 1,
+            "totalRuntime": null,
+            "seasonNumber": null,
+            "runtime": null,
+            "overview": null,
+            "releaseKind": null,
+            "platform": null,
+            "releaseStatus": null,
+            "extra": {
+                "episodeCount": 10
+            },
+            "progressTotal": null,
+            "episodeType": null,
+            "authors": [],
+            "episodeBadge": null,
+            "creatorKind": null,
+            "makes": null,
+            "votes": null,
+            "releasePrecision": "day",
+            "alternativeTitles": []
+        },
+        {
+            "@class": "MediaSummary",
+            "type": "season",
+            "ref": "1399:2",
+            "provider": "tmdb",
+            "title": "Season 2",
+            "year": 2012,
+            "posterPath": "/got-s2.jpg",
+            "backdropPath": null,
+            "communityRating": 8.4,
+            "releaseDate": "2012-04-01",
+            "releaseTime": null,
+            "number": 2,
+            "totalRuntime": null,
+            "seasonNumber": null,
+            "runtime": null,
+            "overview": null,
+            "releaseKind": null,
+            "platform": null,
+            "releaseStatus": null,
+            "extra": {
+                "episodeCount": 10
+            },
+            "progressTotal": null,
+            "episodeType": null,
+            "authors": [],
+            "episodeBadge": null,
+            "creatorKind": null,
+            "makes": null,
+            "votes": null,
+            "releasePrecision": "day",
+            "alternativeTitles": []
+        }
+    ],
+    "cast": [
+        {
+            "@class": "CreditData",
+            "personRef": "22970",
+            "provider": "tmdb",
+            "name": "Peter Dinklage",
+            "profilePath": "/peter.jpg",
+            "department": "acting",
+            "role": "Tyrion Lannister",
+            "order": 0,
+            "episodeCount": 67,
+            "roles": [
+                {
+                    "role": "Tyrion Lannister",
+                    "episodeCount": 67
+                }
+            ]
+        },
+        {
+            "@class": "CreditData",
+            "personRef": "12312",
+            "provider": "tmdb",
+            "name": "Lena Headey",
+            "profilePath": "/lena.jpg",
+            "department": "acting",
+            "role": "Cersei Lannister",
+            "order": 1,
+            "episodeCount": 62,
+            "roles": [
+                {
+                    "role": "Cersei Lannister",
+                    "episodeCount": 62
+                }
+            ]
+        },
+        {
+            "@class": "CreditData",
+            "personRef": "55555",
+            "provider": "tmdb",
+            "name": "Anthology Actor",
+            "profilePath": null,
+            "department": "acting",
+            "role": "Character Two",
+            "order": 2,
+            "episodeCount": 7,
+            "roles": [
+                {
+                    "role": "Character Two",
+                    "episodeCount": 4
+                },
+                {
+                    "role": "Character One",
+                    "episodeCount": 3
+                }
+            ]
+        }
+    ],
+    "crew": [
+        {
+            "@class": "CreditData",
+            "personRef": "9813",
+            "provider": "tmdb",
+            "name": "David Benioff",
+            "profilePath": null,
+            "department": "production",
+            "role": "Executive Producer",
+            "order": 0,
+            "episodeCount": 73,
+            "roles": [
+                {
+                    "role": "Executive Producer",
+                    "episodeCount": 73
+                }
+            ]
+        }
+    ],
+    "videos": [
+        {
+            "@class": "VideoData",
+            "key": "KPLWWIOCOOQ",
+            "site": "YouTube",
+            "type": "Trailer",
+            "name": "Season 1 Trailer",
+            "official": true,
+            "publishedAt": null
+        }
+    ],
+    "backdrops": [
+        "/got-backdrop-1.jpg"
+    ],
+    "posters": [
+        "/got-poster-1.jpg"
+    ],
+    "logos": [
+        "/got-logo.png"
+    ],
+    "related": [
+        {
+            "@class": "MediaSummary",
+            "type": "show",
+            "ref": "94997",
+            "provider": "tmdb",
+            "title": "House of the Dragon",
+            "year": 2022,
+            "posterPath": "/hotd.jpg",
+            "backdropPath": null,
+            "communityRating": 8.4,
+            "releaseDate": "2022-08-21",
+            "releaseTime": null,
+            "number": null,
+            "totalRuntime": null,
+            "seasonNumber": null,
+            "runtime": null,
+            "overview": null,
+            "releaseKind": null,
+            "platform": null,
+            "releaseStatus": null,
+            "extra": [],
+            "progressTotal": null,
+            "episodeType": null,
+            "authors": [],
+            "episodeBadge": null,
+            "creatorKind": null,
+            "makes": null,
+            "votes": null,
+            "releasePrecision": "day",
+            "alternativeTitles": []
+        }
+    ],
+    "similar": [
+        {
+            "@class": "MediaSummary",
+            "type": "show",
+            "ref": "1396",
+            "provider": "tmdb",
+            "title": "Breaking Bad",
+            "year": 2008,
+            "posterPath": "/bb.jpg",
+            "backdropPath": null,
+            "communityRating": 8.9,
+            "releaseDate": "2008-01-20",
+            "releaseTime": null,
+            "number": null,
+            "totalRuntime": null,
+            "seasonNumber": null,
+            "runtime": null,
+            "overview": null,
+            "releaseKind": null,
+            "platform": null,
+            "releaseStatus": null,
+            "extra": [],
+            "progressTotal": null,
+            "episodeType": null,
+            "authors": [],
+            "episodeBadge": null,
+            "creatorKind": null,
+            "makes": null,
+            "votes": null,
+            "releasePrecision": "day",
+            "alternativeTitles": []
+        }
+    ],
+    "localizedTitles": {
+        "en": {
+            "@class": "LocalizedTitle",
+            "title": "Game of Thrones",
+            "posterPath": "/got-poster.jpg"
+        },
+        "pl": {
+            "@class": "LocalizedTitle",
+            "title": "Game of Thrones",
+            "posterPath": "/got-poster.jpg"
+        }
+    },
+    "wikidataId": null,
+    "collection": null,
+    "lastEpisodeToAir": null,
+    "nextEpisodeToAir": null,
+    "adult": false
+}

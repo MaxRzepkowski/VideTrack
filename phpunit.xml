@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
+         bootstrap="vendor/autoload.php"
+         colors="true"
+>
+    <testsuites>
+        <testsuite name="Unit">
+            <directory>tests/Unit</directory>
+        </testsuite>
+        <testsuite name="Feature">
+            <directory>tests/Feature</directory>
+        </testsuite>
+        <testsuite name="Arch">
+            <directory>tests/Arch</directory>
+        </testsuite>
+    </testsuites>
+    <source>
+        <include>
+            <directory>app</directory>
+        </include>
+    </source>
+    <php>
+        <ini name="memory_limit" value="2G"/>
+        <env name="APP_ENV" value="testing"/>
+        <!-- Pinned rather than read from the developer's .env: encryption,
+             the clock's zone and the language of every text a test reads. -->
+        <env name="APP_KEY" value="base64:dGVzdGluZy1rZXktb2YtdGhlLXRlc3Qtc3VpdGUtMzI="/>
+        <env name="APP_TIMEZONE" value="UTC"/>
+        <env name="DEFAULT_LOCALE" value="en"/>
+        <env name="REGISTRATION_ENABLED" value="true"/>
+        <env name="APP_MAINTENANCE_DRIVER" value="file"/>
+        <env name="BCRYPT_ROUNDS" value="4"/>
+        <env name="CACHE_STORE" value="array"/>
+        <env name="DB_CONNECTION" value="sqlite"/>
+        <env name="DB_DATABASE" value=":memory:"/>
+        <env name="MAIL_MAILER" value="array"/>
+        <env name="QUEUE_CONNECTION" value="sync"/>
+        <env name="SESSION_DRIVER" value="array"/>
+        <env name="TMDB_API_KEY" value="testing-key"/>
+        <!-- Explicitly empty: the games, books, manga and comics modules
+             (and the Simkl connection) stay off unless a test enables them
+             via config(), regardless of the developer's .env. -->
+        <env name="IGDB_CLIENT_ID" value=""/>
+        <env name="IGDB_CLIENT_SECRET" value=""/>
+        <env name="HARDCOVER_API_KEY" value=""/>
+        <env name="MAL_CLIENT_ID" value=""/>
+        <env name="COMICVINE_API_KEY" value=""/>
+        <env name="SIMKL_CLIENT_ID" value=""/>
+        <env name="STEAM_API_KEY" value=""/>
+    </php>
+</phpunit>

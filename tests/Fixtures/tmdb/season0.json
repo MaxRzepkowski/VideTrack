@@ -1,0 +1,29 @@
+{
+    "id": 3626,
+    "name": "Specials",
+    "overview": "Extras and behind the scenes.",
+    "air_date": "2010-12-05",
+    "season_number": 0,
+    "poster_path": "/got-s0.jpg",
+    "vote_average": 6.9,
+    "episodes": [
+        {
+            "episode_number": 1,
+            "name": "Inside Game of Thrones",
+            "air_date": "2010-12-05",
+            "runtime": 30,
+            "overview": "A look inside the production.",
+            "still_path": "/got-s0e1.jpg",
+            "vote_average": 6.8
+        },
+        {
+            "episode_number": 2,
+            "name": "15-Minute Preview",
+            "air_date": "2011-04-03",
+            "runtime": 15,
+            "overview": "A preview of the series.",
+            "still_path": "/got-s0e2.jpg",
+            "vote_average": 6.5
+        }
+    ]
+}

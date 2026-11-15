@@ -1,0 +1,76 @@
+{
+    "@class": "MediaDetails",
+    "summary": {
+        "@class": "MediaSummary",
+        "type": "comic",
+        "ref": "4207",
+        "provider": "comicvine",
+        "title": "The Sandman",
+        "year": 1989,
+        "posterPath": "https://comicvine.gamespot.com/a/uploads/scale_large/sandman.jpg",
+        "backdropPath": null,
+        "communityRating": null,
+        "releaseDate": null,
+        "releaseTime": null,
+        "number": null,
+        "totalRuntime": null,
+        "seasonNumber": null,
+        "runtime": null,
+        "overview": null,
+        "releaseKind": null,
+        "platform": null,
+        "releaseStatus": null,
+        "extra": {
+            "issues": 75,
+            "publisher": "Vertigo"
+        },
+        "progressTotal": 75,
+        "episodeType": null,
+        "authors": [],
+        "episodeBadge": null,
+        "creatorKind": null,
+        "makes": null,
+        "votes": null,
+        "releasePrecision": "day",
+        "alternativeTitles": []
+    },
+    "tagline": "The Lord of Dreams learns one must change or die.",
+    "overview": "Neil Gaiman's magnum opus about the king of stories.",
+    "runtime": null,
+    "genres": [],
+    "status": null,
+    "originalLanguage": null,
+    "certification": null,
+    "certifications": [],
+    "releases": [],
+    "platformReleases": [],
+    "keywords": [],
+    "externalLinks": {
+        "comicvine": "https://comicvine.gamespot.com/the-sandman/4050-4207/"
+    },
+    "extra": {
+        "creators": [
+            "Neil Gaiman",
+            "Dave McKean"
+        ],
+        "publisher": "Vertigo",
+        "issues": 75
+    },
+    "children": [],
+    "cast": [],
+    "crew": [],
+    "videos": [],
+    "backdrops": [],
+    "posters": [
+        "https://comicvine.gamespot.com/a/uploads/scale_large/sandman.jpg"
+    ],
+    "logos": [],
+    "related": [],
+    "similar": [],
+    "localizedTitles": [],
+    "wikidataId": null,
+    "collection": null,
+    "lastEpisodeToAir": null,
+    "nextEpisodeToAir": null,
+    "adult": false
+}

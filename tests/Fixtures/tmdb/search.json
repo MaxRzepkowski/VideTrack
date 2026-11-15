@@ -1,0 +1,38 @@
+{
+    "page": 1,
+    "results": [
+        {
+            "id": 603,
+            "media_type": "movie",
+            "title": "The Matrix",
+            "release_date": "1999-03-30",
+            "poster_path": "/matrix-poster.jpg",
+            "backdrop_path": "/matrix-backdrop.jpg",
+            "vote_average": 8.2
+        },
+        {
+            "id": 1399,
+            "media_type": "tv",
+            "name": "Game of Thrones",
+            "first_air_date": "2011-04-17",
+            "poster_path": "/got-poster.jpg",
+            "backdrop_path": "/got-backdrop.jpg",
+            "vote_average": 8.4
+        },
+        {
+            "id": 500,
+            "media_type": "person",
+            "name": "Some Actor",
+            "profile_path": "/actor.jpg"
+        },
+        {
+            "id": 999,
+            "media_type": "movie",
+            "title": "No Poster Movie",
+            "poster_path": null,
+            "vote_average": 5.0
+        }
+    ],
+    "total_pages": 1,
+    "total_results": 4
+}

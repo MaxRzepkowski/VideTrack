@@ -1,0 +1,42 @@
+{
+    "id": 2,
+    "title": "Berserk",
+    "main_picture": {
+        "medium": "https://cdn.myanimelist.net/images/manga/1/157897.webp",
+        "large": "https://cdn.myanimelist.net/images/manga/1/157897l.webp"
+    },
+    "alternative_titles": {
+        "synonyms": ["Berserk: The Prototype"],
+        "en": "Berserk",
+        "ja": "ベルセルク"
+    },
+    "start_date": "1989-08-25",
+    "synopsis": "Guts, a former mercenary now known as the Black Swordsman, is out for revenge.",
+    "mean": 9.46,
+    "media_type": "manga",
+    "status": "currently_publishing",
+    "genres": [
+        { "id": 1, "name": "Action" },
+        { "id": 2, "name": "Adventure" },
+        { "id": 10, "name": "Fantasy" }
+    ],
+    "num_volumes": 42,
+    "num_chapters": 380,
+    "num_list_users": 793550,
+    "num_scoring_users": 372275,
+    "authors": [
+        {
+            "node": { "id": 1868, "first_name": "Kentarou", "last_name": "Miura" },
+            "role": "Story & Art"
+        }
+    ],
+    "serialization": [
+        { "node": { "id": 84, "name": "Young Animal" } }
+    ],
+    "pictures": [
+        {
+            "medium": "https://cdn.myanimelist.net/images/manga/1/157897.webp",
+            "large": "https://cdn.myanimelist.net/images/manga/1/157897l.webp"
+        }
+    ]
+}

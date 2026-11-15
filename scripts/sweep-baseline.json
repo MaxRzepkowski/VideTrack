@@ -1,0 +1,16 @@
+{
+    "metadata read outside ItemMetadata": 0,
+    "?? '' in the domain": 36,
+    "payload reader copied (stringOrNull and kin)": 0,
+    "exception message stored or logged": 4,
+    "query built in a controller": 3,
+    "provider code in the front": 0,
+    "type list written out (front)": 0,
+    "type list written out (core)": 0,
+    "non-null assertion or double cast (front)": 0,
+    "wire shape written by hand (front)": 18,
+    "lint switched off": 0,
+    "PHP class over 400 lines": 3,
+    "controller over 150 lines": 1,
+    "Vue component over 400 lines": 1
+}

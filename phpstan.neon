@@ -1,0 +1,14 @@
+includes:
+    - vendor/larastan/larastan/extension.neon
+
+parameters:
+    paths:
+        - app/
+        - config/
+        - database/
+        - routes/
+    # Level 10: no operation on `mixed`, declared or not. A value from outside
+    # is read by App\Support\Payload, one value a query answers by
+    # App\Support\Numbers, a column of a raw row by App\Support\QueryRow;
+    # nothing is cast where it lands.
+    level: 10

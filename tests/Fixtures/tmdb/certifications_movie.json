@@ -1,0 +1,28 @@
+{
+    "certifications": {
+        "PL": [
+            {
+                "certification": "12",
+                "meaning": "Suitable for viewers aged 12 and older.",
+                "order": 2
+            },
+            {
+                "certification": "16",
+                "meaning": "Suitable for viewers aged 16 and older.",
+                "order": 3
+            }
+        ],
+        "US": [
+            {
+                "certification": "PG-13",
+                "meaning": "Some material may be inappropriate for children under 13.",
+                "order": 3
+            },
+            {
+                "certification": "R",
+                "meaning": "Under 17 requires an accompanying parent or adult guardian.",
+                "order": 4
+            }
+        ]
+    }
+}

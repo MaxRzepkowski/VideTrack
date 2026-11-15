@@ -1,0 +1,42 @@
+[
+    {
+        "@class": "SeasonRatings",
+        "season": 1,
+        "episodes": [
+            {
+                "@class": "EpisodeRating",
+                "episode": 1,
+                "title": "Winter Is Coming",
+                "rating": 8.1,
+                "airDate": "2011-04-17"
+            },
+            {
+                "@class": "EpisodeRating",
+                "episode": 2,
+                "title": "The Kingsroad",
+                "rating": 7.9,
+                "airDate": "2011-04-24"
+            }
+        ]
+    },
+    {
+        "@class": "SeasonRatings",
+        "season": 2,
+        "episodes": [
+            {
+                "@class": "EpisodeRating",
+                "episode": 1,
+                "title": "The North Remembers",
+                "rating": 8.0,
+                "airDate": "2012-04-01"
+            },
+            {
+                "@class": "EpisodeRating",
+                "episode": 2,
+                "title": "The Night Lands",
+                "rating": 7.8,
+                "airDate": "2012-04-08"
+            }
+        ]
+    }
+]

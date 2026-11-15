@@ -1,0 +1,4224 @@
+{
+    "openapi": "3.1.2",
+    "info": {
+        "title": "VideTrack API",
+        "version": "dev",
+        "description": "Token-authenticated REST surface of a VideTrack instance. Create a token in Settings \u2192 API; send it as `Authorization: Bearer <token>`. A token carries `read` and optionally `write`. Answers are camelCase under `data` (with `meta` where there is something to count or page); a position carries the user's state as `state`, and a write that changes a position adds `states`: every state it touched, keyed `type:ref`. Request fields are snake_case."
+    },
+    "servers": [
+        {
+            "url": "http://192.168.1.50:8080/api/v1"
+        }
+    ],
+    "security": [
+        {
+            "http": []
+        }
+    ],
+    "paths": {
+        "/calendar": {
+            "get": {
+                "operationId": "v1.calendar",
+                "tags": [
+                    "Calendar"
+                ],
+                "parameters": [
+                    {
+                        "name": "from",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "to",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {}
+                                        },
+                                        "meta": {
+                                            "type": "object",
+                                            "properties": {
+                                                "from": {
+                                                    "type": "string"
+                                                },
+                                                "to": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "required": [
+                                                "from",
+                                                "to"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "meta"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                }
+            }
+        },
+        "/people/{provider}/{ref}/follow": {
+            "put": {
+                "operationId": "v1.people.follow.update",
+                "summary": "A person, a studio / publisher or a network: the route says which",
+                "tags": [
+                    "CreatorFollow"
+                ],
+                "parameters": [
+                    {
+                        "name": "provider",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "ref",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "mode": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "enum": [
+                                            "follow",
+                                            null
+                                        ]
+                                    }
+                                },
+                                "required": [
+                                    "mode"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "provider": {
+                                                    "type": "string"
+                                                },
+                                                "ref": {
+                                                    "type": "string"
+                                                },
+                                                "mode": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ],
+                                                    "enum": [
+                                                        "follow",
+                                                        null
+                                                    ]
+                                                }
+                                            },
+                                            "required": [
+                                                "provider",
+                                                "ref",
+                                                "mode"
+                                            ]
+                                        },
+                                        "creatorStates": {
+                                            "type": "object",
+                                            "description": "What a client holding this creator shows now \u2014 like `states` of a title write.",
+                                            "additionalProperties": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "followed": {
+                                                        "type": "boolean"
+                                                    },
+                                                    "listIds": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "type": "integer"
+                                                        }
+                                                    }
+                                                },
+                                                "required": [
+                                                    "followed",
+                                                    "listIds"
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "creatorStates"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/companies/{provider}/{ref}/follow": {
+            "put": {
+                "operationId": "v1.companies.follow.update",
+                "summary": "A person, a studio / publisher or a network: the route says which",
+                "tags": [
+                    "CreatorFollow"
+                ],
+                "parameters": [
+                    {
+                        "name": "provider",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "ref",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "mode": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "enum": [
+                                            "follow",
+                                            null
+                                        ]
+                                    }
+                                },
+                                "required": [
+                                    "mode"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "provider": {
+                                                    "type": "string"
+                                                },
+                                                "ref": {
+                                                    "type": "string"
+                                                },
+                                                "mode": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ],
+                                                    "enum": [
+                                                        "follow",
+                                                        null
+                                                    ]
+                                                }
+                                            },
+                                            "required": [
+                                                "provider",
+                                                "ref",
+                                                "mode"
+                                            ]
+                                        },
+                                        "creatorStates": {
+                                            "type": "object",
+                                            "description": "What a client holding this creator shows now \u2014 like `states` of a title write.",
+                                            "additionalProperties": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "followed": {
+                                                        "type": "boolean"
+                                                    },
+                                                    "listIds": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "type": "integer"
+                                                        }
+                                                    }
+                                                },
+                                                "required": [
+                                                    "followed",
+                                                    "listIds"
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "creatorStates"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/networks/{provider}/{ref}/follow": {
+            "put": {
+                "operationId": "v1.networks.follow.update",
+                "summary": "A person, a studio / publisher or a network: the route says which",
+                "tags": [
+                    "CreatorFollow"
+                ],
+                "parameters": [
+                    {
+                        "name": "provider",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "ref",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "mode": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "enum": [
+                                            "follow",
+                                            null
+                                        ]
+                                    }
+                                },
+                                "required": [
+                                    "mode"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "provider": {
+                                                    "type": "string"
+                                                },
+                                                "ref": {
+                                                    "type": "string"
+                                                },
+                                                "mode": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ],
+                                                    "enum": [
+                                                        "follow",
+                                                        null
+                                                    ]
+                                                }
+                                            },
+                                            "required": [
+                                                "provider",
+                                                "ref",
+                                                "mode"
+                                            ]
+                                        },
+                                        "creatorStates": {
+                                            "type": "object",
+                                            "description": "What a client holding this creator shows now \u2014 like `states` of a title write.",
+                                            "additionalProperties": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "followed": {
+                                                        "type": "boolean"
+                                                    },
+                                                    "listIds": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "type": "integer"
+                                                        }
+                                                    }
+                                                },
+                                                "required": [
+                                                    "followed",
+                                                    "listIds"
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "creatorStates"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/collections/{provider}/{ref}/follow": {
+            "put": {
+                "operationId": "v1.collections.follow.update",
+                "summary": "A collection can also be muted, like a title",
+                "tags": [
+                    "CreatorFollow"
+                ],
+                "parameters": [
+                    {
+                        "name": "provider",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "ref",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "mode": {
+                                        "anyOf": [
+                                            {
+                                                "$ref": "#/components/schemas/FollowMode"
+                                            },
+                                            {
+                                                "type": "null"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "required": [
+                                    "mode"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "provider": {
+                                                    "type": "string"
+                                                },
+                                                "ref": {
+                                                    "type": "string"
+                                                },
+                                                "mode": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                }
+                                            },
+                                            "required": [
+                                                "provider",
+                                                "ref",
+                                                "mode"
+                                            ]
+                                        },
+                                        "creatorStates": {
+                                            "type": "object",
+                                            "description": "What a client holding this creator shows now \u2014 like `states` of a title write.",
+                                            "additionalProperties": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "followed": {
+                                                        "type": "boolean"
+                                                    },
+                                                    "listIds": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "type": "integer"
+                                                        }
+                                                    }
+                                                },
+                                                "required": [
+                                                    "followed",
+                                                    "listIds"
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "creatorStates"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/people/{provider}/{ref}/lists": {
+            "get": {
+                "operationId": "v1.people.lists.show",
+                "tags": [
+                    "CreatorLists"
+                ],
+                "parameters": [
+                    {
+                        "name": "provider",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "ref",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "listIds": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "required": [
+                                                "listIds"
+                                            ]
+                                        },
+                                        "creatorStates": {
+                                            "type": "object",
+                                            "additionalProperties": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "followed": {
+                                                        "type": "boolean"
+                                                    },
+                                                    "listIds": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "type": "integer"
+                                                        }
+                                                    }
+                                                },
+                                                "required": [
+                                                    "followed",
+                                                    "listIds"
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "creatorStates"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            },
+            "put": {
+                "operationId": "v1.people.lists.update",
+                "tags": [
+                    "CreatorLists"
+                ],
+                "parameters": [
+                    {
+                        "name": "provider",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "ref",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "list_ids": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer"
+                                        }
+                                    }
+                                },
+                                "required": [
+                                    "list_ids"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "listIds": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "required": [
+                                                "listIds"
+                                            ]
+                                        },
+                                        "creatorStates": {
+                                            "type": "object",
+                                            "additionalProperties": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "followed": {
+                                                        "type": "boolean"
+                                                    },
+                                                    "listIds": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "type": "integer"
+                                                        }
+                                                    }
+                                                },
+                                                "required": [
+                                                    "followed",
+                                                    "listIds"
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "creatorStates"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/companies/{provider}/{ref}/lists": {
+            "get": {
+                "operationId": "v1.companies.lists.show",
+                "tags": [
+                    "CreatorLists"
+                ],
+                "parameters": [
+                    {
+                        "name": "provider",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "ref",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "listIds": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "required": [
+                                                "listIds"
+                                            ]
+                                        },
+                                        "creatorStates": {
+                                            "type": "object",
+                                            "additionalProperties": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "followed": {
+                                                        "type": "boolean"
+                                                    },
+                                                    "listIds": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "type": "integer"
+                                                        }
+                                                    }
+                                                },
+                                                "required": [
+                                                    "followed",
+                                                    "listIds"
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "creatorStates"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            },
+            "put": {
+                "operationId": "v1.companies.lists.update",
+                "tags": [
+                    "CreatorLists"
+                ],
+                "parameters": [
+                    {
+                        "name": "provider",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "ref",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "list_ids": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer"
+                                        }
+                                    }
+                                },
+                                "required": [
+                                    "list_ids"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "listIds": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "required": [
+                                                "listIds"
+                                            ]
+                                        },
+                                        "creatorStates": {
+                                            "type": "object",
+                                            "additionalProperties": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "followed": {
+                                                        "type": "boolean"
+                                                    },
+                                                    "listIds": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "type": "integer"
+                                                        }
+                                                    }
+                                                },
+                                                "required": [
+                                                    "followed",
+                                                    "listIds"
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "creatorStates"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/networks/{provider}/{ref}/lists": {
+            "get": {
+                "operationId": "v1.networks.lists.show",
+                "tags": [
+                    "CreatorLists"
+                ],
+                "parameters": [
+                    {
+                        "name": "provider",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "ref",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "listIds": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "required": [
+                                                "listIds"
+                                            ]
+                                        },
+                                        "creatorStates": {
+                                            "type": "object",
+                                            "additionalProperties": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "followed": {
+                                                        "type": "boolean"
+                                                    },
+                                                    "listIds": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "type": "integer"
+                                                        }
+                                                    }
+                                                },
+                                                "required": [
+                                                    "followed",
+                                                    "listIds"
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "creatorStates"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            },
+            "put": {
+                "operationId": "v1.networks.lists.update",
+                "tags": [
+                    "CreatorLists"
+                ],
+                "parameters": [
+                    {
+                        "name": "provider",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "ref",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "list_ids": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer"
+                                        }
+                                    }
+                                },
+                                "required": [
+                                    "list_ids"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "listIds": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "required": [
+                                                "listIds"
+                                            ]
+                                        },
+                                        "creatorStates": {
+                                            "type": "object",
+                                            "additionalProperties": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "followed": {
+                                                        "type": "boolean"
+                                                    },
+                                                    "listIds": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "type": "integer"
+                                                        }
+                                                    }
+                                                },
+                                                "required": [
+                                                    "followed",
+                                                    "listIds"
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "creatorStates"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/events/{provider}/{ref}/hidden": {
+            "put": {
+                "operationId": "v1.events.hidden.update",
+                "summary": "Take an event (a showcase) off the calendar, the iCal feed and the \"live\" button",
+                "tags": [
+                    "EventVisibility"
+                ],
+                "parameters": [
+                    {
+                        "name": "provider",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "ref",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "hidden": {
+                                                    "type": "boolean"
+                                                }
+                                            },
+                                            "required": [
+                                                "hidden"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            },
+            "delete": {
+                "operationId": "v1.events.hidden.destroy",
+                "summary": "Put a hidden event back on the calendar",
+                "tags": [
+                    "EventVisibility"
+                ],
+                "parameters": [
+                    {
+                        "name": "provider",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "ref",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "hidden": {
+                                                    "type": "boolean"
+                                                }
+                                            },
+                                            "required": [
+                                                "hidden"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/library": {
+            "get": {
+                "operationId": "v1.library",
+                "tags": [
+                    "Library"
+                ],
+                "parameters": [
+                    {
+                        "name": "tab",
+                        "in": "query",
+                        "schema": {
+                            "$ref": "#/components/schemas/LibraryTab"
+                        }
+                    },
+                    {
+                        "name": "type",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "show",
+                                "movie",
+                                "season",
+                                "episode",
+                                "game",
+                                "book",
+                                "manga",
+                                "comic"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 100
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Array of `MediaSummaryResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/MediaSummaryResource"
+                                            }
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                }
+            }
+        },
+        "/lists": {
+            "get": {
+                "operationId": "v1.lists.index",
+                "summary": "The user's own lists, system ones first \u2014 the same order the lists\npage shows, without the poster collage a JSON client has no use for",
+                "tags": [
+                    "List"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Array of `ListResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/ListResource"
+                                            }
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            },
+            "post": {
+                "operationId": "v1.lists.store",
+                "tags": [
+                    "List"
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/StoreListRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "`ListResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/ListResource"
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                }
+            }
+        },
+        "/lists/{list}": {
+            "get": {
+                "operationId": "v1.lists.show",
+                "tags": [
+                    "List"
+                ],
+                "parameters": [
+                    {
+                        "name": "list",
+                        "in": "path",
+                        "required": true,
+                        "description": "The list ID",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "`ListResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/ListResource"
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            },
+            "patch": {
+                "operationId": "v1.lists.update",
+                "summary": "The system watchlist keeps its identity \u2014 only its visibility moves.\nThe action enforces that; the endpoint does not have to know",
+                "tags": [
+                    "List"
+                ],
+                "parameters": [
+                    {
+                        "name": "list",
+                        "in": "path",
+                        "required": true,
+                        "description": "The list ID",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateListRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "`ListResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/ListResource"
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    }
+                }
+            },
+            "delete": {
+                "operationId": "v1.lists.destroy",
+                "tags": [
+                    "List"
+                ],
+                "parameters": [
+                    {
+                        "name": "list",
+                        "in": "path",
+                        "required": true,
+                        "description": "The list ID",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No content"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/lists/order": {
+            "put": {
+                "operationId": "v1.lists.reorder",
+                "summary": "The user's own lists in the order given; the watchlist keeps the lead, foreign ids are ignored",
+                "tags": [
+                    "List"
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ReorderListsRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "204": {
+                        "description": "No content"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                }
+            }
+        },
+        "/lists/{list}/duplicate": {
+            "post": {
+                "operationId": "v1.lists.duplicate",
+                "summary": "A viewable list copied into the caller's own, items and order with it",
+                "tags": [
+                    "List"
+                ],
+                "parameters": [
+                    {
+                        "name": "list",
+                        "in": "path",
+                        "required": true,
+                        "description": "The list ID",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "`ListResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/ListResource"
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/lists/{list}/items/order": {
+            "put": {
+                "operationId": "v1.lists.items.reorder",
+                "summary": "A list's positions in the order given, numbered 1..n; ids of other lists are ignored",
+                "tags": [
+                    "List"
+                ],
+                "parameters": [
+                    {
+                        "name": "list",
+                        "in": "path",
+                        "required": true,
+                        "description": "The list ID",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ReorderListItemsRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "204": {
+                        "description": "No content"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                }
+            }
+        },
+        "/lists/{list}/items/{item}": {
+            "delete": {
+                "operationId": "v1.lists.items.destroy",
+                "tags": [
+                    "List"
+                ],
+                "parameters": [
+                    {
+                        "name": "list",
+                        "in": "path",
+                        "required": true,
+                        "description": "The list ID",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "item",
+                        "in": "path",
+                        "required": true,
+                        "description": "The item ID",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No content"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/me": {
+            "get": {
+                "operationId": "v1.me",
+                "tags": [
+                    "Me"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "`UserResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/UserResource"
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/media/{type}/{ref}": {
+            "get": {
+                "operationId": "v1.media.show",
+                "tags": [
+                    "Media"
+                ],
+                "parameters": [
+                    {
+                        "name": "type",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "ref",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "ref",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 100
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {}
+                                        },
+                                        "meta": {
+                                            "type": "object",
+                                            "properties": {
+                                                "fromLibrary": {
+                                                    "type": "boolean"
+                                                }
+                                            },
+                                            "required": [
+                                                "fromLibrary"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "meta"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                }
+            }
+        },
+        "/media/{type}/{ref}/follow": {
+            "put": {
+                "operationId": "v1.media.follow.update",
+                "summary": "The bell exception on a title: `follow` forces release tracking, `mute`\nsilences it, null hands the title back to the tracking matrix",
+                "tags": [
+                    "MediaFollow"
+                ],
+                "parameters": [
+                    {
+                        "name": "type",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "ref",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateFollowRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "anyOf": [
+                                                {
+                                                    "$ref": "#/components/schemas/MediaSummaryResource"
+                                                },
+                                                {}
+                                            ]
+                                        },
+                                        "states": {
+                                            "anyOf": [
+                                                {
+                                                    "type": "object",
+                                                    "additionalProperties": {
+                                                        "$ref": "#/components/schemas/UserMediaState"
+                                                    }
+                                                },
+                                                {}
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "states"
+                                    ],
+                                    "additionalProperties": {}
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                }
+            }
+        },
+        "/media/{type}/{ref}/rating": {
+            "put": {
+                "operationId": "v1.media.rating.update",
+                "tags": [
+                    "MediaState"
+                ],
+                "parameters": [
+                    {
+                        "name": "type",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "ref",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateRatingRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "anyOf": [
+                                                {
+                                                    "$ref": "#/components/schemas/MediaSummaryResource"
+                                                },
+                                                {}
+                                            ]
+                                        },
+                                        "states": {
+                                            "anyOf": [
+                                                {
+                                                    "type": "object",
+                                                    "additionalProperties": {
+                                                        "$ref": "#/components/schemas/UserMediaState"
+                                                    }
+                                                },
+                                                {}
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "states"
+                                    ],
+                                    "additionalProperties": {}
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                }
+            },
+            "delete": {
+                "operationId": "v1.media.rating.destroy",
+                "tags": [
+                    "MediaState"
+                ],
+                "parameters": [
+                    {
+                        "name": "type",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "ref",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "ref",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 100
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "anyOf": [
+                                                {
+                                                    "$ref": "#/components/schemas/MediaSummaryResource"
+                                                },
+                                                {}
+                                            ]
+                                        },
+                                        "states": {
+                                            "anyOf": [
+                                                {
+                                                    "type": "object",
+                                                    "additionalProperties": {
+                                                        "$ref": "#/components/schemas/UserMediaState"
+                                                    }
+                                                },
+                                                {}
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "states"
+                                    ],
+                                    "additionalProperties": {}
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                }
+            }
+        },
+        "/media/{type}/{ref}/status": {
+            "put": {
+                "operationId": "v1.media.status.update",
+                "summary": "Two semantics behind one field: `dropped` closes the current attempt,\n`on_hold` pauses the open one, null clears both \u2014 on a season, the\nshow's inherited one included. Clearing resumes the attempt with the\nsessions logged before the pause; `discard_progress` throws it away",
+                "tags": [
+                    "MediaState"
+                ],
+                "parameters": [
+                    {
+                        "name": "type",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "ref",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateMediaStatusRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "anyOf": [
+                                                {
+                                                    "$ref": "#/components/schemas/MediaSummaryResource"
+                                                },
+                                                {}
+                                            ]
+                                        },
+                                        "states": {
+                                            "anyOf": [
+                                                {
+                                                    "type": "object",
+                                                    "additionalProperties": {
+                                                        "$ref": "#/components/schemas/UserMediaState"
+                                                    }
+                                                },
+                                                {}
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "states"
+                                    ],
+                                    "additionalProperties": {}
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                }
+            }
+        },
+        "/media/{type}/{ref}/progress": {
+            "put": {
+                "operationId": "v1.media.progress.update",
+                "tags": [
+                    "MediaState"
+                ],
+                "parameters": [
+                    {
+                        "name": "type",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "ref",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateProgressRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "anyOf": [
+                                                {
+                                                    "$ref": "#/components/schemas/MediaSummaryResource"
+                                                },
+                                                {}
+                                            ]
+                                        },
+                                        "states": {
+                                            "anyOf": [
+                                                {
+                                                    "type": "object",
+                                                    "additionalProperties": {
+                                                        "$ref": "#/components/schemas/UserMediaState"
+                                                    }
+                                                },
+                                                {}
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "states"
+                                    ],
+                                    "additionalProperties": {}
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                }
+            }
+        },
+        "/media/{type}/{ref}/favorite": {
+            "put": {
+                "operationId": "v1.media.favorite.update",
+                "tags": [
+                    "MediaState"
+                ],
+                "parameters": [
+                    {
+                        "name": "type",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "ref",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateFavoriteRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "anyOf": [
+                                                {
+                                                    "$ref": "#/components/schemas/MediaSummaryResource"
+                                                },
+                                                {}
+                                            ]
+                                        },
+                                        "states": {
+                                            "anyOf": [
+                                                {
+                                                    "type": "object",
+                                                    "additionalProperties": {
+                                                        "$ref": "#/components/schemas/UserMediaState"
+                                                    }
+                                                },
+                                                {}
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "states"
+                                    ],
+                                    "additionalProperties": {}
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                }
+            }
+        },
+        "/media/{type}/{ref}/lists": {
+            "put": {
+                "operationId": "v1.media.lists.update",
+                "tags": [
+                    "MediaState"
+                ],
+                "parameters": [
+                    {
+                        "name": "type",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "ref",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateListsRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "anyOf": [
+                                                {
+                                                    "$ref": "#/components/schemas/MediaSummaryResource"
+                                                },
+                                                {}
+                                            ]
+                                        },
+                                        "states": {
+                                            "anyOf": [
+                                                {
+                                                    "type": "object",
+                                                    "additionalProperties": {
+                                                        "$ref": "#/components/schemas/UserMediaState"
+                                                    }
+                                                },
+                                                {}
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "states"
+                                    ],
+                                    "additionalProperties": {}
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                }
+            }
+        },
+        "/notifications": {
+            "get": {
+                "operationId": "v1.notifications.index",
+                "summary": "The user's notification feed, newest first: each one worded in the\nlanguage of the request, the raw event data beside it for a client that\nwords its own",
+                "tags": [
+                    "Notification"
+                ],
+                "parameters": [
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 100
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Array of `NotificationResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/NotificationResource"
+                                            }
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                }
+            }
+        },
+        "/notifications/{notification}": {
+            "patch": {
+                "operationId": "v1.notifications.read",
+                "tags": [
+                    "Notification"
+                ],
+                "parameters": [
+                    {
+                        "name": "notification",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No content"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/notifications/read-all": {
+            "post": {
+                "operationId": "v1.notifications.read-all",
+                "tags": [
+                    "Notification"
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No content"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/media/{type}/{ref}/plays": {
+            "get": {
+                "operationId": "v1.media.plays.index",
+                "summary": "Every viewing / playthrough of the position, newest first",
+                "tags": [
+                    "Play"
+                ],
+                "parameters": [
+                    {
+                        "name": "type",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "ref",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "ref",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 100
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Array of `PlayResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/PlayResource"
+                                            }
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                }
+            },
+            "post": {
+                "operationId": "v1.media.plays.store",
+                "summary": "Logs a completion. On a container this settles every unwatched aired\ndescendant, so `meta.created` says how many entries that turned out\nto be. With `next_episode` the play lands on the one episode the\ncontainer stands at instead \u2014 which one is a server question",
+                "tags": [
+                    "Play"
+                ],
+                "parameters": [
+                    {
+                        "name": "type",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "ref",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/StorePlaysRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "anyOf": [
+                                                {
+                                                    "$ref": "#/components/schemas/MediaSummaryResource"
+                                                },
+                                                {}
+                                            ]
+                                        },
+                                        "states": {
+                                            "anyOf": [
+                                                {
+                                                    "type": "object",
+                                                    "additionalProperties": {
+                                                        "$ref": "#/components/schemas/UserMediaState"
+                                                    }
+                                                },
+                                                {}
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "states"
+                                    ],
+                                    "additionalProperties": {}
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                }
+            },
+            "delete": {
+                "operationId": "v1.media.plays.destroy",
+                "summary": "Unmarks the whole position \u2014 every entry of the active cycle, down the\nhierarchy. Deleting one viewing is DELETE /plays/{play}",
+                "tags": [
+                    "Play"
+                ],
+                "parameters": [
+                    {
+                        "name": "type",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "ref",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "ref",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 100
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "anyOf": [
+                                                {
+                                                    "$ref": "#/components/schemas/MediaSummaryResource"
+                                                },
+                                                {}
+                                            ]
+                                        },
+                                        "states": {
+                                            "anyOf": [
+                                                {
+                                                    "type": "object",
+                                                    "additionalProperties": {
+                                                        "$ref": "#/components/schemas/UserMediaState"
+                                                    }
+                                                },
+                                                {}
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "states"
+                                    ],
+                                    "additionalProperties": {}
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                }
+            }
+        },
+        "/plays/{play}": {
+            "patch": {
+                "operationId": "v1.plays.update",
+                "summary": "Corrects the recorded cost of one play (games: post-game content played\nafter completing). Answers with the play and the states it moved",
+                "tags": [
+                    "Play"
+                ],
+                "parameters": [
+                    {
+                        "name": "play",
+                        "in": "path",
+                        "required": true,
+                        "description": "The play ID",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdatePlayAmountRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {}
+                                        },
+                                        "states": {
+                                            "type": "object",
+                                            "additionalProperties": {
+                                                "$ref": "#/components/schemas/UserMediaState"
+                                            }
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "states"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    }
+                }
+            },
+            "delete": {
+                "operationId": "v1.plays.destroy",
+                "summary": "Removes one viewing from the history, not the whole position. The\nplay is gone, so the answer is the position it belonged to",
+                "tags": [
+                    "Play"
+                ],
+                "parameters": [
+                    {
+                        "name": "play",
+                        "in": "path",
+                        "required": true,
+                        "description": "The play ID",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "anyOf": [
+                                                {
+                                                    "$ref": "#/components/schemas/MediaSummaryResource"
+                                                },
+                                                {}
+                                            ]
+                                        },
+                                        "states": {
+                                            "anyOf": [
+                                                {
+                                                    "type": "object",
+                                                    "additionalProperties": {
+                                                        "$ref": "#/components/schemas/UserMediaState"
+                                                    }
+                                                },
+                                                {}
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "states"
+                                    ],
+                                    "additionalProperties": {}
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/search": {
+            "get": {
+                "operationId": "v1.search",
+                "tags": [
+                    "Search"
+                ],
+                "parameters": [
+                    {
+                        "name": "q",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 200
+                        }
+                    },
+                    {
+                        "name": "scope",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 50
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Array of `MediaSummaryResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/MediaSummaryResource"
+                                            }
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                }
+            }
+        },
+        "/media/{type}/{ref}/cycles": {
+            "get": {
+                "operationId": "v1.media.cycles.index",
+                "tags": [
+                    "WatchCycle"
+                ],
+                "parameters": [
+                    {
+                        "name": "type",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "ref",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "ref",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 100
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "anyOf": [
+                                                {
+                                                    "type": "array",
+                                                    "prefixItems": [
+                                                        {
+                                                            "$ref": "#/components/schemas/WatchCycleSummary"
+                                                        }
+                                                    ],
+                                                    "minItems": 1,
+                                                    "maxItems": 1
+                                                },
+                                                {
+                                                    "type": "array"
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                }
+            },
+            "post": {
+                "operationId": "v1.media.cycles.store",
+                "tags": [
+                    "WatchCycle"
+                ],
+                "parameters": [
+                    {
+                        "name": "type",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "ref",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/WatchCyclesRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "anyOf": [
+                                                {
+                                                    "$ref": "#/components/schemas/MediaSummaryResource"
+                                                },
+                                                {}
+                                            ]
+                                        },
+                                        "states": {
+                                            "anyOf": [
+                                                {
+                                                    "type": "object",
+                                                    "additionalProperties": {
+                                                        "$ref": "#/components/schemas/UserMediaState"
+                                                    }
+                                                },
+                                                {}
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "states"
+                                    ],
+                                    "additionalProperties": {}
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                }
+            },
+            "delete": {
+                "operationId": "v1.media.cycles.destroy",
+                "tags": [
+                    "WatchCycle"
+                ],
+                "parameters": [
+                    {
+                        "name": "type",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "ref",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "ref",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 100
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "anyOf": [
+                                                {
+                                                    "$ref": "#/components/schemas/MediaSummaryResource"
+                                                },
+                                                {}
+                                            ]
+                                        },
+                                        "states": {
+                                            "anyOf": [
+                                                {
+                                                    "type": "object",
+                                                    "additionalProperties": {
+                                                        "$ref": "#/components/schemas/UserMediaState"
+                                                    }
+                                                },
+                                                {}
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "states"
+                                    ],
+                                    "additionalProperties": {}
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "securitySchemes": {
+            "http": {
+                "type": "http",
+                "scheme": "bearer"
+            }
+        },
+        "schemas": {
+            "EpisodePointer": {
+                "type": "object",
+                "properties": {
+                    "type": {
+                        "type": "string"
+                    },
+                    "ref": {
+                        "type": "string"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "number": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "seasonNumber": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    }
+                },
+                "required": [
+                    "type",
+                    "ref",
+                    "title",
+                    "number",
+                    "seasonNumber"
+                ],
+                "title": "EpisodePointer"
+            },
+            "FollowMode": {
+                "type": "string",
+                "description": "A follow row is a per-title (or per-person) exception to the tracking matrix: `follow` forces the position into every consumer whose \"followed manually\" source is on, `mute` cuts it out of all of them regardless of which sources would include it.\n",
+                "enum": [
+                    "follow",
+                    "mute"
+                ],
+                "title": "FollowMode"
+            },
+            "LibraryTab": {
+                "type": "string",
+                "description": "The four ways the API walks a user's library.\n",
+                "enum": [
+                    "history",
+                    "ratings",
+                    "favorites",
+                    "progress"
+                ],
+                "title": "LibraryTab"
+            },
+            "ListItemResource": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "position": {
+                        "type": "integer"
+                    },
+                    "addedAt": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "media": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/MediaSummaryResource"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "person": {
+                        "type": [
+                            "object",
+                            "null"
+                        ],
+                        "properties": {
+                            "provider": {
+                                "type": "string"
+                            },
+                            "ref": {
+                                "type": "string"
+                            },
+                            "name": {
+                                "type": "string"
+                            },
+                            "profilePath": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "profileUrl": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            }
+                        },
+                        "required": [
+                            "provider",
+                            "ref",
+                            "name",
+                            "profilePath",
+                            "profileUrl"
+                        ]
+                    },
+                    "company": {
+                        "type": [
+                            "object",
+                            "null"
+                        ],
+                        "properties": {
+                            "provider": {
+                                "type": "string"
+                            },
+                            "ref": {
+                                "type": "string"
+                            },
+                            "kind": {
+                                "type": "string"
+                            },
+                            "name": {
+                                "type": "string"
+                            },
+                            "logoPath": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "logoUrl": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            }
+                        },
+                        "required": [
+                            "provider",
+                            "ref",
+                            "kind",
+                            "name",
+                            "logoPath",
+                            "logoUrl"
+                        ]
+                    }
+                },
+                "required": [
+                    "id",
+                    "position",
+                    "addedAt",
+                    "media",
+                    "person",
+                    "company"
+                ],
+                "title": "ListItemResource"
+            },
+            "ListResource": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "title": {
+                        "type": "string",
+                        "description": "The watchlist stores no title; a client gets the name the app shows."
+                    },
+                    "description": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "isPublic": {
+                        "type": "boolean"
+                    },
+                    "systemKey": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "itemsCount": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "createdAt": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ListItemResource"
+                        }
+                    }
+                },
+                "required": [
+                    "id",
+                    "title",
+                    "description",
+                    "isPublic",
+                    "systemKey",
+                    "itemsCount",
+                    "createdAt"
+                ],
+                "title": "ListResource"
+            },
+            "MediaSummaryResource": {
+                "type": "object",
+                "properties": {
+                    "type": {
+                        "type": "string"
+                    },
+                    "ref": {
+                        "type": "string"
+                    },
+                    "provider": {
+                        "type": "string"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "year": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "posterPath": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "backdropPath": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "communityRating": {
+                        "type": [
+                            "number",
+                            "null"
+                        ]
+                    },
+                    "releaseDate": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "releaseTime": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "number": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "totalRuntime": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "progressTotal": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "extra": {
+                        "type": "object"
+                    },
+                    "posterUrl": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "The images as addresses a client can load; the paths beside\nthem are the providers' own."
+                    },
+                    "backdropUrl": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "state": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "type",
+                    "ref",
+                    "provider",
+                    "title",
+                    "year",
+                    "posterPath",
+                    "backdropPath",
+                    "communityRating",
+                    "releaseDate",
+                    "releaseTime",
+                    "number",
+                    "totalRuntime",
+                    "progressTotal",
+                    "extra",
+                    "posterUrl",
+                    "backdropUrl"
+                ],
+                "title": "MediaSummaryResource"
+            },
+            "NotificationResource": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "readAt": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "createdAt": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "event": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "enum": [
+                            "episode_aired",
+                            "season_premiere",
+                            "premiere",
+                            "home_release",
+                            "date_changed",
+                            "show_status",
+                            "season_announced",
+                            "person_new_title",
+                            "company_new_title",
+                            "collection_new_item",
+                            "titles_removed",
+                            null
+                        ]
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "detail": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "href": {
+                        "type": "string"
+                    },
+                    "imagePath": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "mediaTitle": {
+                        "type": "string"
+                    },
+                    "data": {
+                        "type": "object",
+                        "additionalProperties": {}
+                    }
+                },
+                "required": [
+                    "id",
+                    "readAt",
+                    "createdAt",
+                    "event",
+                    "title",
+                    "detail",
+                    "href",
+                    "imagePath",
+                    "mediaTitle",
+                    "data"
+                ],
+                "title": "NotificationResource"
+            },
+            "PlayResource": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "watchedAt": {
+                        "type": "string"
+                    },
+                    "outcome": {
+                        "type": "string",
+                        "enum": [
+                            "completed",
+                            "dropped"
+                        ]
+                    },
+                    "amount": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "cycle": {
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "id",
+                    "watchedAt",
+                    "outcome",
+                    "amount",
+                    "cycle"
+                ],
+                "title": "PlayResource"
+            },
+            "ReorderListItemsRequest": {
+                "type": "object",
+                "description": "The drag & drop payload: every list-item id in the new manual order.",
+                "properties": {
+                    "item_ids": {
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        }
+                    }
+                },
+                "required": [
+                    "item_ids"
+                ],
+                "title": "ReorderListItemsRequest"
+            },
+            "ReorderListsRequest": {
+                "type": "object",
+                "description": "The drag & drop payload of the lists index: every list id in the new\nmanual order.",
+                "properties": {
+                    "list_ids": {
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        }
+                    }
+                },
+                "required": [
+                    "list_ids"
+                ],
+                "title": "ReorderListsRequest"
+            },
+            "StoreListRequest": {
+                "type": "object",
+                "description": "A new, empty list: its title is all it starts with.",
+                "properties": {
+                    "title": {
+                        "type": "string",
+                        "maxLength": 100
+                    }
+                },
+                "required": [
+                    "title"
+                ],
+                "title": "StoreListRequest"
+            },
+            "StorePlaysRequest": {
+                "type": "object",
+                "properties": {
+                    "ref": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "watched_at": {
+                        "type": "string",
+                        "description": "'now' | 'release' (each play stamped with the item's own\nrelease date) | explicit date, optionally with time, not in\nthe future."
+                    },
+                    "amount": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "description": "Real cost of the completion in the type's progress unit\n(games: minutes played); ignored for types without one.",
+                        "minimum": 1,
+                        "maximum": 1000000
+                    },
+                    "new_attempt": {
+                        "type": "boolean",
+                        "description": "Keep a latest dropped attempt as its own history entry instead\nof completing it in place (games: separate playthroughs)."
+                    },
+                    "merge_hours": {
+                        "type": "boolean",
+                        "description": "When replacing a dropped attempt without an explicit total:\nadd its frozen hours to the sessions, or start fresh."
+                    },
+                    "next_episode": {
+                        "type": "boolean",
+                        "description": "Containers only: mark the one episode the container stands at\ninstead of the whole run. Which episode that is gets resolved\nserver-side \u2014 the client knows the show it clicked, not its tree."
+                    }
+                },
+                "required": [
+                    "watched_at"
+                ],
+                "title": "StorePlaysRequest"
+            },
+            "UpdateFavoriteRequest": {
+                "type": "object",
+                "properties": {
+                    "ref": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "favorite": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "favorite"
+                ],
+                "title": "UpdateFavoriteRequest"
+            },
+            "UpdateFollowRequest": {
+                "type": "object",
+                "description": "The bell on a title. It lives on hierarchy roots alone: season and episode\nevents roll up to the show, so subscribing lower means nothing.",
+                "properties": {
+                    "ref": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "mode": {
+                        "anyOf": [
+                            {
+                                "description": "null clears the exception \u2014 the tracking matrix decides again.",
+                                "$ref": "#/components/schemas/FollowMode"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    }
+                },
+                "required": [
+                    "mode"
+                ],
+                "title": "UpdateFollowRequest"
+            },
+            "UpdateListRequest": {
+                "type": "object",
+                "properties": {
+                    "title": {
+                        "type": "string",
+                        "description": "The watchlist has no title to send: it is named in the\nreader's language, and only its visibility changes.",
+                        "maxLength": 100
+                    },
+                    "description": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "maxLength": 1000
+                    },
+                    "is_public": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "title",
+                    "is_public"
+                ],
+                "title": "UpdateListRequest"
+            },
+            "UpdateListsRequest": {
+                "type": "object",
+                "properties": {
+                    "ref": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "list_ids": {
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        }
+                    }
+                },
+                "required": [
+                    "list_ids"
+                ],
+                "title": "UpdateListsRequest"
+            },
+            "UpdateMediaStatusRequest": {
+                "type": "object",
+                "description": "One endpoint, two attempt-model semantics: `dropped` CLOSES the current\nattempt (a dated play entry \u2014 allowed on roots with a user status and on\nnested positions, where it reads as \"skip\"), while `on_hold` pauses the\nOPEN attempt (state row, roots only). Null clears both: the open state\nand a current drop. \"Playing\" (in_progress) is automatic \u2014 sessions set\nit (LogProgress); it is never written here.",
+                "properties": {
+                    "ref": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "status": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "enum": [
+                            "dropped",
+                            "on_hold",
+                            null
+                        ]
+                    },
+                    "amount": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "description": "Hours sunk into the dropped attempt (progress types) \u2014 the\ndrop freezes them into the play entry.",
+                        "minimum": 1,
+                        "maximum": 1000000
+                    },
+                    "dropped_at": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "The drop is a dated history entry \u2014 same 'now' | 'release' |\nexplicit date convention as logging a play."
+                    },
+                    "discard_progress": {
+                        "type": "boolean",
+                        "description": "Clearing the status resumes the attempt by default; this asks\nto throw it away instead, logged sessions included."
+                    }
+                },
+                "title": "UpdateMediaStatusRequest"
+            },
+            "UpdatePlayAmountRequest": {
+                "type": "object",
+                "description": "Corrects the recorded cost of one play (games: minutes of that\nplaythrough). Null clears it; zero is not a cost, so it is refused rather\nthan quietly read as \"clear\".",
+                "properties": {
+                    "amount": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "minimum": 1,
+                        "maximum": 1000000
+                    }
+                },
+                "required": [
+                    "amount"
+                ],
+                "title": "UpdatePlayAmountRequest"
+            },
+            "UpdateProgressRequest": {
+                "type": "object",
+                "properties": {
+                    "ref": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "add": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "description": "One of the two: `add` appends a session, `set` overwrites the\ncounter (progress editor). Units come from the type registry.",
+                        "minimum": 1,
+                        "maximum": 1000000
+                    },
+                    "set": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "minimum": 0,
+                        "maximum": 1000000
+                    }
+                },
+                "title": "UpdateProgressRequest"
+            },
+            "UpdateRatingRequest": {
+                "type": "object",
+                "properties": {
+                    "ref": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "rating": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 10
+                    }
+                },
+                "required": [
+                    "rating"
+                ],
+                "title": "UpdateRatingRequest"
+            },
+            "UserMediaState": {
+                "type": "object",
+                "properties": {
+                    "watched": {
+                        "type": "boolean"
+                    },
+                    "watchedAt": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "droppedAt": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "plays": {
+                        "type": "integer"
+                    },
+                    "cycle": {
+                        "type": "integer"
+                    },
+                    "completedCycles": {
+                        "type": "integer"
+                    },
+                    "rating": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "favorite": {
+                        "type": "boolean"
+                    },
+                    "listIds": {
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        }
+                    },
+                    "follow": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "enum": [
+                            "follow",
+                            "mute",
+                            null
+                        ]
+                    },
+                    "followVia": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "followSource": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "enum": [
+                            "on_hold",
+                            "dropped",
+                            "backlog",
+                            "activity",
+                            "followed",
+                            "creator",
+                            null
+                        ]
+                    },
+                    "status": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "enum": [
+                            "on_hold",
+                            "in_progress",
+                            "dropped",
+                            null
+                        ]
+                    },
+                    "rootStatus": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "enum": [
+                            "on_hold",
+                            "in_progress",
+                            "dropped",
+                            null
+                        ]
+                    },
+                    "statusInherited": {
+                        "type": "boolean"
+                    },
+                    "progress": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "playedAmount": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "droppedAmount": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "latestDropped": {
+                        "type": "boolean"
+                    },
+                    "watchedEpisodes": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "airedEpisodes": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "remainingEpisodes": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "skippedEpisodes": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "remainingMinutes": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "watchedMinutes": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "position": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "nextEpisode": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/EpisodePointer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "inProgress": {
+                        "type": "boolean"
+                    },
+                    "progression": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "watched",
+                    "watchedAt",
+                    "droppedAt",
+                    "plays",
+                    "cycle",
+                    "completedCycles",
+                    "rating",
+                    "favorite",
+                    "listIds",
+                    "follow",
+                    "followVia",
+                    "followSource",
+                    "status",
+                    "rootStatus",
+                    "statusInherited",
+                    "progress",
+                    "playedAmount",
+                    "droppedAmount",
+                    "latestDropped",
+                    "watchedEpisodes",
+                    "airedEpisodes",
+                    "remainingEpisodes",
+                    "skippedEpisodes",
+                    "remainingMinutes",
+                    "watchedMinutes",
+                    "position",
+                    "nextEpisode",
+                    "inProgress",
+                    "progression"
+                ],
+                "title": "UserMediaState"
+            },
+            "UserResource": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "username": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "email": {
+                        "type": "string"
+                    },
+                    "locale": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "avatar": {
+                        "type": "null"
+                    },
+                    "isAdmin": {
+                        "type": "boolean"
+                    },
+                    "createdAt": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    }
+                },
+                "required": [
+                    "id",
+                    "username",
+                    "name",
+                    "email",
+                    "locale",
+                    "avatar",
+                    "isAdmin",
+                    "createdAt"
+                ],
+                "title": "UserResource"
+            },
+            "WatchCycleSummary": {
+                "type": "object",
+                "properties": {
+                    "number": {
+                        "type": "integer"
+                    },
+                    "startedAt": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "watchedEpisodes": {
+                        "type": "integer"
+                    },
+                    "airedEpisodes": {
+                        "type": "integer"
+                    },
+                    "plays": {
+                        "type": "integer"
+                    },
+                    "completed": {
+                        "type": "boolean"
+                    },
+                    "firstPlayAt": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "lastPlayAt": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "isActive": {
+                        "type": "boolean"
+                    },
+                    "canCancel": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "number",
+                    "startedAt",
+                    "watchedEpisodes",
+                    "airedEpisodes",
+                    "plays",
+                    "completed",
+                    "firstPlayAt",
+                    "lastPlayAt",
+                    "isActive",
+                    "canCancel"
+                ],
+                "title": "WatchCycleSummary"
+            },
+            "WatchCyclesRequest": {
+                "type": "object",
+                "description": "Viewing cycles belong to a root with a hierarchy under it (a show): only\nthere does \"start again from the first episode\" mean anything.",
+                "properties": {
+                    "ref": {
+                        "type": "string",
+                        "maxLength": 100
+                    }
+                },
+                "title": "WatchCyclesRequest"
+            }
+        },
+        "responses": {
+            "AuthenticationException": {
+                "description": "Unauthenticated",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "message": {
+                                    "type": "string",
+                                    "description": "Error overview."
+                                }
+                            },
+                            "required": [
+                                "message"
+                            ]
+                        }
+                    }
+                }
+            },
+            "ValidationException": {
+                "description": "Validation error",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "message": {
+                                    "type": "string",
+                                    "description": "Errors overview."
+                                },
+                                "errors": {
+                                    "type": "object",
+                                    "description": "A detailed description of each field that failed validation.",
+                                    "additionalProperties": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            },
+                            "required": [
+                                "message",
+                                "errors"
+                            ]
+                        }
+                    }
+                }
+            },
+            "AuthorizationException": {
+                "description": "Authorization error",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "message": {
+                                    "type": "string",
+                                    "description": "Error overview."
+                                }
+                            },
+                            "required": [
+                                "message"
+                            ]
+                        }
+                    }
+                }
+            },
+            "ModelNotFoundException": {
+                "description": "Not found",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "message": {
+                                    "type": "string",
+                                    "description": "Error overview."
+                                }
+                            },
+                            "required": [
+                                "message"
+                            ]
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

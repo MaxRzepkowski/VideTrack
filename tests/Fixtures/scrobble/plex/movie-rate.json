@@ -1,0 +1,18 @@
+{
+  "event": "media.rate",
+  "user": true,
+  "owner": true,
+  "rating": 8,
+  "Account": {
+    "id": 1,
+    "title": "alex"
+  },
+  "Metadata": {
+    "librarySectionType": "movie",
+    "type": "movie",
+    "title": "The Matrix",
+    "year": 1999,
+    "userRating": 8,
+    "Guid": [{ "id": "tmdb://603" }]
+  }
+}

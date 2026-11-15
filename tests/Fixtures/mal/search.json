@@ -1,0 +1,57 @@
+{
+    "data": [
+        {
+            "node": {
+                "id": 2,
+                "title": "Berserk",
+                "main_picture": {
+                    "medium": "https://cdn.myanimelist.net/images/manga/1/157897.webp",
+                    "large": "https://cdn.myanimelist.net/images/manga/1/157897l.webp"
+                },
+                "start_date": "1989-08-25",
+                "mean": 9.46,
+                "media_type": "manga",
+                "num_chapters": 0
+            }
+        },
+        {
+            "node": {
+                "id": 121496,
+                "title": "Solo Leveling",
+                "main_picture": {
+                    "medium": "https://cdn.myanimelist.net/images/manga/3/222295.jpg",
+                    "large": "https://cdn.myanimelist.net/images/manga/3/222295l.jpg"
+                },
+                "start_date": "2018-03-04",
+                "mean": 8.25,
+                "media_type": "manhwa",
+                "num_chapters": 201
+            }
+        },
+        {
+            "node": {
+                "id": 21479,
+                "title": "Sword Art Online",
+                "main_picture": {
+                    "medium": "https://cdn.myanimelist.net/images/manga/3/sao.jpg",
+                    "large": "https://cdn.myanimelist.net/images/manga/3/saol.jpg"
+                },
+                "start_date": "2009-04-10",
+                "mean": 7.61,
+                "media_type": "light_novel",
+                "num_chapters": 0
+            }
+        },
+        {
+            "node": {
+                "id": 424242,
+                "title": "Coverless Manga",
+                "start_date": "2001-01-01",
+                "mean": 6.5,
+                "media_type": "manga",
+                "num_chapters": 12
+            }
+        }
+    ],
+    "paging": {}
+}

@@ -1,0 +1,44 @@
+/.phpunit.cache
+/lang/php_*.json
+/node_modules
+/public/build
+/public/hot
+/public/storage
+/storage/*.key
+/storage/pail
+/vendor
+.env
+.env.backup
+.env.production
+.phpactor.json
+.phpunit.result.cache
+Homestead.json
+Homestead.yaml
+npm-debug.log
+yarn-error.log
+/auth.json
+# Local notes and material kept beside the code: anything in the root starting with _.
+/_*
+
+# docs/ holds published documents only; anything else written there stays out
+# of git by default.
+/docs/*
+!/docs/api/
+!/docs/screenshots/
+!/docs/install.md
+!/docs/upgrading.md
+!/docs/administration.md
+!/docs/api.md
+# Loose notes in the root.
+/*.txt
+# Local agent tooling and its notes.
+/.claude/
+/CLAUDE.md
+/.codex
+/.fleet
+/.idea
+/.nova
+/.vscode
+/.zed
+/storage/snapshots
+

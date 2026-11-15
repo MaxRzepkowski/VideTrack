@@ -1,0 +1,12 @@
+[
+    {
+        "@class": "GenreOption",
+        "ref": "Fantasy",
+        "name": "Fantasy"
+    },
+    {
+        "@class": "GenreOption",
+        "ref": "Fiction",
+        "name": "Fiction"
+    }
+]

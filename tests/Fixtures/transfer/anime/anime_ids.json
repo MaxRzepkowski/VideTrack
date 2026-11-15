@@ -1,0 +1,21 @@
+{
+  "7": {
+    "tvdb_epoffset": 0,
+    "imdb_id": "tt0119698",
+    "mal_id": 164,
+    "anilist_id": 164
+  },
+  "9541": {
+    "tvdb_id": 267440,
+    "tvdb_season": 1,
+    "tvdb_epoffset": 0,
+    "mal_id": 16498,
+    "anilist_id": 16498
+  },
+  "9826": {
+    "tvdb_id": 267440,
+    "tvdb_season": 0,
+    "tvdb_epoffset": 0,
+    "mal_id": "18397,25781,36106"
+  }
+}

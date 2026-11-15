@@ -1,0 +1,28 @@
+<?php
+
+return [
+    'activity_date' => 'Activity date',
+    'all_kinds' => 'All kinds',
+    'count_title' => ':count title|:count titles',
+    'grid' => 'Grid',
+    'grouped_by_day' => 'Grouped by day',
+    'hide_listed' => 'Hide listed',
+    'kind' => 'Kind',
+    'mark_date' => 'Mark date',
+    'member_since_date' => 'Member since :date',
+    'mute' => 'Mute',
+    'name_favorites' => ':name: favorites',
+    'name_history' => ':name: history',
+    'name_following' => ':name: following',
+    'name_in_progress' => ':name: in progress',
+    'name_ratings' => ':name: ratings',
+    'nothing_followed_yet_use_the_bell' => 'Nothing followed yet. Use the bell on a title or person page.',
+    'playtime' => 'Playtime',
+    'remove' => 'Remove',
+    'remove_rating_confirm' => 'Your rating of this title is removed.',
+    'remove_favorite_confirm' => 'This title leaves your favorites.',
+    'see_all' => 'See all',
+    'stats' => 'Stats',
+    'unmute' => 'Unmute',
+    'via_followed_people_or_companies' => 'Via followed people or companies',
+];

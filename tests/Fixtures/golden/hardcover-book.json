@@ -1,0 +1,140 @@
+{
+    "@class": "MediaDetails",
+    "summary": {
+        "@class": "MediaSummary",
+        "type": "book",
+        "ref": "2459845",
+        "provider": "hardcover",
+        "title": "The Hobbit, or There and Back Again",
+        "year": 1937,
+        "posterPath": "https://assets.hardcover.app/edition/17456445/hobbit.jpg",
+        "backdropPath": null,
+        "communityRating": 8.6,
+        "releaseDate": "1937-09-21",
+        "releaseTime": null,
+        "number": null,
+        "totalRuntime": null,
+        "seasonNumber": null,
+        "runtime": null,
+        "overview": null,
+        "releaseKind": null,
+        "platform": null,
+        "releaseStatus": null,
+        "extra": [],
+        "progressTotal": 320,
+        "episodeType": null,
+        "authors": [
+            "J.R.R. Tolkien"
+        ],
+        "episodeBadge": null,
+        "creatorKind": null,
+        "makes": null,
+        "votes": null,
+        "releasePrecision": "day",
+        "alternativeTitles": []
+    },
+    "tagline": "The journey through Middle-earth begins here",
+    "overview": "\"In a hole in the ground there lived a hobbit.\" So begins one of the most beloved tales.",
+    "runtime": null,
+    "genres": [
+        "Fantasy",
+        "Classics"
+    ],
+    "status": null,
+    "originalLanguage": null,
+    "certification": null,
+    "certifications": [],
+    "releases": [],
+    "platformReleases": [],
+    "keywords": [
+        {
+            "@class": "KeywordData",
+            "name": "Adventurous",
+            "ref": null
+        },
+        {
+            "@class": "KeywordData",
+            "name": "Lighthearted",
+            "ref": null
+        }
+    ],
+    "externalLinks": {
+        "hardcover": "https://hardcover.app/books/the-hobbit",
+        "goodreads": "https://www.goodreads.com/book/show/3686567"
+    },
+    "extra": {
+        "authorLinks": [
+            {
+                "@class": "CreatorLink",
+                "name": "J.R.R. Tolkien",
+                "kind": "person",
+                "ref": "132049",
+                "provider": "hardcover",
+                "logoPath": null
+            }
+        ],
+        "coverColor": "#c58f27",
+        "pages": 320,
+        "series": {
+            "name": "Middle Earth",
+            "position": 1.0
+        },
+        "contentWarnings": [
+            "Violence"
+        ],
+        "ratingsCount": 6898,
+        "readersCount": 11743,
+        "nonfiction": false,
+        "isbn": "9780618260300",
+        "goodreadsId": "3686567",
+        "originalTitle": null,
+        "localEdition": null
+    },
+    "children": [],
+    "cast": [],
+    "crew": [
+        {
+            "@class": "CreditData",
+            "personRef": "205738",
+            "provider": "hardcover",
+            "name": "Alan Lee",
+            "profilePath": null,
+            "department": "art",
+            "role": "illustrator",
+            "order": 0,
+            "episodeCount": null,
+            "roles": []
+        }
+    ],
+    "videos": [],
+    "backdrops": [],
+    "posters": [
+        "https://assets.hardcover.app/edition/17456445/hobbit.jpg"
+    ],
+    "logos": [],
+    "related": [],
+    "similar": [],
+    "localizedTitles": {
+        "en": {
+            "@class": "LocalizedTitle",
+            "title": "The Hobbit, or There and Back Again",
+            "posterPath": "https://assets.hardcover.app/edition/17456445/hobbit.jpg"
+        },
+        "pl": {
+            "@class": "LocalizedTitle",
+            "title": "Hobbit, czyli tam i z powrotem",
+            "posterPath": "https://assets.hardcover.app/edition/31415926/hobbit-pl.jpg"
+        }
+    },
+    "wikidataId": null,
+    "collection": {
+        "@class": "CollectionLink",
+        "ref": "127396",
+        "name": "Middle Earth",
+        "posterPath": null,
+        "backdropPath": null
+    },
+    "lastEpisodeToAir": null,
+    "nextEpisodeToAir": null,
+    "adult": false
+}

@@ -1,0 +1,39 @@
+{
+    "@class": "Paginated",
+    "items": [
+        {
+            "@class": "MediaSummary",
+            "type": "game",
+            "ref": "7346",
+            "provider": "igdb",
+            "title": "The Legend of Zelda: Breath of the Wild",
+            "year": 2017,
+            "posterPath": "https://images.igdb.com/igdb/image/upload/t_cover_big_2x/co3p2d.jpg",
+            "backdropPath": null,
+            "communityRating": 9.5,
+            "releaseDate": "2017-03-03",
+            "releaseTime": null,
+            "number": null,
+            "totalRuntime": null,
+            "seasonNumber": null,
+            "runtime": null,
+            "overview": null,
+            "releaseKind": null,
+            "platform": null,
+            "releaseStatus": null,
+            "extra": [],
+            "progressTotal": null,
+            "episodeType": null,
+            "authors": [],
+            "episodeBadge": null,
+            "creatorKind": null,
+            "makes": null,
+            "votes": null,
+            "releasePrecision": "day",
+            "alternativeTitles": []
+        }
+    ],
+    "page": 1,
+    "totalPages": 3,
+    "total": 42
+}

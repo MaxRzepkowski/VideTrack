@@ -1,0 +1,89 @@
+{
+    "id": 603,
+    "title": "The Matrix",
+    "original_title": "The Matrix",
+    "tagline": "The fight for the future begins.",
+    "overview": "Set in the 22nd century, The Matrix tells the story of a computer hacker.",
+    "release_date": "1999-03-30",
+    "runtime": 136,
+    "budget": 63000000,
+    "revenue": 463517383,
+    "status": "Released",
+    "original_language": "en",
+    "homepage": "https://www.warnerbros.com/movies/matrix",
+    "poster_path": "/matrix-poster.jpg",
+    "backdrop_path": "/matrix-backdrop.jpg",
+    "vote_average": 8.22,
+    "genres": [{ "id": 28, "name": "Action" }, { "id": 878, "name": "Science Fiction" }],
+    "spoken_languages": [{ "iso_639_1": "en", "english_name": "English" }],
+    "production_countries": [{ "iso_3166_1": "US", "name": "United States of America" }, { "iso_3166_1": "AU", "name": "Australia" }],
+    "external_ids": { "imdb_id": "tt0133093", "twitter_id": "TheMatrix", "wikidata_id": "Q83495" },
+    "keywords": { "keywords": [{ "id": 1, "name": "artificial intelligence" }, { "id": 2, "name": "cyberpunk" }] },
+    "release_dates": {
+        "results": [
+            {
+                "iso_3166_1": "US",
+                "release_dates": [
+                    { "certification": "", "release_date": "1999-03-24T00:00:00.000Z", "type": 2, "note": "Westwood premiere" },
+                    { "certification": "R", "descriptors": ["Violence", "Language"], "release_date": "1999-03-31T00:00:00.000Z", "type": 3 },
+                    { "certification": "", "release_date": "1999-09-21T00:00:00.000Z", "type": 4 },
+                    { "certification": "", "release_date": "1999-11-02T00:00:00.000Z", "type": 5 }
+                ]
+            },
+            {
+                "iso_3166_1": "PL",
+                "release_dates": [
+                    { "certification": "16", "release_date": "1999-06-11T00:00:00.000Z", "type": 3 },
+                    { "certification": "", "release_date": "2001-02-03T00:00:00.000Z", "type": 6 },
+                    { "certification": "", "type": 6 }
+                ]
+            },
+            {
+                "iso_3166_1": "RO",
+                "release_dates": [{ "certification": "", "release_date": "1999-08-15T00:00:00.000Z", "type": 4, "note": "Netflix" }]
+            }
+        ]
+    },
+    "credits": {
+        "cast": [
+            { "id": 6384, "name": "Keanu Reeves", "character": "Neo", "profile_path": "/keanu.jpg", "order": 0 },
+            { "id": 2975, "name": "Laurence Fishburne", "character": "Morpheus", "profile_path": "/laurence.jpg", "order": 1 }
+        ],
+        "crew": [
+            { "id": 9339, "name": "Lana Wachowski", "job": "Director", "department": "Directing", "profile_path": null },
+            { "id": 9340, "name": "Lilly Wachowski", "job": "Director", "department": "Directing", "profile_path": null },
+            { "id": 9339, "name": "Lana Wachowski", "job": "Writer", "department": "Writing", "profile_path": null }
+        ]
+    },
+    "videos": {
+        "results": [
+            { "key": "vKQi3bBA1y8", "site": "YouTube", "type": "Trailer", "name": "Official Trailer", "official": true, "published_at": "2014-01-01" },
+            { "key": "abc", "site": "Vimeo", "type": "Trailer", "name": "Vimeo Trailer", "official": false },
+            { "key": "rec", "site": "YouTube", "type": "Recap", "name": "The story so far", "official": true }
+        ]
+    },
+    "images": {
+        "backdrops": [{ "file_path": "/backdrop-1.jpg" }, { "file_path": "/backdrop-2.jpg" }],
+        "posters": [{ "file_path": "/poster-1.jpg" }],
+        "logos": [{ "file_path": "/matrix-logo.png" }]
+    },
+    "recommendations": {
+        "results": [
+            { "id": 604, "media_type": "movie", "title": "The Matrix Reloaded", "release_date": "2003-05-15", "poster_path": "/reloaded.jpg", "vote_average": 7.0 },
+            { "id": 605, "media_type": "movie", "title": "No Poster", "poster_path": null }
+        ]
+    },
+    "similar": {
+        "results": [
+            { "id": 606, "title": "The Matrix Revolutions", "release_date": "2003-11-05", "poster_path": "/revolutions.jpg", "vote_average": 6.7 },
+            { "id": 607, "title": "No Poster Similar", "poster_path": null }
+        ]
+    },
+    "alternative_titles": {
+        "titles": [
+            { "iso_3166_1": "US", "title": "The Matrix" },
+            { "iso_3166_1": "DE", "title": "Matrix" },
+            { "iso_3166_1": "FR", "title": "La Matrice" }
+        ]
+    }
+}

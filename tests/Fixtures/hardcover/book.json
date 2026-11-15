@@ -1,0 +1,129 @@
+{
+    "data": {
+        "books_by_pk": {
+            "id": 2459845,
+            "title": "The Hobbit, or There and Back Again",
+            "subtitle": null,
+            "headline": "The journey through Middle-earth begins here",
+            "description": "<i>\"In a hole in the ground there lived a hobbit.\"</i> So begins one of the most beloved tales.",
+            "pages": 320,
+            "release_date": "1937-09-21",
+            "release_year": 1937,
+            "rating": 4.31,
+            "ratings_count": 6898,
+            "users_count": 11743,
+            "slug": "the-hobbit",
+            "compilation": false,
+            "cached_similar_book_ids": [312460, 2459845, 424242],
+            "cached_image": {
+                "id": 6075752,
+                "url": "https://assets.hardcover.app/edition/17456445/hobbit.jpg",
+                "color": "#c58f27",
+                "color_name": "Orange"
+            },
+            "cached_contributors": [
+                {
+                    "author": {
+                        "id": 132049,
+                        "slug": "j-r-r-tolkien",
+                        "name": "J.R.R. Tolkien"
+                    },
+                    "contribution": null
+                },
+                {
+                    "author": {
+                        "id": 205738,
+                        "slug": "alan-lee",
+                        "name": "Alan Lee"
+                    },
+                    "contribution": "Illustrator"
+                }
+            ],
+            "cached_featured_series": {
+                "id": 739164,
+                "position": 1.0,
+                "series": {
+                    "id": 127396,
+                    "name": "Middle Earth",
+                    "slug": "middle-earth"
+                }
+            },
+            "cached_tags": {
+                "Genre": [
+                    {
+                        "tag": "Fantasy",
+                        "tagSlug": "fantasy",
+                        "category": "Genre",
+                        "count": 100
+                    },
+                    {
+                        "tag": "Classics",
+                        "tagSlug": "classics",
+                        "category": "Genre",
+                        "count": 90
+                    }
+                ],
+                "Mood": [
+                    {
+                        "tag": "Adventurous",
+                        "tagSlug": "adventurous",
+                        "category": "Mood",
+                        "count": 110
+                    },
+                    {
+                        "tag": "Lighthearted",
+                        "tagSlug": "lighthearted",
+                        "category": "Mood",
+                        "count": 80
+                    }
+                ],
+                "Content Warning": [
+                    {
+                        "tag": "Violence",
+                        "tagSlug": "violence",
+                        "category": "Content Warning",
+                        "count": 12
+                    }
+                ]
+            },
+            "book_category_id": 1,
+            "literary_type_id": 1,
+            "default_physical_edition": {
+                "isbn_13": "9780618260300",
+                "isbn_10": "0618260307"
+            },
+            "default_ebook_edition": {
+                "isbn_13": "9780547951966",
+                "isbn_10": "0547951965"
+            },
+            "book_mappings": [
+                {
+                    "external_id": "3686567"
+                }
+            ],
+            "edition0": [
+                {
+                    "title": "Hobbit, czyli tam i z powrotem",
+                    "cached_image": {
+                        "id": 31415926,
+                        "url": "https://assets.hardcover.app/edition/31415926/hobbit-pl.jpg",
+                        "color": "#5b7c3a"
+                    },
+                    "release_date": "2012-10-01",
+                    "release_year": 2012,
+                    "publisher": { "name": "Iskry" },
+                    "cached_contributors": [
+                        {
+                            "author": { "id": 132049, "slug": "j-r-r-tolkien", "name": "J.R.R. Tolkien" },
+                            "contribution": null
+                        },
+                        {
+                            "author": { "id": 263001, "slug": "maria-skibniewska", "name": "Maria Skibniewska" },
+                            "contribution": "Translator"
+                        }
+                    ]
+                }
+            ]
+        }
+    }
+}

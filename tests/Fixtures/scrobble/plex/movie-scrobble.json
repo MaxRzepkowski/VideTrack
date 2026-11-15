@@ -1,0 +1,31 @@
+{
+  "event": "media.scrobble",
+  "user": true,
+  "owner": true,
+  "Account": {
+    "id": 1,
+    "thumb": "https://plex.tv/users/abc/avatar",
+    "title": "alex"
+  },
+  "Server": {
+    "title": "plex",
+    "uuid": "1a2b3c"
+  },
+  "Player": {
+    "local": true,
+    "publicAddress": "10.0.0.2",
+    "title": "Plex Web",
+    "uuid": "4d5e6f"
+  },
+  "Metadata": {
+    "librarySectionType": "movie",
+    "ratingKey": "1234",
+    "type": "movie",
+    "title": "The Matrix",
+    "year": 1999,
+    "duration": 8160000,
+    "viewOffset": 8160000,
+    "guid": "plex://movie/5d776831999c64001ec2c8f1",
+    "Guid": [{ "id": "imdb://tt0133093" }, { "id": "tmdb://603" }, { "id": "tvdb://169" }]
+  }
+}

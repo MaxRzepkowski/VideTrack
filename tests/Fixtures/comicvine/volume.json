@@ -1,0 +1,28 @@
+{
+    "error": "OK",
+    "limit": 1,
+    "offset": 0,
+    "number_of_page_results": 1,
+    "number_of_total_results": 1,
+    "status_code": 1,
+    "results": {
+        "count_of_issues": 75,
+        "deck": "The Lord of Dreams learns one must change or die.",
+        "description": "<p>Neil Gaiman's <a href=\"/morpheus/\">magnum opus</a> about the king of stories.</p>",
+        "id": 4207,
+        "image": {
+            "medium_url": "https://comicvine.gamespot.com/a/uploads/scale_medium/sandman.jpg",
+            "super_url": "https://comicvine.gamespot.com/a/uploads/scale_large/sandman.jpg",
+            "original_url": "https://comicvine.gamespot.com/a/uploads/original/sandman.jpg"
+        },
+        "name": "The Sandman",
+        "people": [
+            { "id": 1537, "name": "Neil Gaiman", "count": "75" },
+            { "id": 5261, "name": "Dave McKean", "count": "70" },
+            { "id": 1537, "name": "Neil Gaiman", "count": "75" }
+        ],
+        "publisher": { "id": 10, "name": "Vertigo" },
+        "site_detail_url": "https://comicvine.gamespot.com/the-sandman/4050-4207/",
+        "start_year": "1989"
+    }
+}

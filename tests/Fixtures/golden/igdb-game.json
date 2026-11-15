@@ -1,0 +1,385 @@
+{
+    "@class": "MediaDetails",
+    "summary": {
+        "@class": "MediaSummary",
+        "type": "game",
+        "ref": "7346",
+        "provider": "igdb",
+        "title": "The Legend of Zelda: Breath of the Wild",
+        "year": 2017,
+        "posterPath": "https://images.igdb.com/igdb/image/upload/t_cover_big_2x/co3p2d.jpg",
+        "backdropPath": "https://images.igdb.com/igdb/image/upload/t_1080p/k1ufoamwo9mdzy9ooztf.jpg",
+        "communityRating": 9.5,
+        "releaseDate": "2017-03-03",
+        "releaseTime": null,
+        "number": null,
+        "totalRuntime": null,
+        "seasonNumber": null,
+        "runtime": null,
+        "overview": null,
+        "releaseKind": null,
+        "platform": null,
+        "releaseStatus": null,
+        "extra": [],
+        "progressTotal": null,
+        "episodeType": null,
+        "authors": [],
+        "episodeBadge": null,
+        "creatorKind": null,
+        "makes": null,
+        "votes": null,
+        "releasePrecision": "day",
+        "alternativeTitles": []
+    },
+    "tagline": null,
+    "overview": "The Legend of Zelda: Breath of the Wild is the first 3D open-world game in the Zelda series.",
+    "runtime": 5536,
+    "genres": [
+        "Puzzle",
+        "Adventure"
+    ],
+    "status": "released",
+    "originalLanguage": null,
+    "certification": "PEGI 12",
+    "certifications": [],
+    "releases": [],
+    "platformReleases": [
+        {
+            "@class": "PlatformRelease",
+            "date": "2017-03-02",
+            "platform": "WiiU",
+            "status": null,
+            "region": "europe",
+            "precision": "day"
+        },
+        {
+            "@class": "PlatformRelease",
+            "date": "2017-03-03",
+            "platform": "WiiU",
+            "status": null,
+            "region": "north_america",
+            "precision": "day"
+        },
+        {
+            "@class": "PlatformRelease",
+            "date": "2017-03-03",
+            "platform": "Switch",
+            "status": null,
+            "region": "worldwide",
+            "precision": "day"
+        },
+        {
+            "@class": "PlatformRelease",
+            "date": "2030-01-01",
+            "platform": "Switch 2",
+            "status": "Next-Gen Optimization Patch Release",
+            "region": "worldwide",
+            "precision": "day"
+        }
+    ],
+    "keywords": [
+        {
+            "@class": "KeywordData",
+            "name": "Action",
+            "ref": null
+        },
+        {
+            "@class": "KeywordData",
+            "name": "Open world",
+            "ref": null
+        },
+        {
+            "@class": "KeywordData",
+            "name": "exploration",
+            "ref": null
+        }
+    ],
+    "externalLinks": {
+        "homepage": "http://www.zelda.com/breath-of-the-wild/",
+        "wikipedia": "https://en.wikipedia.org/wiki/The_Legend_of_Zelda:_Breath_of_the_Wild",
+        "x": "https://twitter.com/NintendoAmerica",
+        "igdb": "https://www.igdb.com/games/the-legend-of-zelda-breath-of-the-wild"
+    },
+    "extra": {
+        "developerLinks": [
+            {
+                "@class": "CreatorLink",
+                "name": "Nintendo EPD Production Group No. 3",
+                "kind": "company",
+                "ref": "45209",
+                "provider": "igdb",
+                "logoPath": null
+            }
+        ],
+        "publisherLinks": [
+            {
+                "@class": "CreatorLink",
+                "name": "Nintendo",
+                "kind": "company",
+                "ref": "70",
+                "provider": "igdb",
+                "logoPath": null
+            }
+        ],
+        "portingLinks": [
+            {
+                "@class": "CreatorLink",
+                "name": "Example Port Studio",
+                "kind": "company",
+                "ref": "4242",
+                "provider": "igdb",
+                "logoPath": null
+            }
+        ],
+        "supportingLinks": [
+            {
+                "@class": "CreatorLink",
+                "name": "Example Support Studio",
+                "kind": "company",
+                "ref": "4343",
+                "provider": "igdb",
+                "logoPath": null
+            }
+        ],
+        "storyline": "Link awakens from a deep slumber.",
+        "platforms": [
+            "Wii U",
+            "Nintendo Switch"
+        ],
+        "gameModes": [
+            "Single player"
+        ],
+        "alternativeTitles": null,
+        "perspectives": null,
+        "languages": null,
+        "multiplayer": null,
+        "criticsRating": null,
+        "playersRating": null,
+        "stores": null,
+        "ageRatings": [
+            {
+                "@class": "AgeRatingData",
+                "board": "PEGI",
+                "rating": "12",
+                "descriptors": [],
+                "synopsis": null
+            },
+            {
+                "@class": "AgeRatingData",
+                "board": "ESRB",
+                "rating": "E10+",
+                "descriptors": [],
+                "synopsis": null
+            }
+        ],
+        "engines": [
+            "Havok Physics"
+        ],
+        "franchises": [
+            "The Legend of Zelda"
+        ],
+        "franchiseLinks": [
+            {
+                "@class": "CatalogLink",
+                "ref": "596",
+                "name": "The Legend of Zelda"
+            }
+        ],
+        "platformLinks": [
+            {
+                "@class": "CatalogLink",
+                "ref": "41",
+                "name": "Wii U"
+            },
+            {
+                "@class": "CatalogLink",
+                "ref": "130",
+                "name": "Nintendo Switch"
+            }
+        ],
+        "timeToBeat": {
+            "hastily": 3333,
+            "normally": 5536,
+            "completely": 8333
+        },
+        "dlcs": [
+            {
+                "@class": "MediaSummary",
+                "type": "game",
+                "ref": "5001",
+                "provider": "igdb",
+                "title": "The Champions Ballad",
+                "year": 2017,
+                "posterPath": "https://images.igdb.com/igdb/image/upload/t_cover_big_2x/codlc2.jpg",
+                "backdropPath": null,
+                "communityRating": 8.2,
+                "releaseDate": "2017-12-07",
+                "releaseTime": null,
+                "number": null,
+                "totalRuntime": null,
+                "seasonNumber": null,
+                "runtime": null,
+                "overview": null,
+                "releaseKind": null,
+                "platform": null,
+                "releaseStatus": null,
+                "extra": {
+                    "gameType": "expansion"
+                },
+                "progressTotal": null,
+                "episodeType": null,
+                "authors": [],
+                "episodeBadge": null,
+                "creatorKind": null,
+                "makes": null,
+                "votes": null,
+                "releasePrecision": "day",
+                "alternativeTitles": []
+            },
+            {
+                "@class": "MediaSummary",
+                "type": "game",
+                "ref": "5000",
+                "provider": "igdb",
+                "title": "The Master Trials",
+                "year": 2017,
+                "posterPath": "https://images.igdb.com/igdb/image/upload/t_cover_big_2x/codlc1.jpg",
+                "backdropPath": null,
+                "communityRating": 8.0,
+                "releaseDate": "2017-06-23",
+                "releaseTime": null,
+                "number": null,
+                "totalRuntime": null,
+                "seasonNumber": null,
+                "runtime": null,
+                "overview": null,
+                "releaseKind": null,
+                "platform": null,
+                "releaseStatus": null,
+                "extra": {
+                    "gameType": "dlc"
+                },
+                "progressTotal": null,
+                "episodeType": null,
+                "authors": [],
+                "episodeBadge": null,
+                "creatorKind": null,
+                "makes": null,
+                "votes": null,
+                "releasePrecision": "day",
+                "alternativeTitles": []
+            }
+        ],
+        "otherReleases": [
+            {
+                "@class": "MediaSummary",
+                "type": "game",
+                "ref": "5002",
+                "provider": "igdb",
+                "title": "Breath of the Wild + Expansion Pass",
+                "year": 2018,
+                "posterPath": "https://images.igdb.com/igdb/image/upload/t_cover_big_2x/cobun1.jpg",
+                "backdropPath": null,
+                "communityRating": 9.0,
+                "releaseDate": "2018-03-02",
+                "releaseTime": null,
+                "number": null,
+                "totalRuntime": null,
+                "seasonNumber": null,
+                "runtime": null,
+                "overview": null,
+                "releaseKind": null,
+                "platform": null,
+                "releaseStatus": null,
+                "extra": {
+                    "gameType": "bundle"
+                },
+                "progressTotal": null,
+                "episodeType": null,
+                "authors": [],
+                "episodeBadge": null,
+                "creatorKind": null,
+                "makes": null,
+                "votes": null,
+                "releasePrecision": "day",
+                "alternativeTitles": []
+            }
+        ],
+        "parentGameRef": "9000",
+        "parentGameTitle": "The Legend of Zelda",
+        "editions": null,
+        "bundleContents": null
+    },
+    "children": [],
+    "cast": [],
+    "crew": [],
+    "videos": [
+        {
+            "@class": "VideoData",
+            "key": "zw47_q9wbBE",
+            "site": "YouTube",
+            "type": "Trailer",
+            "name": "Trailer",
+            "official": false,
+            "publishedAt": null
+        },
+        {
+            "@class": "VideoData",
+            "key": "abcd1234",
+            "site": "YouTube",
+            "type": "Clip",
+            "name": "Gameplay video",
+            "official": false,
+            "publishedAt": null
+        }
+    ],
+    "backdrops": [
+        "https://images.igdb.com/igdb/image/upload/t_1080p/sckj69.jpg",
+        "https://images.igdb.com/igdb/image/upload/t_1080p/sckj6a.jpg",
+        "https://images.igdb.com/igdb/image/upload/t_1080p/k1ufoamwo9mdzy9ooztf.jpg"
+    ],
+    "posters": [
+        "https://images.igdb.com/igdb/image/upload/t_cover_big_2x/co3p2d.jpg"
+    ],
+    "logos": [],
+    "related": [
+        {
+            "@class": "MediaSummary",
+            "type": "game",
+            "ref": "1942",
+            "provider": "igdb",
+            "title": "The Witcher 3: Wild Hunt",
+            "year": 2015,
+            "posterPath": "https://images.igdb.com/igdb/image/upload/t_cover_big_2x/coaarl.jpg",
+            "backdropPath": null,
+            "communityRating": 9.3,
+            "releaseDate": "2015-05-19",
+            "releaseTime": null,
+            "number": null,
+            "totalRuntime": null,
+            "seasonNumber": null,
+            "runtime": null,
+            "overview": null,
+            "releaseKind": null,
+            "platform": null,
+            "releaseStatus": null,
+            "extra": [],
+            "progressTotal": null,
+            "episodeType": null,
+            "authors": [],
+            "episodeBadge": null,
+            "creatorKind": null,
+            "makes": null,
+            "votes": null,
+            "releasePrecision": "day",
+            "alternativeTitles": []
+        }
+    ],
+    "similar": [],
+    "localizedTitles": [],
+    "wikidataId": null,
+    "collection": null,
+    "lastEpisodeToAir": null,
+    "nextEpisodeToAir": null,
+    "adult": false
+}

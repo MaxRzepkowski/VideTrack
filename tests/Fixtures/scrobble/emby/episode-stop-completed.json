@@ -1,0 +1,30 @@
+{
+  "Title": "Game of Thrones S01E01 has been played",
+  "Date": "2026-09-21T21:00:00.0000000Z",
+  "Event": "playback.stop",
+  "User": {
+    "Name": "alex",
+    "Id": "9d8c7b6a"
+  },
+  "Item": {
+    "Name": "Winter Is Coming",
+    "Type": "Episode",
+    "SeriesName": "Game of Thrones",
+    "ParentIndexNumber": 1,
+    "IndexNumber": 1,
+    "ProductionYear": 2011,
+    "RunTimeTicks": 36000000000,
+    "ProviderIds": {
+      "Tvdb": "3254641",
+      "Imdb": "tt1480055"
+    }
+  },
+  "PlaybackInfo": {
+    "PlayedToCompletion": true,
+    "PositionTicks": 36000000000
+  },
+  "Server": {
+    "Name": "emby",
+    "Id": "1a2b3c"
+  }
+}

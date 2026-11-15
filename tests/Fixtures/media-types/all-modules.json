@@ -1,0 +1,82 @@
+[
+    {
+        "code": "show",
+        "parentType": null,
+        "childType": "season",
+        "playable": false,
+        "userStatus": true,
+        "progressUnit": null,
+        "ownPage": true,
+        "genreBrowsable": true
+    },
+    {
+        "code": "movie",
+        "parentType": null,
+        "childType": null,
+        "playable": true,
+        "userStatus": true,
+        "progressUnit": null,
+        "ownPage": true,
+        "genreBrowsable": true
+    },
+    {
+        "code": "season",
+        "parentType": "show",
+        "childType": "episode",
+        "playable": false,
+        "userStatus": false,
+        "progressUnit": null,
+        "ownPage": true,
+        "genreBrowsable": false
+    },
+    {
+        "code": "episode",
+        "parentType": "season",
+        "childType": null,
+        "playable": true,
+        "userStatus": false,
+        "progressUnit": null,
+        "ownPage": true,
+        "genreBrowsable": false
+    },
+    {
+        "code": "game",
+        "parentType": null,
+        "childType": null,
+        "playable": true,
+        "userStatus": true,
+        "progressUnit": "minutes",
+        "ownPage": false,
+        "genreBrowsable": true
+    },
+    {
+        "code": "book",
+        "parentType": null,
+        "childType": null,
+        "playable": true,
+        "userStatus": true,
+        "progressUnit": "pages",
+        "ownPage": false,
+        "genreBrowsable": true
+    },
+    {
+        "code": "manga",
+        "parentType": null,
+        "childType": null,
+        "playable": true,
+        "userStatus": true,
+        "progressUnit": "chapters",
+        "ownPage": false,
+        "genreBrowsable": false
+    },
+    {
+        "code": "comic",
+        "parentType": null,
+        "childType": null,
+        "playable": true,
+        "userStatus": true,
+        "progressUnit": "issues",
+        "ownPage": false,
+        "genreBrowsable": false
+    }
+]

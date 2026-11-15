@@ -1,0 +1,4 @@
+{
+  "user": { "name": "jane_doe", "joined_at": "2018-06-12T14:23:08.000Z", "avatar": "https://simkl.in/avatars/12/12345678abcdef9/user_100.jpg" },
+  "account": { "id": 12345, "timezone": "Europe/Lisbon", "type": "free" }
+}

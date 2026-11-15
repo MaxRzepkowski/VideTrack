@@ -1,0 +1,7 @@
+{
+  "data": [
+    { "id": "7d9c1b8e-0000-4000-8000-000000000001", "username": "alex", "email": "alex@example.com", "plex_account_id": "123", "accounts": [] },
+    { "id": "7d9c1b8e-0000-4000-8000-000000000002", "username": "guest", "email": null, "plex_account_id": null, "accounts": [] }
+  ],
+  "meta": { "nextCursor": null, "pageSize": 100 }
+}

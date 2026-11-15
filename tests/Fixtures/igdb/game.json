@@ -1,0 +1,164 @@
+[
+    {
+        "id": 7346,
+        "name": "The Legend of Zelda: Breath of the Wild",
+        "summary": "The Legend of Zelda: Breath of the Wild is the first 3D open-world game in the Zelda series.",
+        "storyline": "Link awakens from a deep slumber.",
+        "first_release_date": 1488499200,
+        "total_rating": 95.04583579913081,
+        "game_status": { "id": 0, "status": "Released" },
+        "url": "https://www.igdb.com/games/the-legend-of-zelda-breath-of-the-wild",
+        "cover": { "id": 172453, "image_id": "co3p2d" },
+        "screenshots": [
+            { "id": 957969, "image_id": "sckj69" },
+            { "id": 957970, "image_id": "sckj6a" }
+        ],
+        "artworks": [{ "id": 3472, "image_id": "k1ufoamwo9mdzy9ooztf" }],
+        "genres": [
+            { "id": 9, "name": "Puzzle" },
+            { "id": 31, "name": "Adventure" }
+        ],
+        "themes": [
+            { "id": 1, "name": "Action" },
+            { "id": 38, "name": "Open world" }
+        ],
+        "keywords": [{ "id": 4179, "name": "exploration" }],
+        "game_modes": [{ "id": 1, "name": "Single player" }],
+        "platforms": [
+            { "id": 41, "name": "Wii U" },
+            { "id": 130, "name": "Nintendo Switch" }
+        ],
+        "game_engines": [{ "id": 17, "name": "Havok Physics" }],
+        "franchises": [{ "id": 596, "name": "The Legend of Zelda" }],
+        "involved_companies": [
+            {
+                "id": 200267,
+                "company": { "id": 70, "name": "Nintendo" },
+                "developer": false,
+                "publisher": true
+            },
+            {
+                "id": 200268,
+                "company": { "id": 45209, "name": "Nintendo EPD Production Group No. 3" },
+                "developer": true,
+                "publisher": false
+            },
+            {
+                "id": 200269,
+                "company": { "id": 4242, "name": "Example Port Studio" },
+                "developer": false,
+                "publisher": false,
+                "porting": true,
+                "supporting": false
+            },
+            {
+                "id": 200270,
+                "company": { "id": 4343, "name": "Example Support Studio" },
+                "developer": false,
+                "publisher": false,
+                "porting": false,
+                "supporting": true
+            }
+        ],
+        "videos": [
+            { "id": 18857, "video_id": "zw47_q9wbBE", "name": "Trailer" },
+            { "id": 18858, "video_id": "abcd1234", "name": "Gameplay video" }
+        ],
+        "websites": [
+            { "id": 12644, "url": "http://www.zelda.com/breath-of-the-wild/", "type": 1 },
+            { "id": 12646, "url": "https://en.wikipedia.org/wiki/The_Legend_of_Zelda:_Breath_of_the_Wild", "type": 3 },
+            { "id": 169669, "url": "https://twitter.com/NintendoAmerica", "type": 5 }
+        ],
+        "release_dates": [
+            {
+                "id": 1,
+                "date": 1488499200,
+                "date_format": { "id": 0, "format": "YYYYMMDD" },
+                "platform": { "id": 41, "abbreviation": "WiiU" },
+                "status": { "id": 6, "name": "Full Release" },
+                "release_region": 2
+            },
+            {
+                "id": 2,
+                "date": 1488412800,
+                "date_format": { "id": 0, "format": "YYYYMMDD" },
+                "platform": { "id": 41, "abbreviation": "WiiU" },
+                "status": { "id": 6, "name": "Full Release" },
+                "release_region": 1
+            },
+            {
+                "id": 3,
+                "date": 1488499200,
+                "date_format": { "id": 0, "format": "YYYYMMDD" },
+                "platform": { "id": 130, "abbreviation": "Switch" },
+                "status": { "id": 6, "name": "Full Release" },
+                "release_region": 8
+            },
+            {
+                "id": 4,
+                "date": 1893456000,
+                "date_format": { "id": 0, "format": "YYYYMMDD" },
+                "platform": { "id": 508, "abbreviation": "Switch 2" },
+                "status": { "id": 12, "name": "Next-Gen Optimization Patch Release" },
+                "release_region": 8
+            }
+        ],
+        "age_ratings": [
+            {
+                "id": 32771,
+                "organization": { "id": 2, "name": "PEGI" },
+                "rating_category": { "id": 10, "rating": "12" }
+            },
+            {
+                "id": 189068,
+                "organization": { "id": 1, "name": "ESRB" },
+                "rating_category": { "id": 4, "rating": "E10+" }
+            }
+        ],
+        "parent_game": { "id": 9000, "name": "The Legend of Zelda" },
+        "dlcs": [
+            {
+                "id": 5000,
+                "name": "The Master Trials",
+                "first_release_date": 1498176000,
+                "total_rating": 80.0,
+                "game_type": 1,
+                "cover": { "id": 10, "image_id": "codlc1" }
+            }
+        ],
+        "expansions": [
+            {
+                "id": 5001,
+                "name": "The Champions Ballad",
+                "first_release_date": 1512604800,
+                "total_rating": 82.0,
+                "game_type": 2,
+                "cover": { "id": 11, "image_id": "codlc2" }
+            }
+        ],
+        "bundles": [
+            {
+                "id": 5002,
+                "name": "Breath of the Wild + Expansion Pass",
+                "first_release_date": 1520000000,
+                "total_rating": 90.0,
+                "game_type": 3,
+                "cover": { "id": 12, "image_id": "cobun1" }
+            }
+        ],
+        "similar_games": [
+            {
+                "id": 1942,
+                "name": "The Witcher 3: Wild Hunt",
+                "first_release_date": 1431993600,
+                "total_rating": 92.77177865438908,
+                "cover": { "id": 480513, "image_id": "coaarl" }
+            },
+            {
+                "id": 99999,
+                "name": "Coverless Game",
+                "first_release_date": 1431993600
+            }
+        ]
+    }
+]

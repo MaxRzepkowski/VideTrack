@@ -1,0 +1,18 @@
+{
+  "event": "media.pause",
+  "user": true,
+  "owner": true,
+  "Account": {
+    "id": 1,
+    "title": "alex"
+  },
+  "Metadata": {
+    "librarySectionType": "movie",
+    "type": "movie",
+    "title": "The Matrix",
+    "year": 1999,
+    "duration": 8160000,
+    "viewOffset": 1200000,
+    "Guid": [{ "id": "tmdb://603" }]
+  }
+}

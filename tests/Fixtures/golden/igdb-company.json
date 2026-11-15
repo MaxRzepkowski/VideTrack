@@ -1,0 +1,92 @@
+{
+    "@class": "CompanyDetails",
+    "ref": "70",
+    "name": "Nintendo",
+    "logoPath": "https://images.igdb.com/igdb/image/upload/t_logo_med/cl9fnwljvm3jj4b2y8vg.png",
+    "description": "Nintendo Co., Ltd. is a Japanese multinational video game company.",
+    "founded": "2001-09-09",
+    "country": "JP",
+    "parentName": "Parent Company",
+    "parentRef": "51",
+    "externalLinks": {
+        "homepage": "https://www.nintendo.com",
+        "igdb": "https://www.igdb.com/companies/nintendo"
+    },
+    "credits": [
+        {
+            "@class": "CompanyCredit",
+            "media": {
+                "@class": "MediaSummary",
+                "type": "game",
+                "ref": "7346",
+                "provider": "igdb",
+                "title": "The Legend of Zelda: Breath of the Wild",
+                "year": 2017,
+                "posterPath": "https://images.igdb.com/igdb/image/upload/t_cover_big_2x/co3p2d.jpg",
+                "backdropPath": null,
+                "communityRating": 9.5,
+                "releaseDate": "2017-03-03",
+                "releaseTime": null,
+                "number": null,
+                "totalRuntime": null,
+                "seasonNumber": null,
+                "runtime": null,
+                "overview": null,
+                "releaseKind": null,
+                "platform": null,
+                "releaseStatus": null,
+                "extra": [],
+                "progressTotal": null,
+                "episodeType": null,
+                "authors": [],
+                "episodeBadge": null,
+                "creatorKind": null,
+                "makes": null,
+                "votes": null,
+                "releasePrecision": "day",
+                "alternativeTitles": []
+            },
+            "role": "developer",
+            "category": "game"
+        },
+        {
+            "@class": "CompanyCredit",
+            "media": {
+                "@class": "MediaSummary",
+                "type": "game",
+                "ref": "5000",
+                "provider": "igdb",
+                "title": "The Master Trials",
+                "year": 2017,
+                "posterPath": "https://images.igdb.com/igdb/image/upload/t_cover_big_2x/codlc1.jpg",
+                "backdropPath": null,
+                "communityRating": 8.0,
+                "releaseDate": "2017-06-23",
+                "releaseTime": null,
+                "number": null,
+                "totalRuntime": null,
+                "seasonNumber": null,
+                "runtime": null,
+                "overview": null,
+                "releaseKind": null,
+                "platform": null,
+                "releaseStatus": null,
+                "extra": {
+                    "gameType": "dlc"
+                },
+                "progressTotal": null,
+                "episodeType": null,
+                "authors": [],
+                "episodeBadge": null,
+                "creatorKind": null,
+                "makes": null,
+                "votes": null,
+                "releasePrecision": "day",
+                "alternativeTitles": []
+            },
+            "role": "publisher",
+            "category": "dlc"
+        }
+    ],
+    "hasMoreCredits": false
+}

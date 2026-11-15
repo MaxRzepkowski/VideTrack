@@ -1,0 +1,23 @@
+{
+  "data": [
+    {
+      "id": "c0000000-0000-4000-8000-000000000004",
+      "server_type": "jellyfin", "state": "stopped", "media_type": "episode", "media_title": "The Kingsroad", "show_title": "Game of Thrones",
+      "season_number": 1, "episode_number": 2, "year": 2011,
+      "started_at": "2026-09-22T20:00:00.000Z", "stopped_at": "2026-09-22T20:57:00.000Z",
+      "watched": true, "media_id": "m0000000-0000-4000-8000-000000000012", "show_media_id": "m0000000-0000-4000-8000-000000000010",
+      "imdb_id": "tt1668746", "tmdb_id": 63057, "tvdb_id": 3436411,
+      "user": { "id": "7d9c1b8e-0000-4000-8000-000000000001", "username": "alex" }
+    },
+    {
+      "id": "c0000000-0000-4000-8000-000000000005",
+      "server_type": "jellyfin", "state": "stopped", "media_type": "movie", "media_title": "Home Video", "show_title": null,
+      "season_number": null, "episode_number": null, "year": 2019,
+      "started_at": "2026-09-23T18:00:00.000Z", "stopped_at": "2026-09-23T18:30:00.000Z",
+      "watched": true, "media_id": "m0000000-0000-4000-8000-000000000020", "show_media_id": null,
+      "imdb_id": null, "tmdb_id": null, "tvdb_id": null,
+      "user": { "id": "7d9c1b8e-0000-4000-8000-000000000001", "username": "alex" }
+    }
+  ],
+  "meta": { "nextCursor": null, "pageSize": 100 }
+}

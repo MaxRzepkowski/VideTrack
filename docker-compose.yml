@@ -1,0 +1,53 @@
+# Development stack. Self-hosting uses deploy/compose.yaml with the published image.
+
+# One image for every service: built once, each service runs its own command.
+x-app: &app
+  build: docker/dev
+  image: videtrack-dev
+  user: "1000:1000"
+  working_dir: /app
+  volumes:
+    - .:/app
+  environment:
+    HOME: /tmp
+  restart: unless-stopped
+
+services:
+  app:
+    <<: *app
+    ports:
+      # Loopback only by default; DEV_BIND_ADDRESS=0.0.0.0 in .env opens the
+      # dev server to a phone or another computer in the local network.
+      - "${DEV_BIND_ADDRESS:-127.0.0.1}:8080:8000"
+    environment:
+      HOME: /tmp
+      # Must be a real process env var: `artisan serve` runs PHP's built-in
+      # server (php -S), which reads PHP_CLI_SERVER_WORKERS via getenv — the
+      # .env value never reaches it (Laravel's immutable Dotenv skips putenv),
+      # so without this the dev server is single-worker and every blocking
+      # deferred request (watch providers, Wikidata, ratings…) serializes.
+      PHP_CLI_SERVER_WORKERS: "8"
+    # --no-reload is required for `artisan serve` to honor PHP_CLI_SERVER_WORKERS
+    # (its file-watcher forces a single worker otherwise). PHP code is re-read per
+    # request in dev, so only .env edits need a manual `docker compose restart app`.
+    command: php artisan serve --host=0.0.0.0 --port=8000 --no-reload
+
+  queue:
+    <<: *app
+    # The production worker's flags, so retries behave here as they will there.
+    # --memory sits below PHP's memory_limit (256M): the worker restarts
+    # itself between jobs before one of them runs into the hard limit.
+    command: php artisan queue:work --tries=3 --sleep=3 --max-time=3600 --memory=192
+
+  # Without this process no scheduled task runs on its own (production runs
+  # them under supervisord). It catches up on start, then ticks every minute.
+  scheduler:
+    <<: *app
+    # exec: the shell is PID 1 and would swallow SIGTERM, so every stop would end in a kill.
+    command: sh -c "php artisan tasks:catch-up; exec php artisan schedule:work"
+
+  vite:
+    <<: *app
+    ports:
+      - "${DEV_BIND_ADDRESS:-127.0.0.1}:5173:5173"
+    command: npm run dev -- --host 0.0.0.0

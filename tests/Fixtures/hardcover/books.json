@@ -1,0 +1,24 @@
+{
+    "data": {
+        "books": [
+            {
+                "id": 2459845,
+                "title": "The Hobbit, or There and Back Again",
+                "release_date": "1937-09-21",
+                "release_year": 1937,
+                "rating": 4.31,
+                "cached_image": { "url": "https://assets.hardcover.app/edition/17456445/hobbit.jpg", "color": "#c58f27" },
+                "cached_contributors": [{ "author": { "name": "J.R.R. Tolkien" } }]
+            },
+            {
+                "id": 312460,
+                "title": "Dune",
+                "release_date": "1965-01-01",
+                "release_year": 1965,
+                "rating": 4.32,
+                "cached_image": { "url": "https://assets.hardcover.app/editions/3274049/dune.jpg", "color": "#bf1705" },
+                "cached_contributors": [{ "author": { "name": "Frank Herbert" } }]
+            }
+        ]
+    }
+}

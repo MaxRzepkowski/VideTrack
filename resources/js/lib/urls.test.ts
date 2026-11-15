@@ -1,0 +1,55 @@
+import { creatorHref, listUrl, mediaUrl, seasonUrlOf } from '@/lib/urls';
+import { useMediaTypes } from '@/test/factories';
+import { beforeEach, describe, expect, it } from 'vitest';
+
+beforeEach(() => useMediaTypes());
+
+describe('mediaUrl', () => {
+    it('routes a type with a page of its own there, and every other root to the shared title page', () => {
+        expect(mediaUrl({ type: 'movie', ref: '42', provider: 'x' })).toBe('/movie.details/42');
+        expect(mediaUrl({ type: 'show', ref: '42', provider: 'x' })).toBe('/show.details/42');
+        expect(mediaUrl({ type: 'manga', ref: '42', provider: 'x' })).toBe('/title.details/manga/42');
+    });
+
+    it('splits hierarchical refs into show, season and episode', () => {
+        expect(mediaUrl({ type: 'season', ref: '10:2', provider: 'tmdb' })).toBe('/season.details/10/2');
+        expect(mediaUrl({ type: 'episode', ref: '10:2:5', provider: 'tmdb' })).toBe('/episode.details/10/2/5');
+    });
+
+    it('qualifies creators with their provider, a network apart from a company', () => {
+        expect(mediaUrl({ type: 'person', ref: '7', provider: 'tmdb' })).toBe('/person.details/tmdb/7');
+        expect(mediaUrl({ type: 'company', ref: '7', provider: 'tmdb' })).toBe('/company.details/tmdb/7');
+        expect(mediaUrl({ type: 'company', ref: '7', provider: 'tmdb', extra: { kind: 'network' } })).toBe('/network.details/tmdb/7');
+    });
+
+    it('opens a user list under its owner', () => {
+        expect(listUrl('ana', 12)).toBe('/users.lists.show/ana/12');
+    });
+
+    it('opens a collection at its provider address', () => {
+        expect(mediaUrl({ type: 'collection', ref: '10194', provider: 'tmdb' })).toBe('/collections.show/tmdb/10194');
+    });
+
+    it('sends an unknown type to search rather than a broken page', () => {
+        expect(mediaUrl({ type: 'podcast', ref: '1', provider: 'x' })).toBe('/search');
+    });
+});
+
+describe('creatorHref', () => {
+    it('links a creator by kind', () => {
+        expect(creatorHref({ kind: 'person', ref: '1', provider: 'tmdb' })).toBe('/person.details/tmdb/1');
+        expect(creatorHref({ kind: 'company', ref: '2', provider: 'igdb' })).toBe('/company.details/igdb/2');
+        expect(creatorHref({ kind: 'network', ref: '3', provider: 'tmdb' })).toBe('/network.details/tmdb/3');
+    });
+
+    it('leaves a creator without a reachable page as plain text', () => {
+        expect(creatorHref({ kind: 'person', ref: null, provider: 'mal' })).toBeNull();
+        expect(creatorHref({ kind: 'person', ref: '5', provider: null })).toBeNull();
+    });
+});
+
+describe('seasonUrlOf', () => {
+    it('opens the season an episode belongs to', () => {
+        expect(seasonUrlOf({ ref: '1399:2:9' })).toBe(route('season.details', { ref: '1399', number: '2' }));
+    });
+});

@@ -1,0 +1,433 @@
+{
+    "episode:1399:0:1": {
+        "backdrop_path": "/got-s0e1.jpg",
+        "community_rating": 6.8,
+        "gone_at": null,
+        "home_release_date": null,
+        "localized_titles": null,
+        "metadata": null,
+        "number": 1,
+        "overview": "A look inside the production.",
+        "parent": "1399:0",
+        "poster_path": null,
+        "provider": "tmdb",
+        "provider_ref": "1399:0:1",
+        "release_date": "2010-12-05 00:00:00",
+        "release_date_precision": "day",
+        "release_time": null,
+        "runtime": 30,
+        "status": null,
+        "title": "Inside Game of Thrones",
+        "total_runtime": 30,
+        "type": "episode",
+        "year": 2010
+    },
+    "episode:1399:0:2": {
+        "backdrop_path": "/got-s0e2.jpg",
+        "community_rating": 6.5,
+        "gone_at": null,
+        "home_release_date": null,
+        "localized_titles": null,
+        "metadata": null,
+        "number": 2,
+        "overview": "A preview of the series.",
+        "parent": "1399:0",
+        "poster_path": null,
+        "provider": "tmdb",
+        "provider_ref": "1399:0:2",
+        "release_date": "2011-04-03 00:00:00",
+        "release_date_precision": "day",
+        "release_time": null,
+        "runtime": 15,
+        "status": null,
+        "title": "15-Minute Preview",
+        "total_runtime": 15,
+        "type": "episode",
+        "year": 2011
+    },
+    "episode:1399:1:1": {
+        "backdrop_path": "/got-s1e1.jpg",
+        "community_rating": 8.1,
+        "gone_at": null,
+        "home_release_date": null,
+        "localized_titles": null,
+        "metadata": {
+            "episodeBadge": "series_premiere"
+        },
+        "number": 1,
+        "overview": "Jon Arryn, the Hand of the King, is dead.",
+        "parent": "1399:1",
+        "poster_path": null,
+        "provider": "tmdb",
+        "provider_ref": "1399:1:1",
+        "release_date": "2011-04-17 00:00:00",
+        "release_date_precision": "day",
+        "release_time": null,
+        "runtime": 62,
+        "status": null,
+        "title": "Winter Is Coming",
+        "total_runtime": 62,
+        "type": "episode",
+        "year": 2011
+    },
+    "episode:1399:1:2": {
+        "backdrop_path": "/got-s1e2.jpg",
+        "community_rating": 7.9,
+        "gone_at": null,
+        "home_release_date": null,
+        "localized_titles": null,
+        "metadata": {
+            "episodeType": "mid_season",
+            "episodeBadge": "mid_season_finale"
+        },
+        "number": 2,
+        "overview": "While Bran recovers from his fall, Ned takes only his daughters to King's Landing.",
+        "parent": "1399:1",
+        "poster_path": null,
+        "provider": "tmdb",
+        "provider_ref": "1399:1:2",
+        "release_date": "2011-04-24 00:00:00",
+        "release_date_precision": "day",
+        "release_time": null,
+        "runtime": 56,
+        "status": null,
+        "title": "The Kingsroad",
+        "total_runtime": 56,
+        "type": "episode",
+        "year": 2011
+    },
+    "episode:1399:2:1": {
+        "backdrop_path": "/got-s2e1.jpg",
+        "community_rating": 8,
+        "gone_at": null,
+        "home_release_date": null,
+        "localized_titles": null,
+        "metadata": {
+            "episodeBadge": "season_premiere"
+        },
+        "number": 1,
+        "overview": "Tyrion arrives in King's Landing.",
+        "parent": "1399:2",
+        "poster_path": null,
+        "provider": "tmdb",
+        "provider_ref": "1399:2:1",
+        "release_date": "2012-04-01 00:00:00",
+        "release_date_precision": "day",
+        "release_time": null,
+        "runtime": 53,
+        "status": null,
+        "title": "The North Remembers",
+        "total_runtime": 53,
+        "type": "episode",
+        "year": 2012
+    },
+    "episode:1399:2:2": {
+        "backdrop_path": "/got-s2e2.jpg",
+        "community_rating": 7.8,
+        "gone_at": null,
+        "home_release_date": null,
+        "localized_titles": null,
+        "metadata": {
+            "episodeType": "finale",
+            "episodeBadge": "season_finale"
+        },
+        "number": 2,
+        "overview": "Arya makes friends on the road north.",
+        "parent": "1399:2",
+        "poster_path": null,
+        "provider": "tmdb",
+        "provider_ref": "1399:2:2",
+        "release_date": "2012-04-08 00:00:00",
+        "release_date_precision": "day",
+        "release_time": null,
+        "runtime": 54,
+        "status": null,
+        "title": "The Night Lands",
+        "total_runtime": 54,
+        "type": "episode",
+        "year": 2012
+    },
+    "episode:1399:3:1": {
+        "backdrop_path": "/got-s3e1.jpg",
+        "community_rating": 8.2,
+        "gone_at": null,
+        "home_release_date": null,
+        "localized_titles": null,
+        "metadata": {
+            "episodeType": "standard",
+            "episodeBadge": "season_premiere"
+        },
+        "number": 1,
+        "overview": "Jon meets the King-Beyond-the-Wall.",
+        "parent": "1399:3",
+        "poster_path": null,
+        "provider": "tmdb",
+        "provider_ref": "1399:3:1",
+        "release_date": "2013-03-31 00:00:00",
+        "release_date_precision": "day",
+        "release_time": null,
+        "runtime": 55,
+        "status": null,
+        "title": "Valar Dohaeris",
+        "total_runtime": 55,
+        "type": "episode",
+        "year": 2013
+    },
+    "episode:1399:3:2": {
+        "backdrop_path": "/got-s3e2.jpg",
+        "community_rating": 8,
+        "gone_at": null,
+        "home_release_date": null,
+        "localized_titles": null,
+        "metadata": {
+            "episodeType": "finale",
+            "episodeBadge": "series_finale"
+        },
+        "number": 2,
+        "overview": "Sansa says too much.",
+        "parent": "1399:3",
+        "poster_path": null,
+        "provider": "tmdb",
+        "provider_ref": "1399:3:2",
+        "release_date": "2013-04-07 00:00:00",
+        "release_date_precision": "day",
+        "release_time": null,
+        "runtime": 57,
+        "status": null,
+        "title": "Dark Wings, Dark Words",
+        "total_runtime": 57,
+        "type": "episode",
+        "year": 2013
+    },
+    "episode:1399:3:3": {
+        "backdrop_path": null,
+        "community_rating": null,
+        "gone_at": null,
+        "home_release_date": null,
+        "localized_titles": null,
+        "metadata": null,
+        "number": 3,
+        "overview": null,
+        "parent": "1399:3",
+        "poster_path": null,
+        "provider": "tmdb",
+        "provider_ref": "1399:3:3",
+        "release_date": null,
+        "release_date_precision": "day",
+        "release_time": null,
+        "runtime": null,
+        "status": null,
+        "title": "Untitled",
+        "total_runtime": null,
+        "type": "episode",
+        "year": null
+    },
+    "season:1399:0": {
+        "backdrop_path": null,
+        "community_rating": null,
+        "gone_at": null,
+        "home_release_date": null,
+        "localized_titles": null,
+        "metadata": {
+            "episodeCount": 2
+        },
+        "number": 0,
+        "overview": null,
+        "parent": "1399",
+        "poster_path": "/got-poster.jpg",
+        "provider": "tmdb",
+        "provider_ref": "1399:0",
+        "release_date": "2010-12-05 00:00:00",
+        "release_date_precision": "day",
+        "release_time": null,
+        "runtime": null,
+        "status": null,
+        "title": "Specials",
+        "total_runtime": 45,
+        "type": "season",
+        "year": 2010
+    },
+    "season:1399:1": {
+        "backdrop_path": null,
+        "community_rating": 8.3,
+        "gone_at": null,
+        "home_release_date": null,
+        "localized_titles": null,
+        "metadata": {
+            "episodeCount": 10
+        },
+        "number": 1,
+        "overview": null,
+        "parent": "1399",
+        "poster_path": "/got-s1.jpg",
+        "provider": "tmdb",
+        "provider_ref": "1399:1",
+        "release_date": "2011-04-17 00:00:00",
+        "release_date_precision": "day",
+        "release_time": null,
+        "runtime": null,
+        "status": null,
+        "title": "Season 1",
+        "total_runtime": 118,
+        "type": "season",
+        "year": 2011
+    },
+    "season:1399:2": {
+        "backdrop_path": null,
+        "community_rating": 8.4,
+        "gone_at": null,
+        "home_release_date": null,
+        "localized_titles": null,
+        "metadata": {
+            "episodeCount": 10
+        },
+        "number": 2,
+        "overview": null,
+        "parent": "1399",
+        "poster_path": "/got-s2.jpg",
+        "provider": "tmdb",
+        "provider_ref": "1399:2",
+        "release_date": "2012-04-01 00:00:00",
+        "release_date_precision": "day",
+        "release_time": null,
+        "runtime": null,
+        "status": null,
+        "title": "Season 2",
+        "total_runtime": 107,
+        "type": "season",
+        "year": 2012
+    },
+    "season:1399:3": {
+        "backdrop_path": null,
+        "community_rating": 8.6,
+        "gone_at": null,
+        "home_release_date": null,
+        "localized_titles": null,
+        "metadata": {
+            "episodeCount": 3
+        },
+        "number": 3,
+        "overview": null,
+        "parent": "1399",
+        "poster_path": "/got-s3.jpg",
+        "provider": "tmdb",
+        "provider_ref": "1399:3",
+        "release_date": "2013-03-31 00:00:00",
+        "release_date_precision": "day",
+        "release_time": null,
+        "runtime": null,
+        "status": null,
+        "title": "Season 3",
+        "total_runtime": 112,
+        "type": "season",
+        "year": 2013
+    },
+    "show:1399": {
+        "backdrop_path": "/got-backdrop.jpg",
+        "community_rating": 8.5,
+        "gone_at": null,
+        "home_release_date": null,
+        "localized_titles": "{\"en\":{\"title\":\"Game of Thrones\",\"posterPath\":\"/got-poster.jpg\"},\"pl\":{\"title\":\"Game of Thrones\",\"posterPath\":\"/got-poster.jpg\"}}",
+        "metadata": {
+            "createdBy": [
+                {
+                    "name": "David Benioff",
+                    "kind": "person",
+                    "ref": "9813",
+                    "provider": "tmdb",
+                    "logoPath": null
+                },
+                {
+                    "name": "D. B. Weiss",
+                    "kind": "person",
+                    "ref": "228068",
+                    "provider": "tmdb",
+                    "logoPath": null
+                }
+            ],
+            "networks": [
+                {
+                    "name": "HBO",
+                    "kind": "network",
+                    "ref": "49",
+                    "provider": "tmdb",
+                    "logoPath": "/hbo.png"
+                }
+            ],
+            "studios": [],
+            "seasonCount": 3,
+            "episodeCount": 20,
+            "imdbId": "tt0944947",
+            "tvdbId": null,
+            "logoPath": "/got-logo.png",
+            "originalTitle": null,
+            "originCountry": [
+                "US"
+            ],
+            "spokenLanguages": [
+                "English",
+                "Dothraki"
+            ],
+            "showType": "Scripted",
+            "screenedTheatrically": [
+                {
+                    "seasonNumber": 2,
+                    "episodeNumber": 5
+                },
+                {
+                    "seasonNumber": 4,
+                    "episodeNumber": 1
+                }
+            ],
+            "alternativeTitles": [],
+            "certificationRegion": "US",
+            "certificationMeaning": null,
+            "certificationDescriptors": [],
+            "genres": [
+                "Sci-Fi & Fantasy",
+                "Drama"
+            ],
+            "tagline": "Winter is coming.",
+            "originalLanguage": "en",
+            "certification": "TV-MA",
+            "keywords": [
+                {
+                    "name": "war",
+                    "ref": "6091"
+                }
+            ],
+            "certifications": [
+                {
+                    "region": "US",
+                    "code": "TV-MA",
+                    "meaning": null
+                },
+                {
+                    "region": "PL",
+                    "code": "18",
+                    "meaning": null
+                }
+            ],
+            "externalLinks": {
+                "homepage": "https://www.hbo.com/game-of-thrones",
+                "tmdb": "https://www.themoviedb.org/tv/1399",
+                "imdb": "https://www.imdb.com/title/tt0944947/"
+            }
+        },
+        "number": null,
+        "overview": "Seven noble families fight for control of the mythical land of Westeros.",
+        "parent": null,
+        "poster_path": "/got-poster.jpg",
+        "provider": "tmdb",
+        "provider_ref": "1399",
+        "release_date": "2011-04-17 00:00:00",
+        "release_date_precision": "day",
+        "release_time": null,
+        "runtime": 60,
+        "status": "ended",
+        "title": "Game of Thrones",
+        "total_runtime": 337,
+        "type": "show",
+        "year": 2011
+    }
+}

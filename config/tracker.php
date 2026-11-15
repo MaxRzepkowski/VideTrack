@@ -1,0 +1,467 @@
+<?php
+
+$version = env('APP_VERSION', 'dev');
+
+$locales = [
+    'en' => ['language' => 'en-US', 'region' => 'US'],
+    'pl' => ['language' => 'pl-PL', 'region' => 'PL'],
+];
+
+return [
+
+    /*
+    |--------------------------------------------------------------------------
+    | Application version
+    |--------------------------------------------------------------------------
+    |
+    | Shown on the About page. Set at image build time (release tag); "dev"
+    | when running from source.
+    |
+    */
+
+    'version' => $version,
+
+    /*
+    | Where the running code can be read, linked from About: the AGPL asks every
+    | instance to offer its users the source. Point it at your fork when you run
+    | a modified version.
+    */
+
+    'source_url' => env('SOURCE_URL', 'https://github.com/MaxRzepkowski/VideTrack'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | How the instance names itself to outside services
+    |--------------------------------------------------------------------------
+    |
+    | The User-Agent of every request to a provider or an integration. Some
+    | services refuse the HTTP library's default, so a client name and version
+    | are sent; which product runs here is nobody's business until the
+    | operator says so, hence a neutral default.
+    |
+    */
+
+    'http' => [
+        'user_agent' => env('HTTP_USER_AGENT', 'media-tracker/'.$version),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Integration addresses
+    |--------------------------------------------------------------------------
+    |
+    | Hosts in a private network an ordinary account may connect to (a
+    | Tracearr in the local network), comma-separated, e.g.
+    | "tracearr.lan,192.168.1.20". An administrator may give any address.
+    |
+    */
+
+    'integrations' => [
+        'private_hosts' => (string) env('INTEGRATION_PRIVATE_HOSTS', ''),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Registration
+    |--------------------------------------------------------------------------
+    |
+    | When disabled, the register routes return 404 and the UI hides all
+    | registration links. Existing accounts are unaffected. Unset (null),
+    | sign-up is open until the first account exists, then closed.
+    |
+    */
+
+    'registration_enabled' => in_array($registration = env('REGISTRATION_ENABLED'), [null, ''], true)
+        ? null
+        : filter_var($registration, FILTER_VALIDATE_BOOL),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Bootstrap admin account
+    |--------------------------------------------------------------------------
+    |
+    | On container start `php artisan app:ensure-admin` creates this account
+    | if it does not exist yet and guarantees it has the admin role. The
+    | password is only used at creation time; a password changed later in
+    | the UI is not overwritten by subsequent starts.
+    |
+    */
+
+    'admin_email' => env('ADMIN_EMAIL'),
+    'admin_password' => env('ADMIN_PASSWORD'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Locales
+    |--------------------------------------------------------------------------
+    */
+
+    // A title whose refresh takes the worker's memory past this many MB is
+    // named in the run's details, so a title that runs it out of memory
+    // (256 MB, PHP's limit in the image) can be told apart.
+    'heavy_title_megabytes' => 128,
+
+    // The instance's language, the same variable `app.locale` reads: a
+    // request switches `app.locale` to its viewer's, this one stays.
+    'default_locale' => env('DEFAULT_LOCALE', 'en'),
+    'supported_locales' => array_keys($locales),
+
+    // What each UI language means outside the UI: the language tag providers
+    // are asked in, and the country whose streaming offers, release dates and
+    // age ratings a viewer sees until they pick their own.
+    'locales' => $locales,
+
+    /*
+    |--------------------------------------------------------------------------
+    | TMDB metadata provider
+    |--------------------------------------------------------------------------
+    |
+    | The key never leaves the backend; every TMDB call goes through the
+    | provider with response caching. Both v3 API keys and v4 read access
+    | tokens are accepted. Images are hotlinked from the TMDB CDN.
+    |
+    */
+
+    'tmdb' => [
+        'api_key' => env('TMDB_API_KEY'),
+        'base_url' => env('TMDB_BASE_URL', 'https://api.themoviedb.org/3'),
+        'image_base_url' => env('TMDB_IMAGE_BASE_URL', 'https://image.tmdb.org/t/p'),
+        'cache' => [
+            'details' => 60 * 60 * 24, // seconds
+            'dictionary' => 60 * 60 * 24 * 30, // certifications change very rarely
+            'listing' => 60 * 60 * 3, // trending / discover
+            'search' => 60 * 15,
+            'changes' => 60 * 60, // read once a morning; an hour covers a run asked again
+        ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Wikidata enrichment (experimental)
+    |--------------------------------------------------------------------------
+    |
+    | Cross-cutting enrichment, not a media provider: given a title's TMDB id
+    | we query the public Wikidata SPARQL endpoint for "based on" (P144) —
+    | the source book/manga a film or show adapts. No API key; Wikidata only
+    | asks for a descriptive User-Agent identifying the client.
+    |
+    */
+
+    'wikidata' => [
+        'base_url' => env('WIKIDATA_BASE_URL', 'https://query.wikidata.org'),
+        // Wikidata asks for a descriptive client with a way to reach its
+        // operator; an instance that queries it heavily sets its own.
+        'user_agent' => env('WIKIDATA_USER_AGENT', env('HTTP_USER_AGENT', 'media-tracker/'.$version)),
+        'cache' => [
+            'query' => 60 * 60 * 24, // seconds
+            // A failed/timed-out lookup is negative-cached for this long so a
+            // slow or unreachable Wikidata blocks at most one render per window
+            // instead of a fresh multi-second timeout on every page load.
+            'failure' => 60 * 10, // seconds
+        ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | IGDB metadata provider (games)
+    |--------------------------------------------------------------------------
+    |
+    | IGDB is accessed with Twitch developer credentials: the client id and
+    | secret are exchanged for an app access token on the backend (cached
+    | until shortly before expiry). Images are hotlinked from the IGDB CDN.
+    |
+    */
+
+    'igdb' => [
+        'client_id' => env('IGDB_CLIENT_ID'),
+        'client_secret' => env('IGDB_CLIENT_SECRET'),
+        'base_url' => env('IGDB_BASE_URL', 'https://api.igdb.com/v4'),
+        'oauth_url' => env('IGDB_OAUTH_URL', 'https://id.twitch.tv/oauth2/token'),
+        'cache' => [
+            'details' => 60 * 60 * 24, // seconds
+            'listing' => 60 * 60 * 3, // trending / discover
+            'search' => 60 * 15,
+        ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | TVmaze schedule enrichment (episode air times)
+    |--------------------------------------------------------------------------
+    |
+    | TVmaze is a free, keyless API (~20 req / 10 s). It is not a metadata
+    | provider — it only backfills the exact broadcast instant of episodes
+    | whose show has a real airing slot, in a queued background job so the
+    | show page render is never blocked. Streaming premieres carry no time.
+    |
+    */
+
+    'tvmaze' => [
+        'base_url' => env('TVMAZE_BASE_URL', 'https://api.tvmaze.com'),
+        'cache' => [
+            'schedule' => 60 * 60 * 12, // seconds
+        ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Hardcover metadata provider (books)
+    |--------------------------------------------------------------------------
+    |
+    | Hardcover serves a GraphQL API authenticated with a personal API key
+    | (hardcover.app/account/api, scope read:catalog). The key never leaves the backend; every
+    | call goes through the provider with response caching. Covers are
+    | hotlinked from the Hardcover assets CDN.
+    |
+    */
+
+    'hardcover' => [
+        'api_key' => env('HARDCOVER_API_KEY'),
+        'endpoint' => env('HARDCOVER_ENDPOINT', 'https://api.hardcover.app/v1/graphql'),
+        'cache' => [
+            'details' => 60 * 60 * 24, // seconds
+            'listing' => 60 * 60 * 3, // trending / discover
+            'search' => 60 * 15,
+            // Hardcover recomputes a book's similar list every 7 days.
+            'similar' => 60 * 60 * 24 * 7,
+        ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | MyAnimeList metadata provider (manga)
+    |--------------------------------------------------------------------------
+    |
+    | Public MAL API v2 data only needs the client id (X-MAL-CLIENT-ID
+    | header) — no OAuth dance. Covers are hotlinked from the MAL CDN.
+    |
+    */
+
+    'mal' => [
+        'client_id' => env('MAL_CLIENT_ID'),
+        'base_url' => env('MAL_BASE_URL', 'https://api.myanimelist.net/v2'),
+        'cache' => [
+            'details' => 60 * 60 * 24, // seconds
+            'listing' => 60 * 60 * 3, // trending / discover
+            'search' => 60 * 15,
+        ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Simkl (import through a connected account)
+    |--------------------------------------------------------------------------
+    |
+    | The instance owner registers one AUTH V2 app of type "TV, devices &
+    | command line" at https://simkl.com/settings/developer/ and puts its
+    | client id here. The device flow needs no secret and no callback
+    | address, so this works on an instance that answers only on localhost.
+    | Without a client id the Simkl source is not offered.
+    |
+    */
+
+    'simkl' => [
+        'client_id' => env('SIMKL_CLIENT_ID'),
+        'base_url' => env('SIMKL_BASE_URL', 'https://api.simkl.com'),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Steam (import of a public game library)
+    |--------------------------------------------------------------------------
+    |
+    | One Steam Web API key for the instance (free, 100,000 calls a day,
+    | https://steamcommunity.com/dev/apikey). A user names their profile; the
+    | library is one request. Games are placed through IGDB, so the source is
+    | offered only when IGDB is configured too.
+    |
+    */
+
+    'steam' => [
+        'api_key' => env('STEAM_API_KEY'),
+        'base_url' => env('STEAM_BASE_URL', 'https://api.steampowered.com'),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | ComicVine metadata provider (comics)
+    |--------------------------------------------------------------------------
+    |
+    | ComicVine authenticates with an api_key query parameter and requires a
+    | custom User-Agent. The hourly quota is tight (200 requests per
+    | resource), so responses are cached and the client fails fast when the
+    | local budget runs out instead of queueing up.
+    |
+    */
+
+    'comicvine' => [
+        'api_key' => env('COMICVINE_API_KEY'),
+        'base_url' => env('COMICVINE_BASE_URL', 'https://comicvine.gamespot.com/api'),
+        'cache' => [
+            'details' => 60 * 60 * 24, // seconds
+            'listing' => 60 * 60 * 3, // trending / discover
+            'search' => 60 * 15,
+            // A volume ComicVine no longer has (status 101) is asked about by
+            // every refresh; a short memory keeps it off the hourly budget.
+            'not_found' => 60 * 10,
+            'changes' => 60 * 60, // read once a morning; an hour covers a run asked again
+        ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Incoming scrobbles (media servers, readers)
+    |--------------------------------------------------------------------------
+    |
+    | A media server reports a stop, not a verdict: credits, a skipped outro
+    | or simply closing the app all arrive the same way. The threshold is
+    | where "stopped" becomes "watched" — 85% is the convention the ecosystem
+    | settled on. The dedup window keeps two servers reporting the same
+    | viewing from logging it twice.
+    |
+    */
+
+    'scrobble' => [
+        'completion_threshold' => (int) env('SCROBBLE_COMPLETION_THRESHOLD', 85),
+        'dedup_window_hours' => (int) env('SCROBBLE_DEDUP_WINDOW_HOURS', 6),
+        // Hosts a media server in a container of its own hears as itself: a
+        // webhook address on one of them never leaves the sender. `app` is
+        // this instance's service name in the shipped docker-compose.yml.
+        'loopback_hosts' => ['localhost', '127.0.0.1', '::1', '0.0.0.0', 'app'],
+        // Addresses one account may have for one server: enough for every
+        // server and player in a home, short of an unbounded pile of tokens.
+        'endpoints_per_source' => 10,
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | How long the instance keeps what it writes for itself
+    |--------------------------------------------------------------------------
+    |
+    | The daily cleanup task prunes these and reports what it removed.
+    | Notifications are a feed, not an archive — the activity pages hold the
+    | durable history. An integration's delivery log fails two ways: it goes
+    | stale, and a chatty server buries yesterday under today, so it has an
+    | age and a per-endpoint cap.
+    |
+    */
+
+    'retention' => [
+        'task_runs_days' => 30,
+        'failed_jobs_days' => 30,
+        'notifications_days' => 30,
+        'webhook_deliveries_days' => (int) env('SCROBBLE_DELIVERY_RETENTION_DAYS', 30),
+        'webhook_deliveries_per_endpoint' => 100,
+    ],
+
+    // Showcases and shows of a medium (Summer Game Fest, a Nintendo Direct).
+    'events' => [
+        // How long a show counts as on the air where its provider names no
+        // end: the "live" marks, the countdowns and the calendar's end time
+        // fall back on it.
+        'fallback_minutes' => (int) env('TRACKER_EVENTS_FALLBACK_MINUTES', 30),
+        // How far ahead the "live" button is told of an event, so it switches
+        // itself on at the start on a page opened earlier.
+        'live_lookahead_hours' => (int) env('TRACKER_EVENTS_LIVE_LOOKAHEAD_HOURS', 12),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Suggestions
+    |--------------------------------------------------------------------------
+    |
+    | The bars a title or a person clears to be put forward: looser and the
+    | shelves fill with titles nobody has heard of, tighter and they stay empty.
+    | Set from measurements on a real library, not guessed.
+    |
+    */
+
+    'suggestions' => [
+        // Ratings a title needs at its provider to count into a person's
+        // work at all: below it are shorts, music videos and festival films.
+        'min_votes' => 300,
+        // Titles read from the top of each type's chart, per shelf: deep enough
+        // that someone well-watched still finds things, shallow enough that
+        // the bottom of the list is still a title people have heard of.
+        'chart_depth' => ['best_known' => 500, 'top_rated' => 250, 'per_year' => 60, 'per_decade' => 100],
+        // People whose work is fetched per shelf, the best fits first.
+        'people_per_shelf' => 150,
+        'directors' => ['min_finished' => 3, 'min_share' => 0.5],
+        'writers' => ['min_finished' => 3, 'min_share' => 0.5],
+        'actors' => [
+            // Deeper in the cast than this is a cameo, not "a film with them".
+            'max_billing' => 8,
+            'min_rated' => 4,
+            // An actor's average is pulled toward the user's own by this many
+            // imaginary average films, so two lucky hits do not make a favourite.
+            'prior_films' => 5,
+            // How far above the user's own average the pulled average must sit.
+            'margin' => 0.4,
+        ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Rate limits (requests a minute)
+    |--------------------------------------------------------------------------
+    |
+    | Ceilings for a runaway tab or script, not a pace a person reaches. The
+    | API and the incoming webhooks are what scripts and media servers call,
+    | so those two can be raised for a busy instance.
+    |
+    */
+
+    'rate_limits' => [
+        // Everything a signed-in person clicks.
+        'web' => 240,
+        // Pages that fan out to an upstream provider.
+        'provider_pages' => 120,
+        'api' => (int) env('API_RATE_LIMIT_PER_MINUTE', 240),
+        'webhooks_per_endpoint' => (int) env('WEBHOOK_RATE_LIMIT_PER_MINUTE', 60),
+        'webhooks_per_ip' => 300,
+        'ical_per_feed' => 30,
+        'ical_per_ip' => 120,
+        // Forms an anonymous visitor can submit in a loop.
+        'account_forms' => 6,
+        // Settings actions that read or write a whole library.
+        'library_heavy' => 10,
+        // A test message to the user's own Discord webhook.
+        'discord_test' => 5,
+        // A webhook dry run, which reaches out to the metadata provider.
+        'integration_test' => 20,
+        // A connect card waiting on a device flow polls every few seconds.
+        'connections' => 60,
+        // Sign-in attempts from one address across every e-mail: the form's
+        // own throttle counts each e-mail apart, which a spray walks around.
+        'login_per_ip' => 30,
+        // Wrong passwords for one account from any address, within the
+        // window below: a spray from many addresses (or forged ones) still
+        // meets a wall.
+        'login_per_account' => 30,
+        'login_per_account_window_minutes' => 60,
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Imports from anime and manga trackers
+    |--------------------------------------------------------------------------
+    |
+    | AniList and Kitsu serve public libraries without a key; MyAnimeList
+    | uses the MAL client id above. Anime is tracked as TMDB shows and films,
+    | so it is placed through the Kometa anime id map — pinned to one
+    | revision in App\Integrations\Anime\AnimeIdMap, fetched from this host.
+    |
+    */
+
+    'imports' => [
+        'anilist_url' => env('ANILIST_GRAPHQL_URL', 'https://graphql.anilist.co'),
+        'kitsu_url' => env('KITSU_BASE_URL', 'https://kitsu.app/api/edge'),
+        'anime_ids_url' => env('ANIME_IDS_BASE_URL', 'https://raw.githubusercontent.com/Kometa-Team/Anime-IDs'),
+        // The largest single JSON file an import decodes, uncompressed. A
+        // file is decoded whole, and a 50 MB ZIP of history can unpack to
+        // hundreds of MB; past this, the import stops at analysis instead of
+        // the worker running out of memory.
+        'max_json_megabytes' => 64,
+    ],
+
+];

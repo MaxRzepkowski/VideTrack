@@ -1,0 +1,27 @@
+<?php
+
+return [
+    'a_reset_link_will_be_sent' => 'Jeśli konto istnieje, wyślemy na nie link do zresetowania hasła.',
+    'already_have_an_account' => 'Masz już konto?',
+    'create_account' => 'Utwórz konto',
+    'create_an_account' => 'Utwórz konto',
+    'dont_have_an_account' => 'Nie masz konta?',
+    'email_password_reset_link' => 'Wyślij link do resetu hasła',
+    'enter_your_details_below_to_create' => 'Podaj poniżej swoje dane, aby utworzyć konto',
+    'enter_your_email_and_password_below' => 'Podaj poniżej swój e-mail i hasło, aby się zalogować',
+    'enter_your_email_to_receive_a' => 'Podaj swój e-mail, aby otrzymać link do zresetowania hasła',
+    'forgot_password' => 'Nie pamiętasz hasła',
+    'forgot_password_2' => 'Nie pamiętasz hasła?',
+    'full_name' => 'Imię i nazwisko',
+    'log_in' => 'Zaloguj się',
+    'log_in_2' => 'logowania',
+    'log_in_to_your_account' => 'Zaloguj się na swoje konto',
+    'or_return_to_login' => 'Albo wróć do :login',
+    'please_enter_your_new_password_below' => 'Podaj poniżej nowe hasło',
+    'register' => 'Rejestracja',
+    'remember_me' => 'Zapamiętaj mnie',
+    'reset_password' => 'Zresetuj hasło',
+    'sign_up' => 'Zarejestruj się',
+    'username_a_z_0_9' => 'nazwa_uzytkownika (a-z, 0-9, _)',
+    'this_server_sends_no_mail' => 'Ten serwer nie ma skonfigurowanej poczty, więc link trafi tylko do logu serwera. Poproś osobę, która prowadzi ten VideTrack, o zresetowanie hasła.',
+];

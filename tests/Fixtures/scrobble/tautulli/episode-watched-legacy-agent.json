@@ -1,0 +1,17 @@
+{
+  "action": "watched",
+  "media_type": "episode",
+  "title": "Game of Thrones - Winter Is Coming",
+  "show_name": "Game of Thrones",
+  "year": "2011",
+  "season": "1",
+  "episode": "1",
+  "ids": {
+    "tmdb": "",
+    "imdb": "",
+    "tvdb": "121361"
+  },
+  "progress": "91",
+  "username": "alex",
+  "occurred_at": "1790024400"
+}

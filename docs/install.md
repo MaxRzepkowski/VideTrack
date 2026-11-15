@@ -1,0 +1,128 @@
+# Installing VideTrack
+
+VideTrack runs as one container: the web server, the queue worker and the scheduler, with the
+library in one SQLite file. The [quick start](../README.md#install) gets it running
+on one machine; this page covers putting it on the network, every setting, and building the
+image yourself.
+
+## Files
+
+Two files in one directory:
+
+- [`compose.yaml`](../deploy/compose.yaml): the service, its port and its two volumes;
+- `.env`, copied from [`env.example`](../deploy/env.example): your settings.
+
+```sh
+docker compose up -d        # start, or apply a changed .env
+docker compose logs -f      # what the container says
+docker compose ps           # "healthy" once the app answers
+```
+
+The `videtrack-data` volume holds the database, its pre-upgrade backups and the generated app key;
+`videtrack-storage` holds avatars, exports and caches.
+
+## On the network
+
+`compose.yaml` binds the port to `127.0.0.1:8080`, for a reverse proxy on the same machine that
+serves the instance over HTTPS. Set `APP_URL` to the address people open (`https://tracker.example.com`):
+links that go to someone else (a password-reset e-mail, a Discord message) are built from it, and an
+`https://` address keeps the session cookie on HTTPS.
+
+The app believes `X-Forwarded-*` headers only from private addresses (`TRUSTED_PROXIES`), which is
+where a proxy on the host or in the Docker network connects from. A visitor from the internet keeps
+its own address, so the login throttle cannot be dodged with a forged header. A proxy on a public
+address (another server, a tunnel) must be listed in `TRUSTED_PROXIES`.
+
+### Caddy
+
+```caddy
+tracker.example.com {
+    reverse_proxy 127.0.0.1:8080
+}
+```
+
+### Traefik
+
+Remove the `ports:` section from `compose.yaml`, put the service on Traefik's network and add:
+
+```yaml
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.videtrack.rule=Host(`tracker.example.com`)
+      - traefik.http.routers.videtrack.entrypoints=websecure
+      - traefik.http.routers.videtrack.tls.certresolver=letsencrypt
+      - traefik.http.services.videtrack.loadbalancer.server.port=80
+```
+
+### nginx
+
+```nginx
+location / {
+    proxy_pass http://127.0.0.1:8080;
+    proxy_set_header Host $host;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_set_header X-Forwarded-Host $host;
+    client_max_body_size 64m;
+}
+```
+
+`client_max_body_size` lets an import file of up to 50 MB through.
+
+### A home network without a proxy
+
+Change the port mapping to `"8080:80"` and open `http://<server-address>:8080`. Keep `APP_URL` on
+`http://`: with `https://` the session cookie would only travel over HTTPS and signing in over
+plain HTTP would not work.
+
+## Accounts
+
+The first account registered becomes the administrator and sign-up closes after it. To keep
+sign-up open for your household, set `REGISTRATION_ENABLED=true`; `false` keeps it closed even on
+an empty instance. Instead of registering, `ADMIN_EMAIL` and `ADMIN_PASSWORD` create the
+administrator on every start (it is never created twice). Accounts are managed with commands; see
+[Administration](administration.md).
+
+## Settings
+
+Everything is optional except `TMDB_API_KEY`. A media type exists only when its keys are set.
+
+| Variable | Default | Description |
+|---|---|---|
+| `TMDB_API_KEY` | (required) | TMDB API key (v3) or read token (v4): movies and TV |
+| `APP_URL` | `http://localhost:8080` | the address people open; links sent to others and the webhook addresses on Settings → Integrations are built from it, so a media server in another container needs an address it can reach |
+| `APP_KEY` | generated | encryption key for stored tokens and sessions; generated on first start into `/data/app.key`. Set it only to bring your own |
+| `IGDB_CLIENT_ID` / `IGDB_CLIENT_SECRET` | | [Twitch Developers](https://dev.twitch.tv/console/apps) app credentials: **games** |
+| `HARDCOVER_API_KEY` | | [Hardcover](https://hardcover.app/account/api) API key (`hc_pat_…`, scope `read:catalog`): **books** |
+| `MAL_CLIENT_ID` | | [MyAnimeList](https://myanimelist.net/apiconfig) client id: **manga** |
+| `COMICVINE_API_KEY` | | [ComicVine](https://comicvine.gamespot.com/api) key: **comics** |
+| `SIMKL_CLIENT_ID` | | client id of a Simkl **AUTH V2** app of type *TV, devices & command line* ([developer settings](https://simkl.com/settings/developer/)); users connect with a code, no callback address. Without it the Simkl import is not offered |
+| `STEAM_API_KEY` | | [Steam Web API key](https://steamcommunity.com/dev/apikey); with IGDB, users can import a public Steam library |
+| `REGISTRATION_ENABLED` | open until the first account | `true` keeps sign-up open, `false` closed |
+| `ADMIN_EMAIL` / `ADMIN_PASSWORD` | | an administrator created on start |
+| `DEFAULT_LOCALE` | `en` | language of new accounts (`en` / `pl`); each user picks their own |
+| `APP_TIMEZONE` | `UTC` | storage time zone; display uses each user's preference |
+| `MAIL_MAILER` | `log` | how the password-reset link is sent; `log` only writes it to the container log. `smtp` with `MAIL_HOST`, `MAIL_PORT` (`587`), `MAIL_USERNAME`, `MAIL_PASSWORD`, `MAIL_SCHEME` |
+| `MAIL_FROM_ADDRESS` | `videtrack@localhost` | sender of the password-reset mail |
+| `TRUSTED_PROXIES` | `PRIVATE_SUBNETS` | whose `X-Forwarded-*` headers to believe (client address for throttling, HTTPS detection); list a proxy on a public address here. `*` is right only when nothing but the proxy can reach the app |
+| `SESSION_SECURE_COOKIE` | follows `APP_URL` | `true` sends the session cookie over HTTPS only; unset, it is `true` exactly when `APP_URL` starts with `https://` |
+| `SESSION_LIFETIME` | `43200` (30 days) | minutes of inactivity before a session ends; "remember me" keeps it about five years |
+| `INTEGRATION_PRIVATE_HOSTS` | | private-network hosts an ordinary account may connect an integration to (an administrator may use any), comma-separated: `tracearr.lan,192.168.1.20` |
+| `LOG_CHANNEL` / `LOG_LEVEL` | `stderr` / `warning` | `stderr` writes to `docker logs`; `daily` or `single` write a file on the storage volume |
+| `SOURCE_URL` | this repository | where About links for the source code; point it at your fork when you run a modified version (AGPL-3.0, section 13) |
+| `HTTP_USER_AGENT` | `media-tracker/<version>` | how the instance names itself to providers and integrations |
+| `WIKIDATA_USER_AGENT` | same as above | Wikidata asks heavy clients for a descriptive name with a contact |
+| `SCROBBLE_COMPLETION_THRESHOLD` | `85` | percent of a title a media server must report before a stop counts as watched |
+| `SCROBBLE_DEDUP_WINDOW_HOURS` | `6` | two servers reporting one viewing within this window log one play |
+| `SCROBBLE_DELIVERY_RETENTION_DAYS` | `30` | how long the delivery log of an integration is kept |
+| `API_RATE_LIMIT_PER_MINUTE` | `240` | requests a minute one API token (or address) may send |
+| `WEBHOOK_RATE_LIMIT_PER_MINUTE` | `60` | reports a minute one integration's webhook address may receive |
+
+## Building the image yourself
+
+```sh
+git clone https://github.com/MaxRzepkowski/VideTrack.git && cd VideTrack
+docker build -f docker/prod/Dockerfile --build-arg APP_VERSION=local -t videtrack:local .
+```
+
+Then set `image: videtrack:local` in your `compose.yaml`.

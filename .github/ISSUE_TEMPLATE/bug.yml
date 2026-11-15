@@ -1,0 +1,35 @@
+name: Bug
+description: Something does not work as it should.
+labels: [bug]
+body:
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: Settings → About, or the image tag you run.
+      placeholder: 0.1.0
+    validations:
+      required: true
+  - type: dropdown
+    id: install
+    attributes:
+      label: How it runs
+      options:
+        - Published image with compose.yaml
+        - Image built from source
+        - Development setup
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: What happened
+      description: The steps, what you expected and what you saw instead.
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: The relevant part of `docker compose logs`. Remove keys, addresses and e-mails first.
+      render: text

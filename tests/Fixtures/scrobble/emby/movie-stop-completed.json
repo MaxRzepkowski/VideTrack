@@ -1,0 +1,28 @@
+{
+  "Title": "The Matrix has been played",
+  "Date": "2026-09-21T20:15:00.0000000Z",
+  "Event": "playback.stop",
+  "User": {
+    "Name": "alex",
+    "Id": "9d8c7b6a"
+  },
+  "Item": {
+    "Name": "The Matrix",
+    "Type": "Movie",
+    "ProductionYear": 1999,
+    "RunTimeTicks": 81600000000,
+    "ProviderIds": {
+      "Tmdb": "603",
+      "Imdb": "tt0133093",
+      "TmdbCollection": "2344"
+    }
+  },
+  "PlaybackInfo": {
+    "PlayedToCompletion": true,
+    "PositionTicks": 81600000000
+  },
+  "Server": {
+    "Name": "emby",
+    "Id": "1a2b3c"
+  }
+}

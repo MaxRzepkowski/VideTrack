@@ -1,0 +1,5 @@
+[
+    { "id": 1, "game_id": 115289, "popularity_type": 1, "value": 0.9 },
+    { "id": 2, "game_id": 14593, "popularity_type": 1, "value": 0.5 },
+    { "id": 3, "game_id": 424242, "popularity_type": 1, "value": 0.1 }
+]

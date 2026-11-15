@@ -1,0 +1,16 @@
+[
+    {
+        "id": 14593,
+        "name": "Hollow Knight",
+        "first_release_date": 1487894400,
+        "total_rating": 92.03731981566378,
+        "cover": { "id": 84327, "image_id": "co1rgi" }
+    },
+    {
+        "id": 115289,
+        "name": "Hollow Knight: Silksong",
+        "first_release_date": 1757116800,
+        "total_rating": 91.1,
+        "cover": { "id": 425257, "image_id": "co946p" }
+    }
+]

@@ -1,0 +1,31 @@
+.git
+.github
+node_modules
+vendor
+public/build
+public/storage
+public/hot
+# Everything under storage is the instance's own (database snapshots,
+# exports, logs): the image makes the empty skeleton itself.
+storage
+# Any copy of a database (backups, `.bak-*`, WAL files) holds a real library.
+database/*.sqlite*
+.claude
+.env
+.env.*
+!.env.example
+docker-compose*.yml
+deploy
+*.md
+tests
+.phpunit.result.cache
+docs
+scripts
+*.txt
+phpstan*.neon
+phpunit.xml
+eslint.config.js
+vitest.config.ts
+components.json
+# Local notes kept beside the code (anything in the root starting with _).
+_*

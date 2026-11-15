@@ -1,0 +1,28 @@
+<?php
+
+return [
+    'activity_date' => 'Data aktywności',
+    'all_kinds' => 'Wszystkie rodzaje',
+    'count_title' => ':count tytuł|:count tytuły|:count tytułów',
+    'grid' => 'Siatka',
+    'grouped_by_day' => 'Grupuj po dniach',
+    'hide_listed' => 'Ukryj z list',
+    'kind' => 'Rodzaj',
+    'mark_date' => 'Data oznaczenia',
+    'member_since_date' => 'W serwisie od :date',
+    'mute' => 'Wycisz',
+    'name_favorites' => ':name: ulubione',
+    'name_history' => ':name: historia',
+    'name_following' => ':name: śledzone',
+    'name_in_progress' => ':name: w trakcie',
+    'name_ratings' => ':name: oceny',
+    'nothing_followed_yet_use_the_bell' => 'Niczego jeszcze nie śledzisz. Użyj dzwonka na stronie tytułu lub osoby.',
+    'playtime' => 'Czas grania',
+    'remove' => 'Usuń',
+    'remove_rating_confirm' => 'Twoja ocena tego tytułu zostanie usunięta.',
+    'remove_favorite_confirm' => 'Ten tytuł zniknie z ulubionych.',
+    'see_all' => 'Zobacz wszystkie',
+    'stats' => 'Statystyki',
+    'unmute' => 'Cofnij wyciszenie',
+    'via_followed_people_or_companies' => 'Przez śledzone osoby lub firmy',
+];

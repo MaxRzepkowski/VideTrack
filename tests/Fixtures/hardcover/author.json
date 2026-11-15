@@ -1,0 +1,87 @@
+{
+    "data": {
+        "authors_by_pk": {
+            "id": 132049,
+            "name": "J.R.R. Tolkien",
+            "bio": "<i>John Ronald Reuel Tolkien</i> was an English writer and philologist, best known for The Hobbit and The Lord of the Rings.",
+            "born_date": "1892-01-03",
+            "death_date": "1973-09-02",
+            "slug": "j-r-r-tolkien",
+            "cached_image": {
+                "id": 1,
+                "url": "https://assets.hardcover.app/authors/132049/tolkien.jpg"
+            },
+            "location": "United Kingdom",
+            "links": [
+                {
+                    "url": "https://www.tolkiensociety.org/",
+                    "title": "The Tolkien Society",
+                    "social_type": "website",
+                    "display_name": "tolkiensociety.org"
+                },
+                {
+                    "url": "https://www.tolkienestate.com/",
+                    "title": "The Official Website of the JRR Tolkien Estate",
+                    "social_type": "website",
+                    "display_name": "tolkienestate.com"
+                },
+                { "url": "https://www.theonering.com/", "title": "TheOneRing.com", "social_type": "website", "display_name": "theonering.com" },
+                {
+                    "url": "https://en.wikipedia.org/wiki/J._R._R._Tolkien",
+                    "title": "Wikipedia",
+                    "social_type": "website",
+                    "display_name": "en.wikipedia.org"
+                }
+            ]
+        },
+        "books": [
+            {
+                "id": 312460,
+                "title": "The Fellowship of the Ring",
+                "release_date": "1954-07-29",
+                "release_year": 1954,
+                "rating": 4.5,
+                "users_count": 9120,
+                "cached_image": { "url": "https://assets.hardcover.app/edition/999/fellowship.jpg" },
+                "cached_contributors": [{ "author": { "id": 132049, "name": "J.R.R. Tolkien" } }]
+            },
+            {
+                "id": 2459845,
+                "title": "The Hobbit, or There and Back Again",
+                "release_date": "1937-09-21",
+                "release_year": 1937,
+                "rating": 4.31,
+                "users_count": 7400,
+                "cached_image": { "url": "https://assets.hardcover.app/edition/17456445/hobbit.jpg" },
+                "cached_contributors": [
+                    { "author": { "id": 132049, "name": "J.R.R. Tolkien" }, "contribution": null },
+                    { "author": { "id": 132049, "name": "J.R.R. Tolkien" }, "contribution": "Illustrator" }
+                ]
+            },
+            {
+                "id": 431002,
+                "title": "Sir Gawain and the Green Knight",
+                "release_date": "1975-01-01",
+                "release_year": 1975,
+                "rating": 3.9,
+                "users_count": 610,
+                "cached_image": { "url": "https://assets.hardcover.app/edition/431002/gawain.jpg" },
+                "cached_contributors": [
+                    { "author": { "id": 118355, "name": "Anonymous" }, "contribution": null },
+                    { "author": { "id": 132049, "name": "J.R.R. Tolkien" }, "contribution": "Translator" }
+                ]
+            },
+            {
+                "id": 999999,
+                "title": "Coverless Placeholder",
+                "release_date": "2001-01-01",
+                "release_year": 2001,
+                "rating": null,
+                "users_count": 0,
+                "cached_image": [],
+                "cached_contributors": [{ "author": { "id": 132049, "name": "J.R.R. Tolkien" } }]
+            },
+            null
+        ]
+    }
+}

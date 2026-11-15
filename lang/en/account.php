@@ -1,0 +1,27 @@
+<?php
+
+return [
+    'a_reset_link_will_be_sent' => 'A reset link will be sent if the account exists.',
+    'already_have_an_account' => 'Already have an account?',
+    'create_account' => 'Create account',
+    'create_an_account' => 'Create an account',
+    'dont_have_an_account' => 'Don\'t have an account?',
+    'email_password_reset_link' => 'Email password reset link',
+    'enter_your_details_below_to_create' => 'Enter your details below to create your account',
+    'enter_your_email_and_password_below' => 'Enter your email and password below to log in',
+    'enter_your_email_to_receive_a' => 'Enter your email to receive a password reset link',
+    'forgot_password' => 'Forgot password',
+    'forgot_password_2' => 'Forgot password?',
+    'full_name' => 'Full name',
+    'log_in' => 'Log in',
+    'log_in_2' => 'log in',
+    'log_in_to_your_account' => 'Log in to your account',
+    'or_return_to_login' => 'Or, return to :login',
+    'please_enter_your_new_password_below' => 'Please enter your new password below',
+    'register' => 'Register',
+    'remember_me' => 'Remember me',
+    'reset_password' => 'Reset password',
+    'sign_up' => 'Sign up',
+    'username_a_z_0_9' => 'username (a-z, 0-9, _)',
+    'this_server_sends_no_mail' => 'This server has no mail set up, so the link only reaches the server log. Ask whoever runs this VideTrack to reset your password.',
+];

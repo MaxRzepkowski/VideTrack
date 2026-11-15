@@ -1,0 +1,29 @@
+{
+    "id": 3628,
+    "name": "Season 2",
+    "overview": "The cold winds of winter are rising.",
+    "air_date": "2012-04-01",
+    "season_number": 2,
+    "poster_path": "/got-s2.jpg",
+    "vote_average": 8.4,
+    "episodes": [
+        {
+            "episode_number": 1,
+            "name": "The North Remembers",
+            "air_date": "2012-04-01",
+            "runtime": 53,
+            "overview": "Tyrion arrives in King's Landing.",
+            "still_path": "/got-s2e1.jpg",
+            "vote_average": 8.0
+        },
+        {
+            "episode_number": 2,
+            "name": "The Night Lands",
+            "air_date": "2012-04-08",
+            "runtime": 54,
+            "overview": "Arya makes friends on the road north.",
+            "still_path": "/got-s2e2.jpg",
+            "vote_average": 7.8
+        }
+    ]
+}

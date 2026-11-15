@@ -1,0 +1,17 @@
+{
+  "action": "{action}",
+  "media_type": "{media_type}",
+  "title": "{title}",
+  "show_name": "{show_name}",
+  "year": "{year}",
+  "season": "{season_num}",
+  "episode": "{episode_num}",
+  "ids": {
+    "tmdb": "{themoviedb_id}",
+    "imdb": "{imdb_id}",
+    "tvdb": "{thetvdb_id}"
+  },
+  "progress": "{progress_percent}",
+  "username": "{username}",
+  "occurred_at": "{unixtime}"
+}

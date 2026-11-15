@@ -1,0 +1,50 @@
+{
+    "data": [
+        {
+            "node": {
+                "id": 2,
+                "title": "Berserk",
+                "main_picture": {
+                    "medium": "https://cdn.myanimelist.net/images/manga/1/157897.webp",
+                    "large": "https://cdn.myanimelist.net/images/manga/1/157897l.webp"
+                },
+                "start_date": "1989-08-25",
+                "mean": 9.46,
+                "media_type": "manga",
+                "num_chapters": 0
+            },
+            "ranking": { "rank": 1 }
+        },
+        {
+            "node": {
+                "id": 21479,
+                "title": "Sword Art Online",
+                "main_picture": {
+                    "medium": "https://cdn.myanimelist.net/images/manga/3/sao.jpg",
+                    "large": "https://cdn.myanimelist.net/images/manga/3/saol.jpg"
+                },
+                "start_date": "2009-04-10",
+                "mean": 7.61,
+                "media_type": "light_novel",
+                "num_chapters": 0
+            },
+            "ranking": { "rank": 2 }
+        },
+        {
+            "node": {
+                "id": 116778,
+                "title": "Chainsaw Man",
+                "main_picture": {
+                    "medium": "https://cdn.myanimelist.net/images/manga/3/216464.webp",
+                    "large": "https://cdn.myanimelist.net/images/manga/3/216464l.webp"
+                },
+                "start_date": "2018-12-03",
+                "mean": 8.63,
+                "media_type": "manga",
+                "num_chapters": 232
+            },
+            "ranking": { "rank": 3 }
+        }
+    ],
+    "paging": {}
+}

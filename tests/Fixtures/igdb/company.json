@@ -1,0 +1,13 @@
+[
+    {
+        "id": 70,
+        "name": "Nintendo",
+        "description": "Nintendo Co., Ltd. is a Japanese multinational video game company.",
+        "country": 392,
+        "start_date": 1000000000,
+        "url": "https://www.igdb.com/companies/nintendo",
+        "logo": { "id": 1, "image_id": "cl9fnwljvm3jj4b2y8vg" },
+        "websites": [{ "id": 1, "url": "https://www.nintendo.com", "type": 1 }],
+        "parent": { "id": 51, "name": "Parent Company" }
+    }
+]

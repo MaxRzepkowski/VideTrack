@@ -1,0 +1,17 @@
+{
+  "ServerId": "7f0b0c0e",
+  "ServerName": "jellyfin",
+  "NotificationType": "PlaybackStop",
+  "ItemType": "Movie",
+  "ItemId": "a1b2c3",
+  "Name": "The Matrix",
+  "Year": 1999,
+  "Overview": "A computer hacker learns about the true nature of his reality.",
+  "Provider_tmdb": "603",
+  "Provider_imdb": "tt0133093",
+  "PlayedToCompletion": "True",
+  "PlaybackPositionTicks": 81600000000,
+  "RunTimeTicks": 81600000000,
+  "NotificationUsername": "alex",
+  "UtcTimestamp": "2026-09-21 20:15:00Z"
+}

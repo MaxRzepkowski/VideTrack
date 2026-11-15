@@ -1,0 +1,18 @@
+{
+    "certifications": {
+        "PL": [
+            {
+                "certification": "18",
+                "meaning": "Suitable only for adults.",
+                "order": 4
+            }
+        ],
+        "US": [
+            {
+                "certification": "TV-MA",
+                "meaning": "Designed to be viewed by adults and may be unsuitable for children under 17.",
+                "order": 5
+            }
+        ]
+    }
+}

@@ -1,0 +1,379 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+/* Dark-only app: `.dark` is hard-set on <html> and never toggled. Declared as
+   a custom variant so `dark:` utilities resolve as the baseline. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Sources outside the auto-detected app tree (vendor is gitignored). */
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+
+/*
+ * Design-system tokens — the single source of truth. The shadcn components
+ * in `components/ui` read these too; there is no second palette.
+ */
+@theme {
+    --font-sans:
+        'Roboto Flex Variable', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+
+    /* shadcn radius scale */
+    --radius-lg: var(--radius);
+    --radius-md: calc(var(--radius) - 2px);
+    --radius-sm: calc(var(--radius) - 4px);
+
+    /* Exactly two layout container widths — plus one exception. */
+    --max-width-content: 1400px;
+    --max-width-wide: 1530px;
+
+    /*
+     * The exception: the calendar page, a grid of DAYS rather than of cards.
+     * Its column count is fixed by the calendar (seven of them on a wide
+     * screen), so the only place a day can take its width from is the page —
+     * every pixel the container gives back lands inside a day.
+     */
+    --max-width-calendar: 1920px;
+
+    /* Extra-small breakpoint (~480px): compact mobile cards expand their
+       controls and poster grids gain their regular spacing. */
+    --breakpoint-xs: 30rem;
+
+    /*
+     * The width at which the page container stops growing (`--max-width-content`
+     * = 1400px). Anything that only earns its keep on a full-width page — the
+     * dashboard calendar's posters — hangs off this one, so it appears exactly
+     * when the layout has nothing left to give.
+     */
+    --breakpoint-wide: 87.5rem;
+
+    /* Above this the calendar can hold seven days a row and still read. */
+    --breakpoint-3xl: 110rem;
+
+    /* Semantic dark-theme scale. */
+    --color-surface: #141418;
+    --color-surface-base: #0a0a0d;
+    /* Full-width page bands (PageSection `subtle`). Sits between the page
+       background and a card, so the band reads against the page and the cards
+       on it still read against the band. */
+    --color-surface-band: #070709;
+    --color-surface-raised: #1c1c22;
+    --color-surface-control: #1f1f24;
+    --color-surface-toolbar: #0f0f12;
+    --color-surface-overlay: #232329;
+
+    --color-ink: #f2f1f5;
+    --color-ink-secondary: #c9c9d1;
+    --color-ink-muted: #9a9aa5;
+    /* ~5:1 on the base bg, so body text in it passes WCAG AA. */
+    --color-ink-faint: #85858d;
+
+    --color-line: #26262e;
+    --color-line-subtle: #202027;
+    --color-line-strong: #3a3a45;
+    /* The dimmest hairline, for the seam between two surfaces that already sit
+       a hair apart — full-page band edges. `line-subtle` is drawn to read
+       against a card; over the near-black bands it reads as a stripe. */
+    --color-line-faint: #16161b;
+
+    --color-brand: #7337ff;
+    --color-brand-soft: #b794ff;
+    --color-brand-strong: #4b1fb0;
+
+    --color-status-dropped: #ff5c5c;
+    --color-status-onhold: #ffa843;
+    --color-status-progress: #b794ff;
+
+    /* Danger / destructive family (delete, drop, Danger Zone). */
+    --color-danger: #e8a3ad;
+    --color-danger-surface: #1a1216;
+    --color-danger-line: #3a2028;
+    --color-danger-strong: #b3244a;
+
+    /* On the air: the red mark of an event streaming now, the one sign a live show wears everywhere. */
+    --color-live: #ff3b47;
+
+    /* Something went through (a link sent, a run finished): the quiet green beside danger. */
+    --color-success: #9fdcaa;
+
+    /* Action colors (marking surfaces). */
+    --color-action-watched: #6aff5c;
+    --color-action-watchlist: #4dcaff;
+    --color-action-favorite: #ff4a90;
+    --color-action-rating: #ffc53d;
+
+    /* Media-type colors. */
+    --color-media-movie: #2e90fa;
+    --color-media-tv: #8136ff;
+    --color-media-game: #10b981;
+    --color-media-book: #ff6900;
+    --color-media-manga: #d946ef;
+    --color-media-comic: #dc2626;
+    /* Deep tints of the reading types, for the hero of a title with neither a
+       backdrop nor a cover colour of its own. */
+    --color-media-manga-shade: #47173f;
+    --color-media-comic-shade: #4a1515;
+
+    /* The trend line of the rating charts and the moving shine of a loading
+       card: one shade each, lighter than any surface they sit on. */
+    --color-chart-line: #4a4a52;
+    --color-skeleton-shine: #31313c;
+
+    /* The perfect-10 ring: a gold sweep and its glow, warmer than the plain
+       rating amber. */
+    --color-rating-gold-light: #ffe08a;
+    --color-rating-gold: #ffb020;
+    --color-rating-glow: #ffc83c;
+
+    /* Rating tiers of the charts, best to worst. */
+    --color-tier-absolute: #00a6ff;
+    --color-tier-awesome: #026446;
+    --color-tier-great: #14de5e;
+    --color-tier-good: #ffd52d;
+    --color-tier-regular: #fb923c;
+    --color-tier-bad: #ff5252;
+    --color-tier-garbage: #69006f;
+
+    /* White and black by role, never by name. On a photo: text and marks laid
+       over a picture. On an accent: text on a fill of colour (the brand, a
+       media type, a status). The scrim: the shade under such marks and behind
+       a dialog. The highlight: the faint wash of a hovered row. The paper: the
+       light ground a logo drawn for one sits on. */
+    --color-on-photo: #ffffff;
+    --color-on-accent: #ffffff;
+    --color-scrim: #000000;
+    --color-highlight: #ffffff;
+    --color-paper: #ffffff;
+
+    /* Episode milestone colors (premiere / finale chips). */
+    --color-episode-premiere: #8600d3;
+    --color-episode-finale: #d30066;
+    /* A release of another kind than a plain one (Early Access, a next-gen patch): its own chip, not a type's colour. */
+    --color-release-status: #b45309;
+
+    /* Store marks on a game's "Where to buy" card: each brand's own colour
+       (simple-icons' official hex; Xbox and Nintendo from their brand guides). */
+    --color-store-steam: #000000;
+    --color-store-gog: #86328a;
+    --color-store-epicgames: #313131;
+    --color-store-playstation: #0070d1;
+    --color-store-xbox: #107c10;
+    --color-store-nintendo: #e60012;
+    --color-store-itch: #fa5c5c;
+    --color-store-appstore: #0d96f6;
+    --color-store-googleplay: #414141;
+
+    /* Named aspect ratios (poster grid, banner). */
+    --aspect-poster: 2 / 3;
+    --aspect-banner: 2 / 1;
+
+    /* Modal / panel / menu widths (named, not raw px). */
+    --max-width-menu: 240px;
+    --max-width-narrow: 300px;
+    --max-width-dialog: 560px;
+    --max-width-dialog-lg: 640px;
+    --max-width-reading: 720px;
+    --max-width-reading-lg: 760px;
+    --max-width-panel: 1100px;
+
+    /* Semantic heading scale. */
+    --text-hero: 44px;
+    --text-title: 28px;
+    /* Initials inside a small avatar: the one text allowed under 14px.
+       Nothing else uses it. */
+    --text-initials: 11px;
+    /* Card captions (the episode counter under a progress bar); 14px, the
+       floor for any label. */
+    --text-caption: 14px;
+
+    /* Elevation scale: use these, not inline shadows. */
+    --shadow-card: 0 2px 8px rgb(0 0 0 / 0.45);
+    --shadow-float: 0 2px 10px rgb(0 0 0 / 0.6);
+    --shadow-tight: 0 1px 6px rgb(0 0 0 / 0.8);
+    --drop-shadow-float: 0 2px 10px rgb(0 0 0 / 0.6);
+    --drop-shadow-tight: 0 1px 6px rgb(0 0 0 / 0.8);
+}
+
+::selection {
+    background: var(--color-brand);
+    color: var(--color-on-accent);
+}
+
+/*
+ * Scroll areas inside panels (the notification bell, modal lists): the browser
+ * paints its own bar, a bright chrome slab that glares against a dark surface
+ * and reads as part of the window, not of the panel. Drawn instead in the line
+ * tokens, thin and on a transparent track — still there, so a list that
+ * continues below the fold says so.
+ *
+ * `scrollbar-*` covers Firefox and Chromium 121+; the WebKit pseudo-elements
+ * cover everything older. Both are set — they don't collide, each browser
+ * honours one.
+ */
+@utility scroll-subtle {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-line-strong) transparent;
+
+    &::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+    }
+
+    &::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background-color: var(--color-line-strong);
+        border-radius: 9999px;
+    }
+
+    &::-webkit-scrollbar-thumb:hover {
+        background-color: var(--color-ink-faint);
+    }
+}
+
+/*
+ * The shade at the foot of a poster, under its marks: dark at the edge, gone
+ * a fifth of the way up.
+ */
+@utility scrim-bottom {
+    background: linear-gradient(to top, color-mix(in oklab, var(--color-scrim) 65%, transparent) 0%, transparent 20%);
+}
+
+/*
+ * A scroll area that carries its own affordance — arrow buttons that appear
+ * only while there is something past an edge — and so has no use for a bar
+ * underneath saying the same thing a second time. The area still scrolls by
+ * wheel, touch and keyboard; only the paint is gone. Never reach for this on
+ * a scroll area whose overflow is otherwise unannounced.
+ */
+@utility scroll-none {
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+}
+
+@layer base {
+    /* Dark-only app. */
+    :root {
+        color-scheme: dark;
+
+        --radius: 0.5rem;
+    }
+}
+
+/*
+ * v4 defaults borders/dividers to currentColor; a bare `border` draws the
+ * subtle line instead.
+ */
+@layer base {
+    *,
+    ::after,
+    ::before,
+    ::backdrop,
+    ::file-selector-button {
+        border-color: var(--color-line-subtle);
+    }
+
+    body {
+        @apply bg-surface-base text-ink;
+    }
+
+    /*
+     * Tailwind's preflight leaves buttons with the browser's default cursor;
+     * enabled clickables get the pointer.
+     */
+    button:not(:disabled),
+    [role='button']:not(:disabled) {
+        cursor: pointer;
+    }
+
+    /*
+     * One keyboard-focus indicator for every clickable, the hand-rolled
+     * action surfaces included. Only shows for keyboard users
+     * (:focus-visible); form controls keep their own border-brand focus, and
+     * radix overlays manage their own focus, so they're excluded.
+     */
+    a:focus-visible,
+    button:focus-visible,
+    [role='button']:focus-visible {
+        outline: 2px solid var(--color-brand-soft);
+        outline-offset: 2px;
+        border-radius: var(--radius-sm);
+    }
+}
+
+/*
+ * The reading-position slider (status modal): a native range input dressed in
+ * the app's surfaces, so it keeps the keyboard and touch behaviour browsers
+ * already give it. The filled part is painted as a gradient stopping at
+ * `--slider-fill` (set inline per value) because WebKit has no counterpart to
+ * Firefox's ::-moz-range-progress — one declaration, both engines.
+ */
+@layer components {
+    .progress-slider {
+        -webkit-appearance: none;
+        appearance: none;
+        height: 1.25rem;
+        background: transparent;
+        cursor: pointer;
+    }
+
+    .progress-slider::-webkit-slider-runnable-track {
+        height: 0.375rem;
+        border-radius: 9999px;
+        background: linear-gradient(
+            to right,
+            var(--color-status-progress) var(--slider-fill, 0%),
+            var(--color-surface-overlay) var(--slider-fill, 0%)
+        );
+    }
+
+    .progress-slider::-moz-range-track {
+        height: 0.375rem;
+        border-radius: 9999px;
+        background: linear-gradient(
+            to right,
+            var(--color-status-progress) var(--slider-fill, 0%),
+            var(--color-surface-overlay) var(--slider-fill, 0%)
+        );
+    }
+
+    .progress-slider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        height: 1.125rem;
+        width: 1.125rem;
+        border-radius: 9999px;
+        background: var(--color-status-progress);
+        /* Centres the thumb on a 6px rail inside a 20px control. */
+        margin-top: -0.375rem;
+    }
+
+    .progress-slider::-moz-range-thumb {
+        height: 1.125rem;
+        width: 1.125rem;
+        border: 0;
+        border-radius: 9999px;
+        background: var(--color-status-progress);
+    }
+
+    .progress-slider:focus-visible {
+        outline: 2px solid var(--color-brand-soft);
+        outline-offset: 2px;
+        border-radius: 9999px;
+    }
+}
+
+/*
+ * A hand-arranged grid (a list's positions, the lists themselves) in edit
+ * mode: `<TransitionGroup name="reorder">`. When a move or a removal shifts
+ * the cards, FLIP slides them to their new spot instead of snapping;
+ * move-only (no absolute-positioned leave) keeps the grid from glitching.
+ */
+@layer components {
+    .reorder-move {
+        transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1);
+    }
+}

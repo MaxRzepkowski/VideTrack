@@ -1,0 +1,330 @@
+{
+    "@class": "MediaDetails",
+    "summary": {
+        "@class": "MediaSummary",
+        "type": "movie",
+        "ref": "603",
+        "provider": "tmdb",
+        "title": "The Matrix",
+        "year": 1999,
+        "posterPath": "/matrix-poster.jpg",
+        "backdropPath": "/matrix-backdrop.jpg",
+        "communityRating": 8.2,
+        "releaseDate": "1999-03-30",
+        "releaseTime": null,
+        "number": null,
+        "totalRuntime": null,
+        "seasonNumber": null,
+        "runtime": null,
+        "overview": null,
+        "releaseKind": null,
+        "platform": null,
+        "releaseStatus": null,
+        "extra": [],
+        "progressTotal": null,
+        "episodeType": null,
+        "authors": [],
+        "episodeBadge": null,
+        "creatorKind": null,
+        "makes": null,
+        "votes": null,
+        "releasePrecision": "day",
+        "alternativeTitles": []
+    },
+    "tagline": "The fight for the future begins.",
+    "overview": "Set in the 22nd century, The Matrix tells the story of a computer hacker.",
+    "runtime": 136,
+    "genres": [
+        "Action",
+        "Science Fiction"
+    ],
+    "status": "released",
+    "originalLanguage": "en",
+    "certification": "16",
+    "certifications": [
+        {
+            "@class": "CertificationData",
+            "region": "US",
+            "code": "R",
+            "meaning": "Under 17 requires an accompanying parent or adult guardian."
+        },
+        {
+            "@class": "CertificationData",
+            "region": "PL",
+            "code": "16",
+            "meaning": "Suitable for viewers aged 16 and older."
+        }
+    ],
+    "releases": [
+        {
+            "@class": "ReleaseEntry",
+            "region": "US",
+            "kind": "limited",
+            "date": "1999-03-24",
+            "note": "Westwood premiere"
+        },
+        {
+            "@class": "ReleaseEntry",
+            "region": "US",
+            "kind": "theatrical",
+            "date": "1999-03-31",
+            "note": null
+        },
+        {
+            "@class": "ReleaseEntry",
+            "region": "PL",
+            "kind": "theatrical",
+            "date": "1999-06-11",
+            "note": null
+        },
+        {
+            "@class": "ReleaseEntry",
+            "region": "RO",
+            "kind": "digital",
+            "date": "1999-08-15",
+            "note": "Netflix"
+        },
+        {
+            "@class": "ReleaseEntry",
+            "region": "US",
+            "kind": "digital",
+            "date": "1999-09-21",
+            "note": null
+        },
+        {
+            "@class": "ReleaseEntry",
+            "region": "US",
+            "kind": "disc",
+            "date": "1999-11-02",
+            "note": null
+        },
+        {
+            "@class": "ReleaseEntry",
+            "region": "PL",
+            "kind": "tv",
+            "date": "2001-02-03",
+            "note": null
+        }
+    ],
+    "platformReleases": [],
+    "keywords": [
+        {
+            "@class": "KeywordData",
+            "name": "artificial intelligence",
+            "ref": "1"
+        },
+        {
+            "@class": "KeywordData",
+            "name": "cyberpunk",
+            "ref": "2"
+        }
+    ],
+    "externalLinks": {
+        "homepage": "https://www.warnerbros.com/movies/matrix",
+        "tmdb": "https://www.themoviedb.org/movie/603",
+        "imdb": "https://www.imdb.com/title/tt0133093/",
+        "x": "https://x.com/TheMatrix",
+        "wikidata": "https://www.wikidata.org/wiki/Q83495"
+    },
+    "extra": {
+        "budget": 63000000,
+        "revenue": 463517383,
+        "studios": [],
+        "imdbId": "tt0133093",
+        "logoPath": "/matrix-logo.png",
+        "originalTitle": null,
+        "spokenLanguages": [
+            "English"
+        ],
+        "productionCountries": [
+            "US",
+            "AU"
+        ],
+        "alternativeTitles": [
+            "Matrix",
+            "La Matrice"
+        ],
+        "certificationRegion": "PL",
+        "certificationMeaning": "Suitable for viewers aged 16 and older.",
+        "certificationDescriptors": [],
+        "homeReleaseNote": "Netflix"
+    },
+    "children": [],
+    "cast": [
+        {
+            "@class": "CreditData",
+            "personRef": "6384",
+            "provider": "tmdb",
+            "name": "Keanu Reeves",
+            "profilePath": "/keanu.jpg",
+            "department": "acting",
+            "role": "Neo",
+            "order": 0,
+            "episodeCount": null,
+            "roles": []
+        },
+        {
+            "@class": "CreditData",
+            "personRef": "2975",
+            "provider": "tmdb",
+            "name": "Laurence Fishburne",
+            "profilePath": "/laurence.jpg",
+            "department": "acting",
+            "role": "Morpheus",
+            "order": 1,
+            "episodeCount": null,
+            "roles": []
+        }
+    ],
+    "crew": [
+        {
+            "@class": "CreditData",
+            "personRef": "9339",
+            "provider": "tmdb",
+            "name": "Lana Wachowski",
+            "profilePath": null,
+            "department": "directing",
+            "role": "Director",
+            "order": 0,
+            "episodeCount": null,
+            "roles": []
+        },
+        {
+            "@class": "CreditData",
+            "personRef": "9340",
+            "provider": "tmdb",
+            "name": "Lilly Wachowski",
+            "profilePath": null,
+            "department": "directing",
+            "role": "Director",
+            "order": 0,
+            "episodeCount": null,
+            "roles": []
+        },
+        {
+            "@class": "CreditData",
+            "personRef": "9339",
+            "provider": "tmdb",
+            "name": "Lana Wachowski",
+            "profilePath": null,
+            "department": "writing",
+            "role": "Writer",
+            "order": 0,
+            "episodeCount": null,
+            "roles": []
+        }
+    ],
+    "videos": [
+        {
+            "@class": "VideoData",
+            "key": "vKQi3bBA1y8",
+            "site": "YouTube",
+            "type": "Trailer",
+            "name": "Official Trailer",
+            "official": true,
+            "publishedAt": "2014-01-01"
+        },
+        {
+            "@class": "VideoData",
+            "key": "abc",
+            "site": "Vimeo",
+            "type": "Trailer",
+            "name": "Vimeo Trailer",
+            "official": false,
+            "publishedAt": null
+        }
+    ],
+    "backdrops": [
+        "/backdrop-1.jpg",
+        "/backdrop-2.jpg"
+    ],
+    "posters": [
+        "/poster-1.jpg"
+    ],
+    "logos": [
+        "/matrix-logo.png"
+    ],
+    "related": [
+        {
+            "@class": "MediaSummary",
+            "type": "movie",
+            "ref": "604",
+            "provider": "tmdb",
+            "title": "The Matrix Reloaded",
+            "year": 2003,
+            "posterPath": "/reloaded.jpg",
+            "backdropPath": null,
+            "communityRating": 7.0,
+            "releaseDate": "2003-05-15",
+            "releaseTime": null,
+            "number": null,
+            "totalRuntime": null,
+            "seasonNumber": null,
+            "runtime": null,
+            "overview": null,
+            "releaseKind": null,
+            "platform": null,
+            "releaseStatus": null,
+            "extra": [],
+            "progressTotal": null,
+            "episodeType": null,
+            "authors": [],
+            "episodeBadge": null,
+            "creatorKind": null,
+            "makes": null,
+            "votes": null,
+            "releasePrecision": "day",
+            "alternativeTitles": []
+        }
+    ],
+    "similar": [
+        {
+            "@class": "MediaSummary",
+            "type": "movie",
+            "ref": "606",
+            "provider": "tmdb",
+            "title": "The Matrix Revolutions",
+            "year": 2003,
+            "posterPath": "/revolutions.jpg",
+            "backdropPath": null,
+            "communityRating": 6.7,
+            "releaseDate": "2003-11-05",
+            "releaseTime": null,
+            "number": null,
+            "totalRuntime": null,
+            "seasonNumber": null,
+            "runtime": null,
+            "overview": null,
+            "releaseKind": null,
+            "platform": null,
+            "releaseStatus": null,
+            "extra": [],
+            "progressTotal": null,
+            "episodeType": null,
+            "authors": [],
+            "episodeBadge": null,
+            "creatorKind": null,
+            "makes": null,
+            "votes": null,
+            "releasePrecision": "day",
+            "alternativeTitles": []
+        }
+    ],
+    "localizedTitles": {
+        "en": {
+            "@class": "LocalizedTitle",
+            "title": "The Matrix",
+            "posterPath": "/matrix-poster.jpg"
+        },
+        "pl": {
+            "@class": "LocalizedTitle",
+            "title": "The Matrix",
+            "posterPath": "/matrix-poster.jpg"
+        }
+    },
+    "wikidataId": "Q83495",
+    "collection": null,
+    "lastEpisodeToAir": null,
+    "nextEpisodeToAir": null,
+    "adult": false
+}

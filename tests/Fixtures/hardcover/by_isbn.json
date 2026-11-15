@@ -1,0 +1,31 @@
+{
+  "data": {
+    "editions": [
+      {
+        "book": {
+          "id": 2459845,
+          "title": "The Hobbit, or There and Back Again",
+          "release_date": "1937-09-21",
+          "release_year": 1937,
+          "rating": 4.31,
+          "cached_image": {
+            "id": 6075752,
+            "url": "https://assets.hardcover.app/edition/17456445/hobbit.jpg",
+            "color": "#c58f27",
+            "color_name": "Orange"
+          },
+          "cached_contributors": [
+            {
+              "author": {
+                "id": 132049,
+                "slug": "j-r-r-tolkien",
+                "name": "J.R.R. Tolkien"
+              },
+              "contribution": null
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
