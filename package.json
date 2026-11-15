@@ -18,7 +18,7 @@
         "@vitest/coverage-v8": "^5.1.0",
         "@vue/eslint-config-typescript": "^14.3.0",
         "@vue/test-utils": "^2.5.1",
-        "eslint": "^9.17.0",
+        "eslint": "^10.14.0",
         "eslint-config-prettier": "^10.0.1",
         "eslint-plugin-vue": "^9.32.0",
         "happy-dom": "^21.0.4",
