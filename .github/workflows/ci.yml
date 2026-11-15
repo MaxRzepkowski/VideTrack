@@ -103,8 +103,10 @@ jobs:
           load: true
           tags: videtrack:ci
           build-args: APP_VERSION=ci-${{ github.sha }}
-          cache-from: type=gha,scope=prod
-          cache-to: type=gha,scope=prod,mode=max
+          # One cache per image shape: an amd64-only export under the name the
+          # multi-arch builds use would replace theirs and drop the arm64 layers.
+          cache-from: type=gha,scope=prod-amd64
+          cache-to: type=gha,scope=prod-amd64,mode=max
 
       - name: Fresh start
         run: scripts/smoke.sh videtrack:ci
@@ -164,5 +166,7 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: APP_VERSION=edge-${{ github.sha }}
-          cache-from: type=gha,scope=prod
-          cache-to: type=gha,scope=prod,mode=max
+          cache-from: |
+            type=gha,scope=prod-multiarch
+            type=gha,scope=prod-amd64
+          cache-to: type=gha,scope=prod-multiarch,mode=max
