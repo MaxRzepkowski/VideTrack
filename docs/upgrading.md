@@ -28,8 +28,7 @@ version in `.env`:
 VIDETRACK_VERSION=0.1      # 0.1.x patches only
 ```
 
-Images are tagged `X.Y.Z`, `X.Y` and `latest` for releases. `edge` follows the main branch and is
-not a release: do not run it on data you care about.
+Images are tagged `X.Y.Z`, `X.Y` and `latest`, one set per release.
 
 ## Going back
 
