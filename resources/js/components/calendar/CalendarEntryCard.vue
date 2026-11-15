@@ -152,8 +152,7 @@ const followedVia = computed(() => compactFollowedVia(props.entry.media));
             </Link>
             <div v-else class="text-ink text-base font-semibold wrap-break-word">{{ entry.showTitle ?? entry.media.title }}</div>
             <div v-if="episode" class="text-ink-muted text-sm wrap-break-word">
-                <span class="text-ink-secondary font-semibold">{{ episode.code }}</span
-                >{{ ' ' + episode.title }}
+                <span class="text-ink-secondary font-semibold">{{ episode.code }}</span>{{ ' ' + episode.title }}
             </div>
             <MetaLine v-else :parts="subtitle()" wrap class="text-ink-muted text-sm" />
             <div v-if="releaseNote" class="text-ink-secondary text-sm font-semibold wrap-break-word">{{ releaseNote }}</div>
