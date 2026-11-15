@@ -17,7 +17,9 @@ RUN apt-get update \
 RUN printf 'upload_max_filesize=64M\npost_max_size=64M\nmemory_limit=256M\n' \
     > /usr/local/etc/php/conf.d/uploads.ini
 
-FROM base AS vendor
+# The vendor tree and the built front are the same on every platform, so
+# both stages run natively on the build machine instead of under emulation.
+FROM --platform=$BUILDPLATFORM base AS vendor
 
 COPY --from=composer:2@sha256:ca11f643d7791ebdd90a34fc20caf11380d434007ae539a9ea75cd9212e13dca /usr/bin/composer /usr/bin/composer
 WORKDIR /app
@@ -31,7 +33,7 @@ RUN mkdir -p storage/framework/cache storage/framework/sessions storage/framewor
     && composer dump-autoload --optimize \
     && rm -rf resources/js resources/css package.json package-lock.json vite.config.ts tsconfig.json
 
-FROM node:22-alpine@sha256:0e1754758c2df4cfa3e68d59e2e1b7374bb7fd9ea6328eaaacf15cc934af8202 AS frontend
+FROM --platform=$BUILDPLATFORM node:22-alpine@sha256:0e1754758c2df4cfa3e68d59e2e1b7374bb7fd9ea6328eaaacf15cc934af8202 AS frontend
 
 WORKDIR /app
 COPY package.json package-lock.json ./
