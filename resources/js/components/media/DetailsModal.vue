@@ -77,8 +77,10 @@ const open = ref(false);
                         <div class="text-ink-muted mb-1 text-sm font-bold">{{ row.label }}</div>
                         <div class="text-ink text-base font-semibold">
                             <template v-for="(link, i) in row.links" :key="link.href">
-                                <Link :href="link.href" class="hover:text-brand-soft transition-colors duration-150">{{ link.name }}</Link
-                                ><span v-if="i < row.links.length - 1">, </span>
+                                <Link :href="link.href" class="hover:text-brand-soft transition-colors duration-150">{{ link.name }}</Link><span
+                                    v-if="i < row.links.length - 1"
+                                    >,
+                                </span>
                             </template>
                         </div>
                     </div>
@@ -96,8 +98,7 @@ const open = ref(false);
                             <Link v-if="creator.href" :href="creator.href" class="hover:text-brand-soft transition-colors duration-150">
                                 {{ creator.name }}
                             </Link>
-                            <span v-else>{{ creator.name }}</span
-                            ><span v-if="i < row.creators.length - 1">, </span>
+                            <span v-else>{{ creator.name }}</span><span v-if="i < row.creators.length - 1">, </span>
                         </template>
                     </div>
                 </div>

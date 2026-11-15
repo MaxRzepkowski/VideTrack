@@ -26,8 +26,9 @@ const rows = computed(() => {
         <p v-for="row in rows" :key="row.label" class="text-ink-muted m-0">
             {{ row.label }}
             <template v-for="(link, i) in row.links" :key="link.href">
-                <Link :href="link.href" class="text-brand-soft hover:text-ink font-semibold transition-colors duration-150">{{ link.name }}</Link
-                ><span v-if="i < row.links.length - 1">, </span>
+                <Link :href="link.href" class="text-brand-soft hover:text-ink font-semibold transition-colors duration-150">{{
+                    link.name
+                }}</Link><span v-if="i < row.links.length - 1">, </span>
             </template>
         </p>
     </div>
