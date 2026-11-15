@@ -11,7 +11,7 @@ export default defineConfig({
     plugins: [vue()],
     resolve: {
         alias: {
-            '@': path.resolve(__dirname, './resources/js'),
+            '@': path.resolve(import.meta.dirname, './resources/js'),
         },
     },
     test: {
@@ -29,7 +29,7 @@ export default defineConfig({
             // wobble between runs. Measured by Vitest 5, which maps
             // V8 coverage onto the source's syntax tree: a Vue file counts its
             // script, not its compiled render function.
-            thresholds: { lines: 62.8, statements: 61.6, branches: 54.3, functions: 53.5 },
+            thresholds: { lines: 63.0, statements: 61.8, branches: 54.9, functions: 53.8 },
         },
     },
 });
