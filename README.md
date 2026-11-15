@@ -15,7 +15,7 @@ tells you when the next episode or release is out, and keeps all of it on your o
 [![CodeFactor](https://www.codefactor.io/repository/github/MaxRzepkowski/VideTrack/badge)](https://www.codefactor.io/repository/github/MaxRzepkowski/VideTrack)
 [![codecov](https://codecov.io/gh/MaxRzepkowski/VideTrack/branch/main/graph/badge.svg)](https://codecov.io/gh/MaxRzepkowski/VideTrack)
 -->
-![Laravel 12](https://img.shields.io/badge/Laravel-12-FF2D20?logo=laravel&logoColor=white)
+![Laravel 13](https://img.shields.io/badge/Laravel-13-FF2D20?logo=laravel&logoColor=white)
 ![Vue 3](https://img.shields.io/badge/Vue-3-4FC08D?logo=vue.js&logoColor=white)
 ![PHP 8.5](https://img.shields.io/badge/PHP-8.5-777BB4?logo=php&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-ready-2496ED?logo=docker&logoColor=white)
