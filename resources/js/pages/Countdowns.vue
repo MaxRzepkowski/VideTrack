@@ -16,7 +16,7 @@ import type { CountdownEntry } from '@/types/media';
 import type { PageInfo } from '@/types/pagination';
 import { Head, router } from '@inertiajs/vue3';
 import { trans, transChoice } from 'laravel-vue-i18n';
-import { Timer } from 'lucide-vue-next';
+import { Timer } from '@lucide/vue';
 import { computed } from 'vue';
 
 const props = defineProps<{

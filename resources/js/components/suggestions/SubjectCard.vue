@@ -7,7 +7,7 @@ import { POSTER_CARD_SIZES } from '@/lib/ui';
 import type { EpisodeSegment } from '@/types/media';
 import type { SuggestionSubject } from '@/types/suggestions';
 import { Link } from '@inertiajs/vue3';
-import { Layers } from 'lucide-vue-next';
+import { Layers } from '@lucide/vue';
 import { computed } from 'vue';
 
 /**

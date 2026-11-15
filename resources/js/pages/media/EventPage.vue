@@ -11,7 +11,7 @@ import { safeUrl } from '@/lib/url';
 import type { EventPage } from '@/types/generated';
 import { Head, router } from '@inertiajs/vue3';
 import { trans } from 'laravel-vue-i18n';
-import { Radio } from 'lucide-vue-next';
+import { Radio } from '@lucide/vue';
 import { computed, ref } from 'vue';
 
 // An event's page: when it runs in the viewer's zone, where it streams, what

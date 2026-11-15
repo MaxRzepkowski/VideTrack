@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useDragScroll } from '@/composables/useDragScroll';
 import { trans } from 'laravel-vue-i18n';
-import { ChevronLeft, ChevronRight } from 'lucide-vue-next';
+import { ChevronLeft, ChevronRight } from '@lucide/vue';
 import { ref } from 'vue';
 
 /**

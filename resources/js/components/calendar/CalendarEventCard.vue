@@ -8,7 +8,7 @@ import { mediaTypeMeta } from '@/lib/mediaTypes';
 import type { CalendarEvent } from '@/types/generated';
 import { Link } from '@inertiajs/vue3';
 import { trans } from 'laravel-vue-i18n';
-import { Radio } from 'lucide-vue-next';
+import { Radio } from '@lucide/vue';
 import { computed } from 'vue';
 
 // A showcase on the calendar, set like the release cards beside it (see

@@ -14,7 +14,7 @@ import { POSTER_CARD_SIZES } from '@/lib/ui';
 import { mediaUrl } from '@/lib/urls';
 import { Link } from '@inertiajs/vue3';
 import { trans } from 'laravel-vue-i18n';
-import { Star } from 'lucide-vue-next';
+import { Star } from '@lucide/vue';
 import { computed } from 'vue';
 
 const props = defineProps<{ entry: CompletedShow }>();

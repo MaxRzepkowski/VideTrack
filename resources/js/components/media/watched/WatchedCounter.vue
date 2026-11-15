@@ -2,7 +2,7 @@
 import { parseDecimal, positionText, progressInputMax, progressInputStep } from '@/lib/progress';
 import type { MediaSummary } from '@/types/media';
 import { trans } from 'laravel-vue-i18n';
-import { BookOpen, Percent } from 'lucide-vue-next';
+import { BookOpen, Percent } from '@lucide/vue';
 import { computed, ref, useId, watch } from 'vue';
 
 // The counter of a progress type, as the field the user types it into. The

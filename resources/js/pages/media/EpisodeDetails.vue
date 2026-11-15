@@ -22,7 +22,7 @@ import type { EpisodeExtra, EpisodeNeighbour } from '@/types/extras';
 import type { DetailRow, MediaDetails } from '@/types/media';
 import { Head, Link } from '@inertiajs/vue3';
 import { trans } from 'laravel-vue-i18n';
-import { Star, Tv } from 'lucide-vue-next';
+import { Star, Tv } from '@lucide/vue';
 import { computed, ref } from 'vue';
 
 const props = defineProps<{

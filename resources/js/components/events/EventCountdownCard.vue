@@ -7,7 +7,7 @@ import { eventWhen, isLive } from '@/lib/liveEvents';
 import type { EventEntry } from '@/types/generated';
 import { Link } from '@inertiajs/vue3';
 import { trans } from 'laravel-vue-i18n';
-import { CalendarDays, Radio } from 'lucide-vue-next';
+import { CalendarDays, Radio } from '@lucide/vue';
 import { computed } from 'vue';
 
 // An event among the countdowns, in its medium's colour: ticking to its

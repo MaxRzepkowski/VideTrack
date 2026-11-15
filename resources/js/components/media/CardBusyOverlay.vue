@@ -2,7 +2,7 @@
 import { useCardBusy } from '@/composables/useMediaActions';
 import type { MediaSummary } from '@/types/media';
 import { trans } from 'laravel-vue-i18n';
-import { LoaderCircle } from 'lucide-vue-next';
+import { LoaderCircle } from '@lucide/vue';
 
 // Veils a card's poster / still while a write for that item is on its way to
 // the server, and until the loader's minimum is served out. Everything the card

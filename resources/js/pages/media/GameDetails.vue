@@ -30,7 +30,7 @@ import type { EventEntry } from '@/types/generated';
 import type { CertificationRow, Chip, CollectionBannerData, CreatorLink, DetailRow, MediaDetails, MediaSummary } from '@/types/media';
 import { Head, Link } from '@inertiajs/vue3';
 import { trans } from 'laravel-vue-i18n';
-import { Gauge, Timer, Trophy } from 'lucide-vue-next';
+import { Gauge, Timer, Trophy } from '@lucide/vue';
 import { computed } from 'vue';
 
 const props = defineProps<{

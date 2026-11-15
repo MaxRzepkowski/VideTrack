@@ -5,7 +5,7 @@ import { mediaImage, mediaImageSrcSet } from '@/lib/images';
 import { videoEmbedUrl } from '@/lib/videos';
 import type { VideoData } from '@/types/media';
 import { trans } from 'laravel-vue-i18n';
-import { Play } from 'lucide-vue-next';
+import { Play } from '@lucide/vue';
 import { computed, ref } from 'vue';
 
 const props = withDefaults(

@@ -19,7 +19,7 @@ import type { PageInfo } from '@/types/pagination';
 import type { OpenedSubject, Suggestion, SuggestionOrigin, SuggestionSubject } from '@/types/suggestions';
 import { Head, router } from '@inertiajs/vue3';
 import { trans, transChoice } from 'laravel-vue-i18n';
-import { Sparkles } from 'lucide-vue-next';
+import { Sparkles } from '@lucide/vue';
 import { computed } from 'vue';
 
 /**

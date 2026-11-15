@@ -1,8 +1,8 @@
 import { MAIN_NAV, navHref, OTHER_PLACES, SETTINGS_NAV, USER_PANELS, type NavEntry } from '@/lib/navigation';
 import { viewerUsername } from '@/lib/pageContext';
 import { router } from '@inertiajs/vue3';
+import { LogOut, type LucideIcon } from '@lucide/vue';
 import { trans } from 'laravel-vue-i18n';
-import { LogOut, type LucideIcon } from 'lucide-vue-next';
 
 /**
  * A palette row pointing at a title — the lean shape `PaletteController` sends

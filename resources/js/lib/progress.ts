@@ -2,8 +2,8 @@ import { formatNumber, formatWatchTime } from '@/lib/format';
 import { mediaTypeDefinition, mediaTypeMeta, typeCountingIn } from '@/lib/mediaTypes';
 import type { TooltipRow } from '@/lib/tooltip';
 import type { ActivityEntry, MediaSummary, ProgressUnit } from '@/types/media';
+import type { LucideIcon } from '@lucide/vue';
 import { trans, transChoice } from 'laravel-vue-i18n';
-import type { LucideIcon } from 'lucide-vue-next';
 
 /**
  * Wording of the play action, from what the type counts: time played reads

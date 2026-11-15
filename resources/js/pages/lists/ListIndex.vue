@@ -17,7 +17,7 @@ import { listUrl } from '@/lib/urls';
 import type { ListOverview, ProfileData } from '@/types/media';
 import { Head, Link } from '@inertiajs/vue3';
 import { trans, transChoice } from 'laravel-vue-i18n';
-import { GripVertical, List as ListIcon, Pin, Plus } from 'lucide-vue-next';
+import { GripVertical, List as ListIcon, Pin, Plus } from '@lucide/vue';
 import { computed, reactive, ref, watch } from 'vue';
 
 const props = withDefaults(

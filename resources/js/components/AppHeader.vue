@@ -15,7 +15,7 @@ import type { SharedData } from '@/types';
 import type { NotificationEntry } from '@/types/notifications';
 import { Link, router, usePage } from '@inertiajs/vue3';
 import { trans } from 'laravel-vue-i18n';
-import { Bell, ChevronDown, Menu, Search, X } from 'lucide-vue-next';
+import { Bell, ChevronDown, Menu, Search, X } from '@lucide/vue';
 import {
     DialogClose,
     DialogContent,

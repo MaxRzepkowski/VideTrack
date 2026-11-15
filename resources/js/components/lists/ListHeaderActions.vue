@@ -14,7 +14,7 @@ import { nextFollowMode } from '@/lib/tracking';
 import type { ListDetailsData, ListItemEntry } from '@/types/media';
 import { router } from '@inertiajs/vue3';
 import { trans } from 'laravel-vue-i18n';
-import { Bell, BellOff, BellRing, Check, FileDown, FileSpreadsheet, MoreVertical, Pencil, RefreshCw, Share2 } from 'lucide-vue-next';
+import { Bell, BellOff, BellRing, Check, FileDown, FileSpreadsheet, MoreVertical, Pencil, RefreshCw, Share2 } from '@lucide/vue';
 import { computed, reactive, ref } from 'vue';
 import { toast } from 'vue-sonner';
 

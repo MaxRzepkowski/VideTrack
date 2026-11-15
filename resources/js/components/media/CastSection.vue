@@ -7,7 +7,7 @@ import { withCount } from '@/lib/format';
 import { mediaImage } from '@/lib/images';
 import { Link } from '@inertiajs/vue3';
 import { trans, transChoice } from 'laravel-vue-i18n';
-import { User } from 'lucide-vue-next';
+import { User } from '@lucide/vue';
 import { computed, ref } from 'vue';
 
 const props = defineProps<{

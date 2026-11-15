@@ -4,7 +4,7 @@ import { navHref, SETTINGS_NAV, userPanel } from '@/lib/navigation';
 import type { User } from '@/types';
 import { Link } from '@inertiajs/vue3';
 import { trans } from 'laravel-vue-i18n';
-import { LogOut, Settings } from 'lucide-vue-next';
+import { LogOut, Settings } from '@lucide/vue';
 import { computed } from 'vue';
 
 interface Props {

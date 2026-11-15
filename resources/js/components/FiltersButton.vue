@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { trans } from 'laravel-vue-i18n';
-import { SlidersHorizontal } from 'lucide-vue-next';
+import { SlidersHorizontal } from '@lucide/vue';
 
 // The toolbar's "Filters" button with the count of filters in force, in the
 // two looks a toolbar comes in: on the page, or on its full-width band.

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useMediaActions } from '@/composables/useMediaActions';
 import type { MediaSummary } from '@/types/media';
-import { Heart, List } from 'lucide-vue-next';
+import { Heart, List } from '@lucide/vue';
 import { computed } from 'vue';
 
 /**

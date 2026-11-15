@@ -10,7 +10,7 @@ import type { DiscoverActiveFilters, DiscoverFilter, MediaSummary } from '@/type
 import type { PageInfo } from '@/types/pagination';
 import { Head } from '@inertiajs/vue3';
 import { trans } from 'laravel-vue-i18n';
-import { Compass } from 'lucide-vue-next';
+import { Compass } from '@lucide/vue';
 import { computed } from 'vue';
 
 /**

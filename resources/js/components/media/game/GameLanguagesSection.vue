@@ -4,7 +4,7 @@ import ShowMoreToggle from '@/components/ShowMoreToggle.vue';
 import { languageRows } from '@/lib/gamePlay';
 import type { LanguageSupport } from '@/types/generated';
 import { trans } from 'laravel-vue-i18n';
-import { Check } from 'lucide-vue-next';
+import { Check } from '@lucide/vue';
 import { computed, ref } from 'vue';
 
 // The languages a game speaks and how, as a store page tables them: the

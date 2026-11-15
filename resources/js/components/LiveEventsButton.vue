@@ -7,7 +7,7 @@ import type { SharedData } from '@/types';
 import type { EventEntry } from '@/types/generated';
 import { Link, usePage } from '@inertiajs/vue3';
 import { trans } from 'laravel-vue-i18n';
-import { Play, X } from 'lucide-vue-next';
+import { Play, X } from '@lucide/vue';
 import { computed, ref } from 'vue';
 
 // A small "Live" mark in the bottom-left corner of every page while a

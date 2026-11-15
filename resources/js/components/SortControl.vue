@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { trans } from 'laravel-vue-i18n';
-import { ArrowDownWideNarrow, ArrowUpNarrowWide } from 'lucide-vue-next';
+import { ArrowDownWideNarrow, ArrowUpNarrowWide } from '@lucide/vue';
 import { computed } from 'vue';
 
 /**

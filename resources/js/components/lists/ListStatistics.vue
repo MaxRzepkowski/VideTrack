@@ -5,7 +5,7 @@ import { formatUnitAmount, unitGlyph } from '@/lib/progress';
 import type { TooltipContent, TooltipRow } from '@/lib/tooltip';
 import type { ListStatisticsData, ListUnitTotal } from '@/types/media';
 import { trans } from 'laravel-vue-i18n';
-import { Check, Clock3, File, type LucideIcon } from 'lucide-vue-next';
+import { Check, Clock3, File, type LucideIcon } from '@lucide/vue';
 import { computed } from 'vue';
 
 const props = defineProps<{

@@ -1,5 +1,4 @@
 import type { NonEmpty } from '@/types';
-import { trans } from 'laravel-vue-i18n';
 import {
     Bell,
     Braces,
@@ -25,7 +24,8 @@ import {
     Upload,
     UserRound,
     type LucideIcon,
-} from 'lucide-vue-next';
+} from '@lucide/vue';
+import { trans } from 'laravel-vue-i18n';
 
 /**
  * A place in the app. Every surface that links to places — the main menu, the

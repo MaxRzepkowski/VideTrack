@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { transChoice } from 'laravel-vue-i18n';
-import { Globe, Lock } from 'lucide-vue-next';
+import { Globe, Lock } from '@lucide/vue';
 
 // Under a list's cover: its name, how many positions it holds, and whether
 // others can see it. `linked` lights the name when the card is a link.

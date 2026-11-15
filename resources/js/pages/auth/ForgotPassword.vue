@@ -8,7 +8,7 @@ import AuthLayout from '@/layouts/AuthLayout.vue';
 import { splitAtPlaceholder } from '@/lib/format';
 import { Head, useForm } from '@inertiajs/vue3';
 import { trans } from 'laravel-vue-i18n';
-import { LoaderCircle } from 'lucide-vue-next';
+import { LoaderCircle } from '@lucide/vue';
 import { computed } from 'vue';
 
 defineProps<{

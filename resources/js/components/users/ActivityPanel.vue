@@ -15,7 +15,7 @@ import type { ActivityEntry, ActivityFilters } from '@/types/media';
 import type { PageInfo } from '@/types/pagination';
 import { router } from '@inertiajs/vue3';
 import { trans, transChoice } from 'laravel-vue-i18n';
-import { CalendarDays, Clock, LayoutGrid, Trash2, type LucideIcon } from 'lucide-vue-next';
+import { CalendarDays, Clock, LayoutGrid, Trash2, type LucideIcon } from '@lucide/vue';
 import { computed } from 'vue';
 
 // What a day of a log panel cost, by unit. Time and reading counters never add

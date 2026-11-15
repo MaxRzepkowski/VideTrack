@@ -15,7 +15,7 @@ import type { NotificationEntry } from '@/types/notifications';
 import type { PageInfo } from '@/types/pagination';
 import { Head, router } from '@inertiajs/vue3';
 import { trans, transChoice } from 'laravel-vue-i18n';
-import { Bell, CheckCheck, Trash2, X } from 'lucide-vue-next';
+import { Bell, CheckCheck, Trash2, X } from '@lucide/vue';
 import { computed } from 'vue';
 
 const props = defineProps<{

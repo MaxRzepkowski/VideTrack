@@ -1,6 +1,6 @@
 import type { UserMediaState } from '@/types/generated';
+import { CircleCheck, CircleOff, CirclePlay, ListTodo, Pause, type LucideIcon } from '@lucide/vue';
 import { trans } from 'laravel-vue-i18n';
-import { CircleCheck, CircleOff, CirclePlay, ListTodo, Pause, type LucideIcon } from 'lucide-vue-next';
 
 /** How one library state looks wherever it is shown: its icon and its colour token. */
 export interface StatusVisual {

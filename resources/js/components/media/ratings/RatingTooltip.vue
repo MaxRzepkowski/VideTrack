@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { TOOLTIP_ALIGN_CLASS, type TooltipAnchor } from '@/lib/ratingChart';
-import { Star } from 'lucide-vue-next';
+import { Star } from '@lucide/vue';
 
 // A rating chart's tooltip: the value leads, the identity (the slot) follows.
 defineProps<{

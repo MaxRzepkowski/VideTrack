@@ -9,7 +9,7 @@ import { mediaUrl } from '@/lib/urls';
 import { router } from '@inertiajs/vue3';
 import { useDebounceFn } from '@vueuse/core';
 import { trans } from 'laravel-vue-i18n';
-import { LoaderCircle, Search } from 'lucide-vue-next';
+import { LoaderCircle, Search } from '@lucide/vue';
 import { computed, ref, watch } from 'vue';
 
 // The endpoint reads the local library, not a provider, so this only has to

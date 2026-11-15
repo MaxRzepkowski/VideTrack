@@ -33,7 +33,7 @@ import type { CollectionCredit, CollectionOverview } from '@/types/generated';
 import type { ListDetailsData, ListItemEntry, ListStatisticsData } from '@/types/media';
 import { Head, Link } from '@inertiajs/vue3';
 import { trans, transChoice } from 'laravel-vue-i18n';
-import { Globe, GripVertical, Lock, X } from 'lucide-vue-next';
+import { Globe, GripVertical, Lock, X } from '@lucide/vue';
 import { computed, ref } from 'vue';
 
 const props = defineProps<{

@@ -6,8 +6,8 @@ import { mediaTypeMeta } from '@/lib/mediaTypes';
 import { batchHref, releaseFacts, releaseStatusChip } from '@/lib/releases';
 import { mediaUrl } from '@/lib/urls';
 import type { CalendarEvent, EventEntry } from '@/types/generated';
+import { Radio } from '@lucide/vue';
 import { trans, transChoice } from 'laravel-vue-i18n';
-import { Radio } from 'lucide-vue-next';
 import type { Component } from 'vue';
 
 /**

@@ -7,7 +7,7 @@ import { formatTimestampDate, withCount } from '@/lib/format';
 import { isLive } from '@/lib/liveEvents';
 import type { EventEntry } from '@/types/generated';
 import { Link } from '@inertiajs/vue3';
-import { Radio } from 'lucide-vue-next';
+import { Radio } from '@lucide/vue';
 import { computed, ref } from 'vue';
 
 // The events a title was shown at, the latest first: each its key art, its

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { trans } from 'laravel-vue-i18n';
-import { Eye } from 'lucide-vue-next';
+import { Eye } from '@lucide/vue';
 
 defineProps<{
     /** Whether the content is currently hidden (preference on + unwatched). */

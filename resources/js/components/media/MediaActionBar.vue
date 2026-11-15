@@ -8,7 +8,7 @@ import { ratingPercent } from '@/lib/ratings';
 import { shownStatus, shownStatusVisual, STATUS_VISUALS } from '@/lib/status';
 import type { MediaSummary } from '@/types/media';
 import { trans } from 'laravel-vue-i18n';
-import { Heart, List, MoreHorizontal, Star } from 'lucide-vue-next';
+import { Heart, List, MoreHorizontal, Star } from '@lucide/vue';
 import { computed } from 'vue';
 
 const props = defineProps<{

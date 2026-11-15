@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { shownState, stateKey, useMediaActions } from '@/composables/useMediaActions';
 import { useMediaModals } from '@/composables/useMediaModals';
 import { trans } from 'laravel-vue-i18n';
-import { Minus, Plus, Star } from 'lucide-vue-next';
+import { Minus, Plus, Star } from '@lucide/vue';
 import { computed, ref, watch } from 'vue';
 
 const { modals, close } = useMediaModals();
