@@ -77,7 +77,7 @@ jobs:
           load: true
           tags: videtrack:release
           build-args: APP_VERSION=${{ env.VERSION }}
-          cache-from: type=gha,scope=prod
+          cache-from: type=gha,scope=prod-amd64
 
       # The upgrade is skipped only for the first release; after that a
       # failed pull of the previous one fails the release.
@@ -111,5 +111,5 @@ jobs:
             org.opencontainers.image.version=${{ env.VERSION }}
             org.opencontainers.image.licenses=AGPL-3.0-or-later
           build-args: APP_VERSION=${{ env.VERSION }}
-          cache-from: type=gha,scope=prod
-          cache-to: type=gha,scope=prod,mode=max
+          cache-from: type=gha,scope=prod-multiarch
+          cache-to: type=gha,scope=prod-multiarch,mode=max
