@@ -396,11 +396,15 @@ function inertiaPage(HttpKernel $kernel, User $user, string $url): array
     $body = content($response);
     $status = $response->getStatusCode();
 
-    if (preg_match('/data-page="([^"]*)"/', $body, $match) !== 1) {
+    // The page object rides a JSON script element; an older Inertia wrote it
+    // into an attribute, which an earlier snapshot was taken from.
+    if (preg_match('#<script data-page="app" type="application/json">(.*?)</script>#s', $body, $match) === 1) {
+        $page = json_decode($match[1], true);
+    } elseif (preg_match('/data-page="([^"]*)"/', $body, $match) === 1) {
+        $page = json_decode(html_entity_decode($match[1], ENT_QUOTES | ENT_HTML5), true);
+    } else {
         return ['status' => $status, 'body' => json_decode($body, true) ?? mb_substr($body, 0, 2000)];
     }
-
-    $page = json_decode(html_entity_decode($match[1], ENT_QUOTES | ENT_HTML5), true);
 
     foreach ($page['deferredProps'] ?? [] as $keys) {
         $partial = Request::create($url, 'GET', [], [], [], [
