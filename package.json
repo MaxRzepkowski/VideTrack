@@ -39,7 +39,7 @@
         "class-variance-authority": "^0.7.1",
         "clsx": "^2.1.1",
         "laravel-vue-i18n": "^2.8.0",
-        "lucide-vue-next": "^0.468.0",
+        "lucide-vue-next": "^1.0.0",
         "radix-vue": "^1.9.11",
         "simple-icons": "^16.26.0",
         "tailwind-merge": "^3.7.0",
