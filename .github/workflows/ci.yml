@@ -1,6 +1,8 @@
 # The one gate of this repository, `composer check`, run in the same dev
-# image as locally; then the production image is started for real. A commit
-# on main that passed everything becomes the `edge` image.
+# image as locally; then the production image is started for real. Images are
+# published by releases only (release.yml); a commit on main builds the image
+# for every platform without publishing it, so a broken arm64 build shows up
+# before a release depends on it.
 name: ci
 
 on:
@@ -125,7 +127,7 @@ jobs:
           docker pull "$previous"
           scripts/smoke.sh videtrack:ci "$previous"
 
-  edge:
+  multiarch:
     needs: [check, audit, gitleaks, smoke]
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
@@ -135,7 +137,6 @@ jobs:
     timeout-minutes: 120
     permissions:
       contents: read
-      packages: write
     steps:
       - uses: actions/checkout@v7
 
@@ -143,29 +144,13 @@ jobs:
 
       - uses: docker/setup-buildx-action@v4
 
-      - uses: docker/login-action@v4
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - id: meta
-        uses: docker/metadata-action@v6
-        with:
-          images: ghcr.io/${{ github.repository }}
-          tags: |
-            type=edge,branch=main
-            type=sha
-
       - uses: docker/build-push-action@v7
         with:
           context: .
           file: docker/prod/Dockerfile
           platforms: linux/amd64,linux/arm64
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          build-args: APP_VERSION=edge-${{ github.sha }}
+          push: false
+          build-args: APP_VERSION=main-${{ github.sha }}
           cache-from: |
             type=gha,scope=prod-multiarch
             type=gha,scope=prod-amd64
