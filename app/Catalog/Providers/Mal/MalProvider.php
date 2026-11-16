@@ -8,9 +8,7 @@ use App\Catalog\Data\MediaDetails;
 use App\Catalog\Data\MediaSummary;
 use App\Catalog\ItemNotFoundException;
 use App\Catalog\Matching;
-use App\Catalog\ProviderException;
 use App\Catalog\ProviderRejected;
-use App\Catalog\TitleStatus;
 use App\Support\Payload;
 use LogicException;
 
@@ -44,14 +42,17 @@ class MalProvider implements MetadataProvider, SupportsTrending
     private const DETAIL_FIELDS = 'end_date,synopsis,status,genres,rank,popularity,background,num_volumes,num_list_users,num_scoring_users,'
         .'authors{first_name,last_name},serialization{name},pictures,recommendations{'.self::SUMMARY_FIELDS.'}';
 
-    /** MAL media_type values that are prose, not comics. */
-    private const NOVEL_TYPES = ['novel', 'light_novel'];
+    /** The provider's code, on every card it makes. */
+    public const CODE = 'mal';
 
-    public function __construct(private readonly MalClient $client) {}
+    public function __construct(
+        private readonly MalClient $client,
+        private readonly MalPayload $payload,
+    ) {}
 
     public function code(): string
     {
-        return 'mal';
+        return self::CODE;
     }
 
     public function search(string $query, string $locale): array
@@ -72,7 +73,7 @@ class MalProvider implements MetadataProvider, SupportsTrending
             throw $refusal;
         }
 
-        return $this->nodeSummaries(Payload::list($data['data'] ?? null));
+        return $this->payload->cards(Payload::list($data['data'] ?? null));
     }
 
     public function details(string $type, string $ref, string $locale, ?string $region = null): MediaDetails
@@ -98,15 +99,15 @@ class MalProvider implements MetadataProvider, SupportsTrending
 
         $genres = Payload::names($data['genres'] ?? null);
 
-        $summary = $this->summary($data);
-        $status = $this->publicationStatus($data);
-        $original = $this->nativeTitle($data);
+        $summary = $this->payload->card($data);
+        $status = $this->payload->publicationStatus($data);
+        $original = $this->payload->nativeTitle($data);
         $original = $original !== null && Matching::sameTitle($original, $summary->title) ? null : $original;
 
         $posters = [];
 
         foreach (Payload::list($data['pictures'] ?? null) as $picture) {
-            $url = $this->pictureUrl($picture);
+            $url = $this->payload->pictureUrl($picture);
 
             if ($url !== null) {
                 $posters[] = $url;
@@ -124,7 +125,7 @@ class MalProvider implements MetadataProvider, SupportsTrending
                 'volumes' => Payload::positiveInt($data, 'num_volumes'),
                 // Manga / Manhwa / Manhua / One-shot — MAL mixes formats in
                 // one catalogue; the format chip disambiguates.
-                'mangaFormat' => $this->format($data),
+                'mangaFormat' => $this->payload->format($data),
                 'magazine' => Payload::string(Payload::map(data_get($data, 'serialization.0.node')), 'name'),
                 'readersCount' => Payload::positiveInt($data, 'num_list_users'),
                 'ratingsCount' => Payload::positiveInt($data, 'num_scoring_users'),
@@ -133,9 +134,9 @@ class MalProvider implements MetadataProvider, SupportsTrending
                 // romanised one is just another name it goes by.
                 'originalTitle' => $original,
                 'alternativeTitles' => array_values(array_filter($summary->alternativeTitles, fn (string $name): bool => $name !== $original)) ?: null,
-                'authorRoles' => $this->authorRoles($data) ?: null,
+                'authorRoles' => $this->payload->authorRoles($data) ?: null,
                 // The last chapter's date: with the first, the years it ran.
-                'endDate' => $this->paddedDate($data, 'end_date'),
+                'endDate' => $this->payload->paddedDate($data, 'end_date'),
                 // Without an end, whether the years read "since 1989" or just "1989".
                 'stillPublishing' => $status?->isRunning() ?? false,
                 'rank' => Payload::positiveInt($data, 'rank'),
@@ -159,136 +160,7 @@ class MalProvider implements MetadataProvider, SupportsTrending
             requireKey: 'data',
         );
 
-        return array_slice($this->nodeSummaries(Payload::list($data['data'] ?? null)), 0, 20);
-    }
-
-    /**
-     * Summaries out of the entries of a MAL list (`[].node`): novels drop out
-     * (books module territory), covers are required.
-     *
-     * @param  list<array<array-key, mixed>>  $entries
-     * @return list<MediaSummary>
-     */
-    private function nodeSummaries(array $entries): array
-    {
-        $summaries = [];
-
-        foreach ($entries as $entry) {
-            $node = Payload::map($entry['node'] ?? null);
-
-            if (Payload::id($node['id'] ?? null) === null || $this->pictureUrl(Payload::map($node['main_picture'] ?? null)) === null) {
-                continue;
-            }
-
-            if (in_array($node['media_type'] ?? '', self::NOVEL_TYPES, true)) {
-                continue;
-            }
-
-            $summaries[] = $this->summary($node);
-        }
-
-        return $summaries;
-    }
-
-    /**
-     * @param  array<array-key, mixed>  $data
-     */
-    private function summary(array $data): MediaSummary
-    {
-        $releaseDate = $this->paddedDate($data, 'start_date');
-        $title = $this->shownTitle($data);
-
-        return new MediaSummary(
-            type: 'manga',
-            ref: Payload::id($data['id'] ?? null) ?? throw ProviderException::missingId('MyAnimeList'),
-            provider: $this->code(),
-            title: $title,
-            year: Payload::yearOf($releaseDate),
-            posterPath: $this->pictureUrl(Payload::map($data['main_picture'] ?? null)),
-            communityRating: (($mean = Payload::float($data, 'mean') ?? 0.0) > 0) ? round($mean, 1) : null,
-            releaseDate: $releaseDate,
-            extra: array_filter(['chapters' => Payload::positiveInt($data, 'num_chapters')]),
-            progressTotal: Payload::positiveInt($data, 'num_chapters'),
-            authors: $this->authors($data),
-            alternativeTitles: $this->otherTitles($data, $title),
-        );
-    }
-
-    /**
-     * The name readers know the manga by: MAL's English title where it has
-     * one, else MAL's own, usually romanised Japanese ("Shingeki no Kyojin").
-     * MAL names a manga in no other language, so a reader of any language
-     * gets the English one, as a title without their own version does on
-     * every type.
-     *
-     * @param  array<array-key, mixed>  $data
-     */
-    private function shownTitle(array $data): string
-    {
-        return Payload::string(Payload::map($data['alternative_titles'] ?? null), 'en') ?? Payload::text($data, 'title');
-    }
-
-    /**
-     * The title in the manga's own script. MAL keeps it under `ja` whatever
-     * the language: a manhwa's Korean title sits there too.
-     *
-     * @param  array<array-key, mixed>  $data
-     */
-    private function nativeTitle(array $data): ?string
-    {
-        return Payload::string(Payload::map($data['alternative_titles'] ?? null), 'ja');
-    }
-
-    /**
-     * Every other name MAL knows the manga by, for placing it by name: its own
-     * title, the native one and the synonyms, each once, none that is the
-     * shown one written another way.
-     *
-     * @param  array<array-key, mixed>  $data
-     * @return list<string>
-     */
-    private function otherTitles(array $data, string $shown): array
-    {
-        $candidates = [
-            Payload::string($data, 'title'),
-            $this->nativeTitle($data),
-            ...Payload::texts(Payload::map($data['alternative_titles'] ?? null)['synonyms'] ?? null),
-        ];
-        $titles = [];
-
-        foreach ($candidates as $name) {
-            if ($name === null || Matching::sameTitle($name, $shown)) {
-                continue;
-            }
-
-            if (! in_array($name, $titles, true) && array_filter($titles, fn (string $kept): bool => Matching::sameTitle($kept, $name)) === []) {
-                $titles[] = $name;
-            }
-        }
-
-        return $titles;
-    }
-
-    /**
-     * Author display names ("First Last"), deduplicated.
-     *
-     * @param  array<array-key, mixed>  $data
-     * @return list<string>
-     */
-    private function authors(array $data): array
-    {
-        $names = [];
-
-        foreach (Payload::list($data['authors'] ?? null) as $author) {
-            $node = Payload::map($author['node'] ?? null);
-            $name = trim(Payload::text($node, 'first_name').' '.Payload::text($node, 'last_name'));
-
-            if ($name !== '' && ! in_array($name, $names, true)) {
-                $names[] = $name;
-            }
-        }
-
-        return $names;
+        return array_slice($this->payload->cards(Payload::list($data['data'] ?? null)), 0, 20);
     }
 
     /**
@@ -303,84 +175,7 @@ class MalProvider implements MetadataProvider, SupportsTrending
         $entries = Payload::list($data['recommendations'] ?? null);
         usort($entries, fn (array $a, array $b): int => (Payload::int($b, 'num_recommendations') ?? 0) <=> (Payload::int($a, 'num_recommendations') ?? 0));
 
-        return $this->nodeSummaries($entries);
-    }
-
-    /**
-     * Each author's parts by name, for an author MAL says something about.
-     *
-     * @param  array<array-key, mixed>  $data
-     * @return array<string, list<value-of<MangaAuthorRole>>>
-     */
-    private function authorRoles(array $data): array
-    {
-        $roles = [];
-
-        foreach (Payload::list($data['authors'] ?? null) as $author) {
-            $node = Payload::map($author['node'] ?? null);
-            $name = trim(Payload::text($node, 'first_name').' '.Payload::text($node, 'last_name'));
-            $parts = array_map(fn (MangaAuthorRole $role): string => $role->value, MangaAuthorRole::fromMal(Payload::string($author, 'role')));
-
-            if ($name !== '' && $parts !== []) {
-                $roles[$name] = array_values(array_unique([...$roles[$name] ?? [], ...$parts]));
-            }
-        }
-
-        return $roles;
-    }
-
-    /**
-     * MAL dates may be a full date, year-month or bare year — pad the
-     * short forms so the app always sees Y-m-d.
-     *
-     * @param  array<array-key, mixed>  $data
-     */
-    private function paddedDate(array $data, string $key): ?string
-    {
-        $date = Payload::string($data, $key);
-
-        return match (true) {
-            $date === null => null,
-            strlen($date) === 4 => "{$date}-01-01",
-            strlen($date) === 7 => "{$date}-01",
-            default => $date,
-        };
-    }
-
-    /**
-     * @param  array<array-key, mixed>  $data
-     */
-    private function format(array $data): ?string
-    {
-        // A code the page names in the reader's language, not a label.
-        return Payload::enum($data, 'media_type', MangaFormat::class)?->value;
-    }
-
-    /**
-     * @param  array<array-key, mixed>  $data
-     */
-    private function publicationStatus(array $data): ?TitleStatus
-    {
-        return match ($data['status'] ?? null) {
-            'finished' => TitleStatus::Finished,
-            'currently_publishing' => TitleStatus::Publishing,
-            'not_yet_published' => TitleStatus::NotYetPublished,
-            'on_hiatus' => TitleStatus::OnHiatus,
-            'discontinued' => TitleStatus::Discontinued,
-            default => null,
-        };
-    }
-
-    /**
-     * Cover URL out of a main_picture / pictures object, largest size first.
-     *
-     * @param  array<array-key, mixed>  $picture
-     */
-    private function pictureUrl(array $picture): ?string
-    {
-        $url = $picture['large'] ?? $picture['medium'] ?? null;
-
-        return is_string($url) && str_starts_with($url, 'http') ? $url : null;
+        return $this->payload->cards($entries);
     }
 
     private function ttl(string $kind): int
