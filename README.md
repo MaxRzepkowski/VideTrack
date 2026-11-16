@@ -33,7 +33,7 @@ tells you when the next episode or release is out, and keeps all of it on your o
 - ⭐ Rate, favorite and collect titles in a backlog and in your own lists.
 - 📊 Keep a full history with rewatches and see how much time went into it.
 - ✨ Get suggestions based on what you finished. They wait on their own page and never nag.
-- 📥 Import from Trakt, Simkl, IMDb, Goodreads, MyAnimeList, AniList, Kitsu, Steam and more.
+- 📥 Import from Trakt, Letterboxd, TV Time, Simkl, IMDb, Goodreads, StoryGraph, MyAnimeList, AniList, Kitsu, Steam and more.
 - 📡 Log what you watch automatically from Plex, Jellyfin, Emby or Tautulli.
 - 📤 Export everything as a backup, as CSV, or as files for IMDb and Letterboxd.
 - 👥 Give everyone at home their own account, in English or Polish.

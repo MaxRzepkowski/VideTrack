@@ -12,6 +12,9 @@ use Generator;
  * header is malformed: rows() passes over it, entries() reports it by number
  * so the import says something is missing. A UTF-8 byte order mark before
  * the first column is not part of its name.
+ *
+ * A file inside an uploaded ZIP is read where it lies, never unpacked to
+ * disk: {@see inArchive()}.
  */
 final readonly class CsvStream
 {
@@ -32,7 +35,22 @@ final readonly class CsvStream
         private string $path,
         private array $requiredColumns,
         private bool $lowercase = false,
+        private ?string $entry = null,
+        private int $preamble = 0,
     ) {}
+
+    /**
+     * One file of a ZIP export, by its path inside the archive.
+     *
+     * @param  list<string>  $requiredColumns
+     * @param  int  $preamble  records before the header, for an export that
+     *                         opens with a note of its own (a version line,
+     *                         a summary row)
+     */
+    public static function inArchive(string $archive, string $entry, array $requiredColumns, bool $lowercase = false, int $preamble = 0): self
+    {
+        return new self($archive, $requiredColumns, $lowercase, $entry, $preamble);
+    }
 
     public function isValid(): bool
     {
@@ -90,7 +108,7 @@ final readonly class CsvStream
         }
 
         [$stream, $header] = $opened;
-        $number = 1;
+        $number = $this->preamble + 1;
 
         try {
             while (($values = fgetcsv($stream, escape: self::NO_ESCAPE)) !== false) {
@@ -117,10 +135,14 @@ final readonly class CsvStream
      */
     private function open(): ?array
     {
-        $stream = is_file($this->path) ? fopen($this->path, 'r') : false;
+        $stream = $this->entry === null ? $this->file() : $this->archived($this->entry);
 
-        if ($stream === false) {
+        if ($stream === null) {
             return null;
+        }
+
+        for ($skipped = 0; $skipped < $this->preamble; $skipped++) {
+            fgetcsv($stream, escape: self::NO_ESCAPE);
         }
 
         $header = fgetcsv($stream, escape: self::NO_ESCAPE);
@@ -141,5 +163,26 @@ final readonly class CsvStream
         }
 
         return [$stream, $header];
+    }
+
+    /** @return resource|null */
+    private function file()
+    {
+        $stream = is_file($this->path) ? fopen($this->path, 'r') : false;
+
+        return $stream === false ? null : $stream;
+    }
+
+    /**
+     * The entry through the zip wrapper, which opens an archive handle of its
+     * own: a stream taken from a ZipArchive dies with that object's handle.
+     *
+     * @return resource|null
+     */
+    private function archived(string $entry)
+    {
+        $stream = (new ZipExport($this->path))->has($entry) ? fopen("zip://{$this->path}#{$entry}", 'r') : false;
+
+        return $stream === false ? null : $stream;
     }
 }

@@ -109,7 +109,7 @@ test('an export with a file that unpacks past the limit stops at analysis', func
 
 test('analyzing an unknown source is a 404', function () {
     $this->actingAs(User::factory()->create())
-        ->post('/settings/import/letterboxd/analyze', ['file' => UploadedFile::fake()->createWithContent('x.csv', 'x')])
+        ->post(route('settings.import.analyze', ['source' => 'no-such-service']), ['file' => UploadedFile::fake()->createWithContent('x.csv', 'x')])
         ->assertNotFound();
 });
 

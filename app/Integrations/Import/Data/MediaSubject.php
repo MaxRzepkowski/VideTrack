@@ -16,7 +16,8 @@ use App\Catalog\MediaKind;
  * ExternalIdResolver. An episode's own ids and its show's ids travel apart —
  * reading one as the other is how a stranger's series gets marked watched.
  * A source that accepts a match by name adds a TitleQuery; the resolver
- * itself never guesses from a title.
+ * itself never guesses from a title. An episode's query names its show,
+ * and the season and episode numbers lead down from there.
  */
 final readonly class MediaSubject
 {

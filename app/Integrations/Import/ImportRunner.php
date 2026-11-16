@@ -66,6 +66,7 @@ final readonly class ImportRunner
         private TitleStore $persist,
         private ExternalIdResolver $resolver,
         private TitleMatcher $titles,
+        private PlaybackLength $length,
         private HierarchyPath $hierarchy,
         private Creators $creators,
         private CreatorPages $pages,
@@ -164,6 +165,12 @@ final readonly class ImportRunner
             // A viewing a media server reported, which a webhook may have
             // logged already at a slightly different time.
             if ($play->scrobbled && $play->at !== null && $this->dedup->alreadyPlayed($user, $item, $play->at)) {
+                continue;
+            }
+
+            if ($play->playedSeconds !== null && ($short = $this->length->shortfall($row->subject->label, $item->runtime, $play->playedSeconds)) !== null) {
+                $run->skip($short->key, $short->replace);
+
                 continue;
             }
 
@@ -300,7 +307,7 @@ final readonly class ImportRunner
 
         if ($resolved === null && $subject->byTitle !== null) {
             try {
-                $resolved = $this->titles->match($kind, $subject->byTitle, $run->locale);
+                $resolved = $this->titles->match($kind, $subject->byTitle, $run->locale, $subject->season, $subject->episode);
             } catch (ExternalServiceException $e) {
                 $run->unavailable($subject->label, $e);
 

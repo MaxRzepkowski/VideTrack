@@ -51,3 +51,30 @@ test('a note ending in a backslash before its closing quote keeps the rows after
         ['id' => '2', 'notes' => 'says "hi"'],
     ]);
 });
+
+test('a file inside a ZIP is read where it lies, and a missing one reads as no rows', function () {
+    $path = scratchPath('zip', '.zip');
+    $zip = new ZipArchive;
+    $zip->open($path, ZipArchive::CREATE);
+    $zip->addFromString('likes/films.csv', "Name,Year\nDune,2021\n");
+    $zip->close();
+
+    expect(iterator_to_array(CsvStream::inArchive($path, 'likes/films.csv', ['Name'])->rows(), false))->toBe([['Name' => 'Dune', 'Year' => '2021']])
+        // Read twice: each pass opens its own handle on the archive.
+        ->and(CsvStream::inArchive($path, 'likes/films.csv', ['Name'])->count())->toBe(1)
+        ->and(CsvStream::inArchive($path, 'diary.csv', ['Name'])->isValid())->toBeFalse()
+        ->and(CsvStream::inArchive(csvFile("Name\nDune\n"), 'diary.csv', ['Name'])->isValid())->toBeFalse();
+});
+
+test('an export that opens with a note of its own is read from the header after it', function () {
+    $path = scratchPath('zip', '.zip');
+    $zip = new ZipArchive;
+    $zip->open($path, ZipArchive::CREATE);
+    $zip->addFromString('lists/picks.csv', "Letterboxd list export v7\nDate,Name\n2026-01-01,\"Picks,\nwith a note\"\n\nPosition,Name\n1,Dune\n2\n");
+    $zip->close();
+
+    $entries = iterator_to_array(CsvStream::inArchive($path, 'lists/picks.csv', ['Position'], preamble: 4)->entries(), false);
+
+    expect($entries[0])->toBe(['Position' => '1', 'Name' => 'Dune'])
+        ->and($entries[1])->toBeInstanceOf(SkipRow::class);
+});

@@ -82,3 +82,18 @@ function tmdbShowAnswer(?array $show = null, ?array $seasons = null): Closure
         return Http::response($body);
     };
 }
+
+/**
+ * TMDB's search knowing titles by the exact query: each answers with its one
+ * result, any other query with none.
+ *
+ * @param  array<string, array<string, mixed>>  $results  query => one `search/multi` result
+ */
+function tmdbSearchAnswer(array $results): Closure
+{
+    return function (Request $request) use ($results) {
+        $result = $results[$request->data()['query'] ?? ''] ?? null;
+
+        return Http::response(['page' => 1, 'results' => $result === null ? [] : [$result], 'total_pages' => 1, 'total_results' => $result === null ? 0 : 1]);
+    };
+}
