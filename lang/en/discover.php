@@ -29,4 +29,8 @@ return [
     'language' => 'Language',
     'game_modes' => 'Game modes',
     'perspective' => 'Perspective',
+    'ranking' => 'Ranking',
+    'one_shots' => 'One-shots',
+    'most_popular' => 'Most popular',
+    'most_favorited' => 'Most favorited',
 ];

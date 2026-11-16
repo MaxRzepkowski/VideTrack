@@ -29,4 +29,8 @@ return [
     'language' => 'Język',
     'game_modes' => 'Tryby gry',
     'perspective' => 'Perspektywa',
+    'ranking' => 'Ranking',
+    'one_shots' => 'One-shoty',
+    'most_popular' => 'Najpopularniejsze',
+    'most_favorited' => 'Najczęściej w ulubionych',
 ];

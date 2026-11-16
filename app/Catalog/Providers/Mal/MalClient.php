@@ -28,6 +28,12 @@ class MalClient
 
     public const RATE_LIMIT_PER_MINUTE = 55;
 
+    /**
+     * Listings ask MAL for adult titles too: what MAL hides by default is its
+     * own call, so the catalog's rule (MangaNsfw::isAdult) decides instead.
+     */
+    public const ALL_RATINGS = ['nsfw' => 'true'];
+
     public function __construct(private readonly ProviderCacheContext $cacheContext) {}
 
     /**
@@ -50,6 +56,12 @@ class MalClient
             fn (): array => $this->fetch($path, $query),
             $requireKey === null ? null : fn (mixed $data): bool => ! is_array($data) || empty($data[$requireKey]),
         ));
+    }
+
+    /** Seconds an answer of this kind (search, details, listing) is kept. */
+    public function ttl(string $kind): int
+    {
+        return config()->integer("tracker.mal.cache.{$kind}");
     }
 
     /**

@@ -3,9 +3,11 @@
 namespace App\Catalog\Providers\Mal;
 
 use App\Catalog\Contracts\MetadataProvider;
+use App\Catalog\Contracts\SupportsFilteredDiscovery;
 use App\Catalog\Contracts\SupportsTrending;
 use App\Catalog\Data\MediaDetails;
 use App\Catalog\Data\MediaSummary;
+use App\Catalog\Data\Paginated;
 use App\Catalog\Data\RankingPosition;
 use App\Catalog\ItemNotFoundException;
 use App\Catalog\Matching;
@@ -20,11 +22,11 @@ use LogicException;
  * Manga are flat (no hierarchy); refs are MAL numeric
  * manga ids. Light novels are filtered out — prose belongs to the books
  * module. MAL serves no genre browsing or upcoming listings in API v2, so
- * the provider stops at search + details + trending (ranking by
- * popularity). Covers are absolute MAL CDN URLs (`mediaImage` passes
- * `http…` through).
+ * besides search and details it offers trending (the ranking by popularity)
+ * and its rankings as the discover page's filtered listing. Covers are
+ * absolute MAL CDN URLs (`mediaImage` passes `http…` through).
  */
-class MalProvider implements MetadataProvider, SupportsTrending
+class MalProvider implements MetadataProvider, SupportsFilteredDiscovery, SupportsTrending
 {
     /** Below this length a refused search is an empty one. */
     private const SHORT_QUERY = 3;
@@ -37,12 +39,6 @@ class MalProvider implements MetadataProvider, SupportsTrending
 
     /** Fields shared by every manga listing (search, ranking, the recommendations on a page). */
     private const SUMMARY_FIELDS = 'id,title,main_picture,alternative_titles,start_date,mean,media_type,num_chapters,nsfw';
-
-    /**
-     * Listings ask MAL for adult titles too: what MAL hides by default is its
-     * own call, so the catalog's rule (MangaNsfw::isAdult) decides instead.
-     */
-    private const ALL_RATINGS = ['nsfw' => 'true'];
 
     /**
      * What a manga page reads beyond its card. The recommended manga come with
@@ -58,6 +54,7 @@ class MalProvider implements MetadataProvider, SupportsTrending
     public function __construct(
         private readonly MalClient $client,
         private readonly MalPayload $payload,
+        private readonly MalRankings $rankings,
     ) {}
 
     public function code(): string
@@ -70,8 +67,8 @@ class MalProvider implements MetadataProvider, SupportsTrending
         try {
             $data = $this->client->get(
                 '/manga',
-                ['q' => $query, 'limit' => 20, 'fields' => self::SUMMARY_FIELDS, ...self::ALL_RATINGS],
-                $this->ttl('search'),
+                ['q' => $query, 'limit' => 20, 'fields' => self::SUMMARY_FIELDS, ...MalClient::ALL_RATINGS],
+                $this->client->ttl('search'),
                 requireKey: 'data',
             );
         } catch (ProviderRejected $refusal) {
@@ -101,7 +98,7 @@ class MalProvider implements MetadataProvider, SupportsTrending
         $data = $this->client->get(
             "/manga/{$ref}",
             ['fields' => self::SUMMARY_FIELDS.','.self::DETAIL_FIELDS],
-            $this->ttl('details'),
+            $this->client->ttl('details'),
             requireKey: 'id',
         );
 
@@ -166,12 +163,27 @@ class MalProvider implements MetadataProvider, SupportsTrending
         // ranking (members count) is the closest stable signal.
         $data = $this->client->get(
             '/manga/ranking',
-            ['ranking_type' => 'bypopularity', 'limit' => 30, 'fields' => self::SUMMARY_FIELDS, ...self::ALL_RATINGS],
-            $this->ttl('listing'),
+            ['ranking_type' => MangaRankingType::ByPopularity->value, 'limit' => 30, 'fields' => self::SUMMARY_FIELDS, ...MalClient::ALL_RATINGS],
+            $this->client->ttl('listing'),
             requireKey: 'data',
         );
 
         return array_slice($this->payload->cards(Payload::list($data['data'] ?? null)), 0, 20);
+    }
+
+    public function filterableTypes(): array
+    {
+        return ['manga'];
+    }
+
+    public function discoverFilters(string $type, string $locale, string $region, array $requested = []): array
+    {
+        return $this->rankings->filters();
+    }
+
+    public function discoverFiltered(string $type, array $filters, string $locale, string $region, int $page = 1): Paginated
+    {
+        return $this->rankings->page($filters, self::SUMMARY_FIELDS, $page);
     }
 
     /**
@@ -235,10 +247,5 @@ class MalProvider implements MetadataProvider, SupportsTrending
         }
 
         return $rankings;
-    }
-
-    private function ttl(string $kind): int
-    {
-        return config()->integer("tracker.mal.cache.{$kind}");
     }
 }
