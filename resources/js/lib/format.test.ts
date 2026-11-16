@@ -1,4 +1,6 @@
 import {
+    ALTERNATIVE_TITLES_SHOWN,
+    alternativeTitlesLine,
     countryName,
     dateTimeInputInstant,
     durationTerms,
@@ -210,6 +212,18 @@ describe('formatCountOrNull', () => {
         expect(formatCountOrNull(1200)).toBe(formatNumber(1200));
         expect(formatCountOrNull(null)).toBeNull();
         expect(formatCountOrNull('12')).toBeNull();
+    });
+});
+
+describe('alternativeTitlesLine', () => {
+    it('lists the first few other names on one line, and nothing without any', () => {
+        const names = Array.from({ length: ALTERNATIVE_TITLES_SHOWN + 1 }, (_, index) => `Name ${index + 1}`);
+
+        expect(alternativeTitlesLine(names)).toBe(names.slice(0, ALTERNATIVE_TITLES_SHOWN).join(', '));
+        expect(alternativeTitlesLine(['AoT'])).toBe('AoT');
+        expect(alternativeTitlesLine([])).toBeNull();
+        expect(alternativeTitlesLine(null)).toBeNull();
+        expect(alternativeTitlesLine(undefined)).toBeNull();
     });
 });
 

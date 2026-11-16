@@ -37,6 +37,8 @@ export interface TitleExtra {
     supportingLinks?: CreatorLink[] | null;
     /** The title in its own language, only when it differs from the one shown. */
     originalTitle?: string | null;
+    /** Other names it goes by (an acronym, another spelling, a title in another language). */
+    alternativeTitles?: string[] | null;
 }
 
 interface TmdbTitleExtra extends TitleExtra {
@@ -44,7 +46,6 @@ interface TmdbTitleExtra extends TitleExtra {
     wikidataId?: string | null;
     logoPath?: string | null;
     spokenLanguages?: string[];
-    alternativeTitles?: string[];
 }
 
 export interface MovieExtra extends TmdbTitleExtra {
@@ -111,8 +112,6 @@ export interface GameExtra extends TitleExtra {
     storyline?: string | null;
     platforms?: string[];
     gameModes?: string[];
-    /** Other names the game goes by (an acronym, another spelling, a title in another language). */
-    alternativeTitles?: string[] | null;
     perspectives?: string[] | null;
     languages?: LanguageSupport[] | null;
     multiplayer?: MultiplayerSupport[] | null;

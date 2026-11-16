@@ -373,6 +373,14 @@ export function formatCountOrNull(value: unknown): string | null {
     return typeof value === 'number' ? formatNumber(value) : null;
 }
 
+/** How many other names a title page lists: past a handful they read as noise. */
+export const ALTERNATIVE_TITLES_SHOWN = 8;
+
+/** The other names a title goes by as one detail line, the first few of them; null when it has none. */
+export function alternativeTitlesLine(titles: string[] | null | undefined): string | null {
+    return titles?.slice(0, ALTERNATIVE_TITLES_SHOWN).join(', ') || null;
+}
+
 /** A label with how many it holds ("Movies (12)"), worded by the translation. */
 export function withCount(label: string, count: number): string {
     return trans('common.label_with_count', { label, count: String(count) });
