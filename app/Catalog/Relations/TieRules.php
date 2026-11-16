@@ -81,13 +81,25 @@ final readonly class TieRules
             }
         }
 
-        $order = array_flip(array_map(fn (TitleRelation $relation): string => $relation->value, TitleRelation::cases()));
-        $settled = array_values($settled);
+        return self::inPageOrder(array_values($settled));
+    }
 
-        usort($settled, fn (TitleTie $a, TitleTie $b): int => [$order[$a->relation->value], $a->media->releaseDate, $a->media->title]
+    /**
+     * The order a page lists ties in: by how the other title stands to this
+     * one, as TitleRelation lists them (spin-offs, the original, what follows
+     * it, what it follows, then the rest of the universe), each kind by release.
+     *
+     * @param  list<TitleTie>  $ties
+     * @return list<TitleTie>
+     */
+    public static function inPageOrder(array $ties): array
+    {
+        $order = array_flip(array_map(fn (TitleRelation $relation): string => $relation->value, TitleRelation::cases()));
+
+        usort($ties, fn (TitleTie $a, TitleTie $b): int => [$order[$a->relation->value], $a->media->releaseDate, $a->media->title]
             <=> [$order[$b->relation->value], $b->media->releaseDate, $b->media->title]);
 
-        return $settled;
+        return $ties;
     }
 
     private function minVotes(TitleTie $tie): int
