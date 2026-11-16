@@ -46,7 +46,6 @@ return [
     'videtrack_is_up' => 'VideTrack is up',
     'view_all_notifications' => 'View all notifications',
     'where_to_watch_data_is_provided' => 'Where to watch data is provided by JustWatch.',
-    'year_all_rights_reserved' => '© :year. All rights reserved.',
     'leave_page' => 'Leave',
     'you_have_unsaved_changes_leave_this' => 'You have unsaved changes. Leave this page?',
 ];

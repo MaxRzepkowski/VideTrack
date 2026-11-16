@@ -12,8 +12,6 @@ final class AboutController extends Controller
     public function __invoke(DataSources $sources): Response
     {
         return Inertia::render('About', [
-            'version' => config('tracker.version'),
-            'sourceUrl' => config('tracker.source_url'),
             'dataSources' => array_map(fn (DataSourceCredit $credit): DataSourceCredit => $credit->translated(), $sources->all()),
         ]);
     }

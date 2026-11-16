@@ -57,6 +57,10 @@ class HandleInertiaRequests extends Middleware
             'registrationEnabled' => $request->user() === null && $this->registration->isOpen(),
             'locale' => App::getLocale(),
             'imageBase' => ImageUrls::base(),
+            // The footer names the running version and links its source on
+            // every page: the AGPL asks each instance to offer its users the code.
+            'version' => config()->string('tracker.version'),
+            'sourceUrl' => config()->string('tracker.source_url'),
             // The registry's types, in its order: the front reads what a type
             // can do (played, given a status, counted in pages…) from here
             // instead of keeping a copy of the backend's knowledge.

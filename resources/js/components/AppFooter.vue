@@ -1,8 +1,10 @@
 <script setup lang="ts">
-import { Link } from '@inertiajs/vue3';
+import { versionLabel } from '@/lib/format';
+import type { SharedData } from '@/types';
+import { Link, usePage } from '@inertiajs/vue3';
 import { trans } from 'laravel-vue-i18n';
 
-const year = new Date().getFullYear();
+const page = usePage<SharedData>();
 </script>
 
 <template>
@@ -23,9 +25,17 @@ const year = new Date().getFullYear();
                  `text-base` in Roboto Flex. -->
             <div class="flex flex-col items-center gap-3 sm:flex-row sm:items-baseline sm:gap-6">
                 <img src="/logo.svg" alt="VideTrack" width="162" height="27" loading="lazy" class="block h-4.25 w-auto" />
-                <span class="text-ink-muted text-base leading-none">{{ trans('app.year_all_rights_reserved', { year: String(year) }) }}</span>
+                <span class="text-ink-muted text-base leading-none">{{ versionLabel(page.props.version) }}</span>
             </div>
             <div class="flex items-center gap-6">
+                <a
+                    :href="page.props.sourceUrl"
+                    target="_blank"
+                    rel="noopener"
+                    class="text-ink-muted hover:text-ink text-base transition-colors duration-150"
+                >
+                    {{ trans('app.source_code') }}
+                </a>
                 <Link :href="route('about')" class="text-ink-muted hover:text-ink text-base transition-colors duration-150">
                     {{ trans('common.about') }}
                 </Link>

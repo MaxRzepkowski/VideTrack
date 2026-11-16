@@ -13,14 +13,21 @@ const ALWAYS_CREDITED = ['The Movie Database (TMDB)', 'JustWatch'];
 
 const ALWAYS_LAST = ['TVmaze', 'Wikidata'];
 
-test('the about page renders with the app version', function () {
-    config(['tracker.version' => '1.2.3']);
-
+test('the about page credits the data sources every instance uses', function () {
     $this->actingAs(User::factory()->create())
         ->get('/about')
         ->assertOk()
-        ->assertInertia(fn (Assert $page) => expect(creditedNames($page->component('About')->where('version', '1.2.3')->where('sourceUrl', config('tracker.source_url'))))
+        ->assertInertia(fn (Assert $page) => expect(creditedNames($page->component('About')))
             ->toBe([...ALWAYS_CREDITED, ...ALWAYS_LAST]));
+});
+
+test('every page carries the version and the source for the footer', function () {
+    config(['tracker.version' => '1.2.3', 'tracker.source_url' => 'https://github.com/example/fork']);
+
+    $this->actingAs(User::factory()->create())
+        ->get(route('dashboard'))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page->where('version', '1.2.3')->where('sourceUrl', 'https://github.com/example/fork'));
 });
 
 test('about credits only enabled optional modules', function (string $enable, string $source) {

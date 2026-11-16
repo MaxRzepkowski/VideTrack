@@ -2,17 +2,19 @@
 import SectionHeading from '@/components/SectionHeading.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { splitAtPlaceholder } from '@/lib/format';
+import type { SharedData } from '@/types';
 import type { DataSourceCredit } from '@/types/generated';
-import { Head } from '@inertiajs/vue3';
+import { Head, usePage } from '@inertiajs/vue3';
 import { trans } from 'laravel-vue-i18n';
 
 // The sources come credited by the modules that use them, their notices
-// already in the reader's language.
+// already in the reader's language. The version and the source come shared
+// with every page, for the footer.
 defineProps<{
-    version: string;
-    sourceUrl: string;
     dataSources: DataSourceCredit[];
 }>();
+
+const { version, sourceUrl } = usePage<SharedData>().props;
 
 // @view A licence a notice links to: the app's own, or a credit's two fields put together.
 type License = { name: string; url: string };

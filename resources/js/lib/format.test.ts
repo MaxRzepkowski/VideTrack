@@ -24,6 +24,7 @@ import {
     relativeTime,
     splitAtPlaceholder,
     todayDateKey,
+    versionLabel,
     withCount,
     yearsBetween,
 } from '@/lib/format';
@@ -241,5 +242,13 @@ describe('alternativeTitlesLine', () => {
 describe('withCount', () => {
     it('words a label with its count through one translation', () => {
         expect(withCount('Movies', 12)).toBe('Movies (12)');
+    });
+});
+
+describe('versionLabel', () => {
+    it('prefixes a release number and leaves a build label alone', () => {
+        expect(versionLabel('1.4.0')).toBe('v1.4.0');
+        expect(versionLabel('dev')).toBe('dev');
+        expect(versionLabel('main-0123abc')).toBe('main-0123abc');
     });
 });
