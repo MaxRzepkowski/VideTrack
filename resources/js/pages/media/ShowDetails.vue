@@ -21,7 +21,7 @@ import WatchProvidersSection from '@/components/media/WatchProvidersSection.vue'
 import SectionHeading from '@/components/SectionHeading.vue';
 import { useDeferredUserStates } from '@/composables/useMediaActions';
 import { useReloadAfterWrites } from '@/composables/useReloadAfterWrites';
-import { countryName, episodeCode, formatCalendarDate, formatRuntime, formatTotalRuntime } from '@/lib/format';
+import { alternativeTitlesLine, countryName, episodeCode, formatCalendarDate, formatRuntime, formatTotalRuntime } from '@/lib/format';
 import { showTypeLabel } from '@/lib/showTypes';
 import { titleStatusLabel } from '@/lib/titleStatus';
 import type { ShowExtra } from '@/types/extras';
@@ -125,7 +125,7 @@ const detailRows = computed<DetailRow[]>(() => [
     // Rare enough that the row simply is not there for most shows.
     { label: trans('media.screened_theatrically'), value: screenedTheatrically.value },
     // Same demotion as on the film page: trivia sits below the facts.
-    { label: trans('media.alternative_titles'), value: props.show.extra.alternativeTitles?.slice(0, 8).join(', ') || null },
+    { label: trans('media.alternative_titles'), value: alternativeTitlesLine(props.show.extra.alternativeTitles) },
     { label: trans('media.created_by'), value: createdBy.value.map((person) => person.name).join(', ') || null },
     { label: trans('media.seasons'), value: String(seasonCount.value) },
     { label: trans('media.episodes'), value: props.show.extra.episodeCount ? String(props.show.extra.episodeCount) : null },

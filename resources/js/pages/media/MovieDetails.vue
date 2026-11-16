@@ -17,7 +17,7 @@ import VideosSection from '@/components/media/VideosSection.vue';
 import WatchProvidersSection from '@/components/media/WatchProvidersSection.vue';
 import { useDeferredUserStates } from '@/composables/useMediaActions';
 import { isDirector, keyCrew, wroteScreenplay } from '@/lib/credits';
-import { countryName, formatCalendarDate, formatMoney, formatRuntime } from '@/lib/format';
+import { alternativeTitlesLine, countryName, formatCalendarDate, formatMoney, formatRuntime } from '@/lib/format';
 import { titleStatusLabel } from '@/lib/titleStatus';
 import type { MovieExtra } from '@/types/extras';
 import type { Chip, CollectionBannerData, DetailRow, MediaDetails, MediaSummary, TitleTie, UserStatesMap, WatchAvailability } from '@/types/media';
@@ -72,7 +72,7 @@ const detailRows = computed<DetailRow[]>(() => [
     // Low-value trivia, so it sits below the facts people actually came for.
     {
         label: trans('media.alternative_titles'),
-        value: props.movie.extra.alternativeTitles?.slice(0, 8).join(', ') || null,
+        value: alternativeTitlesLine(props.movie.extra.alternativeTitles),
     },
     {
         label: trans('media.director'),
