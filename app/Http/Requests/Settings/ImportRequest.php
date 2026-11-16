@@ -57,9 +57,8 @@ class ImportRequest extends FormRequest
         // An unknown source fails on its own rule; a file is still asked for,
         // so the form shows both errors at once.
         if ($source === null || $source instanceof ReadsFile) {
-            // Every format is a plain file (json/csv/zip); browsers report
-            // mime variants inconsistently, so cap the size and let the
-            // source validate the actual contents.
+            // Browsers report the mime types of export files inconsistently,
+            // so cap the size and let the source validate the contents.
             $rules['file'] = ['required', 'file', 'max:'.self::MAX_FILE_KB];
         }
 

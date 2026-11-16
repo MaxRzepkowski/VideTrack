@@ -13,8 +13,9 @@ use App\Integrations\Import\Rows\SkipRow;
 use Generator;
 
 /**
- * An anime/manga list, however it reaches us. The sources differ only in
- * how they get the entries; what an entry means is AnimeListRows' business.
+ * An anime/manga list, however it reaches us: a public profile read by
+ * username or an exported file. The sources differ only in how they get the
+ * entries; what an entry means is AnimeListRows' business.
  */
 abstract class AnimeListSource implements ExplainsSetup, ImportSource
 {
