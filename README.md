@@ -28,7 +28,7 @@ tells you when the next episode or release is out, and keeps all of it on your o
 
 - 🎬 Track movies, TV shows, games, books, manga and comics in one place.
 - ⏭️ See the next episode of every show you watch, and the games and books you are in the middle of.
-- 📅 Follow upcoming releases in a calendar and countdowns, or subscribe to them in your own calendar app.
+- 📅 Follow upcoming releases in a calendar and countdowns, or subscribe to them in your own calendar app or feed reader.
 - 🔔 Ring the bell on a title, a person or a studio to hear about new releases, in the app or on Discord.
 - ⭐ Rate, favorite and collect titles in a backlog and in your own lists.
 - 📊 Keep a full history with rewatches and see how much time went into it.

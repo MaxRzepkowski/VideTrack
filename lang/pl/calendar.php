@@ -5,6 +5,8 @@ return [
     'book_release' => 'Premiera książki',
     'comic_release' => 'Premiera komiksu',
     'days' => 'Dni',
+    'feed_name' => ':app: :name',
+    'feed_item_title' => ':title (:date)',
     'game_release' => 'Premiera gry',
     'hours' => 'Godz.',
     'jump_to_date' => 'Przejdź do daty',

@@ -1,17 +1,16 @@
 <script setup lang="ts">
 import HeadingSmall from '@/components/HeadingSmall.vue';
-import { useCopyToClipboard } from '@/composables/useCopyToClipboard';
+import CalendarSubscriptionCard from '@/components/settings/CalendarSubscriptionCard.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import SettingsLayout from '@/layouts/settings/Layout.vue';
-import { SETTINGS_FIELD_CLASS } from '@/lib/ui';
-import type { ExportDownload, ExportShelf } from '@/types/generated';
+import type { ExportDownload, ExportShelf, SubscriptionFeed } from '@/types/generated';
 import { Head } from '@inertiajs/vue3';
 import { trans } from 'laravel-vue-i18n';
 import { computed } from 'vue';
 
 const props = defineProps<{
-    calendarFeedUrl: string;
-    calendarWebcalUrl: string;
+    calendarFeed: SubscriptionFeed;
+    rssFeed: SubscriptionFeed;
     /** Every download this instance offers, in the order the page shows them. */
     formats: ExportDownload[];
 }>();
@@ -20,12 +19,6 @@ const onShelf = (shelf: ExportShelf) => computed(() => props.formats.filter((for
 const backups = onShelf('backup');
 const spreadsheets = onShelf('spreadsheet');
 const services = onShelf('service');
-
-const { copied, copy } = useCopyToClipboard(trans('common.could_not_copy_the_link'));
-
-async function copyFeedUrl(): Promise<void> {
-    await copy(props.calendarFeedUrl);
-}
 </script>
 
 <template>
@@ -87,45 +80,7 @@ async function copyFeedUrl(): Promise<void> {
                     </div>
                 </div>
 
-                <div class="border-line-subtle bg-surface rounded-xl border px-5 py-4">
-                    <div class="text-ink text-base font-semibold">{{ trans('import.calendar_subscription') }}</div>
-                    <p class="text-ink-muted mt-0.5 mb-3 text-sm">
-                        {{ trans('import.this_link_can_be_used_to') }}
-                    </p>
-                    <div class="flex flex-col gap-3">
-                        <div class="flex gap-2">
-                            <label for="calendar-feed-url" class="sr-only">{{ trans('import.calendar_subscription') }}</label>
-                            <input
-                                id="calendar-feed-url"
-                                readonly
-                                :value="calendarFeedUrl"
-                                :class="[SETTINGS_FIELD_CLASS, 'text-ink-secondary min-w-0 flex-1']"
-                                @focus="($event.target as HTMLInputElement).select()"
-                            />
-                            <button
-                                type="button"
-                                class="border-line-subtle bg-surface-base text-ink hover:border-brand shrink-0 rounded-md border px-4 py-2 text-sm font-medium"
-                                @click="copyFeedUrl"
-                            >
-                                {{ copied ? trans('common.copied') : trans('common.copy') }}
-                            </button>
-                        </div>
-                        <div class="flex flex-wrap gap-2">
-                            <a
-                                :href="calendarWebcalUrl"
-                                class="bg-brand hover:bg-brand/90 text-on-accent inline-flex items-center rounded-md px-4 py-2 text-sm font-semibold"
-                            >
-                                {{ trans('common.subscribe') }}
-                            </a>
-                            <a
-                                :href="calendarFeedUrl"
-                                class="border-line-subtle bg-surface-base text-ink hover:border-brand inline-flex items-center rounded-md border px-4 py-2 text-sm font-medium"
-                            >
-                                {{ trans('common.download_ics') }}
-                            </a>
-                        </div>
-                    </div>
-                </div>
+                <CalendarSubscriptionCard :calendar-feed="calendarFeed" :rss-feed="rssFeed" />
             </div>
         </SettingsLayout>
     </AppLayout>

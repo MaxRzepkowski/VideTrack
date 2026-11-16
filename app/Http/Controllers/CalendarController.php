@@ -27,7 +27,7 @@ class CalendarController extends Controller
         $today = UserCalendar::of($viewer)->today();
         $month = $this->day($request->string('date')->toString(), $today)->startOfMonth();
 
-        $feedUrl = route('calendar.feed', ['token' => $viewer->calendarToken()]);
+        $token = $viewer->calendarToken();
 
         return Inertia::render('Calendar', [
             'anchor' => $month->toDateString(),
@@ -35,8 +35,8 @@ class CalendarController extends Controller
             'prev' => $month->copy()->subMonthNoOverflow()->toDateString(),
             'next' => $month->copy()->addMonthNoOverflow()->toDateString(),
             'month' => $this->month($viewer, $month, $calendar),
-            'feedUrl' => $feedUrl,
-            'webcalUrl' => (string) preg_replace('#^https?://#', 'webcal://', $feedUrl),
+            'feedUrl' => route('calendar.feed', ['token' => $token]),
+            'rssUrl' => route('calendar.rss', ['token' => $token]),
         ]);
     }
 

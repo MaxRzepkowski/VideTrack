@@ -30,6 +30,12 @@ final readonly class ReleaseEntry implements JsonSerializable
         return $this->media->type !== $this->rootType;
     }
 
+    /** The first episode of a numbered season; specials have no premiere. */
+    public function opensSeason(): bool
+    {
+        return $this->isPart() && $this->media->number === 1 && $this->media->seasonNumber !== 0;
+    }
+
     /**
      * @return array{media: MediaSummary, showTitle: string|null}
      */
