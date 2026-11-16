@@ -51,6 +51,54 @@ test('search maps manga summaries and drops light novels and coverless hits', fu
         ->and($results[1]->progressTotal)->toBe(201);
 });
 
+test('a search card carries the English title, the one the manga page shows', function () {
+    enableMangaModule();
+    Http::fake(['api.myanimelist.net/v2/manga?*' => Http::response(jsonFixture('mal/search'))]);
+
+    $results = malProvider()->search('solo leveling', 'pl');
+
+    expect($results[1]->title)->toBe('Solo Leveling')
+        ->and($results[1]->alternativeTitles)->toBe(['Na Honjaman Level Up', '나 혼자만 레벨업', 'Only I Level Up'])
+        // The English title is also MAL's own: it is not another name.
+        ->and($results[0]->title)->toBe('Berserk')
+        ->and($results[0]->alternativeTitles)->toBe(['ベルセルク']);
+
+    Http::assertSent(fn ($request) => str_contains(urldecode($request->url()), 'alternative_titles'));
+});
+
+test('a manga MAL names in English is shown by that name, the Japanese one as its original', function () {
+    enableMangaModule();
+    Http::fake(['api.myanimelist.net/v2/manga/23390*' => Http::response([
+        ...jsonFixture('mal/details'),
+        'id' => 23390,
+        'title' => 'Shingeki no Kyojin',
+        'alternative_titles' => ['synonyms' => ['AoT', ' ', 'ATTACK ON TITAN!', 'Shingeki no Kyojin'], 'en' => 'Attack on Titan', 'ja' => '進撃の巨人'],
+    ])]);
+
+    $manga = malProvider()->details('manga', '23390', 'pl');
+
+    expect($manga->summary->title)->toBe('Attack on Titan')
+        ->and($manga->extra['originalTitle'])->toBe('進撃の巨人')
+        ->and($manga->extra['alternativeTitles'])->toBe(['Shingeki no Kyojin', 'AoT'])
+        // The shown title written another way, or a name twice, is not another name.
+        ->and($manga->summary->alternativeTitles)->toBe(['Shingeki no Kyojin', '進撃の巨人', 'AoT']);
+});
+
+test('a manga without an English title keeps the name MAL gives it', function () {
+    enableMangaModule();
+    Http::fake(['api.myanimelist.net/v2/manga/2*' => Http::response([
+        ...jsonFixture('mal/details'),
+        'title' => 'Hoshi no Samidare',
+        'alternative_titles' => ['synonyms' => [], 'en' => '', 'ja' => '惑星のさみだれ'],
+    ])]);
+
+    $manga = malProvider()->details('manga', '2', 'en');
+
+    expect($manga->summary->title)->toBe('Hoshi no Samidare')
+        ->and($manga->extra['originalTitle'])->toBe('惑星のさみだれ')
+        ->and($manga->extra['alternativeTitles'])->toBeNull();
+});
+
 test('a very short search MAL refuses finds nothing, a longer refused one still fails', function () {
     enableMangaModule();
     Http::fake(['api.myanimelist.net/v2/manga?*' => Http::response(['message' => 'invalid q', 'error' => 'bad_request'], 400)]);

@@ -8,6 +8,11 @@
                     "medium": "https://cdn.myanimelist.net/images/manga/1/157897.webp",
                     "large": "https://cdn.myanimelist.net/images/manga/1/157897l.webp"
                 },
+                "alternative_titles": {
+                    "synonyms": [],
+                    "en": "Berserk",
+                    "ja": "ベルセルク"
+                },
                 "start_date": "1989-08-25",
                 "mean": 9.46,
                 "media_type": "manga",
@@ -17,10 +22,17 @@
         {
             "node": {
                 "id": 121496,
-                "title": "Solo Leveling",
+                "title": "Na Honjaman Level Up",
                 "main_picture": {
                     "medium": "https://cdn.myanimelist.net/images/manga/3/222295.jpg",
                     "large": "https://cdn.myanimelist.net/images/manga/3/222295l.jpg"
+                },
+                "alternative_titles": {
+                    "synonyms": [
+                        "Only I Level Up"
+                    ],
+                    "en": "Solo Leveling",
+                    "ja": "나 혼자만 레벨업"
                 },
                 "start_date": "2018-03-04",
                 "mean": 8.25,

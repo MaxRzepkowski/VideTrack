@@ -7,6 +7,7 @@ use App\Catalog\Contracts\SupportsTrending;
 use App\Catalog\Data\MediaDetails;
 use App\Catalog\Data\MediaSummary;
 use App\Catalog\ItemNotFoundException;
+use App\Catalog\Matching;
 use App\Catalog\ProviderException;
 use App\Catalog\ProviderRejected;
 use App\Catalog\TitleStatus;
@@ -34,7 +35,7 @@ class MalProvider implements MetadataProvider, SupportsTrending
     private const GENRES_KEPT = 8;
 
     /** Fields shared by every manga listing (search, ranking). */
-    private const SUMMARY_FIELDS = 'id,title,main_picture,start_date,mean,media_type,num_chapters';
+    private const SUMMARY_FIELDS = 'id,title,main_picture,alternative_titles,start_date,mean,media_type,num_chapters';
 
     /** MAL media_type values that are prose, not comics. */
     private const NOVEL_TYPES = ['novel', 'light_novel'];
@@ -81,7 +82,7 @@ class MalProvider implements MetadataProvider, SupportsTrending
 
         $data = $this->client->get(
             "/manga/{$ref}",
-            ['fields' => self::SUMMARY_FIELDS.',alternative_titles,synopsis,status,genres,'
+            ['fields' => self::SUMMARY_FIELDS.',synopsis,status,genres,'
                 .'num_volumes,num_list_users,num_scoring_users,authors{first_name,last_name},serialization{name},pictures'],
             $this->ttl('details'),
             requireKey: 'id',
@@ -90,6 +91,10 @@ class MalProvider implements MetadataProvider, SupportsTrending
         $id = Payload::int($data, 'id') ?? throw new ItemNotFoundException("MyAnimeList returned no manga for [{$ref}].");
 
         $genres = Payload::names($data['genres'] ?? null);
+
+        $summary = $this->summary($data);
+        $original = $this->nativeTitle($data);
+        $original = $original !== null && Matching::sameTitle($original, $summary->title) ? null : $original;
 
         $posters = [];
 
@@ -102,7 +107,7 @@ class MalProvider implements MetadataProvider, SupportsTrending
         }
 
         return new MediaDetails(
-            summary: $this->summary($data),
+            summary: $summary,
             overview: Payload::string($data, 'synopsis'),
             genres: array_slice($genres, 0, self::GENRES_KEPT),
             status: $this->publicationStatus($data),
@@ -116,6 +121,11 @@ class MalProvider implements MetadataProvider, SupportsTrending
                 'magazine' => Payload::string(Payload::map(data_get($data, 'serialization.0.node')), 'name'),
                 'readersCount' => Payload::positiveInt($data, 'num_list_users'),
                 'ratingsCount' => Payload::positiveInt($data, 'num_scoring_users'),
+                // The title in the manga's own script (Japanese, Korean,
+                // Chinese) is its original, as a film's is; MAL's own
+                // romanised one is just another name it goes by.
+                'originalTitle' => $original,
+                'alternativeTitles' => array_values(array_filter($summary->alternativeTitles, fn (string $name): bool => $name !== $original)) ?: null,
             ],
             posters: array_slice($posters, 0, self::POSTERS_KEPT),
         );
@@ -169,12 +179,13 @@ class MalProvider implements MetadataProvider, SupportsTrending
     private function summary(array $data): MediaSummary
     {
         $releaseDate = $this->startDate($data);
+        $title = $this->shownTitle($data);
 
         return new MediaSummary(
             type: 'manga',
             ref: Payload::id($data['id'] ?? null) ?? throw ProviderException::missingId('MyAnimeList'),
             provider: $this->code(),
-            title: Payload::text($data, 'title'),
+            title: $title,
             year: Payload::yearOf($releaseDate),
             posterPath: $this->pictureUrl(Payload::map($data['main_picture'] ?? null)),
             communityRating: (($mean = Payload::float($data, 'mean') ?? 0.0) > 0) ? round($mean, 1) : null,
@@ -182,7 +193,63 @@ class MalProvider implements MetadataProvider, SupportsTrending
             extra: array_filter(['chapters' => Payload::positiveInt($data, 'num_chapters')]),
             progressTotal: Payload::positiveInt($data, 'num_chapters'),
             authors: $this->authors($data),
+            alternativeTitles: $this->otherTitles($data, $title),
         );
+    }
+
+    /**
+     * The name readers know the manga by: MAL's English title where it has
+     * one, else MAL's own, usually romanised Japanese ("Shingeki no Kyojin").
+     * MAL names a manga in no other language, so a reader of any language
+     * gets the English one, as a title without their own version does on
+     * every type.
+     *
+     * @param  array<array-key, mixed>  $data
+     */
+    private function shownTitle(array $data): string
+    {
+        return Payload::string(Payload::map($data['alternative_titles'] ?? null), 'en') ?? Payload::text($data, 'title');
+    }
+
+    /**
+     * The title in the manga's own script. MAL keeps it under `ja` whatever
+     * the language: a manhwa's Korean title sits there too.
+     *
+     * @param  array<array-key, mixed>  $data
+     */
+    private function nativeTitle(array $data): ?string
+    {
+        return Payload::string(Payload::map($data['alternative_titles'] ?? null), 'ja');
+    }
+
+    /**
+     * Every other name MAL knows the manga by, for placing it by name: its own
+     * title, the native one and the synonyms, each once, none that is the
+     * shown one written another way.
+     *
+     * @param  array<array-key, mixed>  $data
+     * @return list<string>
+     */
+    private function otherTitles(array $data, string $shown): array
+    {
+        $candidates = [
+            Payload::string($data, 'title'),
+            $this->nativeTitle($data),
+            ...Payload::texts(Payload::map($data['alternative_titles'] ?? null)['synonyms'] ?? null),
+        ];
+        $titles = [];
+
+        foreach ($candidates as $name) {
+            if ($name === null || Matching::sameTitle($name, $shown)) {
+                continue;
+            }
+
+            if (! in_array($name, $titles, true) && array_filter($titles, fn (string $kept): bool => Matching::sameTitle($kept, $name)) === []) {
+                $titles[] = $name;
+            }
+        }
+
+        return $titles;
     }
 
     /**

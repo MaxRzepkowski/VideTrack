@@ -7,7 +7,7 @@ import RecentlyViewed from '@/components/media/RecentlyViewed.vue';
 import StickyActionsPanel from '@/components/media/StickyActionsPanel.vue';
 import TitlePageLayout from '@/components/media/TitlePageLayout.vue';
 import { plainCredits } from '@/lib/creators';
-import { formatCalendarDate, formatCountOrNull } from '@/lib/format';
+import { alternativeTitlesLine, formatCalendarDate, formatCountOrNull } from '@/lib/format';
 import { mangaFormatLabel } from '@/lib/mangaFormats';
 import { titleStatusLabel } from '@/lib/titleStatus';
 import type { MangaExtra } from '@/types/extras';
@@ -44,6 +44,7 @@ const chips = computed(() =>
 
 const detailRows = computed<DetailRow[]>(() => [
     { label: trans('media.authors'), value: authors.value.join(', ') || null },
+    { label: trans('media.original_title'), value: props.manga.extra.originalTitle ?? null },
     { label: trans('media.format'), value: format.value },
     { label: trans('media.magazine'), value: props.manga.extra.magazine ?? null },
     { label: trans('common.release_date'), value: formatCalendarDate(props.manga.releaseDate) },
@@ -52,6 +53,8 @@ const detailRows = computed<DetailRow[]>(() => [
     { label: trans('media.volumes'), value: volumes.value !== null ? String(volumes.value) : null },
     { label: trans('media.readers'), value: formatCountOrNull(props.manga.extra.readersCount) },
     { label: trans('common.ratings'), value: formatCountOrNull(props.manga.extra.ratingsCount) },
+    // Trivia, so it sits below the facts people came for, as on a film's page.
+    { label: trans('media.alternative_titles'), value: alternativeTitlesLine(props.manga.extra.alternativeTitles) },
 ]);
 </script>
 

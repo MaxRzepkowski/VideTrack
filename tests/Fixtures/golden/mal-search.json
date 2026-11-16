@@ -28,7 +28,9 @@
         "makes": null,
         "votes": null,
         "releasePrecision": "day",
-        "alternativeTitles": []
+        "alternativeTitles": [
+            "ベルセルク"
+        ]
     },
     {
         "@class": "MediaSummary",
@@ -61,6 +63,10 @@
         "makes": null,
         "votes": null,
         "releasePrecision": "day",
-        "alternativeTitles": []
+        "alternativeTitles": [
+            "Na Honjaman Level Up",
+            "나 혼자만 레벨업",
+            "Only I Level Up"
+        ]
     }
 ]
