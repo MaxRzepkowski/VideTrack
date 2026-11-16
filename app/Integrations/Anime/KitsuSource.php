@@ -2,6 +2,7 @@
 
 namespace App\Integrations\Anime;
 
+use App\Integrations\Export\ListStatus;
 use App\Integrations\Import\Data\CredentialField;
 use App\Integrations\Import\Data\SetupNote;
 use App\Integrations\Import\Rows\SkipRow;
@@ -14,7 +15,7 @@ use App\Support\Payload;
  * following `links.next`. A title is placed by its `myanimelist/{kind}`
  * mapping; one without it, or hidden by Kitsu as adult content, is reported.
  */
-final class KitsuSource extends AnimeListSource
+final class KitsuSource extends AnimeProfileSource
 {
     public const CODE = 'kitsu';
 
@@ -182,7 +183,7 @@ final class KitsuSource extends AnimeListSource
             $title,
             $status,
             // Kitsu rates 2–20; half-points round up so nothing lands on 0.
-            $rating === null ? null : min(10, (int) ceil($rating / 2)),
+            $rating === null ? null : (int) ceil($rating / 2),
             Payload::int($attributes, 'progress') ?? 0,
             Payload::positiveInt($mediaAttributes, $medium === ListMedium::Anime ? 'episodeCount' : 'chapterCount'),
             Payload::instant($attributes['startedAt'] ?? null),

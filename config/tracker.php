@@ -469,11 +469,11 @@ return [
         'anilist_url' => env('ANILIST_GRAPHQL_URL', 'https://graphql.anilist.co'),
         'kitsu_url' => env('KITSU_BASE_URL', 'https://kitsu.app/api/edge'),
         'anime_ids_url' => env('ANIME_IDS_BASE_URL', 'https://raw.githubusercontent.com/Kometa-Team/Anime-IDs'),
-        // The largest single JSON file an import decodes, uncompressed. A
-        // file is decoded whole, and a 50 MB ZIP of history can unpack to
+        // The largest single file an import reads, uncompressed. A file is
+        // read whole, and a 50 MB ZIP or gzip of history can unpack to
         // hundreds of MB; past this, the import stops at analysis instead of
         // the worker running out of memory.
-        'max_json_megabytes' => 64,
+        'max_unpacked_megabytes' => 64,
     ],
 
 ];

@@ -20,7 +20,12 @@ final readonly class AnimeMapping
         public array $imdbIds,
     ) {}
 
-    /** A regular season of a series — episodes can be ticked. */
+    /**
+     * A regular season of a series — episodes can be ticked.
+     *
+     * @phpstan-assert-if-true int $this->tvdbId
+     * @phpstan-assert-if-true int $this->tvdbSeason
+     */
     public function isSeason(): bool
     {
         return $this->tvdbId !== null && $this->tvdbSeason !== null && $this->tvdbSeason > 0;

@@ -21,6 +21,7 @@ use App\Integrations\Import\Rows\ImportRow;
 use App\Integrations\Import\Rows\ListRow;
 use App\Integrations\Import\Rows\MediaRow;
 use App\Integrations\Import\Rows\PersonListRow;
+use App\Integrations\Import\UnpackedFileLimit;
 use App\Integrations\VideTrack\Backup\BackupCreator;
 use App\Integrations\VideTrack\Backup\BackupCycle;
 use App\Integrations\VideTrack\Backup\BackupFavorite;
@@ -78,7 +79,7 @@ final class VideTrackSource implements ReadsFile
     {
         $path = (string) $input->path;
 
-        if (is_file($path) && filesize($path) > config()->integer('tracker.imports.max_json_megabytes') * 1024 * 1024) {
+        if (is_file($path) && filesize($path) > UnpackedFileLimit::bytes()) {
             return ImportManifest::invalid(__('import.a_file_in_this_export_is'));
         }
 

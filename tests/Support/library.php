@@ -38,6 +38,29 @@ function makeShowTree(array $seasons): MediaItem
     return $show;
 }
 
+/**
+ * A TMDB show whose tree carries refs as TMDB writes them (show, show:season,
+ * show:season:episode), so an import that finds the show by TMDB id descends
+ * to its episodes.
+ *
+ * @param  array<int, list<string>>  $seasons  season number => episode air dates
+ */
+function showWithRefs(string $ref, array $seasons): MediaItem
+{
+    $show = makeShowTree($seasons);
+    $show->update(['provider_ref' => $ref]);
+
+    foreach (MediaItem::query()->where('parent_id', $show->id)->get() as $season) {
+        $season->update(['provider_ref' => "{$ref}:{$season->number}"]);
+
+        foreach (MediaItem::query()->where('parent_id', $season->id)->get() as $episode) {
+            $episode->update(['provider_ref' => "{$ref}:{$season->number}:{$episode->number}"]);
+        }
+    }
+
+    return $show;
+}
+
 function seasonOf(MediaItem $show, int $number): MediaItem
 {
     return $show->children()->where('number', $number)->firstOrFail();

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Settings;
 use App\Http\Controllers\Controller;
 use App\Http\Data\SubscriptionFeed;
 use App\Integrations\Export\Data\ExportDownload;
+use App\Integrations\Export\DependsOnService;
 use App\Integrations\Export\ExportFormatRegistry;
 use App\Models\User;
 use App\Tracking\Surfaces\IcsFeed;
@@ -39,6 +40,7 @@ class ExportController extends Controller
     public function download(#[CurrentUser] User $viewer, ExportFormatRegistry $formats, string $format): StreamedResponse
     {
         $download = $formats->find($format) ?? abort(404);
+        abort_if($download instanceof DependsOnService && ! $download->isAvailable(), 503);
         $stem = $viewer->username.($download->part() === null ? '' : '-'.$download->part());
 
         return response()->streamDownload(

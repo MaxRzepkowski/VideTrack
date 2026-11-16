@@ -35,7 +35,7 @@ tells you when the next episode or release is out, and keeps all of it on your o
 - ✨ Get suggestions based on what you finished. They wait on their own page and never nag.
 - 📥 Import from Trakt, Simkl, IMDb, Goodreads, MyAnimeList, AniList, Kitsu, Steam and more.
 - 📡 Log what you watch automatically from Plex, Jellyfin, Emby or Tautulli.
-- 📤 Export everything as a backup, as CSV, or as files for IMDb and Letterboxd.
+- 📤 Export everything as a backup, as CSV, or as files for IMDb, Letterboxd, Goodreads and MyAnimeList.
 - 👥 Give everyone at home their own account, in English or Polish.
 - 🐳 Run it as a single Docker container with one SQLite file.
 
