@@ -50,3 +50,17 @@ test('points as a file writes them read on the scale, off it as no rating', func
     'blank' => [' ', null],
     'past ten' => ['11', null],
 ]);
+
+test('a score out of 100 lands on the nearest point, a blank, zero or overshoot on none', function (string $value, ?int $rating) {
+    expect(RatingScale::readPercent($value))->toBe($rating);
+})->with([
+    'whole' => ['85', 9],
+    'rounding down' => ['84', 8],
+    'the bottom stays on the scale' => ['3', 1],
+    'the top' => ['100', 10],
+    'with a fraction' => ['72.5', 7],
+    'unrated' => ['0', null],
+    'blank' => ['', null],
+    'past the top' => ['101', null],
+    'not a number' => ['--', null],
+]);

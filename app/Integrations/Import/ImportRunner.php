@@ -307,7 +307,7 @@ final readonly class ImportRunner
 
         if ($resolved === null && $subject->byTitle !== null) {
             try {
-                $resolved = $this->titles->match($kind, $subject->byTitle, $run->locale, $subject->season, $subject->episode);
+                $resolved = $this->titles->match($kind, $subject->byTitle, $run->locale, $subject->season, $subject->episode, $subject->episodeTitle);
             } catch (ExternalServiceException $e) {
                 $run->unavailable($subject->label, $e);
 

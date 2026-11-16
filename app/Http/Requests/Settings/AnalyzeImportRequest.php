@@ -55,6 +55,6 @@ class AnalyzeImportRequest extends FormRequest
             throw new LogicException('A file analysis validated without its file.');
         }
 
-        return ImportInput::file((string) $file->getRealPath());
+        return ImportInput::file((string) $file->getRealPath(), $file->getClientOriginalName());
     }
 }

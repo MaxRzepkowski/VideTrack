@@ -37,3 +37,26 @@ test('a record goes by its title or any other name its provider knows it by', fu
         ->and(Matching::namesTitle($summary, 'bear & breakfast'))->toBeTrue()
         ->and(Matching::namesTitle($summary, 'Bear Breakfast Deluxe'))->toBeFalse();
 });
+
+test('a game name comes without what a store or a launcher adds to it', function (string $name, string $base) {
+    expect(Matching::gameBase($name))->toBe($base);
+})->with([
+    'edition after a dash, platform in brackets, trademark' => ['The Witcher® 3: Wild Hunt – Game of the Year Edition (PC)', 'The Witcher 3: Wild Hunt'],
+    'GOTY after a colon' => ['Fallout 4: GOTY', 'Fallout 4'],
+    'edition after a space' => ['Final Fantasy XV Royal Definitive Edition', 'Final Fantasy XV Royal'],
+    'year in brackets' => ['DOOM (2016)', 'DOOM'],
+    'director\'s cut' => ["Death Stranding Director's Cut", 'Death Stranding'],
+    'ampersand' => ['Bear & Breakfast', 'Bear and Breakfast'],
+    'a name with nothing added' => ['Hades', 'Hades'],
+    'a name made of an edition alone stays' => ['GOTY', 'GOTY'],
+    'an edition word inside the name stays' => ['Ultimate Chicken Horse', 'Ultimate Chicken Horse'],
+]);
+
+test('a record is the game a launcher names once editions are set aside on both sides', function () {
+    $witcher = new MediaSummary(type: 'game', ref: '1942', provider: 'igdb', title: 'The Witcher 3: Wild Hunt');
+    $knight = new MediaSummary(type: 'game', ref: '14593', provider: 'igdb', title: 'Hollow Knight');
+
+    expect(Matching::namesGame($witcher, 'The Witcher 3: Wild Hunt - Complete Edition'))->toBeTrue()
+        ->and(Matching::namesGame($witcher, 'The Witcher 2: Assassins of Kings'))->toBeFalse()
+        ->and(Matching::namesGame($knight, 'Hollow'))->toBeFalse();
+});

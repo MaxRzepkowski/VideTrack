@@ -1,0 +1,7 @@
+{
+    "export": {"version": "0.4b", "type": "anime", "date": "2026-11-16 10:00:00"},
+    "user": {"name": "alex"},
+    "entries": [
+        {"name": "Frieren: Beyond Journey's End", "type": "TV", "status": "watched", "started": "2024-01-01 00:00:00", "completed": "2024-03-22 00:00:00", "rating": 5, "times": 1, "eps": 28}
+    ]
+}

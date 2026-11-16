@@ -17,7 +17,8 @@ use App\Catalog\MediaKind;
  * reading one as the other is how a stranger's series gets marked watched.
  * A source that accepts a match by name adds a TitleQuery; the resolver
  * itself never guesses from a title. An episode's query names its show,
- * and the season and episode numbers lead down from there.
+ * and the season and episode numbers lead down from there; a source that
+ * knows an episode only by its title gives the season and that title.
  */
 final readonly class MediaSubject
 {
@@ -38,6 +39,7 @@ final readonly class MediaSubject
         public ?TitleQuery $byTitle = null,
         /** @var list<int> numbers from the root down (season, episode); empty when `ref` is the item's own */
         public array $path = [],
+        public ?string $episodeTitle = null,
     ) {}
 
     public static function direct(string $type, string $provider, string $ref, string $label): self
@@ -60,6 +62,8 @@ final readonly class MediaSubject
      * @param  array<string, string>  $externalIds  source => id of the title itself
      * @param  array<string, string>  $seriesExternalIds  the show's ids, for an episode
      * @param  TitleQuery|null  $byTitle  tried only when no id leads anywhere
+     * @param  string|null  $episodeTitle  an episode's own title, for a source
+     *                                     that numbers no episodes
      */
     public static function external(
         MediaKind $kind,
@@ -69,6 +73,7 @@ final readonly class MediaSubject
         ?int $season = null,
         ?int $episode = null,
         ?TitleQuery $byTitle = null,
+        ?string $episodeTitle = null,
     ): self {
         return new self(
             $label,
@@ -78,6 +83,7 @@ final readonly class MediaSubject
             season: $season,
             episode: $episode,
             byTitle: $byTitle,
+            episodeTitle: $episodeTitle,
         );
     }
 

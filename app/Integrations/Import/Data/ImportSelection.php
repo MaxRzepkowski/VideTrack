@@ -8,6 +8,9 @@ namespace App\Integrations\Import\Data;
  */
 final readonly class ImportSelection
 {
+    /** The longest category key or list id a selection carries. */
+    public const KEY_LENGTH = 64;
+
     /**
      * @param  list<string>  $categories
      * @param  list<string>  $listIds
@@ -20,6 +23,12 @@ final readonly class ImportSelection
     public static function everything(): self
     {
         return new self;
+    }
+
+    /** A name from the file as a key a selection can carry back. */
+    public static function key(string $name): string
+    {
+        return mb_substr($name, 0, self::KEY_LENGTH);
     }
 
     public function has(string $category): bool

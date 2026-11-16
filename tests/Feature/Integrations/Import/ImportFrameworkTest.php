@@ -287,11 +287,15 @@ test('a finished file import discards its file', function () {
 test('each new file source says what it takes and where its export comes from', function () {
     enableGamesModule();
     enableBooksModule();
+    enableMangaModule();
 
     $this->actingAs(User::factory()->create())
         ->get(route('settings.import.index'))
         ->assertInertia(function (AssertableInertia $page) {
-            $codes = ['letterboxd', 'tvtime', 'storygraph', 'backloggd', 'jellyfin-playback-reporting'];
+            $codes = [
+                'letterboxd', 'tvtime', 'storygraph', 'backloggd', 'jellyfin-playback-reporting', 'playnite', 'gog-galaxy',
+                'librarything', 'calibre', 'criticker', 'icheckmovies', 'grouvee', 'anime-planet', 'netflix',
+            ];
             $files = collect($page->toArray()['props']['sources'])->whereIn('code', $codes);
 
             expect($files->pluck('inputKind')->unique()->all())->toBe(['file'])
@@ -306,3 +310,51 @@ test('each new file source says what it takes and where its export comes from', 
             }
         });
 });
+
+test('the tasks page names a run of each new file source after it', function (string $code, string $label) {
+    enableGamesModule();
+    enableBooksModule();
+    enableMangaModule();
+
+    $user = User::factory()->create();
+    TaskRun::queueTask("import-{$code}", $user->id);
+
+    $this->actingAs($user)
+        ->getJson(route('settings.tasks.runs'))
+        ->assertJsonPath('runs.0.label', $label);
+})->with([
+    ['playnite', 'Import from Playnite'],
+    ['gog-galaxy', 'Import from GOG Galaxy'],
+    ['librarything', 'Import from LibraryThing'],
+    ['calibre', 'Import from Calibre'],
+    ['criticker', 'Import from Criticker'],
+    ['icheckmovies', 'Import from iCheckMovies'],
+    ['grouvee', 'Import from Grouvee'],
+    ['anime-planet', 'Import from Anime-Planet'],
+    ['netflix', 'Import from Netflix'],
+]);
+
+test('a row of a file export the source cannot read is reported by its row, the rest still read', function (string $code, string $content) {
+    enableGamesModule();
+    enableBooksModule();
+
+    $path = scratchPath('export', '.csv');
+    file_put_contents($path, $content);
+    $source = app(ImportSourceRegistry::class)->get($code);
+    $input = ImportInput::file($path);
+    $manifest = $source->analyze($input);
+    $selection = new ImportSelection(array_column(array_map(fn ($category) => $category->toArray(), $manifest->categories), 'key'));
+
+    $skips = array_values(array_filter(iterator_to_array($source->rows($input, $selection), false), fn ($row) => $row instanceof SkipRow));
+
+    expect($manifest->valid)->toBeTrue()
+        ->and(array_map(fn (SkipRow $skip) => [$skip->key, $skip->replace], $skips))->toBe([['import.skip_csv_row_malformed', ['row' => 3]]]);
+})->with([
+    'Playnite' => ['playnite', "Name,Completion Status\r\nHades,Beaten\r\nBroken\r\n"],
+    'GOG Galaxy' => ['gog-galaxy', "title\tgameMins\nHades\t60\nBroken\n"],
+    'LibraryThing' => ['librarything', "Book Id\tTitle\tPrimary Author\tCollections\n1\tDune\tHerbert, Frank\tYour library\n2\n"],
+    'Criticker' => ['criticker', "Score,Film Name\n80,Roma\n90\n"],
+    'iCheckMovies' => ['icheckmovies', "title;year;imdburl;checked\nRoma;2018;;2020-01-01 10:00:00\nBroken\n"],
+    'Grouvee' => ['grouvee', "name,shelves,dates\nHades,\"{\"\"Played\"\": {}}\",[]\nBroken\n"],
+    'Netflix' => ['netflix', "Profile Name,Start Time,Duration,Title,Supplemental Video Type\nAlex,2024-03-09 21:15:02,01:00:00,Roma,\nBroken\n"],
+]);

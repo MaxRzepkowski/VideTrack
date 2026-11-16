@@ -100,3 +100,20 @@ test('a Backloggd row without a title is reported, not searched for', function (
     expect($taskRun->errors)->toBe(['A Backloggd row without a game title.']);
     Http::assertNothingSent();
 });
+
+test('a game named with its edition and trademark signs is placed on the game itself', function () {
+    enableGamesModule();
+    Http::fake(['*/games' => Http::response(jsonFixture('igdb/search'))]);
+    Storage::fake('local');
+    Storage::disk('local')->put('imports/backloggd.csv', "Title,Rating\n\"Hollow Knight™ - Game of the Year Edition (PC)\",4.5\n");
+
+    $user = User::factory()->create();
+    $knight = MediaItem::factory()->game()->create(['provider_ref' => '14593']);
+
+    $taskRun = runImportFile($user, 'backloggd', 'imports/backloggd.csv');
+
+    expect($taskRun->errors)->toBeEmpty()
+        ->and($user->ratings()->where('media_item_id', $knight->id)->value('rating'))->toBe(9);
+    // The full name first, then the bare one.
+    Http::assertSent(fn ($request) => str_contains($request->body(), 'search "Hollow Knight"'));
+});

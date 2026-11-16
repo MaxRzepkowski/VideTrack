@@ -10,3 +10,6 @@ CHANGELOG.md export-ignore
 
 # Papa Parse writes CRLF; the fixture keeps the line ends the add-on gives.
 tests/Fixtures/transfer/backloggd/toolkittd.csv -text
+
+# Library Exporter Advanced writes CRLF (.NET on Windows); the fixtures keep it.
+tests/Fixtures/transfer/playnite/*.csv -text
