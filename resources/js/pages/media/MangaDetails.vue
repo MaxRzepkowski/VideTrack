@@ -13,7 +13,7 @@ import StickyActionsPanel from '@/components/media/StickyActionsPanel.vue';
 import TitlePageLayout from '@/components/media/TitlePageLayout.vue';
 import { mangaAuthorCredits } from '@/lib/creators';
 import { rankingTiles } from '@/lib/factTiles';
-import { alternativeTitlesLine, formatCalendarDate, formatCountOrNull, formatYearSpan } from '@/lib/format';
+import { alternativeTitlesLine, formatCountOrNull, formatReleaseDate, formatYearSpan } from '@/lib/format';
 import { mangaFormatLabel } from '@/lib/mangaFormats';
 import { titleStatusLabel } from '@/lib/titleStatus';
 import type { MangaExtra } from '@/types/extras';
@@ -57,7 +57,7 @@ const detailRows = computed<DetailRow[]>(() => [
     { label: trans('media.original_title'), value: props.manga.extra.originalTitle ?? null },
     { label: trans('media.format'), value: format.value },
     { label: trans('media.magazine'), value: props.manga.extra.magazine ?? null },
-    { label: trans('common.release_date'), value: formatCalendarDate(props.manga.releaseDate) },
+    { label: trans('common.release_date'), value: formatReleaseDate(props.manga.releaseDate, props.manga.extra.releasePrecision) },
     {
         label: trans('media.publication_years'),
         // A manga still to come has no years yet: its date is the release date above.

@@ -107,4 +107,10 @@ describe('MangaDetails', () => {
         expect(section.props('titles')).toEqual([gaiden]);
         expect(section.props('source')).toBeNull();
     });
+
+    it('writes a start known only to the year as the year', () => {
+        const yearOnly = render({ ...manga(), extra: { releasePrecision: 'year' }, releaseDate: '1989-01-01' });
+
+        expect(valueOf(yearOnly.findComponent(MediaTitleHeader).props('detailRows'), 'Release date')).toBe('1989');
+    });
 });

@@ -3,6 +3,7 @@
 namespace App\Catalog\Providers\Mal;
 
 use App\Catalog\Data\MediaSummary;
+use App\Catalog\DatePrecision;
 use App\Catalog\Matching;
 use App\Catalog\ProviderException;
 use App\Catalog\TitleStatus;
@@ -63,6 +64,7 @@ final readonly class MalPayload
             posterPath: $this->pictureUrl(Payload::map($data['main_picture'] ?? null)),
             communityRating: (($mean = Payload::float($data, 'mean') ?? 0.0) > 0) ? round($mean, 1) : null,
             releaseDate: $releaseDate,
+            releasePrecision: $this->datePrecision($data, 'start_date'),
             extra: array_filter(['chapters' => Payload::positiveInt($data, 'num_chapters')]),
             progressTotal: Payload::positiveInt($data, 'num_chapters'),
             authors: $this->authors($data),
@@ -195,6 +197,21 @@ final readonly class MalPayload
             strlen($date) === 4 => "{$date}-01-01",
             strlen($date) === 7 => "{$date}-01",
             default => $date,
+        };
+    }
+
+    /**
+     * How much of a date MAL knows: "1989" is a year, so the page writes the
+     * year rather than the 1 January it is padded to.
+     *
+     * @param  array<array-key, mixed>  $data
+     */
+    private function datePrecision(array $data, string $key): DatePrecision
+    {
+        return match (strlen(Payload::text($data, $key))) {
+            4 => DatePrecision::Year,
+            7 => DatePrecision::Month,
+            default => DatePrecision::Day,
         };
     }
 

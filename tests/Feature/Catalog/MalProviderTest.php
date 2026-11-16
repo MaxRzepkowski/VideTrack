@@ -1,6 +1,7 @@
 <?php
 
 use App\Catalog\Data\RankingPosition;
+use App\Catalog\DatePrecision;
 use App\Catalog\ItemNotFoundException;
 use App\Catalog\MediaTypeRegistry;
 use App\Catalog\ProviderRegistry;
@@ -162,6 +163,20 @@ test('the manga MAL ties to a manga are shown by how they stand to it, without n
 
     Http::assertSent(fn ($request) => str_contains(urldecode($request->url()), 'related_manga{id,title,main_picture,alternative_titles'));
 });
+
+test('a start MAL knows only to the year or the month says so, rather than a stand-in day', function (string $start, DatePrecision $precision, string $date) {
+    enableMangaModule();
+    Http::fake(['api.myanimelist.net/v2/manga/2*' => Http::response([...jsonFixture('mal/details'), 'start_date' => $start])]);
+
+    $summary = malProvider()->details('manga', '2', 'en')->summary;
+
+    expect($summary->releaseDate)->toBe($date)
+        ->and($summary->releasePrecision)->toBe($precision);
+})->with([
+    'a year' => ['1989', DatePrecision::Year, '1989-01-01'],
+    'a month' => ['1989-08', DatePrecision::Month, '1989-08-01'],
+    'a day' => ['1989-08-25', DatePrecision::Day, '1989-08-25'],
+]);
 
 test('a manga without an English title keeps the name MAL gives it', function () {
     enableMangaModule();
