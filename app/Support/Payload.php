@@ -294,6 +294,27 @@ final class Payload
     }
 
     /**
+     * The strings of a list that say something, trimmed (a service's list of
+     * names may carry blanks); the rest dropped.
+     *
+     * @return list<string>
+     */
+    public static function texts(mixed $value): array
+    {
+        $texts = [];
+
+        foreach (self::strings($value) as $text) {
+            $text = trim($text);
+
+            if ($text !== '') {
+                $texts[] = $text;
+            }
+        }
+
+        return $texts;
+    }
+
+    /**
      * A map of string keys to string values (a label and its address), the
      * entries of any other shape dropped.
      *

@@ -33,7 +33,10 @@
         "makes": null,
         "votes": null,
         "releasePrecision": "day",
-        "alternativeTitles": []
+        "alternativeTitles": [
+            "ベルセルク",
+            "Berserk: The Prototype"
+        ]
     },
     "tagline": null,
     "overview": "Guts, a former mercenary now known as the Black Swordsman, is out for revenge.",
@@ -59,7 +62,11 @@
         "mangaFormat": "manga",
         "magazine": "Young Animal",
         "readersCount": 793550,
-        "ratingsCount": 372275
+        "ratingsCount": 372275,
+        "originalTitle": "ベルセルク",
+        "alternativeTitles": [
+            "Berserk: The Prototype"
+        ]
     },
     "children": [],
     "cast": [],

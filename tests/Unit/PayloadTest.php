@@ -77,6 +77,11 @@ test('a list keeps its strings and a map its string entries', function () {
         ->and(Payload::stringMap(null))->toBe([]);
 });
 
+test('texts keep the strings of a list that say something, trimmed', function () {
+    expect(Payload::texts([' AoT ', '', '  ', 3, 'Titan']))->toBe(['AoT', 'Titan'])
+        ->and(Payload::texts(null))->toBe([]);
+});
+
 test('an id is a string whether the service sent a number or a string', function () {
     expect(Payload::id(603))->toBe('603')
         ->and(Payload::id('tt0133093'))->toBe('tt0133093')
