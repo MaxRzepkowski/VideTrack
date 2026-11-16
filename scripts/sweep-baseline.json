@@ -1,6 +1,6 @@
 {
     "metadata read outside ItemMetadata": 0,
-    "?? '' in the domain": 36,
+    "?? '' in the domain": 34,
     "payload reader copied (stringOrNull and kin)": 0,
     "exception message stored or logged": 4,
     "query built in a controller": 3,

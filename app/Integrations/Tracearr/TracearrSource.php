@@ -9,6 +9,7 @@ use App\Integrations\Connections\AddressRefused;
 use App\Integrations\Connections\ConnectionExpired;
 use App\Integrations\Connections\Data\PinnedAddress;
 use App\Integrations\Connections\UserAddresses;
+use App\Integrations\EpisodeLabel;
 use App\Integrations\Import\Contracts\ReadsFromConnection;
 use App\Integrations\Import\Data\ImportInput;
 use App\Integrations\Import\Data\ImportManifest;
@@ -193,7 +194,7 @@ class TracearrSource implements ReadsFromConnection
         $season = $viewing['season_number'] ?? null;
         $number = $viewing['episode_number'] ?? null;
         $show = $this->titleLabel($viewing['show_title'] ?? null, null);
-        $label = is_int($season) && is_int($number) ? sprintf('%s S%02dE%02d', $show, $season, $number) : $show;
+        $label = EpisodeLabel::of($show, is_int($season) ? $season : null, is_int($number) ? $number : null);
 
         // TMDB cannot look an episode up by its own TMDB id; imdb and tvdb it can.
         $own = ExternalIdSource::only($this->ids($viewing), ExternalIdSource::Imdb, ExternalIdSource::Tvdb);

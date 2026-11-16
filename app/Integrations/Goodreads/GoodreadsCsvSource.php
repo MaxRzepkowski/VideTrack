@@ -292,13 +292,7 @@ final class GoodreadsCsvSource implements ExplainsSetup, ReadsFile
      */
     private function rating(array $row): ?int
     {
-        $value = trim($row['my rating'] ?? '');
-
-        if (! is_numeric($value) || (float) $value < 1 || (float) $value > 5) {
-            return null;
-        }
-
-        return RatingScale::fromStars((float) $value);
+        return RatingScale::readStars(Payload::text($row, 'my rating'));
     }
 
     /**

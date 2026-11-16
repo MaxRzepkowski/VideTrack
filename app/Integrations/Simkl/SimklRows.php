@@ -7,6 +7,7 @@ use App\Catalog\MediaKind;
 use App\Enums\MediaUserStatus;
 use App\Integrations\Anime\AnimeIdMap;
 use App\Integrations\Anime\AnimeMapping;
+use App\Integrations\EpisodeLabel;
 use App\Integrations\Import\Data\ImportDrop;
 use App\Integrations\Import\Data\ImportMark;
 use App\Integrations\Import\Data\ImportPlay;
@@ -78,7 +79,7 @@ final readonly class SimklRows
         }
 
         foreach ($this->episodes($entry) as [$season, $number, $play]) {
-            $episodeLabel = sprintf('%s S%02dE%02d', $label, $season, $number);
+            $episodeLabel = EpisodeLabel::of($label, $season, $number);
 
             yield new MediaRow(
                 $tmdb !== null
@@ -145,7 +146,7 @@ final readonly class SimklRows
 
         foreach ($this->episodes($entry, $mapping) as [$season, $number, $play]) {
             yield new MediaRow(
-                MediaSubject::external(MediaKind::Episode, [], sprintf('%s S%02dE%02d', $label, $season, $number), $series, $season, $number),
+                MediaSubject::external(MediaKind::Episode, [], EpisodeLabel::of($label, $season, $number), $series, $season, $number),
                 plays: [$play],
             );
         }
