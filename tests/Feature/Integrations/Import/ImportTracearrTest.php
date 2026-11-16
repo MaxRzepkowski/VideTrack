@@ -65,16 +65,7 @@ function runTracearrImport(ServiceConnection $connection): TaskRun
  */
 function tracearrCatalogue(): array
 {
-    $show = makeShowTree([1 => ['2011-04-17', '2011-04-24']]);
-    $show->update(['provider_ref' => '1399']);
-
-    foreach (MediaItem::query()->where('parent_id', $show->id)->get() as $season) {
-        $season->update(['provider_ref' => "1399:{$season->number}"]);
-
-        foreach (MediaItem::query()->where('parent_id', $season->id)->get() as $episode) {
-            $episode->update(['provider_ref' => "1399:{$season->number}:{$episode->number}"]);
-        }
-    }
+    $show = showWithRefs('1399', [1 => ['2011-04-17', '2011-04-24']]);
 
     return ['matrix' => MediaItem::factory()->movie()->create(['provider_ref' => '603']), 'got' => $show];
 }

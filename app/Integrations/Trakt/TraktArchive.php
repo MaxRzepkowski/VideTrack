@@ -2,6 +2,7 @@
 
 namespace App\Integrations\Trakt;
 
+use App\Integrations\Import\UnpackedFileLimit;
 use App\Support\Payload;
 use Generator;
 use ZipArchive;
@@ -68,7 +69,7 @@ final class TraktArchive
     {
         $stat = $this->zip->statIndex($index);
 
-        return $stat === false || $stat['size'] > config()->integer('tracker.imports.max_json_megabytes') * 1024 * 1024;
+        return $stat === false || $stat['size'] > UnpackedFileLimit::bytes();
     }
 
     /**
