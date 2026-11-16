@@ -1,0 +1,10 @@
+{
+    "export": {"version": "0.4b", "type": "manga", "date": "2026-11-16 10:00:00"},
+    "user": {"name": "alex"},
+    "entries": [
+        {"name": "Berserk", "status": "read", "started": "2021-01-04 00:00:00", "completed": "2023-03-01 00:00:00", "rating": 4.5, "times": 1, "vol": 41, "ch": 364},
+        {"name": "Solo Leveling", "status": "reading", "started": "2024-06-01 00:00:00", "completed": null, "rating": 0, "times": 0, "vol": 0, "ch": 120},
+        {"name": "Nowhere Manga", "status": "want to read", "started": null, "completed": null, "rating": 0, "times": 0, "vol": 0, "ch": 0},
+        {"name": "Never Mind", "status": "won't read", "started": null, "completed": null, "rating": 0, "times": 0, "vol": 0, "ch": 0}
+    ]
+}

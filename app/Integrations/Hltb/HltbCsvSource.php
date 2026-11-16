@@ -19,9 +19,11 @@ use App\Integrations\Import\Data\ManifestCategory;
 use App\Integrations\Import\Data\MediaSubject;
 use App\Integrations\Import\Data\SetupNote;
 use App\Integrations\Import\Data\TitleQuery;
+use App\Integrations\Import\Playtime;
 use App\Integrations\Import\Rows\MediaRow;
 use App\Integrations\Import\Rows\SkipRow;
 use App\Library\PlayDating;
+use App\Library\RatingScale;
 use App\Support\Payload;
 use Carbon\CarbonImmutable;
 use Generator;
@@ -123,16 +125,14 @@ final class HltbCsvSource implements ExplainsSetup, ReadsFile
         $updated = $this->date($row, 'updated');
         $completed = $this->date($row, 'completion date');
         $started = $this->date($row, 'start date');
-        $review = trim($row['review'] ?? '');
+        $rating = RatingScale::readPercent($row['review'] ?? '');
 
         return new MediaRow(
             MediaSubject::external(MediaKind::Game, [], $label, byTitle: new TitleQuery($title, exactTitle: true)),
             plays: $status === 'completed'
                 ? [new ImportPlay($completed ?? $updated, amount: $minutes, dating: $completed === null ? PlayDating::Activity : PlayDating::Viewing)]
                 : [],
-            rating: ctype_digit($review) && (int) $review > 0
-                ? new ImportRating(max(1, min(10, (int) round((int) $review / 10))), $updated)
-                : null,
+            rating: $rating === null ? null : new ImportRating($rating, $updated),
             status: in_array($status, ['playing', 'replay'], true)
                 ? new ImportStatus(MediaUserStatus::InProgress, $started ?? $updated, $minutes)
                 : null,
@@ -165,33 +165,10 @@ final class HltbCsvSource implements ExplainsSetup, ReadsFile
         $longest = 0;
 
         foreach (['progress', 'main story', 'main + extras', 'completionist'] as $column) {
-            $longest = max($longest, $this->duration(trim($row[$column] ?? '')));
+            $longest = max($longest, Playtime::read($row[$column] ?? '') ?? 0);
         }
 
         return $longest > 0 ? $longest : null;
-    }
-
-    /** "8:35:30", "46:30" or plain seconds; "--" and blanks are nothing. */
-    private function duration(string $value): int
-    {
-        if ($value === '' || $value === '--') {
-            return 0;
-        }
-
-        $parts = explode(':', $value);
-
-        if (array_filter($parts, fn (string $part) => ! ctype_digit($part)) !== []) {
-            return 0;
-        }
-
-        $seconds = match (count($parts)) {
-            3 => (int) $parts[0] * 3600 + (int) $parts[1] * 60 + (int) $parts[2],
-            2 => (int) $parts[0] * 60 + (int) $parts[1],
-            1 => (int) $parts[0],
-            default => 0,
-        };
-
-        return (int) round($seconds / 60);
     }
 
     /**

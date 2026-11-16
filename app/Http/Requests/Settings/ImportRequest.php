@@ -47,9 +47,9 @@ class ImportRequest extends FormRequest
             // Which categories to bring over and, for custom lists, which
             // lists. Sources without a selection ignore both.
             'categories' => ['array'],
-            'categories.*' => ['string', 'max:64'],
+            'categories.*' => ['string', 'max:'.ImportSelection::KEY_LENGTH],
             'list_ids' => ['array'],
-            'list_ids.*' => ['string', 'max:64'],
+            'list_ids.*' => ['string', 'max:'.ImportSelection::KEY_LENGTH],
         ];
 
         $source = $this->importSource();
@@ -127,7 +127,7 @@ class ImportRequest extends FormRequest
             throw new LogicException('A file import validated without its file.');
         }
 
-        return ImportInput::file(Storage::disk('local')->path((string) $file->store('imports', 'local')));
+        return ImportInput::file(Storage::disk('local')->path((string) $file->store('imports', 'local')), $file->getClientOriginalName());
     }
 
     public function selection(): ImportSelection

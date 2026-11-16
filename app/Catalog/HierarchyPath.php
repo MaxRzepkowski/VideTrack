@@ -3,6 +3,7 @@
 namespace App\Catalog;
 
 use App\Catalog\Contracts\SupportsHierarchy;
+use App\Catalog\Data\MediaSummary;
 use App\Catalog\Data\ResolvedMedia;
 
 /**
@@ -29,6 +30,23 @@ final readonly class HierarchyPath
         }
 
         return $this->descend($show->type, $show->ref, [$season, $episode]);
+    }
+
+    /**
+     * Every episode of a show as its provider lists them; none when the
+     * root is not a show or the provider keeps no hierarchy.
+     *
+     * @return list<MediaSummary>
+     */
+    public function episodes(ResolvedMedia $show, string $locale): array
+    {
+        if ($show->type !== MediaKind::Show->value || ! $this->types->has($show->type)) {
+            return [];
+        }
+
+        $provider = $this->providers->forType($this->types->get($show->type));
+
+        return $provider instanceof SupportsHierarchy ? $provider->leaves($show->type, $show->ref, $locale) : [];
     }
 
     /**

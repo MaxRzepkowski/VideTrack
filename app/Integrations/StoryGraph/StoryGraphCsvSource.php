@@ -12,7 +12,6 @@ use App\Integrations\Import\CsvStream;
 use App\Integrations\Import\Data\ImportDrop;
 use App\Integrations\Import\Data\ImportInput;
 use App\Integrations\Import\Data\ImportListEntry;
-use App\Integrations\Import\Data\ImportListRef;
 use App\Integrations\Import\Data\ImportManifest;
 use App\Integrations\Import\Data\ImportMark;
 use App\Integrations\Import\Data\ImportPlay;
@@ -20,10 +19,10 @@ use App\Integrations\Import\Data\ImportRating;
 use App\Integrations\Import\Data\ImportSelection;
 use App\Integrations\Import\Data\ImportStatus;
 use App\Integrations\Import\Data\ManifestCategory;
-use App\Integrations\Import\Data\ManifestList;
 use App\Integrations\Import\Data\MediaSubject;
 use App\Integrations\Import\Data\SetupNote;
 use App\Integrations\Import\Data\TitleQuery;
+use App\Integrations\Import\OwnLists;
 use App\Integrations\Import\Rows\ListRow;
 use App\Integrations\Import\Rows\MediaRow;
 use App\Integrations\Import\Rows\SkipRow;
@@ -91,7 +90,7 @@ final class StoryGraphCsvSource implements ExplainsSetup, ReadsFile
         }
 
         $counts = array_fill_keys(array_column(StoryGraphStatus::cases(), 'value'), 0);
-        $tags = [];
+        $tags = new OwnLists;
         $unreadable = 0;
 
         foreach ($csv->entries() as $row) {
@@ -112,7 +111,7 @@ final class StoryGraphCsvSource implements ExplainsSetup, ReadsFile
             }
 
             foreach ($this->tags($row) as $tag) {
-                $tags[$tag] = ($tags[$tag] ?? 0) + 1;
+                $tags->count($tag);
             }
         }
 
@@ -122,13 +121,7 @@ final class StoryGraphCsvSource implements ExplainsSetup, ReadsFile
             $categories[] = new ManifestCategory($status->value, __($status->importLabel()), $counts[$status->value]);
         }
 
-        $lists = [];
-
-        foreach ($tags as $name => $count) {
-            $lists[] = new ManifestList((string) $name, (string) $name, $count, false);
-        }
-
-        return ImportManifest::selectable($categories, $lists, $unreadable);
+        return ImportManifest::selectable($categories, $tags->offered(), $unreadable);
     }
 
     public function rows(ImportInput $input, ImportSelection $selection): Generator
@@ -159,20 +152,18 @@ final class StoryGraphCsvSource implements ExplainsSetup, ReadsFile
             return;
         }
 
-        $lists = [];
+        $lists = OwnLists::picked($selection);
 
-        foreach ($selection->listIds as $name) {
-            $lists[$name] = new ImportListRef($name);
-
-            yield new ListRow($lists[$name]);
+        foreach ($lists as $list) {
+            yield new ListRow($list);
         }
 
         // One row per membership, as the manifest counted them.
         foreach ($csv->rows() as $row) {
             foreach ($this->tags($row) as $tag) {
-                if (isset($lists[$tag])) {
+                if (isset($lists[OwnLists::key($tag)])) {
                     yield new MediaRow($this->subject($row), lists: [
-                        new ImportListEntry($lists[$tag], $this->date($row, 'date added')),
+                        new ImportListEntry($lists[OwnLists::key($tag)], $this->date($row, 'date added')),
                     ]);
                 }
             }

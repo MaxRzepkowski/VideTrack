@@ -38,6 +38,8 @@ const POLISH_ALLOWED = [
     /^tests\//, // fixtures with Polish titles and names
     /\.test\.ts$/, // the same, next to front-end modules
     /^app\/Tracking\/Creators\/PersonTitles\.php$/, // Polish credit phrases to recognise ("we własnej osobie")
+    /^app\/Integrations\/Playnite\/PlayniteCsvSource\.php$/, // the column names Playnite writes in Polish ("Nazwa")
+    /^app\/Integrations\/Netflix\/NetflixTitle\.php$/, // the season words Netflix writes in Polish ("Sezon")
     /^resources\/js\/lib\/commands\.ts$/, // folding Polish diacritics for search
     /^scripts\/publish-guard\.mjs$/, // this file: the letters it looks for
 ];

@@ -12,6 +12,9 @@ final class RatingScale
     /** The stars a five-star service gives. */
     public const STARS = 5;
 
+    /** The top of a score out of a hundred. */
+    private const PERCENT = 100;
+
     public static function holds(int $rating): bool
     {
         return $rating >= self::MIN && $rating <= self::MAX;
@@ -45,6 +48,22 @@ final class RatingScale
         $rating = (int) round((float) $value);
 
         return self::holds($rating) ? $rating : null;
+    }
+
+    /**
+     * A score out of 100 as a file writes it ("85"), to the nearest point
+     * and never below the bottom of the scale; null for a blank, a zero
+     * (unrated) or anything past 100.
+     */
+    public static function readPercent(string $value): ?int
+    {
+        $value = trim($value);
+
+        if (! is_numeric($value) || (float) $value <= 0 || (float) $value > self::PERCENT) {
+            return null;
+        }
+
+        return max(self::MIN, (int) round((float) $value * self::MAX / self::PERCENT));
     }
 
     /** A score of 1–5 stars on this scale: each star is two points. */

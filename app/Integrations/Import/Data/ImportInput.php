@@ -17,12 +17,17 @@ final readonly class ImportInput
         public ?string $path = null,
         private ?string $sealedCredentials = null,
         public ?int $connectionId = null,
+        public ?string $fileName = null,
     ) {}
 
-    /** An uploaded export at an absolute path; the run deletes it when done. */
-    public static function file(string $path): self
+    /**
+     * An uploaded export at an absolute path; the run deletes it when done.
+     * $fileName is what the user's file was called, for an export whose name
+     * is all that names what it holds (a list saved as its own file).
+     */
+    public static function file(string $path, ?string $fileName = null): self
     {
-        return new self(ImportInputKind::File, path: $path);
+        return new self(ImportInputKind::File, path: $path, fileName: $fileName);
     }
 
     /**

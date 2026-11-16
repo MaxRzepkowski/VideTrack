@@ -9,14 +9,23 @@ use App\Catalog\Providers\Tmdb\TmdbServiceProvider;
 use App\Catalog\Providers\Tvmaze\TvmazeServiceProvider;
 use App\Catalog\Wikidata\WikidataServiceProvider;
 use App\Integrations\Anime\AnimeServiceProvider;
+use App\Integrations\AnimePlanet\AnimePlanetServiceProvider;
 use App\Integrations\Backloggd\BackloggdServiceProvider;
+use App\Integrations\Calibre\CalibreServiceProvider;
+use App\Integrations\Criticker\CritickerServiceProvider;
 use App\Integrations\Emby\EmbyServiceProvider;
 use App\Integrations\Generic\GenericServiceProvider;
+use App\Integrations\GogGalaxy\GogGalaxyServiceProvider;
 use App\Integrations\Goodreads\GoodreadsServiceProvider;
+use App\Integrations\Grouvee\GrouveeServiceProvider;
 use App\Integrations\Hltb\HltbServiceProvider;
+use App\Integrations\ICheckMovies\ICheckMoviesServiceProvider;
 use App\Integrations\Imdb\ImdbServiceProvider;
 use App\Integrations\Jellyfin\JellyfinServiceProvider;
 use App\Integrations\Letterboxd\LetterboxdServiceProvider;
+use App\Integrations\LibraryThing\LibraryThingServiceProvider;
+use App\Integrations\Netflix\NetflixServiceProvider;
+use App\Integrations\Playnite\PlayniteServiceProvider;
 use App\Integrations\Plex\PlexServiceProvider;
 use App\Integrations\Simkl\SimklServiceProvider;
 use App\Integrations\Steam\SteamServiceProvider;
@@ -52,13 +61,22 @@ return [
     TraktServiceProvider::class,
     LetterboxdServiceProvider::class,
     TvTimeServiceProvider::class,
+    NetflixServiceProvider::class,
     ImdbServiceProvider::class,
+    CritickerServiceProvider::class,
+    ICheckMoviesServiceProvider::class,
     GoodreadsServiceProvider::class,
     StoryGraphServiceProvider::class,
+    LibraryThingServiceProvider::class,
+    CalibreServiceProvider::class,
     HltbServiceProvider::class,
     BackloggdServiceProvider::class,
+    PlayniteServiceProvider::class,
+    GogGalaxyServiceProvider::class,
+    GrouveeServiceProvider::class,
     SteamServiceProvider::class,
     AnimeServiceProvider::class,
+    AnimePlanetServiceProvider::class,
     SimklServiceProvider::class,
     TracearrServiceProvider::class,
     JellyfinServiceProvider::class,
