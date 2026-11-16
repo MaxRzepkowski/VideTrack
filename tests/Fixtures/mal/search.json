@@ -63,6 +63,34 @@
                 "media_type": "manga",
                 "num_chapters": 12
             }
+        },
+        {
+            "node": {
+                "id": 900001,
+                "title": "Adult Manga",
+                "main_picture": {
+                    "large": "https://cdn.myanimelist.net/images/manga/9/900001l.jpg"
+                },
+                "start_date": "2010-01-01",
+                "mean": 6.1,
+                "media_type": "manga",
+                "num_chapters": 10,
+                "nsfw": "black"
+            }
+        },
+        {
+            "node": {
+                "id": 900002,
+                "title": "Suggestive Manga",
+                "main_picture": {
+                    "large": "https://cdn.myanimelist.net/images/manga/9/900002l.jpg"
+                },
+                "start_date": "2011-01-01",
+                "mean": 7.2,
+                "media_type": "manga",
+                "num_chapters": 20,
+                "nsfw": "gray"
+            }
         }
     ],
     "paging": {}

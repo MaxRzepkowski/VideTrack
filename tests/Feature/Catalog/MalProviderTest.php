@@ -37,8 +37,8 @@ test('search maps manga summaries and drops light novels and coverless hits', fu
 
     $results = malProvider()->search('berserk', 'en');
 
-    // 4 hits: a light novel and a coverless entry drop out.
-    expect($results)->toHaveCount(2)
+    // 6 hits: a light novel, a coverless entry and an adult one drop out.
+    expect($results)->toHaveCount(3)
         ->and($results[0]->type)->toBe('manga')
         ->and($results[0]->ref)->toBe('2')
         ->and($results[0]->title)->toBe('Berserk')
@@ -50,6 +50,30 @@ test('search maps manga summaries and drops light novels and coverless hits', fu
         ->and($results[1]->extra['chapters'])->toBe(201)
         ->and($results[1]->progressTotal)->toBe(201);
 });
+
+test('adult manga stay out of a search, asked of MAL together with the rest; suggestive ones stay in', function () {
+    enableMangaModule();
+    Http::fake(['api.myanimelist.net/v2/manga?*' => Http::response(jsonFixture('mal/search'))]);
+
+    $refs = array_map(fn ($manga) => $manga->ref, malProvider()->search('manga', 'en'));
+
+    expect($refs)->not->toContain('900001')
+        ->and($refs)->toContain('900002');
+
+    Http::assertSent(fn ($request) => ($request->data()['nsfw'] ?? null) === 'true');
+});
+
+test('a manga MAL rates adult is filed as adult, one it rates suggestive is not', function (string $rating, bool $adult) {
+    enableMangaModule();
+    Http::fake(['api.myanimelist.net/v2/manga/2*' => Http::response([...jsonFixture('mal/details'), 'nsfw' => $rating])]);
+
+    expect(malProvider()->details('manga', '2', 'en')->adult)->toBe($adult);
+})->with([
+    'black' => ['black', true],
+    'gray' => ['gray', false],
+    'white' => ['white', false],
+    'one MAL adds later' => ['red', false],
+]);
 
 test('a search card carries the English title, the one the manga page shows', function () {
     enableMangaModule();

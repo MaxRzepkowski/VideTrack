@@ -33,7 +33,13 @@ class MalProvider implements MetadataProvider, SupportsTrending
     private const GENRES_KEPT = 8;
 
     /** Fields shared by every manga listing (search, ranking, the recommendations on a page). */
-    private const SUMMARY_FIELDS = 'id,title,main_picture,alternative_titles,start_date,mean,media_type,num_chapters';
+    private const SUMMARY_FIELDS = 'id,title,main_picture,alternative_titles,start_date,mean,media_type,num_chapters,nsfw';
+
+    /**
+     * Listings ask MAL for adult titles too: what MAL hides by default is its
+     * own call, so the catalog's rule (MangaNsfw::isAdult) decides instead.
+     */
+    private const ALL_RATINGS = ['nsfw' => 'true'];
 
     /**
      * What a manga page reads beyond its card. The recommended manga come with
@@ -60,7 +66,7 @@ class MalProvider implements MetadataProvider, SupportsTrending
         try {
             $data = $this->client->get(
                 '/manga',
-                ['q' => $query, 'limit' => 20, 'fields' => self::SUMMARY_FIELDS],
+                ['q' => $query, 'limit' => 20, 'fields' => self::SUMMARY_FIELDS, ...self::ALL_RATINGS],
                 $this->ttl('search'),
                 requireKey: 'data',
             );
@@ -146,6 +152,7 @@ class MalProvider implements MetadataProvider, SupportsTrending
             ],
             posters: array_slice($posters, 0, self::POSTERS_KEPT),
             related: $this->recommendations($data),
+            adult: $this->payload->isAdult($data),
         );
     }
 
@@ -155,7 +162,7 @@ class MalProvider implements MetadataProvider, SupportsTrending
         // ranking (members count) is the closest stable signal.
         $data = $this->client->get(
             '/manga/ranking',
-            ['ranking_type' => 'bypopularity', 'limit' => 30, 'fields' => self::SUMMARY_FIELDS],
+            ['ranking_type' => 'bypopularity', 'limit' => 30, 'fields' => self::SUMMARY_FIELDS, ...self::ALL_RATINGS],
             $this->ttl('listing'),
             requireKey: 'data',
         );

@@ -20,7 +20,7 @@ final readonly class MalPayload
 
     /**
      * Summaries out of the entries of a MAL list (`[].node`): novels drop out
-     * (books module territory), covers are required.
+     * (books module territory), adult titles too, and covers are required.
      *
      * @param  list<array<array-key, mixed>>  $entries
      * @return list<MediaSummary>
@@ -36,7 +36,7 @@ final readonly class MalPayload
                 continue;
             }
 
-            if (in_array($node['media_type'] ?? '', self::NOVEL_TYPES, true)) {
+            if (in_array($node['media_type'] ?? '', self::NOVEL_TYPES, true) || $this->isAdult($node)) {
                 continue;
             }
 
@@ -196,6 +196,17 @@ final readonly class MalPayload
             strlen($date) === 7 => "{$date}-01",
             default => $date,
         };
+    }
+
+    /**
+     * Whether MAL rates the manga adult material. A rating MAL did not send,
+     * or one it adds later, is not taken for it.
+     *
+     * @param  array<array-key, mixed>  $data
+     */
+    public function isAdult(array $data): bool
+    {
+        return Payload::enum($data, 'nsfw', MangaNsfw::class)?->isAdult() ?? false;
     }
 
     /**

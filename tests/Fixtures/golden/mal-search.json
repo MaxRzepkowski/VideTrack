@@ -68,5 +68,38 @@
             "나 혼자만 레벨업",
             "Only I Level Up"
         ]
+    },
+    {
+        "@class": "MediaSummary",
+        "type": "manga",
+        "ref": "900002",
+        "provider": "mal",
+        "title": "Suggestive Manga",
+        "year": 2011,
+        "posterPath": "https://cdn.myanimelist.net/images/manga/9/900002l.jpg",
+        "backdropPath": null,
+        "communityRating": 7.2,
+        "releaseDate": "2011-01-01",
+        "releaseTime": null,
+        "number": null,
+        "totalRuntime": null,
+        "seasonNumber": null,
+        "runtime": null,
+        "overview": null,
+        "releaseKind": null,
+        "platform": null,
+        "releaseStatus": null,
+        "extra": {
+            "chapters": 20
+        },
+        "progressTotal": 20,
+        "episodeType": null,
+        "authors": [],
+        "episodeBadge": null,
+        "creatorKind": null,
+        "makes": null,
+        "votes": null,
+        "releasePrecision": "day",
+        "alternativeTitles": []
     }
 ]

@@ -95,7 +95,8 @@ test('a selected manga scope queries only MAL', function () {
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->where('scope', 'mal')
-            ->has('results', 2)
+            // The fixture's manga less a light novel, a coverless and an adult one.
+            ->has('results', 3)
             ->where('results.0.type', 'manga')
         );
 
