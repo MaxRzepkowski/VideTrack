@@ -5,6 +5,7 @@ namespace App\Integrations\Anime;
 use App\Catalog\ExternalIdSource;
 use App\Catalog\MediaKind;
 use App\Enums\MediaUserStatus;
+use App\Integrations\Export\ListStatus;
 use App\Integrations\Import\Data\ImportDrop;
 use App\Integrations\Import\Data\ImportMark;
 use App\Integrations\Import\Data\ImportPlay;
@@ -46,7 +47,7 @@ final readonly class AnimeListRows
 
     private function label(AnimeListEntry $entry): string
     {
-        return "{$entry->title} (MAL {$entry->malId})";
+        return AnimeListEntry::label($entry->title, $entry->malId);
     }
 
     private function manga(AnimeListEntry $entry): MediaRow

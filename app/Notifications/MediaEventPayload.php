@@ -92,8 +92,7 @@ final readonly class MediaEventPayload
 
         $type = match (true) {
             ! $entry->isPart() => MediaEventType::Premiere,
-            // The first episode of a numbered season; specials have no premiere.
-            $media->number === 1 && $media->seasonNumber !== 0 => MediaEventType::SeasonPremiere,
+            $entry->opensSeason() => MediaEventType::SeasonPremiere,
             default => MediaEventType::EpisodeAired,
         };
 

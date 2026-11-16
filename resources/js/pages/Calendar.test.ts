@@ -27,7 +27,7 @@ function dateField() {
             next: '2026-11-01',
             month,
             feedUrl: '/feed',
-            webcalUrl: 'webcal://feed',
+            rssUrl: '/rss',
         },
         global: {
             directives: { tooltip: vTooltip },

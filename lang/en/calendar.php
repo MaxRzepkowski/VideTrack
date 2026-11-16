@@ -5,6 +5,8 @@ return [
     'book_release' => 'Book release',
     'comic_release' => 'Comic release',
     'days' => 'Days',
+    'feed_name' => ':app: :name',
+    'feed_item_title' => ':title (:date)',
     'game_release' => 'Game release',
     'hours' => 'Hours',
     'jump_to_date' => 'Jump to date',

@@ -309,6 +309,7 @@ export type ExportDownload = {
     readonly shelf: ExportShelf;
 };
 export type ExportShelf = 'backup' | 'spreadsheet' | 'service';
+export type FeedScope = 'all' | 'premieres';
 export type FilmReleaseType = 'premiere' | 'limited' | 'theatrical' | 'digital' | 'disc' | 'tv';
 export type FollowEntry = {
     readonly media: MediaSummary;
@@ -733,6 +734,10 @@ export type StoreLink = {
     readonly store: GameStore;
     readonly url: string;
     readonly subscription: boolean;
+};
+export type SubscriptionFeed = {
+    readonly url: string;
+    readonly defaultScope: FeedScope;
 };
 export type Suggestion = {
     readonly media: MediaSummary;

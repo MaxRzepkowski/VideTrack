@@ -238,6 +238,7 @@ test('the export page and the profile take their lists from the server', functio
             ['code' => 'lists', 'label' => 'Lists', 'shelf' => 'spreadsheet'],
             ['code' => 'letterboxd', 'label' => 'Letterboxd', 'shelf' => 'service'],
             ['code' => 'imdb', 'label' => 'IMDb', 'shelf' => 'service'],
+            ['code' => 'myanimelist-anime', 'label' => 'MyAnimeList: anime', 'shelf' => 'service'],
         ]));
 
     $this->actingAs($user)

@@ -4,22 +4,17 @@ namespace App\Integrations\Goodreads;
 
 use App\Accounts\UserCalendar;
 use App\Catalog\ItemMetadata;
+use App\Catalog\MediaKind;
 use App\Catalog\ProgressUnit;
 use App\Enums\PlayOutcome;
-use App\Enums\PositionStatus;
 use App\Integrations\Export\CsvExport;
 use App\Integrations\Export\ExportShelf;
+use App\Integrations\Export\ExportStandings;
+use App\Integrations\Export\ListStatus;
 use App\Library\RatingScale;
-use App\Models\LibraryEntry;
 use App\Models\ListItem;
-use App\Models\MediaItem;
-use App\Models\MediaList;
-use App\Models\MediaUserState;
-use App\Models\Play;
-use App\Models\Rating;
 use App\Models\User;
 use DateTimeInterface;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Str;
 
@@ -36,8 +31,6 @@ final class GoodreadsExport extends CsvExport
 {
     public const CODE = 'goodreads';
 
-    private const BOOK = 'book';
-
     /** What "My Rating" says of a book with none. */
     private const UNRATED = 0;
 
@@ -50,6 +43,8 @@ final class GoodreadsExport extends CsvExport
         'Date Read', 'Date Added', 'Bookshelves', 'Bookshelves with positions', 'Exclusive Shelf', 'My Review',
         'Spoiler', 'Private Notes', 'Read Count', 'Owned Copies',
     ];
+
+    public function __construct(private readonly ExportStandings $standings) {}
 
     public function code(): string
     {
@@ -74,34 +69,21 @@ final class GoodreadsExport extends CsvExport
 
     protected function rows(User $user): iterable
     {
-        $books = $this->books($user);
-        $ids = $books->modelKeys();
-
-        $statuses = LibraryEntry::query()->ofRoots()->where('user_id', $user->id)->whereIn('media_item_id', $ids)
-            ->get(['media_item_id', 'status'])->keyBy('media_item_id');
-        $ratings = Rating::query()->where('user_id', $user->id)->whereIn('media_item_id', $ids)->get()->keyBy('media_item_id');
-        $plays = Play::query()->where('user_id', $user->id)->whereIn('media_item_id', $ids)->get()->groupBy('media_item_id');
-        $opened = MediaUserState::query()->where('user_id', $user->id)->whereIn('media_item_id', $ids)->get()->keyBy('media_item_id');
-        $lists = MediaList::query()->where('user_id', $user->id)->get(['id', 'system_key', 'title'])->keyBy('id');
-        $listed = ListItem::query()->whereIn('list_id', $lists->modelKeys())->whereIn('media_item_id', $ids)->get()->groupBy('media_item_id');
         $calendar = UserCalendar::of($user);
 
-        foreach ($books as $book) {
+        foreach ($this->standings->of($user, MediaKind::Book) as $title) {
+            $book = $title->item;
             $metadata = ItemMetadata::fromStored($book->metadata);
             $authors = $metadata->authors;
-            $rated = $ratings->get($book->id);
-            $history = $plays->get($book->id);
-            $reads = $history?->where('outcome', PlayOutcome::Completed);
-            $memberships = $listed->get($book->id);
-            $onBacklog = $memberships?->contains(fn (ListItem $item): bool => $lists->get($item->list_id)?->system_key === MediaList::SYSTEM_WATCHLIST) ?? false;
+            $rated = $title->rating;
+            $reads = $title->plays->where('outcome', PlayOutcome::Completed);
             // The first thing the library learned of the book.
             $addedOn = $this->earliest([
-                ...$history?->map(fn (Play $play): DateTimeInterface => $play->watched_at)->all() ?? [],
+                $title->startedAt(),
                 $rated?->created_at,
-                $opened->get($book->id)?->created_at,
-                ...$memberships?->map(fn (ListItem $item): ?DateTimeInterface => $item->created_at)->all() ?? [],
+                ...$title->memberships->map(fn (ListItem $item): ?DateTimeInterface => $item->created_at)->all(),
             ]);
-            $readOn = $reads?->sortByDesc('watched_at')->first()?->watched_at;
+            $readOn = $reads->last()?->watched_at;
 
             yield [
                 // The work's ids, the same for every reader: which edition a
@@ -122,55 +104,30 @@ final class GoodreadsExport extends CsvExport
                 $book->year,
                 $this->goodreadsDay($calendar->day($readOn)),
                 $this->goodreadsDay($calendar->day($addedOn)),
-                implode(', ', $memberships === null ? [] : $this->ownShelves($memberships, $lists)),
+                implode(', ', $this->ownShelves($title->memberships)),
                 null,
-                $this->exclusiveShelf($statuses->get($book->id)?->status, $reads?->isNotEmpty() ?? false, $onBacklog, $rated !== null)->value,
+                $this->exclusiveShelf($title->listStatus())->value,
                 null,
                 null,
                 null,
-                $reads?->count() ?? 0,
+                $reads->count(),
                 self::NO_COPIES,
             ];
         }
     }
 
     /**
-     * Every book the user has a word about: history, a rating, an open
-     * attempt or a place on one of their lists.
-     *
-     * @return Collection<int, MediaItem>
+     * The shelf of the state a book stands in: Goodreads has no pause, so
+     * a paused reading is still currently-reading, and a book only on the
+     * user's own lists waits on to-read, Goodreads' shelf for any book added.
      */
-    private function books(User $user): Collection
+    private function exclusiveShelf(?ListStatus $status): GoodreadsShelf
     {
-        return MediaItem::query()
-            ->where('type', self::BOOK)
-            ->where(fn (Builder $query) => $query
-                ->whereIn('id', LibraryEntry::query()->select('media_item_id')->where('user_id', $user->id))
-                ->orWhereIn('id', Rating::query()->select('media_item_id')->where('user_id', $user->id))
-                ->orWhereIn('id', MediaUserState::query()->select('media_item_id')->where('user_id', $user->id))
-                ->orWhereIn('id', ListItem::query()->select('media_item_id')
-                    ->whereIn('list_id', MediaList::query()->select('id')->where('user_id', $user->id))))
-            ->orderBy('title')
-            ->orderBy('id')
-            ->get();
-    }
-
-    /**
-     * What a book stands on, one shelf, the open attempt first: a re-read
-     * in progress is currently-reading, as Goodreads shows it. A finished
-     * read outweighs a later drop, and a rating alone is a read book, which
-     * is where Goodreads puts a book rated there. A book only on the user's
-     * own lists waits on to-read, Goodreads' shelf for any book added.
-     */
-    private function exclusiveShelf(?PositionStatus $status, bool $read, bool $onBacklog, bool $rated): GoodreadsShelf
-    {
-        return match (true) {
-            $status === PositionStatus::InProgress, $status === PositionStatus::OnHold => GoodreadsShelf::CurrentlyReading,
-            $read => GoodreadsShelf::Read,
-            $status === PositionStatus::Dropped => GoodreadsShelf::DidNotFinish,
-            $onBacklog => GoodreadsShelf::ToRead,
-            $rated => GoodreadsShelf::Read,
-            default => GoodreadsShelf::ToRead,
+        return match ($status) {
+            ListStatus::Current, ListStatus::OnHold => GoodreadsShelf::CurrentlyReading,
+            ListStatus::Completed => GoodreadsShelf::Read,
+            ListStatus::Dropped => GoodreadsShelf::DidNotFinish,
+            ListStatus::Planned, null => GoodreadsShelf::ToRead,
         };
     }
 
@@ -180,15 +137,14 @@ final class GoodreadsExport extends CsvExport
      * comma list).
      *
      * @param  Collection<int, ListItem>  $memberships
-     * @param  Collection<int, MediaList>  $lists
      * @return list<string>
      */
-    private function ownShelves(Collection $memberships, Collection $lists): array
+    private function ownShelves(Collection $memberships): array
     {
         $shelves = [];
 
         foreach ($memberships as $item) {
-            $list = $lists->get($item->list_id);
+            $list = $item->list;
             $shelf = $list === null || $list->isSystem() ? '' : Str::slug($list->displayTitle());
 
             if ($shelf !== '') {

@@ -28,14 +28,14 @@ tells you when the next episode or release is out, and keeps all of it on your o
 
 - 🎬 Track movies, TV shows, games, books, manga and comics in one place.
 - ⏭️ See the next episode of every show you watch, and the games and books you are in the middle of.
-- 📅 Follow upcoming releases in a calendar and countdowns, or subscribe to them in your own calendar app.
+- 📅 Follow upcoming releases in a calendar and countdowns, or subscribe to them in your own calendar app or feed reader.
 - 🔔 Ring the bell on a title, a person or a studio to hear about new releases, in the app or on Discord.
 - ⭐ Rate, favorite and collect titles in a backlog and in your own lists.
 - 📊 Keep a full history with rewatches and see how much time went into it.
 - ✨ Get suggestions based on what you finished. They wait on their own page and never nag.
 - 📥 Import from Trakt, Letterboxd, TV Time, Simkl, IMDb, Goodreads, StoryGraph, MyAnimeList, AniList, Kitsu, Steam and more.
 - 📡 Log what you watch automatically from Plex, Jellyfin, Emby or Tautulli.
-- 📤 Export everything as a backup, as CSV, or as files for IMDb and Letterboxd.
+- 📤 Export everything as a backup, as CSV, or as files for IMDb, Letterboxd, Goodreads and MyAnimeList.
 - 👥 Give everyone at home their own account, in English or Polish.
 - 🐳 Run it as a single Docker container with one SQLite file.
 

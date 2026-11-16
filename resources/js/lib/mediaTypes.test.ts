@@ -7,6 +7,7 @@ import {
     MEDIA_TYPE_META,
     mediaTypeDefinition,
     mediaTypeMeta,
+    rootMediaTypes,
 } from '@/lib/mediaTypes';
 import { MEDIA_TYPES, mediaSummary, useMediaTypes } from '@/test/factories';
 import { beforeEach, describe, expect, it } from 'vitest';
@@ -56,6 +57,12 @@ describe('definitions from the registry', () => {
     it('orders codes the way the registry does, unknown ones last as they came', () => {
         expect(inRegistryOrder(['book', 'movie', 'podcast', 'show', 'zine'])).toEqual(['show', 'movie', 'book', 'podcast', 'zine']);
         expect(inRegistryOrder(new Set(['game', 'show']))).toEqual(['show', 'game']);
+    });
+
+    it('names the types a title is stored under as a whole, in the registry order', () => {
+        expect(rootMediaTypes()).toEqual(MEDIA_TYPES.filter((type) => type.parentType === null).map((type) => type.code));
+        expect(rootMediaTypes()).not.toContain('season');
+        expect(rootMediaTypes()).not.toContain('episode');
     });
 
     it("puts films before shows on a person's page, the rest in the registry's order", () => {

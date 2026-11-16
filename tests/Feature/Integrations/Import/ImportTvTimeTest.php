@@ -113,3 +113,20 @@ test('a package without the tracking table is refused with the reason', function
     expect($taskRun->status)->toBe(TaskRunStatus::Failure)
         ->and($taskRun->summary)->toBe('The file is not a TV Time data package: it has no tracking-prod-records file.');
 });
+
+test('a package older than the v2 table places its episodes by their own TVDB ids', function () {
+    $user = User::factory()->create();
+    $catalog = tvTimeCatalog();
+
+    $header = 'uuid,type,series_name,type-uuid-n,created_at,entity_type,season_number,episode_number,episode_id,watch_date_range_key';
+    $path = putZip(['tracking-prod-records.csv' => implode("\n", [
+        $header,
+        '00000000-0000-0000-0000-0000000000c1,watch,The Unit,watch-00000000-0000-0000-0000-0000000000c1-0,2016-08-10 16:48:22,episode,1,4,306587,watch-date-1470847702',
+        '00000000-0000-0000-0000-0000000000c2,watch,,watch-00000000-0000-0000-0000-0000000000c2-0,2016-08-11 16:48:22,episode,,,,',
+    ])."\n"]);
+
+    $taskRun = runImportFile($user, 'tvtime', $path, new ImportSelection(['history']));
+
+    expect($taskRun->errors)->toBe(['An episode without a show name: neither the episode\'s TVDB id nor its show\'s and numbers.'])
+        ->and($user->plays()->where('media_item_id', episodeOf($catalog['unit'], 1, 4)->id)->value('watched_at')->toDateTimeString())->toBe('2016-08-10 16:48:22');
+});

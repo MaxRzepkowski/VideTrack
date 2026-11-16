@@ -15,5 +15,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('calendar/{token}.ics', CalendarFeedController::class)
-    ->where('token', '[A-Za-z0-9]+')->name('calendar.feed');
+Route::where(['token' => '[A-Za-z0-9]+'])->group(function () {
+    Route::get('calendar/{token}.ics', [CalendarFeedController::class, 'ics'])->name('calendar.feed');
+    Route::get('calendar/{token}.rss', [CalendarFeedController::class, 'rss'])->name('calendar.rss');
+});

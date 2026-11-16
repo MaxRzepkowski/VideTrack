@@ -16,19 +16,6 @@ use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 
-/**
- * The pinned anime id map, already verified on disk — the test copy stands
- * in for the real revision.
- */
-function seedAnimeIdMap(): void
-{
-    Storage::fake('local');
-    Storage::disk('local')->put(
-        'anime-ids/'.AnimeIdMap::REVISION.'.json',
-        (string) file_get_contents(base_path('tests/Fixtures/transfer/anime/anime_ids.json')),
-    );
-}
-
 function runListImport(User $user, string $source, string $username): TaskRun
 {
     $taskRun = TaskRun::queueTask("import-{$source}", $user->id);
@@ -39,41 +26,6 @@ function runListImport(User $user, string $source, string $username): TaskRun
     ]);
 
     return $taskRun->refresh();
-}
-
-/**
- * Attack on Titan (TVDB 267440) is TMDB 1429, with two episodes of season 1
- * known locally; Princess Mononoke (tt0119698) is TMDB 128. Anything else
- * TMDB is asked about is unknown.
- *
- * @return array{show: MediaItem, film: MediaItem}
- */
-function animeCatalogue(): array
-{
-    $show = makeShowTree([1 => ['2013-04-07', '2013-04-14']]);
-    $show->update(['provider_ref' => '1429']);
-
-    foreach (MediaItem::query()->where('parent_id', $show->id)->get() as $season) {
-        $season->update(['provider_ref' => "1429:{$season->number}"]);
-
-        foreach (MediaItem::query()->where('parent_id', $season->id)->get() as $episode) {
-            $episode->update(['provider_ref' => "1429:{$season->number}:{$episode->number}"]);
-        }
-    }
-
-    return ['show' => $show, 'film' => MediaItem::factory()->movie()->create(['provider_ref' => '128'])];
-}
-
-/**
- * @return array<string, mixed>
- */
-function tmdbAnimeFakes(): array
-{
-    return [
-        '*/find/267440*' => Http::response(['movie_results' => [], 'tv_results' => [['id' => 1429]]]),
-        '*/find/tt0119698*' => Http::response(['movie_results' => [['id' => 128]], 'tv_results' => []]),
-        'api.themoviedb.org/*' => Http::response(['status_message' => 'Not found'], 404),
-    ];
 }
 
 /**

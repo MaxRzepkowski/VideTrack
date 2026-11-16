@@ -126,6 +126,7 @@ return [
     'something_went_wrong_please_try_again' => 'Something went wrong. Please try again.',
     'status' => 'Status',
     'stop_following' => 'Stop following',
+    'rss_feed' => 'RSS feed',
     'subscribe' => 'Subscribe',
     'talk_show' => 'Talk show',
     'tasks' => 'Tasks',

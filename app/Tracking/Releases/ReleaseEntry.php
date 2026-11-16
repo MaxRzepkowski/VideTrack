@@ -31,6 +31,16 @@ final readonly class ReleaseEntry implements JsonSerializable
     }
 
     /**
+     * The episode opening a numbered season, as the provider marks it: a show
+     * whose numbering runs on across seasons opens one past episode 1, and
+     * specials premiere nothing.
+     */
+    public function opensSeason(): bool
+    {
+        return $this->isPart() && $this->media->episodeBadge?->isPremiere() === true;
+    }
+
+    /**
      * @return array{media: MediaSummary, showTitle: string|null}
      */
     public function jsonSerialize(): array

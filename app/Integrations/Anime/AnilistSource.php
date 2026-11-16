@@ -2,6 +2,7 @@
 
 namespace App\Integrations\Anime;
 
+use App\Integrations\Export\ListStatus;
 use App\Integrations\Import\Data\SetupNote;
 use App\Integrations\Import\Rows\SkipRow;
 use App\Support\Payload;
@@ -14,7 +15,7 @@ use Carbon\CarbonImmutable;
  * status lists and are left out. AniList names titles by idMal, so an entry
  * without one cannot be placed.
  */
-final class AnilistSource extends AnimeListSource
+final class AnilistSource extends AnimeProfileSource
 {
     public const CODE = 'anilist';
 
@@ -155,9 +156,9 @@ final class AnilistSource extends AnimeListSource
         return new AnimeListEntry(
             $medium,
             $malId,
-            $title ?? "MAL {$malId}",
+            $title,
             $status,
-            $score >= 1 ? min(10, $score) : null,
+            $score >= 1 ? $score : null,
             Payload::int($item, 'progress') ?? 0,
             Payload::positiveInt($media, $medium === ListMedium::Anime ? 'episodes' : 'chapters'),
             $this->date($item['startedAt'] ?? null),

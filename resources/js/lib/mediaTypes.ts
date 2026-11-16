@@ -202,6 +202,11 @@ export function hasMediaType(type: string): boolean {
     return definitions.some((definition) => definition.code === type);
 }
 
+/** The types a title is stored under as a whole (a film, a show; not a season), in the registry's order. */
+export function rootMediaTypes(): string[] {
+    return definitions.filter((definition) => definition.parentType === null).map((definition) => definition.code);
+}
+
 /** The given type codes in the registry's order; codes it does not know keep their order at the end. */
 export function inRegistryOrder<T extends string>(codes: Iterable<T>): T[] {
     const present = [...codes];

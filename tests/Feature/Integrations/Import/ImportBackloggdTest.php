@@ -7,6 +7,7 @@ use App\Integrations\Import\ImportSourceRegistry;
 use App\Models\MediaItem;
 use App\Models\User;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
 
 test('Backloggd is only offered with the games module', function () {
     expect(app(ImportSourceRegistry::class)->has('backloggd'))->toBeFalse();
@@ -86,4 +87,16 @@ test('a HowLongToBeat export is not a Backloggd list', function () {
 
     expect($manifest->valid)->toBeFalse()
         ->and($manifest->error)->toBe('The file is not a Backloggd list from Toolkittd or BackloggdExporter.');
+});
+
+test('a Backloggd row without a title is reported, not searched for', function () {
+    enableGamesModule();
+    Http::fake();
+    Storage::fake('local');
+    Storage::disk('local')->put('imports/backloggd.csv', "Title,Rating\n,4.0\n");
+
+    $taskRun = runImportFile(User::factory()->create(), 'backloggd', 'imports/backloggd.csv');
+
+    expect($taskRun->errors)->toBe(['A Backloggd row without a game title.']);
+    Http::assertNothingSent();
 });

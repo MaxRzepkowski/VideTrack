@@ -2,6 +2,7 @@
 
 namespace App\Integrations\Anime;
 
+use App\Integrations\Export\ListStatus;
 use App\Integrations\Import\Data\SetupNote;
 use App\Support\Payload;
 use Carbon\CarbonImmutable;
@@ -11,7 +12,7 @@ use Carbon\CarbonImmutable;
  * the instance's MAL client id, no OAuth (the way Yamtrack reads it). Pages
  * of 1000 until `paging.next` runs out.
  */
-final class MalListSource extends AnimeListSource
+final class MalListSource extends AnimeProfileSource
 {
     public const CODE = 'mal';
 
@@ -109,14 +110,12 @@ final class MalListSource extends AnimeListSource
             return null;
         }
 
-        $score = Payload::positiveInt($list, 'score');
-
         return new AnimeListEntry(
             $medium,
             $id,
-            Payload::string($node, 'title') ?? "MAL {$id}",
+            Payload::string($node, 'title'),
             $status,
-            $score === null ? null : min(10, $score),
+            Payload::positiveInt($list, 'score'),
             Payload::int($list, $medium === ListMedium::Anime ? 'num_episodes_watched' : 'num_chapters_read') ?? 0,
             Payload::positiveInt($node, $medium === ListMedium::Anime ? 'num_episodes' : 'num_chapters'),
             $this->date($list['start_date'] ?? null),

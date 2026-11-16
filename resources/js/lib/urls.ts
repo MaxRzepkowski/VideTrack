@@ -1,5 +1,6 @@
 import { placeOf } from '@/lib/hierarchy';
 import { hasMediaType, mediaTypeDefinition } from '@/lib/mediaTypes';
+import type { FeedScope, SubscriptionFeed } from '@/types/generated';
 import type { CreatorLink, MediaSummary } from '@/types/media';
 
 /**
@@ -39,6 +40,34 @@ export function mediaUrl(media: Pick<MediaSummary, 'type' | 'ref' | 'provider'> 
     return mediaTypeDefinition(media.type).ownPage
         ? route(`${media.type}.details`, { ref: media.ref })
         : route('title.details', { type: media.type, ref: media.ref });
+}
+
+/** What a calendar subscription keeps: how much of the calendar, and of which types. */
+export interface FeedVariant {
+    scope: FeedScope;
+    /** Root type codes; the ones not offered here are left out. */
+    types: string[];
+}
+
+/**
+ * A feed's address for a variant. What narrows nothing stays out of it (every
+ * offered type, the feed's own default scope), so the plain subscription
+ * keeps its plain address. Types go in the offered order, so one variant
+ * has one address.
+ */
+export function feedVariantUrl(feed: SubscriptionFeed, variant: FeedVariant, offeredTypes: string[]): string {
+    const types = offeredTypes.filter((type) => variant.types.includes(type));
+    const query = [
+        ...(types.length > 0 && types.length < offeredTypes.length ? [`types=${types.map(encodeURIComponent).join(',')}`] : []),
+        ...(variant.scope === feed.defaultScope ? [] : [`scope=${encodeURIComponent(variant.scope)}`]),
+    ];
+
+    return query.length === 0 ? feed.url : `${feed.url}?${query.join('&')}`;
+}
+
+/** The same address under webcal://, which makes a calendar app offer to subscribe on click. */
+export function webcalUrl(url: string): string {
+    return url.replace(/^https?:\/\//, 'webcal://');
 }
 
 /** A user's list lives under its owner; a collection has an address of its own ({@link mediaUrl}). */
