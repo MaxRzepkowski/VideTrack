@@ -1,4 +1,4 @@
-import { creatorHref, listUrl, mediaUrl, seasonUrlOf } from '@/lib/urls';
+import { creatorHref, feedVariantUrl, listUrl, mediaUrl, seasonUrlOf, webcalUrl } from '@/lib/urls';
 import { useMediaTypes } from '@/test/factories';
 import { beforeEach, describe, expect, it } from 'vitest';
 
@@ -51,5 +51,34 @@ describe('creatorHref', () => {
 describe('seasonUrlOf', () => {
     it('opens the season an episode belongs to', () => {
         expect(seasonUrlOf({ ref: '1399:2:9' })).toBe(route('season.details', { ref: '1399', number: '2' }));
+    });
+});
+
+describe('feedVariantUrl', () => {
+    const calendar = { url: 'https://example.com/calendar/abc.ics', defaultScope: 'all' } as const;
+    const rss = { url: 'https://example.com/calendar/abc.rss', defaultScope: 'premieres' } as const;
+    const offered = ['show', 'movie', 'game'];
+
+    it('keeps the plain address for every type in the feed default scope', () => {
+        expect(feedVariantUrl(calendar, { scope: 'all', types: ['game', 'movie', 'show'] }, offered)).toBe(calendar.url);
+        expect(feedVariantUrl(rss, { scope: 'premieres', types: offered }, offered)).toBe(rss.url);
+    });
+
+    it('names the chosen types in the offered order, and a scope other than the default', () => {
+        expect(feedVariantUrl(calendar, { scope: 'all', types: ['game', 'show'] }, offered)).toBe(`${calendar.url}?types=show,game`);
+        expect(feedVariantUrl(calendar, { scope: 'premieres', types: ['movie'] }, offered)).toBe(`${calendar.url}?types=movie&scope=premieres`);
+        expect(feedVariantUrl(rss, { scope: 'all', types: offered }, offered)).toBe(`${rss.url}?scope=all`);
+    });
+
+    it('leaves out a type not offered here, and narrows nothing when none is left', () => {
+        expect(feedVariantUrl(calendar, { scope: 'all', types: ['podcast', 'movie'] }, offered)).toBe(`${calendar.url}?types=movie`);
+        expect(feedVariantUrl(calendar, { scope: 'all', types: ['podcast'] }, offered)).toBe(calendar.url);
+    });
+});
+
+describe('webcalUrl', () => {
+    it('swaps the scheme so a calendar app offers to subscribe', () => {
+        expect(webcalUrl('https://example.com/calendar/abc.ics?types=movie')).toBe('webcal://example.com/calendar/abc.ics?types=movie');
+        expect(webcalUrl('http://localhost:8080/calendar/abc.ics')).toBe('webcal://localhost:8080/calendar/abc.ics');
     });
 });

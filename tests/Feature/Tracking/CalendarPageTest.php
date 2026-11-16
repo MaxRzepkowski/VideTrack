@@ -49,15 +49,15 @@ test('range includes past releases too', function () {
     expect(collect($days)->pluck('date'))->toContain(today()->subDays(5)->toDateString());
 });
 
-test('the calendar page renders the month with a subscription feed url', function () {
+test('the calendar page renders the month with the addresses of its feeds', function () {
     $user = User::factory()->create();
 
     $this->actingAs($user)->get('/calendar')
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page->component('Calendar')
             ->has('month')
-            ->where('feedUrl', fn (string $url) => str_contains($url, $user->calendarToken()))
-            ->has('webcalUrl'));
+            ->where('feedUrl', route('calendar.feed', ['token' => $user->calendarToken()]))
+            ->where('rssUrl', route('calendar.rss', ['token' => $user->calendarToken()])));
 });
 
 test('the month spans the month itself and steps by months', function () {

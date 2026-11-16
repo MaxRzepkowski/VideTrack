@@ -126,6 +126,7 @@ return [
     'something_went_wrong_please_try_again' => 'Coś poszło nie tak. Spróbuj ponownie.',
     'status' => 'Status',
     'stop_following' => 'Przestań śledzić',
+    'rss_feed' => 'Kanał RSS',
     'subscribe' => 'Subskrybuj',
     'talk_show' => 'Talk-show',
     'tasks' => 'Zadania',

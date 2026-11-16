@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Settings\ApiTokenController;
+use App\Http\Controllers\Settings\CalendarTokenController;
 use App\Http\Controllers\Settings\ConnectionController;
 use App\Http\Controllers\Settings\DangerZoneController;
 use App\Http\Controllers\Settings\DetectedTimezoneController;
@@ -71,6 +72,7 @@ Route::middleware(['auth', 'throttle:web'])->name('settings.')->group(function (
 
     Route::get('settings/export', [ExportController::class, 'index'])->name('export.index');
     Route::get('settings/export/{format}', [ExportController::class, 'download'])->middleware('throttle:library-heavy')->name('export.download');
+    Route::post('settings/calendar-token', CalendarTokenController::class)->name('calendar-token.update');
 
     Route::get('settings/api', [ApiTokenController::class, 'index'])->name('api-tokens.index');
     Route::post('settings/api/tokens', [ApiTokenController::class, 'store'])->name('api-tokens.store');

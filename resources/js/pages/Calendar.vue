@@ -6,10 +6,11 @@ import PageToolbar from '@/components/PageToolbar.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { pageLocale } from '@/lib/pageContext';
 import { SELECT_CLASS } from '@/lib/ui';
+import { webcalUrl } from '@/lib/urls';
 import type { CalendarMonth } from '@/types/media';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { trans } from 'laravel-vue-i18n';
-import { CalendarDays, CalendarPlus, ChevronLeft, ChevronRight, Download } from '@lucide/vue';
+import { CalendarDays, CalendarPlus, ChevronLeft, ChevronRight, Download, Rss } from '@lucide/vue';
 import { computed, onBeforeUnmount } from 'vue';
 
 const props = defineProps<{
@@ -20,7 +21,7 @@ const props = defineProps<{
     next: string;
     month: CalendarMonth;
     feedUrl: string;
-    webcalUrl: string;
+    rssUrl: string;
 }>();
 
 const locale = pageLocale();
@@ -74,7 +75,7 @@ onBeforeUnmount(() => clearTimeout(jumpTimer));
 
                     <div class="flex items-center gap-3">
                         <a
-                            :href="webcalUrl"
+                            :href="webcalUrl(feedUrl)"
                             class="bg-brand hover:bg-brand/90 text-on-accent inline-flex h-10 items-center gap-1.5 rounded-lg px-4 text-base font-semibold transition-colors"
                         >
                             <CalendarPlus class="size-4" />
@@ -86,6 +87,14 @@ onBeforeUnmount(() => clearTimeout(jumpTimer));
                             class="border-line bg-surface text-ink-secondary hover:border-line-strong flex size-10 items-center justify-center rounded-lg border transition-colors duration-150"
                         >
                             <Download class="size-4" />
+                        </a>
+                        <a
+                            v-tooltip="trans('common.rss_feed')"
+                            :aria-label="trans('common.rss_feed')"
+                            :href="rssUrl"
+                            class="border-line bg-surface text-ink-secondary hover:border-line-strong flex size-10 items-center justify-center rounded-lg border transition-colors duration-150"
+                        >
+                            <Rss class="size-4" />
                         </a>
                     </div>
                 </div>

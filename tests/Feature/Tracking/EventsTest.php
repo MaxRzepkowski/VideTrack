@@ -10,6 +10,7 @@ use App\Models\MediaItem;
 use App\Models\User;
 use App\Tracking\Events\VisibleEvents;
 use App\Tracking\Surfaces\CalendarDays;
+use App\Tracking\Surfaces\FeedFilter;
 use App\Tracking\Surfaces\IcsFeed;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\Client\Request;
@@ -145,7 +146,7 @@ test('the iCal feed carries an event as a timed entry with its stream', function
     $user = User::factory()->create();
     CatalogEvent::factory()->create(['ref' => '6045', 'name' => 'Summer Game Fest', 'starts_at' => now()->addDays(2), 'ends_at' => now()->addDays(2)->addHours(2)]);
 
-    $ics = app(IcsFeed::class)->render($user);
+    $ics = app(IcsFeed::class)->render($user, new FeedFilter);
 
     expect($ics)->toContain('SUMMARY:Summer Game Fest')
         ->toContain('UID:event-igdb-6045@videtrack')
