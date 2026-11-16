@@ -1,5 +1,6 @@
-import type { CreatorKind } from '@/types/generated';
+import type { CreatorKind, MangaAuthorRole } from '@/types/generated';
 import type { CreatorLink, MediaSummary } from '@/types/media';
+import { trans } from 'laravel-vue-i18n';
 
 /** Whoever makes titles and can be followed or put on a list. */
 export interface Creator {
@@ -48,7 +49,24 @@ export function creatorOf(summary: MediaSummary): Creator | null {
 /** Who a credit names and where their page is; a credit has no wordmark to show. */
 export type CreditPerson = Pick<CreatorLink, 'name' | 'kind' | 'ref' | 'provider'> & { roles: string[] };
 
-/** People named on a card without a page of their own (a manga's authors): plain names under one role. */
+/** People named on a card without a page of their own (a comic's creators): plain names under one role. */
 export function plainCredits(names: string[], role: string): CreditPerson[] {
     return names.map((name) => ({ name, kind: 'person', ref: null, provider: null, roles: [role] }));
+}
+
+// Thunks, so every `trans()` stays a literal call the key checks can see.
+const MANGA_ROLE_LABELS: Record<MangaAuthorRole, () => string> = {
+    story: () => trans('media.manga_role_story'),
+    art: () => trans('media.manga_role_art'),
+};
+
+/** A manga's authors, each under what they did (story, art); one the provider says nothing of stays an author. */
+export function mangaAuthorCredits(names: string[], roles: Record<string, MangaAuthorRole[]>): CreditPerson[] {
+    return names.map((name) => ({
+        name,
+        kind: 'person',
+        ref: null,
+        provider: null,
+        roles: roles[name]?.map((role) => MANGA_ROLE_LABELS[role]()) ?? [trans('media.author')],
+    }));
 }

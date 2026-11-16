@@ -6,19 +6,33 @@
         "large": "https://cdn.myanimelist.net/images/manga/1/157897l.webp"
     },
     "alternative_titles": {
-        "synonyms": ["Berserk: The Prototype"],
+        "synonyms": [
+            "Berserk: The Prototype"
+        ],
         "en": "Berserk",
         "ja": "ベルセルク"
     },
     "start_date": "1989-08-25",
     "synopsis": "Guts, a former mercenary now known as the Black Swordsman, is out for revenge.",
+    "rank": 1,
+    "popularity": 1,
+    "background": "Berserk won the Award for Excellence at the sixth installment of Tezuka Osamu Cultural Prize in 2002.",
     "mean": 9.46,
     "media_type": "manga",
     "status": "currently_publishing",
     "genres": [
-        { "id": 1, "name": "Action" },
-        { "id": 2, "name": "Adventure" },
-        { "id": 10, "name": "Fantasy" }
+        {
+            "id": 1,
+            "name": "Action"
+        },
+        {
+            "id": 2,
+            "name": "Adventure"
+        },
+        {
+            "id": 10,
+            "name": "Fantasy"
+        }
     ],
     "num_volumes": 42,
     "num_chapters": 380,
@@ -26,17 +40,79 @@
     "num_scoring_users": 372275,
     "authors": [
         {
-            "node": { "id": 1868, "first_name": "Kentarou", "last_name": "Miura" },
+            "node": {
+                "id": 1868,
+                "first_name": "Kentarou",
+                "last_name": "Miura"
+            },
             "role": "Story & Art"
         }
     ],
     "serialization": [
-        { "node": { "id": 84, "name": "Young Animal" } }
+        {
+            "node": {
+                "id": 84,
+                "name": "Young Animal"
+            }
+        }
     ],
     "pictures": [
         {
             "medium": "https://cdn.myanimelist.net/images/manga/1/157897.webp",
             "large": "https://cdn.myanimelist.net/images/manga/1/157897l.webp"
+        }
+    ],
+    "recommendations": [
+        {
+            "node": {
+                "id": 21479,
+                "title": "Sword Art Online",
+                "main_picture": {
+                    "large": "https://cdn.myanimelist.net/images/manga/3/saol.jpg"
+                },
+                "media_type": "light_novel"
+            },
+            "num_recommendations": 2
+        },
+        {
+            "node": {
+                "id": 656,
+                "title": "Vagabond",
+                "main_picture": {
+                    "large": "https://cdn.myanimelist.net/images/manga/1/259070l.jpg"
+                },
+                "alternative_titles": {
+                    "synonyms": [],
+                    "en": "Vagabond",
+                    "ja": "バガボンド"
+                },
+                "start_date": "1998-09-03",
+                "mean": 9.27,
+                "media_type": "manga",
+                "num_chapters": 327
+            },
+            "num_recommendations": 4
+        },
+        {
+            "node": {
+                "id": 44347,
+                "title": "One Punch-Man",
+                "main_picture": {
+                    "large": "https://cdn.myanimelist.net/images/manga/3/80661l.jpg"
+                },
+                "alternative_titles": {
+                    "synonyms": [
+                        "Onepunch-Man"
+                    ],
+                    "en": "One-Punch Man",
+                    "ja": "ワンパンマン"
+                },
+                "start_date": "2012-06-14",
+                "mean": 8.73,
+                "media_type": "manga",
+                "num_chapters": 0
+            },
+            "num_recommendations": 9
         }
     ]
 }

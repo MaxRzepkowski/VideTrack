@@ -43,6 +43,15 @@ enum TitleStatus: string
     }
 
     /**
+     * More of it is still coming out: a series being published, on a break,
+     * or a show returning. Not a title still to come, nor one that ended.
+     */
+    public function isRunning(): bool
+    {
+        return in_array($this, [self::Publishing, self::OnHiatus, self::ReturningSeries], true);
+    }
+
+    /**
      * Nothing more is coming under this status: out, over or withdrawn. A
      * title in one only changes when a provider corrects it.
      */

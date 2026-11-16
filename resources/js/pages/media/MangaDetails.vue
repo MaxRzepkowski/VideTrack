@@ -1,13 +1,16 @@
 <script setup lang="ts">
+import ClampedText from '@/components/ClampedText.vue';
 import MediaHero from '@/components/media/MediaHero.vue';
 import MediaStatusPanel from '@/components/media/MediaStatusPanel.vue';
 import MediaTitleHeader from '@/components/media/MediaTitleHeader.vue';
 import OverviewSection from '@/components/media/OverviewSection.vue';
 import RecentlyViewed from '@/components/media/RecentlyViewed.vue';
+import RecommendationsBand from '@/components/media/RecommendationsBand.vue';
+import SectionHeading from '@/components/SectionHeading.vue';
 import StickyActionsPanel from '@/components/media/StickyActionsPanel.vue';
 import TitlePageLayout from '@/components/media/TitlePageLayout.vue';
-import { plainCredits } from '@/lib/creators';
-import { alternativeTitlesLine, formatCalendarDate, formatCountOrNull } from '@/lib/format';
+import { mangaAuthorCredits } from '@/lib/creators';
+import { alternativeTitlesLine, formatCalendarDate, formatCountOrNull, formatYearSpan } from '@/lib/format';
 import { mangaFormatLabel } from '@/lib/mangaFormats';
 import { titleStatusLabel } from '@/lib/titleStatus';
 import type { MangaExtra } from '@/types/extras';
@@ -25,8 +28,11 @@ const props = defineProps<{
 
 const authors = computed(() => props.manga.extra.authors ?? []);
 
-// Authors as the byline under the overview, named without a page to link to.
-const authorPeople = computed(() => plainCredits(authors.value, trans('media.author')));
+// Authors as the byline under the overview, each under what they did, named without a page to link to.
+const authorPeople = computed(() => mangaAuthorCredits(authors.value, props.manga.extra.authorRoles ?? {}));
+
+// MAL's rank and popularity are positions, not counts: "#1".
+const position = (value: number | null | undefined): string | null => (value ? trans('media.rank_position', { position: String(value) }) : null);
 
 const chapters = computed(() => props.manga.extra.chapters ?? null);
 
@@ -48,11 +54,21 @@ const detailRows = computed<DetailRow[]>(() => [
     { label: trans('media.format'), value: format.value },
     { label: trans('media.magazine'), value: props.manga.extra.magazine ?? null },
     { label: trans('common.release_date'), value: formatCalendarDate(props.manga.releaseDate) },
+    {
+        label: trans('media.publication_years'),
+        // A manga still to come has no years yet: its date is the release date above.
+        value:
+            props.manga.status === 'not_yet_published'
+                ? null
+                : formatYearSpan(props.manga.releaseDate, props.manga.extra.endDate ?? null, props.manga.extra.stillPublishing ?? false),
+    },
     { label: trans('common.status'), value: titleStatusLabel(props.manga.status) },
     { label: trans('media.chapters'), value: chapters.value !== null ? String(chapters.value) : null },
     { label: trans('media.volumes'), value: volumes.value !== null ? String(volumes.value) : null },
     { label: trans('media.readers'), value: formatCountOrNull(props.manga.extra.readersCount) },
     { label: trans('common.ratings'), value: formatCountOrNull(props.manga.extra.ratingsCount) },
+    { label: trans('media.rank'), value: position(props.manga.extra.rank) },
+    { label: trans('common.popularity'), value: position(props.manga.extra.popularity) },
     // Trivia, so it sits below the facts people came for, as on a film's page.
     { label: trans('media.alternative_titles'), value: alternativeTitlesLine(props.manga.extra.alternativeTitles) },
 ]);
@@ -79,6 +95,14 @@ const detailRows = computed<DetailRow[]>(() => [
 
         <OverviewSection :overview="manga.overview" :people="authorPeople" />
 
+        <!-- MAL's notes (awards, sales, editions abroad) beside the synopsis, in a card as the page's other facts are. -->
+        <section v-if="manga.extra.background">
+            <SectionHeading :title="trans('media.background')" />
+            <div class="border-line-subtle bg-surface rounded-2xl border px-5 py-4">
+                <ClampedText :text="manga.extra.background" :lines="4" />
+            </div>
+        </section>
+
         <template #below>
             <RecentlyViewed
                 class="pt-16 md:pt-32"
@@ -88,6 +112,10 @@ const detailRows = computed<DetailRow[]>(() => [
                 color="var(--color-media-manga-shade)"
                 :items="recentlyViewed ?? []"
             />
+        </template>
+
+        <template #after>
+            <RecommendationsBand :related="manga.related" :related-title="trans('media.recommended_manga')" />
         </template>
     </TitlePageLayout>
 </template>

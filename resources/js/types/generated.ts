@@ -436,6 +436,7 @@ export type ListUnitTotal = {
     readonly itemsCounted: number;
     readonly itemsTotal: number;
 };
+export type MangaAuthorRole = 'story' | 'art';
 export type MangaFormat = 'manga' | 'manhwa' | 'manhua' | 'one_shot' | 'doujinshi' | 'oel';
 export type ManifestCategory = {
     readonly key: string;

@@ -404,4 +404,12 @@ return [
     'nonfiction' => 'Non-fiction',
     'isbn' => 'ISBN',
     'local_edition' => 'Edition in your language',
+    'manga_role_story' => 'Story',
+    'manga_role_art' => 'Art',
+    'publication_years' => 'Published',
+    'since_year' => 'Since :year',
+    'rank' => 'Rank',
+    'rank_position' => '#:position',
+    'background' => 'Background',
+    'recommended_manga' => 'Recommended manga',
 ];

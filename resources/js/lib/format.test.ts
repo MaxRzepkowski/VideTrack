@@ -17,6 +17,7 @@ import {
     formatTimestampDate,
     formatTotalRuntime,
     formatWatchTime,
+    formatYearSpan,
     getInitials,
     localDateKey,
     localDateTimeInput,
@@ -212,6 +213,16 @@ describe('formatCountOrNull', () => {
         expect(formatCountOrNull(1200)).toBe(formatNumber(1200));
         expect(formatCountOrNull(null)).toBeNull();
         expect(formatCountOrNull('12')).toBeNull();
+    });
+});
+
+describe('formatYearSpan', () => {
+    it('spans the years a series ran, says "since" while it runs, and keeps a bare start otherwise', () => {
+        expect(formatYearSpan('1989-08-25', '2021-05-01', false)).toBe('1989–2021');
+        expect(formatYearSpan('2014-01-01', '2014-11-01', false)).toBe('2014');
+        expect(formatYearSpan('1989-08-25', null, true)).toBe('Since 1989');
+        expect(formatYearSpan('1989-08-25', null, false)).toBe('1989');
+        expect(formatYearSpan(null, '2021-05-01', false)).toBeNull();
     });
 });
 

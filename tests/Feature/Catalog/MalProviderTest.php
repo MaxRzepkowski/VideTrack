@@ -84,6 +84,43 @@ test('a manga MAL names in English is shown by that name, the Japanese one as it
         ->and($manga->summary->alternativeTitles)->toBe(['Shingeki no Kyojin', '進撃の巨人', 'AoT']);
 });
 
+test('a manga page names what each author did, its rank, its background and the years it ran', function () {
+    enableMangaModule();
+    Http::fake(['api.myanimelist.net/v2/manga/2*' => Http::response([
+        ...jsonFixture('mal/details'),
+        'end_date' => '2021-05',
+        'authors' => [
+            ['node' => ['id' => 1, 'first_name' => 'Tsugumi', 'last_name' => 'Ohba'], 'role' => 'Story'],
+            ['node' => ['id' => 2, 'first_name' => 'Takeshi', 'last_name' => 'Obata'], 'role' => 'Art'],
+            ['node' => ['id' => 3, 'first_name' => 'Kentarou', 'last_name' => 'Miura'], 'role' => 'Story & Art'],
+            // A part MAL has not been seen to send: the author stays an author.
+            ['node' => ['id' => 4, 'first_name' => 'Kouji', 'last_name' => 'Mori'], 'role' => 'Supervision'],
+        ],
+    ])]);
+
+    $manga = malProvider()->details('manga', '2', 'en');
+
+    expect($manga->extra['authorRoles'])->toBe(['Tsugumi Ohba' => ['story'], 'Takeshi Obata' => ['art'], 'Kentarou Miura' => ['story', 'art']])
+        ->and($manga->summary->authors)->toBe(['Tsugumi Ohba', 'Takeshi Obata', 'Kentarou Miura', 'Kouji Mori'])
+        ->and($manga->extra['endDate'])->toBe('2021-05-01')
+        ->and($manga->extra['rank'])->toBe(1)
+        ->and($manga->extra['popularity'])->toBe(1)
+        ->and($manga->extra['background'])->toStartWith('Berserk won the Award for Excellence');
+});
+
+test('the manga readers recommend come most recommended first, under their English title, without novels', function () {
+    enableMangaModule();
+    Http::fake(['api.myanimelist.net/v2/manga/2*' => Http::response(jsonFixture('mal/details'))]);
+
+    $related = malProvider()->details('manga', '2', 'en')->related;
+
+    expect(array_map(fn ($manga) => $manga->ref, $related))->toBe(['44347', '656'])
+        ->and($related[0]->title)->toBe('One-Punch Man')
+        ->and($related[0]->type)->toBe('manga');
+
+    Http::assertSent(fn ($request) => str_contains(urldecode($request->url()), 'recommendations{id,title,main_picture,alternative_titles'));
+});
+
 test('a manga without an English title keeps the name MAL gives it', function () {
     enableMangaModule();
     Http::fake(['api.myanimelist.net/v2/manga/2*' => Http::response([

@@ -34,8 +34,15 @@ class MalProvider implements MetadataProvider, SupportsTrending
     /** Genres a manga shows. */
     private const GENRES_KEPT = 8;
 
-    /** Fields shared by every manga listing (search, ranking). */
+    /** Fields shared by every manga listing (search, ranking, the recommendations on a page). */
     private const SUMMARY_FIELDS = 'id,title,main_picture,alternative_titles,start_date,mean,media_type,num_chapters';
+
+    /**
+     * What a manga page reads beyond its card. The recommended manga come with
+     * their card fields too, so they show under the same title as their page.
+     */
+    private const DETAIL_FIELDS = 'end_date,synopsis,status,genres,rank,popularity,background,num_volumes,num_list_users,num_scoring_users,'
+        .'authors{first_name,last_name},serialization{name},pictures,recommendations{'.self::SUMMARY_FIELDS.'}';
 
     /** MAL media_type values that are prose, not comics. */
     private const NOVEL_TYPES = ['novel', 'light_novel'];
@@ -65,7 +72,7 @@ class MalProvider implements MetadataProvider, SupportsTrending
             throw $refusal;
         }
 
-        return $this->nodeSummaries($data);
+        return $this->nodeSummaries(Payload::list($data['data'] ?? null));
     }
 
     public function details(string $type, string $ref, string $locale, ?string $region = null): MediaDetails
@@ -82,8 +89,7 @@ class MalProvider implements MetadataProvider, SupportsTrending
 
         $data = $this->client->get(
             "/manga/{$ref}",
-            ['fields' => self::SUMMARY_FIELDS.',synopsis,status,genres,'
-                .'num_volumes,num_list_users,num_scoring_users,authors{first_name,last_name},serialization{name},pictures'],
+            ['fields' => self::SUMMARY_FIELDS.','.self::DETAIL_FIELDS],
             $this->ttl('details'),
             requireKey: 'id',
         );
@@ -93,6 +99,7 @@ class MalProvider implements MetadataProvider, SupportsTrending
         $genres = Payload::names($data['genres'] ?? null);
 
         $summary = $this->summary($data);
+        $status = $this->publicationStatus($data);
         $original = $this->nativeTitle($data);
         $original = $original !== null && Matching::sameTitle($original, $summary->title) ? null : $original;
 
@@ -110,7 +117,7 @@ class MalProvider implements MetadataProvider, SupportsTrending
             summary: $summary,
             overview: Payload::string($data, 'synopsis'),
             genres: array_slice($genres, 0, self::GENRES_KEPT),
-            status: $this->publicationStatus($data),
+            status: $status,
             externalLinks: ['mal' => 'https://myanimelist.net/manga/'.$id],
             extra: [
                 'chapters' => Payload::positiveInt($data, 'num_chapters'),
@@ -126,8 +133,18 @@ class MalProvider implements MetadataProvider, SupportsTrending
                 // romanised one is just another name it goes by.
                 'originalTitle' => $original,
                 'alternativeTitles' => array_values(array_filter($summary->alternativeTitles, fn (string $name): bool => $name !== $original)) ?: null,
+                'authorRoles' => $this->authorRoles($data) ?: null,
+                // The last chapter's date: with the first, the years it ran.
+                'endDate' => $this->paddedDate($data, 'end_date'),
+                // Without an end, whether the years read "since 1989" or just "1989".
+                'stillPublishing' => $status?->isRunning() ?? false,
+                'rank' => Payload::positiveInt($data, 'rank'),
+                'popularity' => Payload::positiveInt($data, 'popularity'),
+                // Awards, sales, where it was published abroad: MAL's own notes, in English as the synopsis is.
+                'background' => Payload::string($data, 'background'),
             ],
             posters: array_slice($posters, 0, self::POSTERS_KEPT),
+            related: $this->recommendations($data),
         );
     }
 
@@ -142,21 +159,21 @@ class MalProvider implements MetadataProvider, SupportsTrending
             requireKey: 'data',
         );
 
-        return array_slice($this->nodeSummaries($data), 0, 20);
+        return array_slice($this->nodeSummaries(Payload::list($data['data'] ?? null)), 0, 20);
     }
 
     /**
-     * Summaries out of a MAL list payload (`data[].node`): novels drop out
+     * Summaries out of the entries of a MAL list (`[].node`): novels drop out
      * (books module territory), covers are required.
      *
-     * @param  array<array-key, mixed>  $data
+     * @param  list<array<array-key, mixed>>  $entries
      * @return list<MediaSummary>
      */
-    private function nodeSummaries(array $data): array
+    private function nodeSummaries(array $entries): array
     {
         $summaries = [];
 
-        foreach (Payload::list($data['data'] ?? null) as $entry) {
+        foreach ($entries as $entry) {
             $node = Payload::map($entry['node'] ?? null);
 
             if (Payload::id($node['id'] ?? null) === null || $this->pictureUrl(Payload::map($node['main_picture'] ?? null)) === null) {
@@ -178,7 +195,7 @@ class MalProvider implements MetadataProvider, SupportsTrending
      */
     private function summary(array $data): MediaSummary
     {
-        $releaseDate = $this->startDate($data);
+        $releaseDate = $this->paddedDate($data, 'start_date');
         $title = $this->shownTitle($data);
 
         return new MediaSummary(
@@ -275,14 +292,52 @@ class MalProvider implements MetadataProvider, SupportsTrending
     }
 
     /**
-     * MAL start_date may be a full date, year-month or bare year — pad the
+     * Manga readers recommend alongside this one, the most recommended first:
+     * what users pair it with, as a film's recommendations are.
+     *
+     * @param  array<array-key, mixed>  $data
+     * @return list<MediaSummary>
+     */
+    private function recommendations(array $data): array
+    {
+        $entries = Payload::list($data['recommendations'] ?? null);
+        usort($entries, fn (array $a, array $b): int => (Payload::int($b, 'num_recommendations') ?? 0) <=> (Payload::int($a, 'num_recommendations') ?? 0));
+
+        return $this->nodeSummaries($entries);
+    }
+
+    /**
+     * Each author's parts by name, for an author MAL says something about.
+     *
+     * @param  array<array-key, mixed>  $data
+     * @return array<string, list<value-of<MangaAuthorRole>>>
+     */
+    private function authorRoles(array $data): array
+    {
+        $roles = [];
+
+        foreach (Payload::list($data['authors'] ?? null) as $author) {
+            $node = Payload::map($author['node'] ?? null);
+            $name = trim(Payload::text($node, 'first_name').' '.Payload::text($node, 'last_name'));
+            $parts = array_map(fn (MangaAuthorRole $role): string => $role->value, MangaAuthorRole::fromMal(Payload::string($author, 'role')));
+
+            if ($name !== '' && $parts !== []) {
+                $roles[$name] = array_values(array_unique([...$roles[$name] ?? [], ...$parts]));
+            }
+        }
+
+        return $roles;
+    }
+
+    /**
+     * MAL dates may be a full date, year-month or bare year — pad the
      * short forms so the app always sees Y-m-d.
      *
      * @param  array<array-key, mixed>  $data
      */
-    private function startDate(array $data): ?string
+    private function paddedDate(array $data, string $key): ?string
     {
-        $date = Payload::string($data, 'start_date');
+        $date = Payload::string($data, $key);
 
         return match (true) {
             $date === null => null,

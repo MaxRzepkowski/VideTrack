@@ -404,4 +404,12 @@ return [
     'nonfiction' => 'Literatura faktu',
     'isbn' => 'ISBN',
     'local_edition' => 'Wydanie polskie',
+    'manga_role_story' => 'Scenariusz',
+    'manga_role_art' => 'Rysunki',
+    'publication_years' => 'Lata wydawania',
+    'since_year' => 'Od :year',
+    'rank' => 'Ranking',
+    'rank_position' => '#:position',
+    'background' => 'Tło',
+    'recommended_manga' => 'Polecane mangi',
 ];

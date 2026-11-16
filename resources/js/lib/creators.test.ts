@@ -1,4 +1,4 @@
-import { creatorKey, creatorOf, isCollection, plainCredits } from '@/lib/creators';
+import { creatorKey, creatorOf, isCollection, mangaAuthorCredits, plainCredits } from '@/lib/creators';
 import { mediaSummary } from '@/test/factories';
 import { describe, expect, it } from 'vitest';
 
@@ -32,5 +32,21 @@ describe('plainCredits and isCollection', () => {
     it('tells a collection card from a title or a creator', () => {
         expect(isCollection(mediaSummary({ type: 'collection' }))).toBe(true);
         expect(isCollection(mediaSummary({ type: 'person' }))).toBe(false);
+    });
+});
+
+describe('mangaAuthorCredits', () => {
+    it('credits each author under what they did, and one the provider says nothing of as an author', () => {
+        const credits = mangaAuthorCredits(['Tsugumi Ohba', 'Kentarou Miura', 'Kouji Mori'], {
+            'Tsugumi Ohba': ['story'],
+            'Kentarou Miura': ['story', 'art'],
+        });
+
+        expect(credits.map((person) => [person.name, person.roles])).toEqual([
+            ['Tsugumi Ohba', ['Story']],
+            ['Kentarou Miura', ['Story', 'Art']],
+            ['Kouji Mori', ['Author']],
+        ]);
+        expect(credits[0]).toMatchObject({ kind: 'person', ref: null, provider: null });
     });
 });

@@ -9,6 +9,7 @@ import type {
     CatalogLink,
     CollectionLink,
     LanguageSupport,
+    MangaAuthorRole,
     MangaFormat,
     MediaSummary,
     MultiplayerSupport,
@@ -167,6 +168,14 @@ export interface MangaExtra extends TitleExtra {
     magazine?: string | null;
     ratingsCount?: number | null;
     readersCount?: number | null;
+    /** What each author did, by name, for the authors MAL says it of. */
+    authorRoles?: Record<string, MangaAuthorRole[]> | null;
+    endDate?: string | null;
+    /** Whether more is coming: the years then read "since", not a bare start year. */
+    stillPublishing?: boolean;
+    rank?: number | null;
+    popularity?: number | null;
+    background?: string | null;
 }
 
 export interface ComicExtra extends TitleExtra {

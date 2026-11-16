@@ -373,6 +373,25 @@ export function formatCountOrNull(value: unknown): string | null {
     return typeof value === 'number' ? formatNumber(value) : null;
 }
 
+/**
+ * The years a series ran: "1989–2021", "Since 1989" while it still runs, the
+ * start year alone when it ended without a known end.
+ */
+export function formatYearSpan(startDate: string | null, endDate: string | null, stillRunning: boolean): string | null {
+    if (!startDate) {
+        return null;
+    }
+
+    const from = startDate.slice(0, 4);
+    const to = endDate?.slice(0, 4) ?? null;
+
+    if (to !== null) {
+        return to === from ? from : `${from}–${to}`;
+    }
+
+    return stillRunning ? trans('media.since_year', { year: from }) : from;
+}
+
 /** How many other names a title page lists: past a handful they read as noise. */
 export const ALTERNATIVE_TITLES_SHOWN = 8;
 
