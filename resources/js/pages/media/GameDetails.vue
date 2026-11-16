@@ -2,6 +2,7 @@
 import ClampedText from '@/components/ClampedText.vue';
 import EventShelf from '@/components/events/EventShelf.vue';
 import CollectionBanner from '@/components/media/CollectionBanner.vue';
+import FactTilesSection from '@/components/media/FactTilesSection.vue';
 import GameLanguagesSection from '@/components/media/game/GameLanguagesSection.vue';
 import GameStoresSection from '@/components/media/game/GameStoresSection.vue';
 import MediaHero from '@/components/media/MediaHero.vue';
@@ -18,6 +19,7 @@ import VideosSection from '@/components/media/VideosSection.vue';
 import SectionHeading from '@/components/SectionHeading.vue';
 import { shownState, stateKey } from '@/composables/useMediaActions';
 import { ageRatingImage, descriptorImage } from '@/lib/ageRatings';
+import type { FactTile } from '@/lib/factTiles';
 import { gameTypeBadge } from '@/lib/badges';
 import { formatReleaseDate, formatRuntime } from '@/lib/format';
 import { multiplayerLabel, providerRatingLabel } from '@/lib/gamePlay';
@@ -134,7 +136,7 @@ const detailRows = computed<DetailRow[]>(() => [
 
 // IGDB "time to beat" tiles (rushed / average / completionist) — the game's
 // counterpart of a movie's runtime, shown as its own section (not a chip).
-const timeToBeat = computed(() => {
+const timeToBeat = computed<FactTile[]>(() => {
     const times = props.game.extra.timeToBeat;
 
     if (!times) {
@@ -145,7 +147,7 @@ const timeToBeat = computed(() => {
         { key: 'hastily', icon: Timer, label: trans('media.rushed'), value: formatRuntime(times.hastily ?? null) },
         { key: 'normally', icon: Gauge, label: trans('media.average_playthrough'), value: formatRuntime(times.normally ?? null) },
         { key: 'completely', icon: Trophy, label: trans('media.completionist'), value: formatRuntime(times.completely ?? null) },
-    ].filter((tile) => tile.value !== null);
+    ].filter((tile): tile is FactTile => tile.value !== null);
 });
 
 // The header's score is critics and players together; hovering it tells them apart.
@@ -155,8 +157,6 @@ const ratingHint = computed<TooltipRow[]>(() =>
         { label: trans('media.players_rating'), value: providerRatingLabel(props.game.extra.playersRating, 'media.count_player_ratings') },
     ].filter((row): row is TooltipRow => row.value !== null),
 );
-
-const hasTimeToBeat = computed(() => timeToBeat.value.length > 0);
 
 // This game is a DLC / edition of a base game — link back to it, like a season
 // links up to its show.
@@ -223,19 +223,7 @@ const ownedEdition = computed(() => {
 
         <OverviewSection :overview="game.overview" :people="companyPeople" />
 
-        <section v-if="hasTimeToBeat">
-            <SectionHeading :title="trans('media.time_to_beat')" />
-
-            <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                <div v-for="tile in timeToBeat" :key="tile.key" class="border-line-subtle bg-surface flex items-center gap-4 rounded-xl border p-5">
-                    <component :is="tile.icon" class="text-media-game size-7 shrink-0" :stroke-width="2" />
-                    <div class="min-w-0">
-                        <div class="text-ink-muted text-sm font-bold">{{ tile.label }}</div>
-                        <div class="text-ink text-xl font-extrabold">{{ tile.value }}</div>
-                    </div>
-                </div>
-            </div>
-        </section>
+        <FactTilesSection :title="trans('media.time_to_beat')" :tiles="timeToBeat" type="game" />
 
         <GameStoresSection :stores="game.extra.stores ?? []" />
         <GameLanguagesSection :languages="game.extra.languages ?? []" />
