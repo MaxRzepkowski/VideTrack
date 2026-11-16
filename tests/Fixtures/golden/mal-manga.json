@@ -174,5 +174,83 @@
             "kind": "popularity",
             "position": 1
         }
+    ],
+    "ties": [
+        {
+            "@class": "TitleTie",
+            "relation": "same_universe",
+            "media": {
+                "@class": "MediaSummary",
+                "type": "manga",
+                "ref": "92299",
+                "provider": "mal",
+                "title": "Berserk: The Prototype",
+                "year": 1988,
+                "posterPath": "https://cdn.myanimelist.net/images/manga/2/92299l.jpg",
+                "backdropPath": null,
+                "communityRating": null,
+                "releaseDate": "1988-01-01",
+                "releaseTime": null,
+                "number": null,
+                "totalRuntime": null,
+                "seasonNumber": null,
+                "runtime": null,
+                "overview": null,
+                "releaseKind": null,
+                "platform": null,
+                "releaseStatus": null,
+                "extra": [],
+                "progressTotal": null,
+                "episodeType": null,
+                "authors": [],
+                "episodeBadge": null,
+                "creatorKind": null,
+                "makes": null,
+                "votes": null,
+                "releasePrecision": "day",
+                "alternativeTitles": [
+                    "ベルセルク プロトタイプ"
+                ]
+            },
+            "collectionRef": null
+        },
+        {
+            "@class": "TitleTie",
+            "relation": "spin_off",
+            "media": {
+                "@class": "MediaSummary",
+                "type": "manga",
+                "ref": "44001",
+                "provider": "mal",
+                "title": "Berserk Gaiden",
+                "year": 1996,
+                "posterPath": "https://cdn.myanimelist.net/images/manga/4/44001l.jpg",
+                "backdropPath": null,
+                "communityRating": null,
+                "releaseDate": "1996-01-01",
+                "releaseTime": null,
+                "number": null,
+                "totalRuntime": null,
+                "seasonNumber": null,
+                "runtime": null,
+                "overview": null,
+                "releaseKind": null,
+                "platform": null,
+                "releaseStatus": null,
+                "extra": [],
+                "progressTotal": null,
+                "episodeType": null,
+                "authors": [],
+                "episodeBadge": null,
+                "creatorKind": null,
+                "makes": null,
+                "votes": null,
+                "releasePrecision": "day",
+                "alternativeTitles": [
+                    "ベルセルク外伝"
+                ]
+            },
+            "collectionRef": null
+        }
     ]
 }

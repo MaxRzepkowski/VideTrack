@@ -2,6 +2,7 @@
 
 namespace App\Catalog\Data;
 
+use App\Catalog\Relations\TitleTie;
 use App\Catalog\TitleStatus;
 use JsonSerializable;
 use Spatie\TypeScriptTransformer\Attributes\TypeScript;
@@ -87,6 +88,14 @@ final readonly class MediaDetails implements JsonSerializable
         public bool $adult = false,
         /** @var list<RankingPosition> where the title stands in its provider's rankings, as the page shows them */
         public array $rankings = [],
+        /**
+         * The titles the provider itself ties to this one with its details
+         * (a manga's sequel, its side story); titles an outside source ties
+         * come from the relation store instead.
+         *
+         * @var list<TitleTie>
+         */
+        public array $ties = [],
     ) {}
 
     /**
@@ -100,15 +109,18 @@ final readonly class MediaDetails implements JsonSerializable
     }
 
     /**
-     * Every card the page shows: the title, its children, related and
-     * similar titles, and the summaries a provider keeps in `extra` (a show's
+     * Every card the page shows: the title, its children, related, similar
+     * and tied titles, and the summaries a provider keeps in `extra` (a show's
      * next or last aired episode), stored directly or in a list.
      *
      * @return list<MediaSummary>
      */
     public function cards(): array
     {
-        $cards = [$this->summary, ...$this->children, ...$this->airingEpisodes(), ...$this->related, ...$this->similar];
+        $cards = [
+            $this->summary, ...$this->children, ...$this->airingEpisodes(), ...$this->related, ...$this->similar,
+            ...array_map(fn (TitleTie $tie): MediaSummary => $tie->media, $this->ties),
+        ];
 
         foreach ($this->extra as $value) {
             foreach (is_array($value) ? $value : [$value] as $item) {

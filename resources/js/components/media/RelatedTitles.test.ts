@@ -33,6 +33,15 @@ describe('the titles of the same universe', () => {
         expect(wrapper.findAllComponents(MediaCard)).toHaveLength(30);
     });
 
+    it('names Wikidata as its source unless the page names none', () => {
+        expect(section([fellow(1)]).text()).toContain('via Wikidata');
+
+        const unsourced = mount(RelatedTitles, { props: { titles: [fellow(1)], source: null }, global: { stubs: { MediaCard: true } } });
+
+        expect(unsourced.text()).not.toContain('via Wikidata');
+        expect(unsourced.find('h2').text()).toBe('From the same universe');
+    });
+
     it('is not there at all for a title with nothing tied to it', () => {
         expect(section([]).find('section').exists()).toBe(false);
     });

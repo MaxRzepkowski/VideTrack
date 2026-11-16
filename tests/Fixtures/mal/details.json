@@ -114,5 +114,79 @@
             },
             "num_recommendations": 9
         }
+    ],
+    "related_manga": [
+        {
+            "node": {
+                "id": 148990,
+                "title": "Duranki",
+                "main_picture": {
+                    "large": "https://cdn.myanimelist.net/images/manga/1/261519l.jpg"
+                },
+                "alternative_titles": {
+                    "synonyms": [],
+                    "en": "",
+                    "ja": "ドゥルアンキ"
+                },
+                "start_date": "2023-06-09",
+                "media_type": "manga"
+            },
+            "relation_type": "other",
+            "relation_type_formatted": "Other"
+        },
+        {
+            "node": {
+                "id": 92299,
+                "title": "Berserk: The Prototype",
+                "main_picture": {
+                    "large": "https://cdn.myanimelist.net/images/manga/2/92299l.jpg"
+                },
+                "alternative_titles": {
+                    "synonyms": [],
+                    "en": "",
+                    "ja": "ベルセルク プロトタイプ"
+                },
+                "start_date": "1988-01-01",
+                "media_type": "one_shot"
+            },
+            "relation_type": "alternative_version",
+            "relation_type_formatted": "Alternative Version"
+        },
+        {
+            "node": {
+                "id": 160000,
+                "title": "Berserk: Shinen no Kami",
+                "main_picture": {
+                    "large": "https://cdn.myanimelist.net/images/manga/3/160000l.jpg"
+                },
+                "alternative_titles": {
+                    "synonyms": [],
+                    "en": "Berserk: God of the Abyss",
+                    "ja": "ベルセルク 深淵の神"
+                },
+                "start_date": "2016-01-01",
+                "media_type": "light_novel"
+            },
+            "relation_type": "side_story",
+            "relation_type_formatted": "Side Story"
+        },
+        {
+            "node": {
+                "id": 44001,
+                "title": "Berserk Gaiden",
+                "main_picture": {
+                    "large": "https://cdn.myanimelist.net/images/manga/4/44001l.jpg"
+                },
+                "alternative_titles": {
+                    "synonyms": [],
+                    "en": "",
+                    "ja": "ベルセルク外伝"
+                },
+                "start_date": "1996-01-01",
+                "media_type": "manga"
+            },
+            "relation_type": "side_story",
+            "relation_type_formatted": "Side Story"
+        }
     ]
 }

@@ -11,6 +11,7 @@ use App\Catalog\Data\CollectionBannerData;
 use App\Catalog\MediaTypeRegistry;
 use App\Catalog\ProviderCalls;
 use App\Catalog\ProviderRegistry;
+use App\Catalog\Relations\TieRules;
 use App\Http\Controllers\Controller;
 use App\Library\LibraryStates;
 use App\Library\RecentViews;
@@ -38,6 +39,7 @@ class TitleDetailsController extends Controller
         ResolveEventsShowing $eventsShowing,
         LibraryStates $states,
         RecentViews $recentViews,
+        TieRules $tieRules,
         string $type,
         string $ref,
     ): Response {
@@ -57,6 +59,8 @@ class TitleDetailsController extends Controller
             $type => $details,
             'fromLibrary' => $title->fromLibrary,
             'removedAtSource' => $title->removedAtSource,
+            // The titles its provider ties to it with the details (a manga's sequel).
+            'relatedTitles' => $tieRules->fromProvider($details->ties),
             // The series or saga the title belongs to, where its provider curates one;
             // from the library alone the provider is not asked.
             'collection' => $title->fromLibrary

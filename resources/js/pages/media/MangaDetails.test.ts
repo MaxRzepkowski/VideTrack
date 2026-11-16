@@ -3,11 +3,12 @@ import FactTilesSection from '@/components/media/FactTilesSection.vue';
 import MediaTitleHeader from '@/components/media/MediaTitleHeader.vue';
 import OverviewSection from '@/components/media/OverviewSection.vue';
 import RecommendationsBand from '@/components/media/RecommendationsBand.vue';
+import RelatedTitles from '@/components/media/RelatedTitles.vue';
 import MangaDetails from '@/pages/media/MangaDetails.vue';
 import { mediaSummary, useMediaTypes } from '@/test/factories';
 import type { MangaExtra } from '@/types/extras';
 import type { RankingPosition } from '@/types/generated';
-import type { DetailRow, MediaDetails } from '@/types/media';
+import type { DetailRow, MediaDetails, TitleTie } from '@/types/media';
 import { shallowMount } from '@vue/test-utils';
 import { beforeEach, describe, expect, it } from 'vitest';
 
@@ -20,9 +21,9 @@ function manga(extra: MangaExtra = {}): MediaDetails<MangaExtra> {
     } as MediaDetails<MangaExtra>;
 }
 
-function render(details: MediaDetails<MangaExtra>) {
+function render(details: MediaDetails<MangaExtra>, relatedTitles: TitleTie[] = []) {
     return shallowMount(MangaDetails, {
-        props: { manga: details },
+        props: { manga: details, relatedTitles },
         global: { stubs: { TitlePageLayout: false, AppLayout: { template: '<div><slot /></div>' } } },
     });
 }
@@ -97,5 +98,13 @@ describe('MangaDetails', () => {
         const upcoming = render({ ...manga(), status: 'not_yet_published', releaseDate: '2027-01-01' });
 
         expect(valueOf(upcoming.findComponent(MediaTitleHeader).props('detailRows'), 'Published')).toBeNull();
+    });
+
+    it('shows the manga MAL ties to it, without naming a source', () => {
+        const gaiden: TitleTie = { relation: 'spin_off', label: 'Spin-off', media: mediaSummary({ type: 'manga', ref: '44001', provider: 'mal' }) };
+        const section = render(manga(), [gaiden]).findComponent(RelatedTitles);
+
+        expect(section.props('titles')).toEqual([gaiden]);
+        expect(section.props('source')).toBeNull();
     });
 });

@@ -7,6 +7,7 @@ use App\Catalog\ProviderRegistry;
 use App\Catalog\ProviderRejected;
 use App\Catalog\Providers\Mal\MalProvider;
 use App\Catalog\RankingKind;
+use App\Catalog\Relations\TitleRelation;
 use App\Catalog\TitleStatus;
 use Illuminate\Support\Facades\Http;
 
@@ -144,6 +145,22 @@ test('the manga readers recommend come most recommended first, under their Engli
         ->and($related[0]->type)->toBe('manga');
 
     Http::assertSent(fn ($request) => str_contains(urldecode($request->url()), 'recommendations{id,title,main_picture,alternative_titles'));
+});
+
+test('the manga MAL ties to a manga are shown by how they stand to it, without novels or ties that say too little', function () {
+    enableMangaModule();
+    Http::fake(['api.myanimelist.net/v2/manga/2*' => Http::response(jsonFixture('mal/details'))]);
+
+    $ties = malProvider()->details('manga', '2', 'en')->ties;
+
+    // "Other" says too little and the side-story novel is prose: both drop out.
+    // Which of the rest a page shows, and in what order, is TieRules' call.
+    expect(array_map(fn ($tie) => [$tie->relation, $tie->media->ref], $ties))->toBe([
+        [TitleRelation::SameUniverse, '92299'],
+        [TitleRelation::SpinOff, '44001'],
+    ]);
+
+    Http::assertSent(fn ($request) => str_contains(urldecode($request->url()), 'related_manga{id,title,main_picture,alternative_titles'));
 });
 
 test('a manga without an English title keeps the name MAL gives it', function () {

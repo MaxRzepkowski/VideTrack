@@ -56,7 +56,6 @@ final readonly class TieRules
         $settled = [];
 
         foreach ($ties as $tie) {
-            $key = $tie->media->key();
             $continuation = in_array($tie->relation, [TitleRelation::Next, TitleRelation::Previous], true);
 
             if ($continuation && $title->type === MediaKind::Movie->value && $tie->media->type === MediaKind::Movie->value) {
@@ -76,12 +75,42 @@ final readonly class TieRules
                 $tie = new TitleTie($this->direction($title, $tie), $tie->media, $tie->collectionRef);
             }
 
-            if (! isset($settled[$key]) || self::CLOSENESS[$tie->relation->value] < self::CLOSENESS[$settled[$key]->relation->value]) {
-                $settled[$key] = $tie;
-            }
+            $this->keepClosest($settled, $tie);
         }
 
         return self::inPageOrder(array_values($settled));
+    }
+
+    /**
+     * The ties a title's own provider names with its details (a manga's
+     * sequel): nothing to second-guess about an outside source, so only the
+     * rules every page keeps — each other title once, by the closest thing
+     * known of it — in page order.
+     *
+     * @param  list<TitleTie>  $ties
+     * @return list<TitleTie>
+     */
+    public function fromProvider(array $ties): array
+    {
+        $kept = [];
+
+        foreach ($ties as $tie) {
+            $this->keepClosest($kept, $tie);
+        }
+
+        return self::inPageOrder(array_values($kept));
+    }
+
+    /**
+     * @param  array<string, TitleTie>  $kept  by the other title's key
+     */
+    private function keepClosest(array &$kept, TitleTie $tie): void
+    {
+        $key = $tie->media->key();
+
+        if (! isset($kept[$key]) || self::CLOSENESS[$tie->relation->value] < self::CLOSENESS[$kept[$key]->relation->value]) {
+            $kept[$key] = $tie;
+        }
     }
 
     /**

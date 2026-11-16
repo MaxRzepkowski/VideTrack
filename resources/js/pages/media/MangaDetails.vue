@@ -7,6 +7,7 @@ import MediaTitleHeader from '@/components/media/MediaTitleHeader.vue';
 import OverviewSection from '@/components/media/OverviewSection.vue';
 import RecentlyViewed from '@/components/media/RecentlyViewed.vue';
 import RecommendationsBand from '@/components/media/RecommendationsBand.vue';
+import RelatedTitles from '@/components/media/RelatedTitles.vue';
 import SectionHeading from '@/components/SectionHeading.vue';
 import StickyActionsPanel from '@/components/media/StickyActionsPanel.vue';
 import TitlePageLayout from '@/components/media/TitlePageLayout.vue';
@@ -16,7 +17,7 @@ import { alternativeTitlesLine, formatCalendarDate, formatCountOrNull, formatYea
 import { mangaFormatLabel } from '@/lib/mangaFormats';
 import { titleStatusLabel } from '@/lib/titleStatus';
 import type { MangaExtra } from '@/types/extras';
-import type { DetailRow, MediaDetails, MediaSummary } from '@/types/media';
+import type { DetailRow, MediaDetails, MediaSummary, TitleTie } from '@/types/media';
 import { Head } from '@inertiajs/vue3';
 import { trans, transChoice } from 'laravel-vue-i18n';
 import { computed } from 'vue';
@@ -24,6 +25,7 @@ import { computed } from 'vue';
 const props = defineProps<{
     manga: MediaDetails<MangaExtra>;
     recentlyViewed?: MediaSummary[];
+    relatedTitles?: TitleTie[];
     fromLibrary?: boolean;
     removedAtSource?: boolean;
 }>();
@@ -104,6 +106,10 @@ const detailRows = computed<DetailRow[]>(() => [
                 <ClampedText :text="manga.extra.background" :lines="4" />
             </div>
         </section>
+
+        <template #below>
+            <RelatedTitles :titles="relatedTitles ?? []" :source="null" />
+        </template>
 
         <template #after>
             <RecommendationsBand :related="manga.related" :related-title="trans('media.recommended_manga')" />

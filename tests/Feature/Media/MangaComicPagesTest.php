@@ -31,6 +31,10 @@ test('the manga details page renders with chapters, authors and the format', fun
             ->where('manga.extra.volumes', 42)
             ->where('manga.extra.mangaFormat', 'manga')
             ->where('manga.extra.authors.0', 'Kentarou Miura')
+            // Ties MAL names with the details, each card saying how it stands to this one.
+            ->where('relatedTitles.0.media.ref', '44001')
+            ->where('relatedTitles.0.label', 'Spin-off')
+            ->has('relatedTitles', 2)
         );
 });
 

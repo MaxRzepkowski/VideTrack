@@ -408,5 +408,6 @@
     "lastEpisodeToAir": null,
     "nextEpisodeToAir": null,
     "adult": false,
-    "rankings": []
+    "rankings": [],
+    "ties": []
 }

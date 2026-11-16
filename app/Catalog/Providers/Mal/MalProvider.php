@@ -11,6 +11,7 @@ use App\Catalog\ItemNotFoundException;
 use App\Catalog\Matching;
 use App\Catalog\ProviderRejected;
 use App\Catalog\RankingKind;
+use App\Catalog\Relations\TitleTie;
 use App\Support\Payload;
 use LogicException;
 
@@ -48,7 +49,8 @@ class MalProvider implements MetadataProvider, SupportsTrending
      * their card fields too, so they show under the same title as their page.
      */
     private const DETAIL_FIELDS = 'end_date,synopsis,status,genres,rank,popularity,background,num_volumes,num_list_users,num_scoring_users,'
-        .'authors{first_name,last_name},serialization{name},pictures,recommendations{'.self::SUMMARY_FIELDS.'}';
+        .'authors{first_name,last_name},serialization{name},pictures,recommendations{'.self::SUMMARY_FIELDS.'},'
+        .'related_manga{'.self::SUMMARY_FIELDS.'}';
 
     /** The provider's code, on every card it makes. */
     public const CODE = 'mal';
@@ -154,6 +156,7 @@ class MalProvider implements MetadataProvider, SupportsTrending
             related: $this->recommendations($data),
             adult: $this->payload->isAdult($data),
             rankings: $this->rankings($data),
+            ties: $this->ties($data),
         );
     }
 
@@ -184,6 +187,33 @@ class MalProvider implements MetadataProvider, SupportsTrending
         usort($entries, fn (array $a, array $b): int => (Payload::int($b, 'num_recommendations') ?? 0) <=> (Payload::int($a, 'num_recommendations') ?? 0));
 
         return $this->payload->cards($entries);
+    }
+
+    /**
+     * The manga MAL ties to this one, as MAL names them; which of them a page
+     * shows is TieRules' call. MAL files a tie on both manga, so either page
+     * has it.
+     *
+     * @param  array<array-key, mixed>  $data
+     * @return list<TitleTie>
+     */
+    private function ties(array $data): array
+    {
+        $ties = [];
+
+        foreach (Payload::list($data['related_manga'] ?? null) as $entry) {
+            $type = Payload::enum($entry, 'relation_type', MangaRelationType::class);
+
+            if ($type === null) {
+                continue;
+            }
+
+            foreach ($this->payload->cards([$entry]) as $card) {
+                $ties[] = new TitleTie($type->relation(), $card);
+            }
+        }
+
+        return $ties;
     }
 
     /**

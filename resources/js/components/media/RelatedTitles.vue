@@ -13,9 +13,17 @@ import { computed, ref } from 'vue';
  * it: its spin-offs, what it was spun off from, what continues it, then the
  * rest of the franchise. A card says how it stands to this title where that
  * is known. Found through Wikidata by a background task, so the page never
- * waits for it. A large universe opens two rows deep.
+ * waits for it, or named by the title's own provider with its details. A
+ * large universe opens two rows deep.
  */
-const props = defineProps<{ titles: TitleTie[] }>();
+const props = withDefaults(
+    defineProps<{
+        titles: TitleTie[];
+        /** Who says so, beside the heading; none where the page names no source. */
+        source?: string | null;
+    }>(),
+    { source: () => trans('media.via_wikidata') },
+);
 
 const ROWS = 2;
 
@@ -28,8 +36,8 @@ const shown = computed(() => (expanded.value ? props.titles : props.titles.slice
 <template>
     <section v-if="titles.length" class="pt-16">
         <SectionHeading :title="trans('media.from_the_same_universe')">
-            <template #badge>
-                <span class="text-ink-faint text-sm font-medium">{{ trans('media.via_wikidata') }}</span>
+            <template v-if="source" #badge>
+                <span class="text-ink-faint text-sm font-medium">{{ source }}</span>
             </template>
         </SectionHeading>
         <MediaGrid>
