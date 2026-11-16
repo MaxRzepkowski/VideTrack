@@ -75,8 +75,8 @@ test('one question covers a batch, asks for both ends of every tie and leaves th
 
     expect(array_keys($works))->toBe(['Q1079'])
         ->and($works['Q1079'][0]->relation)->toBe(TitleRelation::SpinOff)
-        ->and($works['Q1079'][0]->kind->value)->toBe('show')
-        ->and($works['Q1079'][0]->externalIds)->toBe(['tmdb' => '60059']);
+        ->and($works['Q1079'][0]->work->kind->value)->toBe('show')
+        ->and($works['Q1079'][0]->work->externalIds)->toBe(['tmdb' => '60059']);
 
     Http::assertSentCount(1);
     Http::assertSent(function (Request $request) {

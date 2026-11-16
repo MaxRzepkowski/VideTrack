@@ -37,7 +37,7 @@ final readonly class WorkFinder
      *
      * @template TKey of array-key
      *
-     * @param  array<TKey, RelatedWork>  $works
+     * @param  array<TKey, CatalogWork>  $works
      * @return array<TKey, array{card: MediaSummary, collection: CollectionLink|null, votes: int|null}|null> `votes` is null for a stored title: it is the user's own, whatever its reach
      *
      * @throws ExternalServiceException the provider did not answer

@@ -49,8 +49,8 @@ final readonly class RefreshTitleRelations
         $works = [];
 
         foreach ($answer->ties as $sourceId => $ofTitle) {
-            foreach ($ofTitle as $index => $work) {
-                $works["{$sourceId}:{$index}"] = $work;
+            foreach ($ofTitle as $index => $tie) {
+                $works["{$sourceId}:{$index}"] = $tie->work;
             }
         }
 
@@ -60,12 +60,12 @@ final readonly class RefreshTitleRelations
         foreach ($bySourceId as $sourceId => $title) {
             $ties = [];
 
-            foreach ($answer->ties[$sourceId] ?? [] as $index => $work) {
+            foreach ($answer->ties[$sourceId] ?? [] as $index => $tie) {
                 $card = $found["{$sourceId}:{$index}"] ?? null;
 
                 // The source lists a title among its own ties now and then.
                 if ($card !== null && ! ($card['card']->type === $title->type && $card['card']->ref === $title->provider_ref)) {
-                    $ties[] = [$work->relation, $card['card']];
+                    $ties[] = [$tie->relation, $card['card']];
                 }
             }
 

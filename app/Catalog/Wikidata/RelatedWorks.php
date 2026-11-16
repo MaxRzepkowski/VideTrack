@@ -3,6 +3,7 @@
 namespace App\Catalog\Wikidata;
 
 use App\Catalog\MediaKind;
+use App\Catalog\Relations\CatalogWork;
 use App\Catalog\Relations\RelatedWork;
 use App\Catalog\Relations\SourceAnswer;
 use App\Catalog\Relations\TitleRelation;
@@ -114,8 +115,12 @@ final readonly class RelatedWorks
 
             $relation = TitleRelation::tryFrom($kind);
 
-            foreach ($relation === null ? [] : $this->screenWorks($row, $relation) as $key => $work) {
-                $ties[$subject][$key] = $work;
+            if ($relation === null) {
+                continue;
+            }
+
+            foreach ($this->screenWorks($row) as $key => $work) {
+                $ties[$subject]["{$relation->value}:{$key}"] = new RelatedWork($relation, $work);
             }
         }
 
@@ -126,7 +131,7 @@ final readonly class RelatedWorks
      * Every film and show of each franchise, the unwanted left out as above.
      *
      * @param  list<string>  $franchises  the source's ids
-     * @return array<string, list<RelatedWork>> by franchise; one nothing is filed under has no entry
+     * @return array<string, list<CatalogWork>> by franchise; one nothing is filed under has no entry
      *
      * @throws ExternalServiceException
      */
@@ -166,7 +171,7 @@ final readonly class RelatedWorks
                 continue;
             }
 
-            foreach ($this->screenWorks($row, TitleRelation::SameUniverse) as $key => $work) {
+            foreach ($this->screenWorks($row) as $key => $work) {
                 $members[$hub][$key] = $work;
             }
         }
@@ -178,9 +183,9 @@ final readonly class RelatedWorks
      * The row's other work as a film, a show or both, by its ids at our screen provider.
      *
      * @param  array<array-key, mixed>  $row
-     * @return array<string, RelatedWork>
+     * @return array<string, CatalogWork> by kind and id
      */
-    private function screenWorks(array $row, TitleRelation $relation): array
+    private function screenWorks(array $row): array
     {
         $works = [];
 
@@ -188,7 +193,7 @@ final readonly class RelatedWorks
             $id = $this->value($row, $variable);
 
             if ($id !== null && ctype_digit($id)) {
-                $works["{$relation->value}:{$kind}:{$id}"] = new RelatedWork($relation, MediaKind::from($kind), [self::SCREEN_CATALOGUE => $id]);
+                $works["{$kind}:{$id}"] = new CatalogWork(MediaKind::from($kind), [self::SCREEN_CATALOGUE => $id]);
             }
         }
 
