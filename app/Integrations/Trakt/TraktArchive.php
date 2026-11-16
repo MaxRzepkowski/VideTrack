@@ -2,10 +2,11 @@
 
 namespace App\Integrations\Trakt;
 
+use App\Integrations\Import\ImportCategory;
 use App\Integrations\Import\UnpackedFileLimit;
+use App\Integrations\Import\ZipExport;
 use App\Support\Payload;
 use Generator;
-use ZipArchive;
 
 /**
  * Read-only view over a Trakt.tv data export (a ZIP of JSON files at the
@@ -17,25 +18,14 @@ use ZipArchive;
  */
 final class TraktArchive
 {
-    /** Category key => regex matching the export files that carry it. */
-    private const CATEGORY_FILES = [
-        'history' => '/^watched-history-.*\.json$/',
-        'ratings' => '/^ratings-.*\.json$/',
-        'watchlist' => '/^lists-watchlist\.json$/',
-        'favorites' => '/^lists-favorites\.json$/',
-    ];
-
-    private readonly ZipArchive $zip;
-
-    private readonly bool $opened;
+    private readonly ZipExport $zip;
 
     /** @var list<array{trakt_id: int, name: string, item_count: int, is_public: bool}>|null */
     private ?array $lists = null;
 
     public function __construct(string $path)
     {
-        $this->zip = new ZipArchive;
-        $this->opened = $this->zip->open($path) === true;
+        $this->zip = new ZipExport($path);
     }
 
     /**
@@ -44,7 +34,7 @@ final class TraktArchive
      */
     public function isValid(): bool
     {
-        return $this->opened && $this->zip->locateName('user-profile.json') !== false;
+        return $this->zip->has('user-profile.json');
     }
 
     /**
@@ -52,12 +42,8 @@ final class TraktArchive
      */
     public function isTooLarge(): bool
     {
-        if (! $this->opened) {
-            return false;
-        }
-
-        for ($index = 0; $index < $this->zip->numFiles; $index++) {
-            if ($this->unpackedTooLarge($index)) {
+        foreach ($this->zip->names() as $name) {
+            if ($this->unpackedTooLarge($name)) {
                 return true;
             }
         }
@@ -65,11 +51,9 @@ final class TraktArchive
         return false;
     }
 
-    private function unpackedTooLarge(int $index): bool
+    private function unpackedTooLarge(string $name): bool
     {
-        $stat = $this->zip->statIndex($index);
-
-        return $stat === false || $stat['size'] > UnpackedFileLimit::bytes();
+        return ($this->zip->size($name) ?? 0) > UnpackedFileLimit::bytes();
     }
 
     /**
@@ -78,9 +62,14 @@ final class TraktArchive
      *
      * @return Generator<int, array<array-key, mixed>>
      */
-    public function category(string $category): Generator
+    public function category(ImportCategory $category): Generator
     {
-        yield from $this->entries(self::CATEGORY_FILES[$category] ?? '/^$/');
+        yield from $this->entries(match ($category) {
+            ImportCategory::History => '/^watched-history-.*\.json$/',
+            ImportCategory::Ratings => '/^ratings-.*\.json$/',
+            ImportCategory::Watchlist => '/^lists-watchlist\.json$/',
+            ImportCategory::Favorites => '/^lists-favorites\.json$/',
+        });
     }
 
     /**
@@ -95,7 +84,7 @@ final class TraktArchive
         yield from $this->entries('/^lists-list-'.$traktId.'-.*\.json$/');
     }
 
-    public function count(string $category): int
+    public function count(ImportCategory $category): int
     {
         $count = 0;
 
@@ -161,24 +150,10 @@ final class TraktArchive
      */
     private function entries(string $pattern): Generator
     {
-        if (! $this->opened) {
-            return;
-        }
+        foreach ($this->zip->names() as $name) {
+            $raw = preg_match($pattern, $name) === 1 && ! $this->unpackedTooLarge($name) ? $this->zip->contents($name) : null;
 
-        for ($index = 0; $index < $this->zip->numFiles; $index++) {
-            $name = $this->zip->getNameIndex($index);
-
-            if ($name === false || preg_match($pattern, $name) !== 1 || $this->unpackedTooLarge($index)) {
-                continue;
-            }
-
-            $raw = $this->zip->getFromIndex($index);
-
-            if ($raw === false) {
-                continue;
-            }
-
-            foreach (Payload::list(json_decode($raw, true)) as $entry) {
+            foreach (Payload::list($raw === null ? null : json_decode($raw, true)) as $entry) {
                 yield $entry;
             }
         }
@@ -191,22 +166,8 @@ final class TraktArchive
      */
     private function decode(string $name): array
     {
-        if (! $this->opened) {
-            return [];
-        }
+        $raw = $this->unpackedTooLarge($name) ? null : $this->zip->contents($name);
 
-        $index = $this->zip->locateName($name);
-
-        if ($index === false || $this->unpackedTooLarge($index)) {
-            return [];
-        }
-
-        $raw = $this->zip->getFromIndex($index);
-
-        if ($raw === false) {
-            return [];
-        }
-
-        return Payload::list(json_decode($raw, true));
+        return Payload::list($raw === null ? null : json_decode($raw, true));
     }
 }

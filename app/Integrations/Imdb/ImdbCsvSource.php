@@ -12,12 +12,13 @@ use App\Integrations\Import\Data\ImportManifest;
 use App\Integrations\Import\Data\ImportMark;
 use App\Integrations\Import\Data\ImportRating;
 use App\Integrations\Import\Data\ImportSelection;
-use App\Integrations\Import\Data\ManifestCategory;
 use App\Integrations\Import\Data\MediaSubject;
 use App\Integrations\Import\Data\SetupNote;
 use App\Integrations\Import\Data\TitleQuery;
+use App\Integrations\Import\ImportCategory;
 use App\Integrations\Import\Rows\MediaRow;
 use App\Integrations\Import\Rows\SkipRow;
+use App\Library\RatingScale;
 use App\Support\Payload;
 use Generator;
 
@@ -98,8 +99,8 @@ final class ImdbCsvSource implements ExplainsSetup, ReadsFile
         }
 
         return ImportManifest::selectable([
-            new ManifestCategory('ratings', __('common.ratings'), $rated),
-            new ManifestCategory('watchlist', __('import.watchlist'), $unrated),
+            ImportCategory::Ratings->counted($rated),
+            ImportCategory::Watchlist->counted($unrated),
         ], unreadable: $unreadable);
     }
 
@@ -114,7 +115,7 @@ final class ImdbCsvSource implements ExplainsSetup, ReadsFile
 
             $rating = $this->rating($row);
 
-            if (! $selection->has($rating === null ? 'watchlist' : 'ratings')) {
+            if (! $selection->has(($rating === null ? ImportCategory::Watchlist : ImportCategory::Ratings)->value)) {
                 continue;
             }
 
@@ -174,15 +175,7 @@ final class ImdbCsvSource implements ExplainsSetup, ReadsFile
      */
     private function rating(array $row): ?int
     {
-        $value = trim($row['your rating'] ?? '');
-
-        if (! is_numeric($value)) {
-            return null;
-        }
-
-        $rating = (int) round((float) $value);
-
-        return $rating >= 1 && $rating <= 10 ? $rating : null;
+        return RatingScale::readPoints(Payload::text($row, 'your rating'));
     }
 
     /** Older exports drop the tt prefix; TMDB's find needs it. */

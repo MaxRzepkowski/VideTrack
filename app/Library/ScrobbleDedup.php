@@ -16,9 +16,15 @@ use Carbon\CarbonImmutable;
  */
 final readonly class ScrobbleDedup
 {
+    /** How far apart, either way, two reports of one viewing may land. */
+    public static function windowHours(): int
+    {
+        return config()->integer('tracker.scrobble.dedup_window_hours');
+    }
+
     public function alreadyPlayed(User $user, MediaItem $item, CarbonImmutable $at): bool
     {
-        $hours = config()->integer('tracker.scrobble.dedup_window_hours', 6);
+        $hours = self::windowHours();
 
         return Play::query()
             ->where('user_id', $user->id)

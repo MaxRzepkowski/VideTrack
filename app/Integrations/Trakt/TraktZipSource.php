@@ -17,6 +17,7 @@ use App\Integrations\Import\Data\ManifestCategory;
 use App\Integrations\Import\Data\ManifestList;
 use App\Integrations\Import\Data\MediaSubject;
 use App\Integrations\Import\Data\SetupNote;
+use App\Integrations\Import\ImportCategory;
 use App\Integrations\Import\Rows\ListRow;
 use App\Integrations\Import\Rows\MediaRow;
 use App\Integrations\Import\Rows\PersonListRow;
@@ -36,14 +37,6 @@ use Generator;
 final class TraktZipSource implements ExplainsSetup, ReadsFile
 {
     public const CODE = 'trakt';
-
-    /** Category → the translation key of its label in the selection. */
-    private const CATEGORIES = [
-        'history' => 'import.watch_history',
-        'ratings' => 'common.ratings',
-        'watchlist' => 'import.watchlist',
-        'favorites' => 'common.favorites',
-    ];
 
     public function code(): string
     {
@@ -90,11 +83,7 @@ final class TraktZipSource implements ExplainsSetup, ReadsFile
             return ImportManifest::invalid(__('import.a_file_in_this_export_is'));
         }
 
-        $categories = [];
-
-        foreach (self::CATEGORIES as $key => $label) {
-            $categories[] = new ManifestCategory($key, __($label), $archive->count($key));
-        }
+        $categories = array_map(fn (ImportCategory $category): ManifestCategory => $category->counted($archive->count($category)), ImportCategory::cases());
 
         return ImportManifest::selectable($categories, array_map(
             fn (array $list) => new ManifestList((string) $list['trakt_id'], $list['name'], $list['item_count'], $list['is_public']),
@@ -106,16 +95,16 @@ final class TraktZipSource implements ExplainsSetup, ReadsFile
     {
         $archive = $this->archive($input);
 
-        if ($selection->has('history')) {
+        if ($selection->has(ImportCategory::History->value)) {
             yield from $this->history($archive);
         }
 
-        if ($selection->has('ratings')) {
+        if ($selection->has(ImportCategory::Ratings->value)) {
             yield from $this->ratings($archive);
         }
 
-        if ($selection->has('watchlist')) {
-            foreach ($archive->category('watchlist') as $entry) {
+        if ($selection->has(ImportCategory::Watchlist->value)) {
+            foreach ($archive->category(ImportCategory::Watchlist) as $entry) {
                 yield $this->media($entry, fn (MediaSubject $subject) => new MediaRow(
                     $subject,
                     watchlist: new ImportMark(Payload::instant($entry['listed_at'] ?? null)),
@@ -123,8 +112,8 @@ final class TraktZipSource implements ExplainsSetup, ReadsFile
             }
         }
 
-        if ($selection->has('favorites')) {
-            foreach ($archive->category('favorites') as $entry) {
+        if ($selection->has(ImportCategory::Favorites->value)) {
+            foreach ($archive->category(ImportCategory::Favorites) as $entry) {
                 yield $this->media($entry, fn (MediaSubject $subject) => new MediaRow(
                     $subject,
                     favorite: new ImportMark(Payload::instant($entry['listed_at'] ?? null)),
@@ -147,7 +136,7 @@ final class TraktZipSource implements ExplainsSetup, ReadsFile
      */
     private function history(TraktArchive $archive): Generator
     {
-        foreach ($archive->category('history') as $entry) {
+        foreach ($archive->category(ImportCategory::History) as $entry) {
             // History carries movie and episode watch events; only those are
             // playable positions.
             if (! in_array($entry['type'] ?? null, ['movie', 'episode'], true)) {
@@ -176,7 +165,7 @@ final class TraktZipSource implements ExplainsSetup, ReadsFile
      */
     private function ratings(TraktArchive $archive): Generator
     {
-        foreach ($archive->category('ratings') as $entry) {
+        foreach ($archive->category(ImportCategory::Ratings) as $entry) {
             $rating = $entry['rating'] ?? null;
 
             if (! is_int($rating)) {

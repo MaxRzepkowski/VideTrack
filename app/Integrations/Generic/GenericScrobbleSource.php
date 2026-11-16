@@ -10,6 +10,7 @@ use App\Integrations\Scrobble\Contracts\ScrobbleSource;
 use App\Integrations\Scrobble\Data\ScrobbleEvent;
 use App\Integrations\Scrobble\Data\SetupStep;
 use App\Integrations\Scrobble\ScrobbleEventKind;
+use App\Library\PlaybackCompletion;
 use App\Library\RatingScale;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -229,7 +230,7 @@ class GenericScrobbleSource implements ScrobbleSource
                 __('integrations.every_field'),
                 __('integrations.event_is_complete_progress_stop_start', [
                     'events' => implode(', ', $this->eventNames()),
-                    'threshold' => config()->integer('tracker.scrobble.completion_threshold', 85),
+                    'threshold' => PlaybackCompletion::threshold(),
                 ]),
                 <<<'JSON'
                 {

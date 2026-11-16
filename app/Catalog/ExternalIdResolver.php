@@ -104,7 +104,7 @@ final readonly class ExternalIdResolver
         }
 
         $show = $this->first($seriesIds, MediaKind::Show, $locale);
-        $found = $show === null ? null : $this->descend($show, $season, $episode);
+        $found = $show === null ? null : $this->hierarchy->episode($show, $season, $episode);
 
         if ($found === null && $unreachable !== null) {
             throw $unreachable;
@@ -298,17 +298,5 @@ final readonly class ExternalIdResolver
         $book = $provider->bookByIsbns([$thirteen], $locale);
 
         return $book === null ? null : new ResolvedMedia($book->type, $book->ref);
-    }
-
-    /**
-     * Show → season → episode, composed by the provider.
-     */
-    private function descend(ResolvedMedia $show, ?int $season, ?int $episode): ?ResolvedMedia
-    {
-        if ($season === null || $episode === null || $show->type !== MediaKind::Show->value) {
-            return null;
-        }
-
-        return $this->hierarchy->descend($show->type, $show->ref, [$season, $episode]);
     }
 }

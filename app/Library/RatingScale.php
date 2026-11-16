@@ -17,6 +17,36 @@ final class RatingScale
         return $rating >= self::MIN && $rating <= self::MAX;
     }
 
+    /**
+     * A score in stars as a file writes it ("4.5", "5.0", quarter stars too);
+     * null for a blank, a zero (most services' "unrated") or anything off
+     * the five stars. The smallest fraction is the bottom of the scale.
+     */
+    public static function readStars(string $value): ?int
+    {
+        $value = trim($value);
+
+        if (! is_numeric($value) || (float) $value <= 0 || (float) $value > self::STARS) {
+            return null;
+        }
+
+        return max(self::MIN, self::fromStars((float) $value));
+    }
+
+    /** A score already on this scale as a file writes it ("8", "7.0"); null when it is off the scale. */
+    public static function readPoints(string $value): ?int
+    {
+        $value = trim($value);
+
+        if (! is_numeric($value)) {
+            return null;
+        }
+
+        $rating = (int) round((float) $value);
+
+        return self::holds($rating) ? $rating : null;
+    }
+
     /** A score of 1–5 stars on this scale: each star is two points. */
     public static function fromStars(float $stars): int
     {

@@ -11,6 +11,7 @@ use App\Integrations\Scrobble\Data\ScrobbleEvent;
 use App\Integrations\Scrobble\Data\ScrobbleOutcome;
 use App\Integrations\Scrobble\DeliveryNote;
 use App\Integrations\Scrobble\ScrobbleEventKind;
+use App\Library\PlaybackCompletion;
 use App\Library\RatingScale;
 use App\Library\ScrobbleDedup;
 use App\Library\WatchedAt;
@@ -99,7 +100,7 @@ final readonly class ApplyScrobbleEvent
 
         return $event->kind === ScrobbleEventKind::Stop
             && $event->progressPercent !== null
-            && $event->progressPercent >= config()->integer('tracker.scrobble.completion_threshold', 85);
+            && PlaybackCompletion::reached($event->progressPercent);
     }
 
     /**

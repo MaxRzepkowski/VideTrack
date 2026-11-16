@@ -25,3 +25,28 @@ test('an even score survives the trip through stars', function () {
         expect(RatingScale::fromStars(RatingScale::toStars($rating)))->toBe($rating);
     }
 });
+
+test('stars as a file writes them read as points, nothing read as no rating', function (string $value, ?int $rating) {
+    expect(RatingScale::readStars($value))->toBe($rating);
+})->with([
+    'a whole star' => ['4', 8],
+    'one decimal' => ['4.5', 9],
+    'a quarter star' => ['4.25', 9],
+    'half a star, the bottom of the scale' => ['0.5', 1],
+    'a sliver of a star still the bottom' => ['0.1', 1],
+    'unrated as zero' => ['0', null],
+    'unrated as blank' => ['', null],
+    'past five stars' => ['6', null],
+    'not a number' => ['great', null],
+]);
+
+test('points as a file writes them read on the scale, off it as no rating', function (string $value, ?int $rating) {
+    expect(RatingScale::readPoints($value))->toBe($rating);
+})->with([
+    'a whole point' => ['8', 8],
+    'a decimal' => ['7.0', 7],
+    'rounded' => ['8.6', 9],
+    'unrated' => ['0', null],
+    'blank' => [' ', null],
+    'past ten' => ['11', null],
+]);
