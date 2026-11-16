@@ -60,4 +60,14 @@ final class ZipExport
 
         return $contents === false ? null : $contents;
     }
+
+    /**
+     * One CSV file of the archive.
+     *
+     * @param  list<string>  $requiredColumns
+     */
+    public function csv(string $name, array $requiredColumns, bool $lowercase = false, int $preamble = 0): CsvStream
+    {
+        return CsvStream::inArchive($this->path, $name, $requiredColumns, $lowercase, $preamble);
+    }
 }

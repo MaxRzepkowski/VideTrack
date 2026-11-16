@@ -8,6 +8,7 @@ use App\Catalog\Providers\Tmdb\TmdbServiceProvider;
 use App\Catalog\Providers\Tvmaze\TvmazeServiceProvider;
 use App\Catalog\Wikidata\WikidataServiceProvider;
 use App\Integrations\Anime\AnimeServiceProvider;
+use App\Integrations\Backloggd\BackloggdServiceProvider;
 use App\Integrations\Emby\EmbyServiceProvider;
 use App\Integrations\Generic\GenericServiceProvider;
 use App\Integrations\Goodreads\GoodreadsServiceProvider;
@@ -18,9 +19,11 @@ use App\Integrations\Letterboxd\LetterboxdServiceProvider;
 use App\Integrations\Plex\PlexServiceProvider;
 use App\Integrations\Simkl\SimklServiceProvider;
 use App\Integrations\Steam\SteamServiceProvider;
+use App\Integrations\StoryGraph\StoryGraphServiceProvider;
 use App\Integrations\Tautulli\TautulliServiceProvider;
 use App\Integrations\Tracearr\TracearrServiceProvider;
 use App\Integrations\Trakt\TraktServiceProvider;
+use App\Integrations\TvTime\TvTimeServiceProvider;
 use App\Integrations\VideTrack\VideTrackServiceProvider;
 use App\Integrations\Yamtrack\YamtrackServiceProvider;
 use App\Providers\AppServiceProvider;
@@ -47,9 +50,12 @@ return [
     YamtrackServiceProvider::class,
     TraktServiceProvider::class,
     LetterboxdServiceProvider::class,
+    TvTimeServiceProvider::class,
     ImdbServiceProvider::class,
     GoodreadsServiceProvider::class,
+    StoryGraphServiceProvider::class,
     HltbServiceProvider::class,
+    BackloggdServiceProvider::class,
     SteamServiceProvider::class,
     AnimeServiceProvider::class,
     SimklServiceProvider::class,

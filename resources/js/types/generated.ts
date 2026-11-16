@@ -351,6 +351,7 @@ export type ImportManifest = {
     readonly categories: ManifestCategory[];
     readonly lists: ManifestList[];
     readonly supportsSelection: boolean;
+    readonly preselected: boolean;
 };
 export type ImportSourceDef = {
     readonly code: string;

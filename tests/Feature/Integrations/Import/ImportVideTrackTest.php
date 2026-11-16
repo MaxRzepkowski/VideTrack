@@ -83,7 +83,7 @@ test('uploading an export queues the import job with a pending task run', functi
 
 test('the upload requires a file and a known source', function () {
     $this->actingAs(User::factory()->create())
-        ->post('/settings/import', ['source' => 'letterboxd'])
+        ->post(route('settings.import.store'), ['source' => 'no-such-service'])
         ->assertSessionHasErrors(['source', 'file']);
 });
 

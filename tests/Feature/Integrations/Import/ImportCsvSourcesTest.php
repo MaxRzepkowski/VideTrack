@@ -12,14 +12,6 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 
-function putTransferFixture(string $source, string $name): string
-{
-    Storage::fake('local');
-    Storage::disk('local')->put("imports/{$name}", (string) file_get_contents(base_path("tests/Fixtures/transfer/{$source}/{$name}")));
-
-    return "imports/{$name}";
-}
-
 /**
  * TMDB knows two of the fixture's ids; everything else, including a search
  * by name, comes back empty.

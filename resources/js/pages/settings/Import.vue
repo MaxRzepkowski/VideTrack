@@ -60,8 +60,9 @@ const fileInput = ref<HTMLInputElement | null>(null);
 
 // The analysis of the dropped file: whether it is the chosen source's export
 // and, for sources that offer a choice, what it holds. Categories default to
-// everything present; lists are opt-in (an export can hold hundreds, each
-// item a provider round-trip).
+// everything present, unless the source asks the user to pick (a media
+// server's log holds the whole household); lists are opt-in (an export can
+// hold hundreds, each item a provider round-trip).
 const manifest = ref<ImportManifest | null>(null);
 // Why the file could not be analyzed at all (too large, unreadable, network),
 // as opposed to a readable file that is not this source's export.
@@ -111,7 +112,9 @@ async function analyze(file: File, code: string): Promise<void> {
 
         manifest.value = result;
         analysisError.value = failure;
-        selectedCategories.value = Object.fromEntries((result?.categories ?? []).map((category) => [category.key, category.count > 0]));
+        selectedCategories.value = Object.fromEntries(
+            (result?.categories ?? []).map((category) => [category.key, result?.preselected === true && category.count > 0]),
+        );
     } catch {
         manifest.value = null;
         analysisError.value = trans('import.the_file_could_not_be_read');

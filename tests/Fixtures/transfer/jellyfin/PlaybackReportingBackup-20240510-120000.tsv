@@ -1,0 +1,8 @@
+2024-05-01 21:03:11.1234567	3f2a9c1e0b7d4e6f8a1b2c3d4e5f6a7b	a1b2c3d4e5f60718293a4b5c6d7e8f90	Movie	The Matrix	DirectPlay	Jellyfin Web	Firefox	7800
+2024-05-03 20:00:02.5000000	3f2a9c1e0b7d4e6f8a1b2c3d4e5f6a7b	a1b2c3d4e5f60718293a4b5c6d7e8f90	Movie	The Matrix	Transcode (v:h264 a:aac)	Jellyfin Android	Pixel	600
+2024-05-04 22:10:45.0000000	3f2a9c1e0b7d4e6f8a1b2c3d4e5f6a7b	b1b2c3d4e5f60718293a4b5c6d7e8f91	Episode	Breaking Bad - s01e01 - Pilot	DirectPlay	Jellyfin Web	Firefox	3300
+2024-05-05 22:10:45.0000000	3f2a9c1e0b7d4e6f8a1b2c3d4e5f6a7b	c1b2c3d4e5f60718293a4b5c6d7e8f92	Episode	Breaking Bad - s00e00 - Behind the Scenes	DirectPlay	Jellyfin Web	Firefox	900
+2024-05-06 09:00:00.0000000	3f2a9c1e0b7d4e6f8a1b2c3d4e5f6a7b	d1b2c3d4e5f60718293a4b5c6d7e8f93	Audio	Some Artist - Some Song (Some Album)	DirectPlay	Finamp	Phone	240
+2024-05-06 19:30:00.0000000	0123456789abcdef0123456789abcdef	e1b2c3d4e5f60718293a4b5c6d7e8f94	Movie	Up	DirectPlay	Jellyfin Web	Chrome	5600
+2024-05-07 19:30:00.0000000	3f2a9c1e0b7d4e6f8a1b2c3d4e5f6a7b	f1b2c3d4e5f60718293a4b5c6d7e8f95	Movie	Lost Reel	DirectPlay	Jellyfin Web	Firefox	5000
+2024-05-08 19:30:00.0000000	3f2a9c1e0b7d4e6f8a1b2c3d4e5f6a7b	not-a-whole-line	Movie	Broken	DirectPlay	Jellyfin Web	Firefox

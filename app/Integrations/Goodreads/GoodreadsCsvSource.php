@@ -234,7 +234,7 @@ final class GoodreadsCsvSource implements ExplainsSetup, ReadsFile
     {
         $title = trim($row['title']);
 
-        return $title === '' ? 'Goodreads book '.trim($row['book id']) : $title;
+        return $title === '' ? __('import.unnamed_book', ['id' => trim($row['book id'])]) : $title;
     }
 
     /**

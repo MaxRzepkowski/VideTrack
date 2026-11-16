@@ -109,7 +109,7 @@ test('an export with a file that unpacks past the limit stops at analysis', func
 
 test('analyzing an unknown source is a 404', function () {
     $this->actingAs(User::factory()->create())
-        ->post('/settings/import/letterboxd/analyze', ['file' => UploadedFile::fake()->createWithContent('x.csv', 'x')])
+        ->post(route('settings.import.analyze', ['source' => 'no-such-service']), ['file' => UploadedFile::fake()->createWithContent('x.csv', 'x')])
         ->assertNotFound();
 });
 
@@ -282,4 +282,27 @@ test('a finished file import discards its file', function () {
 
     expect(is_file($path))->toBeFalse()
         ->and($taskRun->refresh()->status)->toBe(TaskRunStatus::Success);
+});
+
+test('each new file source says what it takes and where its export comes from', function () {
+    enableGamesModule();
+    enableBooksModule();
+
+    $this->actingAs(User::factory()->create())
+        ->get(route('settings.import.index'))
+        ->assertInertia(function (AssertableInertia $page) {
+            $codes = ['letterboxd', 'tvtime', 'storygraph', 'backloggd', 'jellyfin-playback-reporting'];
+            $files = collect($page->toArray()['props']['sources'])->whereIn('code', $codes);
+
+            expect($files->pluck('inputKind')->unique()->all())->toBe(['file'])
+                ->and($files)->toHaveCount(count($codes));
+
+            foreach ($files as $source) {
+                // Translated, not a key; an upload filter; a note on where to get the file.
+                expect($source['label'])->not->toStartWith('import.')
+                    ->and($source['description'])->not->toStartWith('import.')
+                    ->and($source['accept'])->toStartWith('.')
+                    ->and($source['notes'])->not->toBeEmpty();
+            }
+        });
 });
