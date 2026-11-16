@@ -7,3 +7,6 @@
 *.php diff=php
 
 CHANGELOG.md export-ignore
+
+# Papa Parse writes CRLF; the fixture keeps the line ends the add-on gives.
+tests/Fixtures/transfer/backloggd/toolkittd.csv -text
