@@ -46,7 +46,6 @@ return [
     'videtrack_is_up' => 'VideTrack działa',
     'view_all_notifications' => 'Zobacz wszystkie powiadomienia',
     'where_to_watch_data_is_provided' => 'Dane o dostępności do oglądania dostarcza JustWatch.',
-    'year_all_rights_reserved' => '© :year. Wszelkie prawa zastrzeżone.',
     'leave_page' => 'Opuść',
     'you_have_unsaved_changes_leave_this' => 'Masz niezapisane zmiany. Opuścić tę stronę?',
 ];

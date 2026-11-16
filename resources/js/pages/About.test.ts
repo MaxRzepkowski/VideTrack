@@ -6,10 +6,10 @@ import { beforeEach, describe, expect, it } from 'vitest';
 beforeEach(() => setPageProps({}));
 
 function about(sourceUrl = 'https://github.com/example/fork') {
+    setPageProps({ version: '1.2.3', sourceUrl });
+
     return mount(About, {
         props: {
-            version: '1.2.3',
-            sourceUrl,
             dataSources: [
                 {
                     name: 'Example Data',

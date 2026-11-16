@@ -345,6 +345,14 @@ export function formatNumber(value: number, maximumFractionDigits = 0): string {
     return new Intl.NumberFormat(pageLocale(), { maximumFractionDigits }).format(value);
 }
 
+/**
+ * The running version as a footer shows it: a release number gets its "v"
+ * ("1.4.0" → "v1.4.0"); a build label ("dev", "main-…") stays as it is.
+ */
+export function versionLabel(version: string): string {
+    return /^\d/.test(version) ? `v${version}` : version;
+}
+
 /** A name's initials for an avatar without a picture: the first and the last word's first letter. */
 export function getInitials(fullName?: string): string {
     const names = (fullName ?? '')

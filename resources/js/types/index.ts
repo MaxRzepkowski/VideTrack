@@ -36,6 +36,10 @@ export type SharedData = {
     registrationEnabled: boolean;
     locale: string;
     imageBase: string;
+    /** The running release ("1.4.0"), or a build label such as "dev". */
+    version: string;
+    /** Where the running code can be read. */
+    sourceUrl: string;
     discoverTypes: string[];
     mediaTypes: MediaTypeDefinition[];
     userLists: UserList[];
