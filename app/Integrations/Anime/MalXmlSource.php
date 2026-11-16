@@ -27,7 +27,8 @@ final class MalXmlSource extends AnimeListSource implements ReadsFile
 {
     public const CODE = 'mal-xml';
 
-    private const ROOT = 'myanimelist';
+    /** The element a MyAnimeList list file opens with. */
+    public const ROOT = 'myanimelist';
 
     /** How much of the file is read at a time while measuring it unpacked, in bytes. */
     private const MEASURE_CHUNK = 1024 * 1024;
