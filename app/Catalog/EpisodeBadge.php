@@ -31,4 +31,10 @@ enum EpisodeBadge: string
             default => null,
         };
     }
+
+    /** The episode opens its season; the first season's opener premieres the series too. */
+    public function isPremiere(): bool
+    {
+        return $this === self::SeriesPremiere || $this === self::SeasonPremiere;
+    }
 }

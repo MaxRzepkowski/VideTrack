@@ -1,6 +1,7 @@
 <?php
 
 use App\Catalog\Data\MediaSummary;
+use App\Catalog\EpisodeBadge;
 use App\Enums\ReleaseKind;
 use App\Tracking\Data\CalendarDay;
 use App\Tracking\Data\CalendarEvent;
@@ -14,12 +15,12 @@ function feedFilm(string $ref, ?ReleaseKind $kind = null): ReleaseEntry
     return new ReleaseEntry(new MediaSummary(type: 'movie', ref: $ref, provider: 'tmdb', title: "Film {$ref}", releaseKind: $kind), rootId: (int) $ref, rootType: 'movie');
 }
 
-function feedEpisode(string $ref): ReleaseEntry
+function feedEpisode(string $ref, ?EpisodeBadge $badge = null): ReleaseEntry
 {
     [, $season, $number] = array_map(intval(...), explode(':', $ref));
 
     return new ReleaseEntry(
-        new MediaSummary(type: 'episode', ref: $ref, provider: 'tmdb', title: "Episode {$ref}", number: $number, seasonNumber: $season),
+        new MediaSummary(type: 'episode', ref: $ref, provider: 'tmdb', title: "Episode {$ref}", number: $number, seasonNumber: $season, episodeBadge: $badge),
         rootId: 1,
         rootType: 'show',
         showTitle: 'Alpha',
@@ -46,17 +47,17 @@ test('types keep the titles of those types, an episode counting as its show', fu
         ->and((new FeedFilter(types: ['game']))->admitsEvent(feedShowcase('game')))->toBeTrue();
 });
 
-test('premieres keep titles on their premiere and the episodes opening a numbered season, not events', function () {
+test('premieres keep titles on their premiere and the episodes marked as opening a season, not events', function () {
     $filter = new FeedFilter(scope: FeedScope::Premieres);
 
     expect($filter->admits(feedFilm('1')))->toBeTrue()
         ->and($filter->admits(feedFilm('1', ReleaseKind::Premiere)))->toBeTrue()
         ->and($filter->admits(feedFilm('1', ReleaseKind::Both)))->toBeTrue()
         ->and($filter->admits(feedFilm('1', ReleaseKind::Home)))->toBeFalse()
-        ->and($filter->admits(feedEpisode('7:1:1')))->toBeTrue()
-        ->and($filter->admits(feedEpisode('7:2:1')))->toBeTrue()
-        ->and($filter->admits(feedEpisode('7:2:3')))->toBeFalse()
-        ->and($filter->admits(feedEpisode('7:0:1')))->toBeFalse()
+        ->and($filter->admits(feedEpisode('7:1:1', EpisodeBadge::SeriesPremiere)))->toBeTrue()
+        ->and($filter->admits(feedEpisode('7:2:11', EpisodeBadge::SeasonPremiere)))->toBeTrue()
+        ->and($filter->admits(feedEpisode('7:2:20', EpisodeBadge::SeasonFinale)))->toBeFalse()
+        ->and($filter->admits(feedEpisode('7:2:13')))->toBeFalse()
         ->and($filter->admitsEvent(feedShowcase('game')))->toBeFalse();
 });
 
