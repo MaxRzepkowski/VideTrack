@@ -18,7 +18,7 @@ final readonly class RegisterAccount
         private Registration $registration,
     ) {}
 
-    public function execute(string $name, string $username, string $email, string $password): User
+    public function execute(string $name, string $username, string $email, ?string $password): User
     {
         return DB::transaction(fn (): User => $this->createAccount->execute(
             $name,

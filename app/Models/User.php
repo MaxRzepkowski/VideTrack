@@ -22,6 +22,7 @@ use LogicException;
 
 /**
  * @property UserRole $role
+ * @property string|null $password null for an account made through an identity provider
  * @property UserPreferences $preferences
  * @property string|null $discord_webhook_url encrypted; a credential, never in preferences
  * @property Carbon|null $blocked_at
@@ -138,6 +139,11 @@ class User extends Authenticatable implements HasLocalePreference
         return $this->blocked_at !== null;
     }
 
+    public function hasPassword(): bool
+    {
+        return $this->password !== null;
+    }
+
     /**
      * The user's Discord webhook URL, or null when Discord delivery is off.
      * Per-user webhooks (no bot, no OAuth) — the user creates the webhook in
@@ -200,6 +206,14 @@ class User extends Authenticatable implements HasLocalePreference
     public function serviceConnections(): HasMany
     {
         return $this->hasMany(ServiceConnection::class);
+    }
+
+    /**
+     * @return HasMany<Identity, $this>
+     */
+    public function identities(): HasMany
+    {
+        return $this->hasMany(Identity::class);
     }
 
     /**

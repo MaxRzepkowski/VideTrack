@@ -89,6 +89,56 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Signing in through an identity provider
+    |--------------------------------------------------------------------------
+    |
+    | A provider with a client id and secret shows on the sign-in page. Each
+    | one is told the callback {APP_URL}/auth/{provider}/callback. The generic
+    | OpenID Connect server (Keycloak, Authelia, Authentik, Pocket ID…) is
+    | found from its issuer's /.well-known/openid-configuration; GitLab is
+    | read the same way, from gitlab.com or the instance at GITLAB_URL.
+    |
+    | password_login false leaves identity providers as the only way in. It
+    | holds only while at least one provider is configured, so an instance
+    | cannot be locked out by a missing variable.
+    |
+    | Someone new gets an account through a provider exactly when sign-up is
+    | open (REGISTRATION_ENABLED): with it closed, no provider opens one.
+    |
+    | An existing account is never joined by its address: its owner signs in
+    | and connects the provider under Settings → Connected accounts.
+    |
+    */
+
+    'auth' => [
+        'password_login' => filter_var(env('PASSWORD_LOGIN_ENABLED', true), FILTER_VALIDATE_BOOL),
+        'providers' => [
+            'oidc' => [
+                'issuer' => env('OIDC_ISSUER'),
+                'client_id' => env('OIDC_CLIENT_ID'),
+                'client_secret' => env('OIDC_CLIENT_SECRET'),
+                // The server's name on the sign-in button ("Authentik"); unset,
+                // the button says "single sign-on" in the reader's language.
+                'label' => env('OIDC_LABEL'),
+            ],
+            'google' => [
+                'client_id' => env('GOOGLE_CLIENT_ID'),
+                'client_secret' => env('GOOGLE_CLIENT_SECRET'),
+            ],
+            'github' => [
+                'client_id' => env('GITHUB_CLIENT_ID'),
+                'client_secret' => env('GITHUB_CLIENT_SECRET'),
+            ],
+            'gitlab' => [
+                'url' => env('GITLAB_URL', 'https://gitlab.com'),
+                'client_id' => env('GITLAB_CLIENT_ID'),
+                'client_secret' => env('GITLAB_CLIENT_SECRET'),
+            ],
+        ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Bootstrap admin account
     |--------------------------------------------------------------------------
     |
@@ -451,6 +501,9 @@ return [
         // meets a wall.
         'login_per_account' => 30,
         'login_per_account_window_minutes' => 60,
+        // Trips to an identity provider and back, per address: each one is a
+        // request to the provider from the instance's address.
+        'identity_sign_in' => 20,
     ],
 
     /*

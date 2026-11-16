@@ -1,4 +1,4 @@
-import { MAIN_NAV, navHref, OTHER_PLACES, SETTINGS_NAV, USER_PANELS, type NavEntry } from '@/lib/navigation';
+import { MAIN_NAV, navHref, OTHER_PLACES, settingsNav, USER_PANELS, type NavEntry } from '@/lib/navigation';
 import { viewerUsername } from '@/lib/pageContext';
 import { router } from '@inertiajs/vue3';
 import { LogOut, type LucideIcon } from '@lucide/vue';
@@ -60,7 +60,7 @@ export function allCommands(): Command[] {
                 viewerUsername,
             ),
         ),
-        ...SETTINGS_NAV.map((entry) => goTo(`nav.${entry.id}`, entry, () => trans('palette.settings_section', { section: entry.label() }))),
+        ...settingsNav().map((entry) => goTo(`nav.${entry.id}`, entry, () => trans('palette.settings_section', { section: entry.label() }))),
         {
             id: 'action.logout',
             group: 'actions',

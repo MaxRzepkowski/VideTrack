@@ -1,5 +1,6 @@
 <?php
 
+use App\Accounts\Identity\IdentityServiceProvider;
 use App\Catalog\Providers\ComicVine\ComicVineServiceProvider;
 use App\Catalog\Providers\Hardcover\HardcoverServiceProvider;
 use App\Catalog\Providers\Igdb\IgdbServiceProvider;
@@ -67,6 +68,9 @@ return [
     GenericServiceProvider::class,
 
     SuggestionServiceProvider::class,
+
+    // The identity providers the operator configured, for signing in.
+    IdentityServiceProvider::class,
 
     // A development tool: present only where dev packages are installed.
     ...(class_exists(TypeScriptTransformerApplicationServiceProvider::class) ? [TypeScriptServiceProvider::class] : []),

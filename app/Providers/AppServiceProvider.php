@@ -121,6 +121,9 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('login', fn (Request $request): Limit => Limit::perMinute(self::limit('login_per_ip'))
             ->by((string) $request->ip()));
 
+        RateLimiter::for('identity-sign-in', fn (Request $request): Limit => Limit::perMinute(self::limit('identity_sign_in'))
+            ->by((string) $request->ip()));
+
         // The reset link goes into someone's mailbox, so it carries the
         // instance's address; the request's host is the sender's to choose.
         ResetPassword::createUrlUsing(function (mixed $user, string $token): string {

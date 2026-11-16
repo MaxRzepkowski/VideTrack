@@ -83,6 +83,39 @@ an empty instance. Instead of registering, `ADMIN_EMAIL` and `ADMIN_PASSWORD` cr
 administrator on every start (it is never created twice). Accounts are managed with commands; see
 [Administration](administration.md).
 
+## Signing in with an identity provider
+
+People can also log in through your own OpenID Connect server (Keycloak, Authelia, Authentik,
+Pocket ID and the like), Google, GitHub or GitLab. A provider whose client id and secret are set
+shows on the login page; register VideTrack with it as a web application and give it the callback
+address `<APP_URL>/auth/<provider>/callback`, where `<provider>` is `oidc`, `google`, `github` or
+`gitlab`. `APP_URL` has to be the address people open, because the way back from the provider
+returns there.
+
+| Provider | Variables | Where to get them |
+|---|---|---|
+| OpenID Connect | `OIDC_ISSUER`, `OIDC_CLIENT_ID`, `OIDC_CLIENT_SECRET`, optional `OIDC_LABEL` | your server's client settings; the issuer is the address its `/.well-known/openid-configuration` hangs off. `OIDC_LABEL` names the button ("Authentik"), otherwise it says single sign-on |
+| Google | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | an OAuth client of type *Web application* in the [Google Cloud console](https://console.cloud.google.com/apis/credentials) |
+| GitHub | `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` | an [OAuth app](https://github.com/settings/developers) |
+| GitLab | `GITLAB_CLIENT_ID`, `GITLAB_CLIENT_SECRET`, optional `GITLAB_URL` | an application with the scopes `openid`, `profile` and `email` under *Preferences → Applications*; `GITLAB_URL` points at your own GitLab |
+
+Who gets in:
+
+- Someone who already has an account connects a provider under Settings → Connected accounts and
+  logs in with it from then on.
+- Someone new gets an account on their first login while sign-up is open (`REGISTRATION_ENABLED`),
+  exactly as through the sign-up form; with sign-up closed no provider makes one. A new account
+  needs an email address the provider has verified; it has no password until its owner sets one.
+- A first login whose address already has an account is refused: the owner logs in with their
+  password and connects the provider. Accounts are never joined by address alone, since VideTrack
+  does not confirm the address an account was given.
+
+`PASSWORD_LOGIN_ENABLED=false` makes the providers the only way in: the password form, sign-up,
+password reset and the password settings go away. Existing accounts get in only through a
+provider they connected beforehand, so connect them (the administrator's too) before switching
+passwords off. While no provider is configured the setting is ignored, so a typo cannot lock
+everyone out; the container log says so on every start.
+
 ## Settings
 
 Everything is optional except `TMDB_API_KEY`. A media type exists only when its keys are set.
@@ -100,6 +133,11 @@ Everything is optional except `TMDB_API_KEY`. A media type exists only when its 
 | `STEAM_API_KEY` | | [Steam Web API key](https://steamcommunity.com/dev/apikey); with IGDB, users can import a public Steam library |
 | `REGISTRATION_ENABLED` | open until the first account | `true` keeps sign-up open, `false` closed |
 | `ADMIN_EMAIL` / `ADMIN_PASSWORD` | | an administrator created on start |
+| `OIDC_ISSUER` / `OIDC_CLIENT_ID` / `OIDC_CLIENT_SECRET` / `OIDC_LABEL` | | logging in through your own OpenID Connect server ([above](#signing-in-with-an-identity-provider)) |
+| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | | logging in with Google |
+| `GITHUB_CLIENT_ID` / `GITHUB_CLIENT_SECRET` | | logging in with GitHub |
+| `GITLAB_CLIENT_ID` / `GITLAB_CLIENT_SECRET` / `GITLAB_URL` | `GITLAB_URL`: `https://gitlab.com` | logging in with GitLab |
+| `PASSWORD_LOGIN_ENABLED` | `true` | `false` leaves the providers as the only way in (ignored while none is configured) |
 | `DEFAULT_LOCALE` | `en` | language of new accounts (`en` / `pl`); each user picks their own |
 | `APP_TIMEZONE` | `UTC` | storage time zone; display uses each user's preference |
 | `MAIL_MAILER` | `log` | how the password-reset link is sent; `log` only writes it to the container log. `smtp` with `MAIL_HOST`, `MAIL_PORT` (`587`), `MAIL_USERNAME`, `MAIL_PASSWORD`, `MAIL_SCHEME` |

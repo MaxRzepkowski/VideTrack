@@ -37,6 +37,7 @@ tells you when the next episode or release is out, and keeps all of it on your o
 - 📡 Log what you watch automatically from Plex, Jellyfin, Emby or Tautulli.
 - 📤 Export everything as a backup, as CSV, or as files for IMDb, Letterboxd, Goodreads and MyAnimeList.
 - 👥 Give everyone at home their own account, in English or Polish.
+- 🔑 Log in with a password or through your own OpenID Connect server, Google, GitHub or GitLab.
 - 🐳 Run it as a single Docker container with one SQLite file.
 
 ## Screenshots
@@ -78,6 +79,8 @@ Then open `http://localhost:8080` and register. The first account becomes the ad
 
 Games, books, manga and comics turn on when you add their keys. See the
 [installation guide](docs/install.md) for that, for reverse proxies and for every setting.
+Logging in through Google, GitHub, GitLab or your own OpenID Connect server is set up the same
+way, in [Signing in with an identity provider](docs/install.md#signing-in-with-an-identity-provider).
 
 ## Documentation
 

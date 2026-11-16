@@ -2,7 +2,7 @@
 import Heading from '@/components/Heading.vue';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { navHref, SETTINGS_NAV } from '@/lib/navigation';
+import { navHref, settingsNav } from '@/lib/navigation';
 import { Link, usePage } from '@inertiajs/vue3';
 import { trans } from 'laravel-vue-i18n';
 import { computed } from 'vue';
@@ -10,7 +10,7 @@ import { computed } from 'vue';
 const page = usePage();
 
 // Labels in a computed: they follow a language switched on this very page.
-const sidebarNavItems = computed(() => SETTINGS_NAV.map((entry) => ({ title: entry.label(), href: navHref(entry) })));
+const sidebarNavItems = computed(() => settingsNav().map((entry) => ({ title: entry.label(), href: navHref(entry) })));
 
 const currentPath = computed(() => page.url.split('?')[0]);
 </script>

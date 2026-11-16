@@ -7,6 +7,7 @@ use App\Http\Controllers\Settings\DangerZoneController;
 use App\Http\Controllers\Settings\DetectedTimezoneController;
 use App\Http\Controllers\Settings\DiscordTestController;
 use App\Http\Controllers\Settings\ExportController;
+use App\Http\Controllers\Settings\IdentitiesController;
 use App\Http\Controllers\Settings\ImportController;
 use App\Http\Controllers\Settings\IntegrationsController;
 use App\Http\Controllers\Settings\PasswordController;
@@ -14,6 +15,7 @@ use App\Http\Controllers\Settings\PreferencesController;
 use App\Http\Controllers\Settings\ProfileController;
 use App\Http\Controllers\Settings\TasksController;
 use App\Http\Controllers\Settings\TrackingController;
+use App\Http\Middleware\EnsurePasswordLoginIsEnabled;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth', 'throttle:web'])->name('settings.')->group(function () {
@@ -23,8 +25,14 @@ Route::middleware(['auth', 'throttle:web'])->name('settings.')->group(function (
     Route::patch('settings/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('settings/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    Route::get('settings/password', [PasswordController::class, 'edit'])->name('password.edit');
-    Route::put('settings/password', [PasswordController::class, 'update'])->name('password.update');
+    // A password nothing signs in with is not worth setting.
+    Route::middleware(EnsurePasswordLoginIsEnabled::class)->group(function () {
+        Route::get('settings/password', [PasswordController::class, 'edit'])->name('password.edit');
+        Route::put('settings/password', [PasswordController::class, 'update'])->name('password.update');
+    });
+
+    Route::get('settings/identities', [IdentitiesController::class, 'index'])->name('identities.index');
+    Route::delete('settings/identities/{identity}', [IdentitiesController::class, 'destroy'])->name('identities.destroy');
 
     Route::get('settings/preferences', [PreferencesController::class, 'edit'])->name('preferences.edit');
     Route::patch('settings/preferences', [PreferencesController::class, 'update'])->name('preferences.update');

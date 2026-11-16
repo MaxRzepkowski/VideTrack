@@ -2,6 +2,9 @@
 
 namespace App\Http\Middleware;
 
+use App\Accounts\Identity\Data\IdentityProviderOption;
+use App\Accounts\Identity\IdentityProviderRegistry;
+use App\Accounts\PasswordLogin;
 use App\Accounts\Registration;
 use App\Actions\BuildNotificationFeed;
 use App\Catalog\Discovery;
@@ -28,6 +31,8 @@ class HandleInertiaRequests extends Middleware
         private readonly BuildNotificationFeed $notificationFeed,
         private readonly VisibleEvents $events,
         private readonly Registration $registration,
+        private readonly PasswordLogin $passwordLogin,
+        private readonly IdentityProviderRegistry $identityProviders,
     ) {}
 
     /**
@@ -53,8 +58,13 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $this->viewer($request->user()),
             ],
-            // A signed-in visitor has nothing to sign up for.
-            'registrationEnabled' => $request->user() === null && $this->registration->isOpen(),
+            // A signed-in visitor has nothing to sign up for; the sign-up form
+            // asks for a password, so it goes where passwords do.
+            'registrationEnabled' => $request->user() === null && $this->registration->isOpen() && $this->passwordLogin->isEnabled(),
+            // Whether passwords sign in here, and the identity providers that
+            // do: the sign-in page and the settings menu are drawn from them.
+            'passwordLogin' => $this->passwordLogin->isEnabled(),
+            'identityProviders' => fn (): array => array_map(IdentityProviderOption::of(...), $this->identityProviders->all()),
             'locale' => App::getLocale(),
             'imageBase' => ImageUrls::base(),
             // The footer names the running version and links its source on
@@ -146,6 +156,8 @@ class HandleInertiaRequests extends Middleware
             'is_private' => $user->is_private,
             'locale' => $user->locale,
             'preferences' => $user->preferences->resolved(),
+            // Confirms what cannot be undone with the password, or else with the username.
+            'password_sign_in' => $this->passwordLogin->isWayInFor($user),
         ];
     }
 }

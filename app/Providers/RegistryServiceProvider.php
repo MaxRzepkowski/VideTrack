@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Accounts\Identity\IdentityProviderRegistry;
 use App\Catalog\DataSources;
 use App\Catalog\MediaTypeRegistry;
 use App\Catalog\ProviderRegistry;
@@ -29,5 +30,6 @@ class RegistryServiceProvider extends ServiceProvider
         $this->app->singleton(ScrobbleSourceRegistry::class);
         $this->app->singleton(ConnectionRegistry::class);
         $this->app->singleton(DataSources::class);
+        $this->app->singleton(IdentityProviderRegistry::class);
     }
 }

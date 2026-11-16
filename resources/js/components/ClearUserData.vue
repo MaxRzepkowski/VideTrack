@@ -4,7 +4,7 @@ import { trans } from 'laravel-vue-i18n';
 import { ref } from 'vue';
 
 import HeadingSmall from '@/components/HeadingSmall.vue';
-import InputError from '@/components/InputError.vue';
+import ConfirmAccountField from '@/components/ConfirmAccountField.vue';
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
@@ -16,17 +16,14 @@ import {
     DialogTitle,
     DialogTrigger,
 } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 
-// Template ref holds the Input COMPONENT instance; the native element to
-// focus is its single root ($el).
-const passwordInput = ref<InstanceType<typeof Input> | null>(null);
+const confirmField = ref<InstanceType<typeof ConfirmAccountField> | null>(null);
 
 const open = ref(false);
 
 const form = useForm({
     password: '',
+    username: '',
 });
 
 const onOpenChange = (value: boolean) => {
@@ -44,7 +41,7 @@ const clearData = (e: Event) => {
     form.delete(route('settings.data.destroy'), {
         preserveScroll: true,
         onSuccess: () => onOpenChange(false),
-        onError: () => (passwordInput.value?.$el as HTMLInputElement | undefined)?.focus(),
+        onError: () => confirmField.value?.focus(),
         onFinish: () => form.reset(),
     });
 };
@@ -71,18 +68,13 @@ const clearData = (e: Event) => {
                             </DialogDescription>
                         </DialogHeader>
 
-                        <div class="grid gap-2">
-                            <Label for="clear-data-password" class="sr-only">{{ trans('common.password') }}</Label>
-                            <Input
-                                id="clear-data-password"
-                                ref="passwordInput"
-                                v-model="form.password"
-                                type="password"
-                                name="password"
-                                :placeholder="trans('common.password')"
-                            />
-                            <InputError :message="form.errors.password" />
-                        </div>
+                        <ConfirmAccountField
+                            ref="confirmField"
+                            v-model:password="form.password"
+                            v-model:username="form.username"
+                            :errors="form.errors"
+                            id-prefix="clear-data"
+                        />
 
                         <DialogFooter>
                             <DialogClose as-child>

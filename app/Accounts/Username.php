@@ -7,7 +7,7 @@ use App\Models\User;
 /**
  * What a username may look like — the one rule behind sign-up and the
  * profile form, and the free name an account made without the form (the
- * admin bootstrap) is given.
+ * admin bootstrap, a first sign-in through an identity provider) is given.
  * It names the profile's address, so it stays lower-case letters, digits and
  * underscores.
  */

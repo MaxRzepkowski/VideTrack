@@ -1,5 +1,5 @@
 import type { SharedData, User } from '@/types';
-import type { TimeFormat } from '@/types/generated';
+import type { IdentityProviderOption, TimeFormat } from '@/types/generated';
 import { usePage } from '@inertiajs/vue3';
 
 /*
@@ -50,4 +50,14 @@ export function viewerTimeFormat(): TimeFormat {
 /** Base URL of the image CDN that provider-relative image paths hang off. */
 export function imageBase(): string {
     return shared().imageBase;
+}
+
+/** Whether a password signs in here; false where identity providers are the only way in. */
+export function passwordLoginEnabled(): boolean {
+    return shared().passwordLogin;
+}
+
+/** The identity providers this instance signs in with. */
+export function identityProviders(): IdentityProviderOption[] {
+    return shared().identityProviders;
 }

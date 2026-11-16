@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Accounts\PasswordLogin;
 use App\Accounts\Username;
 use App\Actions\Users\CreateAccount;
 use App\Enums\UserRole;
@@ -14,10 +15,16 @@ class EnsureAdminCommand extends Command
 {
     protected $signature = 'app:ensure-admin';
 
-    protected $description = 'Create the bootstrap admin account from ADMIN_EMAIL / ADMIN_PASSWORD if it does not exist and guarantee it has the admin role (idempotent, safe to run on every container start)';
+    protected $description = 'Create the bootstrap admin account from ADMIN_EMAIL / ADMIN_PASSWORD if it does not exist and guarantee it has the admin role (idempotent, safe to run on every container start); warns when PASSWORD_LOGIN_ENABLED=false is ignored for lack of an identity provider';
 
-    public function handle(CreateAccount $createAccount): int
+    public function handle(CreateAccount $createAccount, PasswordLogin $passwordLogin): int
     {
+        // Said on every start: the operator asked for something the instance
+        // does not do, and nothing else would tell them.
+        if ($passwordLogin->isKeptForLackOfProviders()) {
+            $this->warn('PASSWORD_LOGIN_ENABLED=false is ignored: no identity provider is configured, so passwords still sign in.');
+        }
+
         $email = config('tracker.admin_email');
         $password = config('tracker.admin_password');
 

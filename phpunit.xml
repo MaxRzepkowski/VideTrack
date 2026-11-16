@@ -45,9 +45,10 @@
         <env name="QUEUE_CONNECTION" value="sync"/>
         <env name="SESSION_DRIVER" value="array"/>
         <env name="TMDB_API_KEY" value="testing-key"/>
-        <!-- Explicitly empty: the games, books, manga and comics modules
-             (and the Simkl connection) stay off unless a test enables them
-             via config(), regardless of the developer's .env. -->
+        <!-- Explicitly empty: the games, books, manga and comics modules,
+             the Simkl connection and the identity providers stay off unless
+             a test enables them via config(), regardless of the developer's
+             .env; so do the sign-in switches. -->
         <env name="IGDB_CLIENT_ID" value=""/>
         <env name="IGDB_CLIENT_SECRET" value=""/>
         <env name="HARDCOVER_API_KEY" value=""/>
@@ -55,5 +56,10 @@
         <env name="COMICVINE_API_KEY" value=""/>
         <env name="SIMKL_CLIENT_ID" value=""/>
         <env name="STEAM_API_KEY" value=""/>
+        <env name="OIDC_CLIENT_ID" value=""/>
+        <env name="GOOGLE_CLIENT_ID" value=""/>
+        <env name="GITHUB_CLIENT_ID" value=""/>
+        <env name="GITLAB_CLIENT_ID" value=""/>
+        <env name="PASSWORD_LOGIN_ENABLED" value="true"/>
     </php>
 </phpunit>

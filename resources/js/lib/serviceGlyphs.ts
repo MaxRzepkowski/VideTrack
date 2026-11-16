@@ -7,8 +7,11 @@ import {
     siFacebook,
     siFandom,
     siGamejolt,
+    siGithub,
+    siGitlab,
     siGogdotcom,
     siGoodreads,
+    siGoogle,
     siGoogleplay,
     siIgdb,
     siImdb,
@@ -18,6 +21,7 @@ import {
     siKodi,
     siMeta,
     siMyanimelist,
+    siOpenid,
     siPlaystation,
     siPlex,
     siReddit,
@@ -85,6 +89,10 @@ const BRANDS: Record<string, { path: string; label: string }> = {
     mal: { path: siMyanimelist.path, label: 'MyAnimeList' },
     goodreads: { path: siGoodreads.path, label: 'Goodreads' },
     igdb: { path: siIgdb.path, label: 'IGDB' },
+    google: { path: siGoogle.path, label: 'Google' },
+    github: { path: siGithub.path, label: 'GitHub' },
+    gitlab: { path: siGitlab.path, label: 'GitLab' },
+    openid: { path: siOpenid.path, label: 'OpenID' },
 };
 
 export function glyphFor(code: string): string | null {

@@ -19,6 +19,7 @@ return [
     'completed' => 'Ukończony',
     'confirm_password' => 'Potwierdź hasło',
     'connect' => 'Połącz',
+    'connected_accounts' => 'Połączone konta',
     'copied' => 'Skopiowano',
     'copy' => 'Kopiuj',
     'could_not_copy_the_link' => 'Nie udało się skopiować linku.',
