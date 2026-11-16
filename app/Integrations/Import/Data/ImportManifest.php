@@ -17,8 +17,6 @@ final readonly class ImportManifest
      * @param  list<ManifestList>  $lists
      * @param  int  $unreadable  rows a selectable input cannot read: in no
      *                           category, yet each a row the run reports
-     * @param  bool  $preselected  whether the import page ticks every
-     *                             category with something in it at first
      */
     private function __construct(
         public bool $valid,
@@ -28,7 +26,6 @@ final readonly class ImportManifest
         public bool $supportsSelection,
         #[Hidden]
         public int $unreadable = 0,
-        public bool $preselected = true,
     ) {}
 
     /**
@@ -58,7 +55,7 @@ final readonly class ImportManifest
      */
     public static function pick(array $categories, int $unreadable = 0): self
     {
-        return new self(true, null, $categories, [], true, $unreadable, preselected: false);
+        return new self(true, null, array_map(fn (ManifestCategory $category): ManifestCategory => $category->optIn(), $categories), [], true, $unreadable);
     }
 
     /** Not our input; the reason lands verbatim in the task run. */
@@ -88,7 +85,7 @@ final readonly class ImportManifest
     }
 
     /**
-     * @return array{valid: bool, error: string|null, categories: list<array{key: string, label: string, count: int}>, lists: list<array{id: string, name: string, itemCount: int, isPublic: bool}>, supportsSelection: bool, preselected: bool}
+     * @return array{valid: bool, error: string|null, categories: list<array{key: string, label: string, count: int, preselected: bool}>, lists: list<array{id: string, name: string, itemCount: int, isPublic: bool}>, supportsSelection: bool}
      */
     public function toArray(): array
     {
@@ -98,7 +95,6 @@ final readonly class ImportManifest
             'categories' => array_map(fn (ManifestCategory $c) => $c->toArray(), $this->categories),
             'lists' => array_map(fn (ManifestList $l) => $l->toArray(), $this->lists),
             'supportsSelection' => $this->supportsSelection,
-            'preselected' => $this->preselected,
         ];
     }
 }

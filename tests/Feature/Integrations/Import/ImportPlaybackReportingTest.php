@@ -44,7 +44,7 @@ test('a Playback Reporting backup offers the server\'s users, none of them ticke
         ->analyze(ImportInput::file(base_path('tests/Fixtures/transfer/jellyfin/'.PLAYBACK_REPORTING_FIXTURE)));
 
     expect($manifest->valid)->toBeTrue()
-        ->and($manifest->preselected)->toBeFalse()
+        ->and(array_map(fn ($category) => $category->preselected, $manifest->categories))->each->toBeFalse()
         // Music is not tracked, and a line of the wrong width is not the plugin's.
         ->and(array_map(fn ($category) => [$category->key, $category->count], $manifest->categories))->toBe([
             [PLAYBACK_REPORTING_ME, 5],

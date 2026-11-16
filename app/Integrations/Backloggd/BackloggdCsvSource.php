@@ -126,10 +126,10 @@ final class BackloggdCsvSource implements ExplainsSetup, ReadsFile
     private function logged(array $row): MediaRow|SkipRow
     {
         $name = trim($row['Game Name']);
-        $played = $this->flag($row, 'Played') || $this->flag($row, 'Mastered');
-        $playing = $this->flag($row, 'Currently Playing');
-        $wanted = $this->flag($row, 'In Backlog') || $this->flag($row, 'In Wishlist');
-        $liked = $this->flag($row, 'Liked');
+        $played = Payload::flag($row, 'Played') || Payload::flag($row, 'Mastered');
+        $playing = Payload::flag($row, 'Currently Playing');
+        $wanted = Payload::flag($row, 'In Backlog') || Payload::flag($row, 'In Wishlist');
+        $liked = Payload::flag($row, 'Liked');
         // Backloggd rates in half stars, kept as tenths: 1–10, our scale.
         $rating = RatingScale::readPoints($row['Rating']);
 
@@ -178,14 +178,6 @@ final class BackloggdCsvSource implements ExplainsSetup, ReadsFile
     private function subject(string $title): MediaSubject
     {
         return MediaSubject::external(MediaKind::Game, [], $title, byTitle: new TitleQuery($title, exactTitle: true));
-    }
-
-    /**
-     * @param  array<string, string>  $row
-     */
-    private function flag(array $row, string $column): bool
-    {
-        return mb_strtolower(Payload::text($row, $column)) === 'true';
     }
 
     /**

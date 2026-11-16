@@ -113,7 +113,7 @@ async function analyze(file: File, code: string): Promise<void> {
         manifest.value = result;
         analysisError.value = failure;
         selectedCategories.value = Object.fromEntries(
-            (result?.categories ?? []).map((category) => [category.key, result?.preselected === true && category.count > 0]),
+            (result?.categories ?? []).map((category) => [category.key, category.preselected && category.count > 0]),
         );
     } catch {
         manifest.value = null;

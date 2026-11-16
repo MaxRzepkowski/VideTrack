@@ -221,7 +221,7 @@ final class Payload
 
         // A calendar day with no hour names no moment of it.
         if (preg_match('#^(\d{4})[-/](\d{2})[-/](\d{2})$#', $value, $parts) === 1) {
-            return checkdate((int) $parts[2], (int) $parts[3], (int) $parts[1]) ? self::day((int) $parts[1], (int) $parts[2], (int) $parts[3]) : null;
+            return self::validDay((int) $parts[1], (int) $parts[2], (int) $parts[3]);
         }
 
         try {
@@ -229,6 +229,38 @@ final class Payload
         } catch (InvalidFormatException) {
             return null;
         }
+    }
+
+    /**
+     * A yes or no a file writes as text: "true" and "yes" in any case are
+     * yes (.NET writes "True", other exporters "yes"); anything else no.
+     *
+     * @param  array<array-key, mixed>  $data
+     */
+    public static function flag(array $data, string $key): bool
+    {
+        return in_array(mb_strtolower(self::text($data, $key)), ['true', 'yes'], true);
+    }
+
+    /**
+     * The calendar day a value opens with, written year first ("2024-04-25",
+     * "2024/4/25", "2024-04-25T06:54:47Z"), as {@see day()} reads it. Null
+     * for anything else, a year or a month alone and a placeholder ("None")
+     * included: unlike {@see instant()} it never guesses at a value.
+     */
+    public static function calendarDay(mixed $value): ?CarbonImmutable
+    {
+        if (! is_string($value) || preg_match('#^\s*(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})(?!\d)#', $value, $parts) !== 1) {
+            return null;
+        }
+
+        return self::validDay((int) $parts[1], (int) $parts[2], (int) $parts[3]);
+    }
+
+    /** {@see day()} for numbers read from a file, which may name no day of the calendar (2023-02-30). */
+    public static function validDay(int $year, int $month, int $day): ?CarbonImmutable
+    {
+        return checkdate($month, $day, $year) ? self::day($year, $month, $day) : null;
     }
 
     /**

@@ -1,5 +1,6 @@
 <?php
 
+use App\Integrations\Import\ColumnMap;
 use App\Integrations\Import\CsvStream;
 use App\Integrations\Import\Rows\SkipRow;
 
@@ -77,4 +78,37 @@ test('an export that opens with a note of its own is read from the header after 
 
     expect($entries[0])->toBe(['Position' => '1', 'Name' => 'Dune'])
         ->and($entries[1])->toBeInstanceOf(SkipRow::class);
+});
+
+test('the separator is the one the header uses: tab, semicolon or comma', function (string $separator) {
+    $csv = new CsvStream(csvFile("id{$separator}title\n1{$separator}\"Dune, Part Two\"\n"), ['id']);
+
+    expect(iterator_to_array($csv->rows(), false))->toBe([['id' => '1', 'title' => 'Dune, Part Two']]);
+})->with(['tab' => "\t", 'semicolon' => ';', 'comma' => ',']);
+
+test('a separator inside a quoted column name does not count', function () {
+    $csv = new CsvStream(csvFile("\"a;b;c\",title\n1,Dune\n"), ['a;b;c']);
+
+    expect(iterator_to_array($csv->rows(), false))->toBe([['a;b;c' => '1', 'title' => 'Dune']]);
+});
+
+test('a file opening with a UTF-16 byte order mark is read as UTF-16', function () {
+    $content = mb_convert_encoding("id\ttitle\n1\tŁódź\n", 'UTF-16LE', 'UTF-8');
+    $csv = new CsvStream(csvFile("\xFF\xFE".$content), ['id']);
+
+    expect(iterator_to_array($csv->rows(), false))->toBe([['id' => '1', 'title' => 'Łódź']]);
+});
+
+test('a value that is not UTF-8 is read as Windows-1252, the rest of the row as it is', function () {
+    $csv = new CsvStream(csvFile("id,title,author\n1,Caf\xE9,Cortázar\n"), ['id']);
+
+    expect(iterator_to_array($csv->rows(), false))->toBe([['id' => '1', 'title' => 'Café', 'author' => 'Cortázar']]);
+});
+
+test('a column map keys rows by its own names, whatever the header calls them', function () {
+    $columns = new ColumnMap(['name' => ['Name', 'Nazwa'], 'played' => ['Time Played', 'Czas gry']]);
+    $csv = CsvStream::mapped(csvFile(" Nazwa ,czas gry,Platformy\nHades,3600,PC\n"), $columns, ['name']);
+
+    expect(iterator_to_array($csv->rows(), false))->toBe([['name' => 'Hades', 'played' => '3600', 'Platformy' => 'PC']])
+        ->and(CsvStream::mapped(csvFile("Titel\nHades\n"), $columns, ['name'])->isValid())->toBeFalse();
 });
