@@ -50,7 +50,7 @@ class EnsureAdminCommand extends Command
 
             $createAccount->execute(
                 name: $name,
-                username: $this->availableUsername($name),
+                username: Username::firstFree($name, 'admin'),
                 email: $email,
                 password: $password,
                 role: UserRole::Admin,
@@ -69,24 +69,5 @@ class EnsureAdminCommand extends Command
         }
 
         return self::SUCCESS;
-    }
-
-    private function availableUsername(string $base): string
-    {
-        // Room left for a numbered suffix, so the name stays within the rule.
-        $slug = str($base)->slug('_')->limit(Username::MAX - 4, '')->toString();
-
-        if (strlen($slug) < Username::MIN) {
-            $slug = 'admin';
-        }
-
-        $candidate = $slug;
-        $suffix = 1;
-
-        while (User::where('username', $candidate)->exists()) {
-            $candidate = $slug.'_'.(++$suffix);
-        }
-
-        return $candidate;
     }
 }
