@@ -30,6 +30,12 @@ VIDETRACK_VERSION=0.1      # 0.1.x patches only
 
 Images are tagged `X.Y.Z`, `X.Y` and `latest`, one set per release.
 
+## Settings that changed
+
+- **`HTTP_USER_AGENT` is now `VIDETRACK_USER_AGENT`.** If you set it in `.env`, rename it. During a
+  web request PHP fills `HTTP_USER_AGENT` with the visitor's browser header, so an instance running
+  without a cached configuration sent that header to the services it talks to.
+
 ## Going back
 
 A migration changes the database, so an older image cannot simply run on it. To return to the

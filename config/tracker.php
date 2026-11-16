@@ -52,7 +52,9 @@ return [
     */
 
     'http' => [
-        'user_agent' => env('HTTP_USER_AGENT', $userAgent),
+        // Not HTTP_USER_AGENT: during a web request PHP fills that name with
+        // the visitor's browser header, which would go out to every service.
+        'user_agent' => env('VIDETRACK_USER_AGENT', $userAgent),
     ],
 
     /*
@@ -161,7 +163,7 @@ return [
         'base_url' => env('WIKIDATA_BASE_URL', 'https://query.wikidata.org'),
         // Wikidata asks for a descriptive client with a way to reach its
         // operator; an instance that queries it heavily sets its own.
-        'user_agent' => env('WIKIDATA_USER_AGENT', env('HTTP_USER_AGENT', $userAgent)),
+        'user_agent' => env('WIKIDATA_USER_AGENT', env('VIDETRACK_USER_AGENT', $userAgent)),
         'cache' => [
             'query' => 60 * 60 * 24, // seconds
             // A failed/timed-out lookup is negative-cached for this long so a
