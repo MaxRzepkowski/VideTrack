@@ -6,7 +6,7 @@ use App\Catalog\DatePrecision;
 use App\Catalog\ImageUrls;
 use App\Catalog\MediaTypeRegistry;
 use App\Catalog\TitleStatus;
-use App\Http\TitlePages;
+use App\Http\CardPages;
 use App\Notifications\Data\NotificationEntry;
 use App\Support\Payload;
 use App\Support\PublicUrl;
@@ -23,16 +23,16 @@ final readonly class NotificationCopy
     /** The brand purple, for a title of no known type. */
     private const BRAND_COLOR = 0x7337FF;
 
-    /** Below a root, the ref adds a number per level: season 2 of show 10 is "10:2". */
-    private const LEVEL_PARAMETERS = ['number', 'episode'];
-
     /** How many titles a notification names before the rest is left to its page. */
     private const PREVIEW_TITLES = 3;
 
     /** Discord carries plain text, so the facts a screen sets apart with a hairline are joined by a dash. */
     private const PLAIN_SEPARATOR = ' – ';
 
-    public function __construct(private MediaTypeRegistry $types) {}
+    public function __construct(
+        private MediaTypeRegistry $types,
+        private CardPages $pages,
+    ) {}
 
     /**
      * A stored notification as the bell, the notifications pages and the API
@@ -336,26 +336,10 @@ final readonly class NotificationCopy
     private function titlePath(array $media): string
     {
         $type = Payload::string($media, 'type');
-        $ref = (string) Payload::string($media, 'ref');
 
-        if ($type === null || ! $this->types->has($type)) {
-            return route('search', absolute: false);
-        }
-
-        $depth = count($this->types->lineage($type)) - 1;
-
-        if ($depth === 0) {
-            return TitlePages::path($type, $ref);
-        }
-
-        $parts = explode(':', $ref);
-        $parameters = ['ref' => $parts[0]];
-
-        foreach (array_slice(self::LEVEL_PARAMETERS, 0, $depth) as $level => $name) {
-            $parameters[$name] = $parts[$level + 1] ?? 1;
-        }
-
-        return route("{$type}.details", $parameters, absolute: false);
+        return $type === null
+            ? route('search', absolute: false)
+            : $this->pages->path($type, (string) Payload::string($media, 'ref'));
     }
 
     /**
