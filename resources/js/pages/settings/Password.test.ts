@@ -1,4 +1,6 @@
 import Password from '@/pages/settings/Password.vue';
+import { userPreferences } from '@/test/factories';
+import { setPageProps } from '@/test/page';
 import { router } from '@inertiajs/vue3';
 import { flushPromises, mount } from '@vue/test-utils';
 import { describe, expect, it, vi } from 'vitest';
@@ -49,5 +51,14 @@ describe('Password', () => {
         );
         expect(success).toHaveBeenCalledWith('Saved.');
         expect((wrapper.find('#password').element as HTMLInputElement).value).toBe('');
+    });
+
+    it('sets the first password of an account without one, with no current password asked', () => {
+        setPageProps({ auth: { user: { id: 1, name: 'Alex', username: 'alex', preferences: userPreferences(), password_sign_in: false } } });
+        const wrapper = page();
+
+        expect(wrapper.text()).toContain('Set password');
+        expect(wrapper.find('#current_password').exists()).toBe(false);
+        expect(wrapper.find('#password').exists()).toBe(true);
     });
 });

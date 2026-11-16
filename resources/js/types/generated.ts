@@ -344,6 +344,11 @@ export type GenreOption = {
     readonly ref: string;
     readonly name: string;
 };
+export type IdentityProviderOption = {
+    readonly code: string;
+    readonly label: string;
+    readonly glyph: string;
+};
 export type ImportInputKind = 'file' | 'credentials' | 'connection';
 export type ImportManifest = {
     readonly valid: boolean;
@@ -372,6 +377,11 @@ export type LanguageSupport = {
     readonly audio: boolean;
     readonly subtitles: boolean;
     readonly interface: boolean;
+};
+export type LinkedIdentity = {
+    readonly id: number;
+    readonly provider: string;
+    readonly email: string | null;
 };
 export type ListDetailsData = {
     readonly id: number;

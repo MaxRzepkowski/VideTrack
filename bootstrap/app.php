@@ -1,5 +1,6 @@
 <?php
 
+use App\Accounts\Identity\IdentityRefused;
 use App\Catalog\Creators\UnknownCreator;
 use App\Catalog\ItemNotFoundException;
 use App\Catalog\ProviderException;
@@ -90,6 +91,10 @@ return Application::configure(basePath: dirname(__DIR__))
         // A rule of the library refused the change: the same validation error
         // on the web (back with errors) and in the API (422).
         $exceptions->map(fn (LibraryRefusal $e) => ValidationException::withMessages([$e->field() => $e->reason()]));
+
+        // A rule of the account refused a change to how it signs in: the
+        // same, on the field the settings page reads.
+        $exceptions->map(fn (IdentityRefused $e) => ValidationException::withMessages([IdentityRefused::FIELD => $e->reason()]));
 
         // Missing upstream item → regular 404. Nothing serves this creator
         // here — a link to an unknown provider — is a 404 too, not a failure

@@ -4,6 +4,7 @@ import type {
     DiscordMode,
     EpisodeImage,
     EventEntry,
+    IdentityProviderOption,
     PersonFollowScope,
     ReleaseDateMode,
     TimeFormat,
@@ -34,6 +35,10 @@ export interface Auth {
 export type SharedData = {
     auth: Auth;
     registrationEnabled: boolean;
+    /** Whether a password signs in here; false where identity providers are the only way in. */
+    passwordLogin: boolean;
+    /** The identity providers this instance signs in with, in the order the login page offers them. */
+    identityProviders: IdentityProviderOption[];
     locale: string;
     imageBase: string;
     /** The running release ("1.4.0"), or a build label such as "dev". */
@@ -68,6 +73,8 @@ export interface User {
     is_private: boolean;
     locale: string | null;
     preferences: UserPreferences;
+    /** The password is a way in, so it confirms what cannot be undone; otherwise the username does. */
+    password_sign_in: boolean;
 }
 
 /**

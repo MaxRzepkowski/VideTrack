@@ -4,6 +4,7 @@ import InputError from '@/components/InputError.vue';
 import SettingsSaveBar from '@/components/settings/SettingsSaveBar.vue';
 import { Label } from '@/components/ui/label';
 import { useUnsavedChanges } from '@/composables/useUnsavedChanges';
+import { signedInUser } from '@/lib/pageContext';
 import AppLayout from '@/layouts/AppLayout.vue';
 import SettingsLayout from '@/layouts/settings/Layout.vue';
 import { SETTINGS_CARD_CLASS, SETTINGS_FIELD_CLASS } from '@/lib/ui';
@@ -11,6 +12,11 @@ import { Head, useForm } from '@inertiajs/vue3';
 import { trans } from 'laravel-vue-i18n';
 import { ref } from 'vue';
 import { toast } from 'vue-sonner';
+
+// An account made through an identity provider sets its first password
+// with nothing to confirm it by. The page exists only where passwords sign
+// in, so signing in with one here means having one.
+const hasPassword = signedInUser().password_sign_in;
 
 const passwordInput = ref<HTMLInputElement | null>(null);
 const currentPasswordInput = ref<HTMLInputElement | null>(null);
@@ -63,9 +69,12 @@ function submit(): void {
         <SettingsLayout>
             <form class="space-y-6" @submit.prevent="submit">
                 <fieldset :disabled="form.processing" class="min-w-0 space-y-6">
-                    <HeadingSmall :title="trans('settings.update_password')" :description="trans('settings.ensure_your_account_is_using_a')" />
+                    <HeadingSmall
+                        :title="hasPassword ? trans('settings.update_password') : trans('settings.set_password')"
+                        :description="hasPassword ? trans('settings.ensure_your_account_is_using_a') : trans('settings.set_a_password_to_log_in')"
+                    />
 
-                    <div :class="SETTINGS_CARD_CLASS">
+                    <div v-if="hasPassword" :class="SETTINGS_CARD_CLASS">
                         <Label for="current_password" class="text-ink text-base font-semibold">{{ trans('settings.current_password') }}</Label>
                         <input
                             id="current_password"

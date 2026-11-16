@@ -5,12 +5,12 @@ namespace App\Http\Controllers\Settings;
 use App\Actions\Users\DeleteAccount;
 use App\Actions\Users\SetAvatar;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Settings\ConfirmAccountRequest;
 use App\Http\Requests\Settings\ProfileUpdateRequest;
 use App\Models\User;
 use App\Support\Locales;
 use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
@@ -48,12 +48,8 @@ class ProfileController extends Controller
     /**
      * Delete the user's profile.
      */
-    public function destroy(#[CurrentUser] User $viewer, Request $request, DeleteAccount $deleteAccount): RedirectResponse
+    public function destroy(#[CurrentUser] User $viewer, ConfirmAccountRequest $request, DeleteAccount $deleteAccount): RedirectResponse
     {
-        $request->validate([
-            'password' => ['required', 'current_password'],
-        ]);
-
         Auth::logout();
 
         $deleteAccount->execute($viewer);

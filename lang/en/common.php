@@ -19,6 +19,7 @@ return [
     'completed' => 'Completed',
     'confirm_password' => 'Confirm password',
     'connect' => 'Connect',
+    'connected_accounts' => 'Connected accounts',
     'copied' => 'Copied',
     'copy' => 'Copy',
     'could_not_copy_the_link' => 'Could not copy the link.',

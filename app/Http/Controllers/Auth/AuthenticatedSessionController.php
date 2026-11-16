@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Accounts\PasswordLogin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use Illuminate\Http\RedirectResponse;
@@ -16,10 +17,10 @@ class AuthenticatedSessionController extends Controller
     /**
      * Show the login page.
      */
-    public function create(Request $request): Response
+    public function create(Request $request, PasswordLogin $passwordLogin): Response
     {
         return Inertia::render('auth/Login', [
-            'canResetPassword' => Route::has('password.request'),
+            'canResetPassword' => $passwordLogin->isEnabled() && Route::has('password.request'),
             'status' => $request->session()->get('status'),
         ]);
     }

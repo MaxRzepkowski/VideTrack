@@ -24,9 +24,12 @@ export function resetPage(): void {
     testPage.props = {
         locale: 'en',
         imageBase: 'https://image.tmdb.org/t/p',
-        auth: { user: { id: 1, name: 'Alex', username: 'alex', preferences: userPreferences() } },
+        auth: { user: { id: 1, name: 'Alex', username: 'alex', preferences: userPreferences(), password_sign_in: true } },
         mediaTypes: [],
         untouchedState: userState(),
+        passwordLogin: true,
+        identityProviders: [],
+        errors: {},
     };
     testPage.url = `/test-page-${visits}`;
 }

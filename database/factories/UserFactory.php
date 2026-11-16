@@ -71,6 +71,12 @@ class UserFactory extends Factory
         return $this->state(['role' => UserRole::Admin]);
     }
 
+    /** An account made through an identity provider, never given a password. */
+    public function withoutPassword(): static
+    {
+        return $this->state(['password' => null]);
+    }
+
     public function blocked(): static
     {
         return $this->state(['blocked_at' => now()]);

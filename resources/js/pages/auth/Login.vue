@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import BrandGlyph from '@/components/BrandGlyph.vue';
 import InputError from '@/components/InputError.vue';
 import TextLink from '@/components/TextLink.vue';
 import { Button } from '@/components/ui/button';
@@ -16,7 +17,8 @@ defineProps<{
     canResetPassword: boolean;
 }>();
 
-const registrationEnabled = usePage<SharedData>().props.registrationEnabled;
+const page = usePage<SharedData>();
+const { registrationEnabled, passwordLogin, identityProviders } = page.props;
 
 const form = useForm({
     email: '',
@@ -32,14 +34,17 @@ const submit = () => {
 </script>
 
 <template>
-    <AuthBase :title="trans('account.log_in_to_your_account')" :description="trans('account.enter_your_email_and_password_below')">
+    <AuthBase
+        :title="trans('account.log_in_to_your_account')"
+        :description="passwordLogin ? trans('account.enter_your_email_and_password_below') : trans('account.choose_how_to_log_in')"
+    >
         <Head :title="trans('account.log_in')" />
 
         <div v-if="status" class="text-success mb-4 text-center text-sm font-medium">
             {{ status }}
         </div>
 
-        <form class="flex flex-col gap-6" @submit.prevent="submit">
+        <form v-if="passwordLogin" class="flex flex-col gap-6" @submit.prevent="submit">
             <div class="grid gap-6">
                 <div class="grid gap-2">
                     <Label for="email">{{ trans('common.email_address') }}</Label>
@@ -83,5 +88,23 @@ const submit = () => {
                 <TextLink :href="route('register')">{{ trans('account.sign_up') }}</TextLink>
             </div>
         </form>
+
+        <div v-if="identityProviders.length > 0" class="flex flex-col gap-3">
+            <div v-if="passwordLogin" class="text-ink-muted flex items-center gap-3 text-sm">
+                <span class="bg-line h-px flex-1" aria-hidden="true" />
+                {{ trans('account.or_divider') }}
+                <span class="bg-line h-px flex-1" aria-hidden="true" />
+            </div>
+
+            <!-- Plain links: the trip leaves the app for the provider. -->
+            <Button v-for="provider in identityProviders" :key="provider.code" variant="outline" class="w-full" as-child>
+                <a :href="route('identities.redirect', { provider: provider.code })">
+                    <BrandGlyph :code="provider.glyph" />
+                    {{ trans('account.log_in_with_provider', { provider: provider.label }) }}
+                </a>
+            </Button>
+
+            <InputError :message="page.props.errors.identity" />
+        </div>
     </AuthBase>
 </template>

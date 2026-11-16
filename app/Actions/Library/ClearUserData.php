@@ -28,7 +28,7 @@ final readonly class ClearUserData
     public const CLEARED = ['plays', 'watch_cycles', 'ratings', 'favorites', 'media_user_states', 'library_entries', 'follows', 'hidden_events', 'lists', 'recent_views'];
 
     /** Tables keyed by the user that belong to the account, not to the library. */
-    public const KEPT = ['service_connections', 'webhook_endpoints', 'task_runs', 'sessions'];
+    public const KEPT = ['service_connections', 'webhook_endpoints', 'task_runs', 'sessions', 'identities'];
 
     public function __construct(
         private MutationContext $mutations,

@@ -30,6 +30,7 @@ return [
     'keywords_following' => 'following, followed',
     'keywords_settings_profile' => 'profile, settings, language',
     'keywords_settings_password' => 'password, settings',
+    'keywords_settings_identities' => 'connected accounts, sso, oidc, google, github, gitlab, login, settings',
     'keywords_settings_preferences' => 'preferences, settings, discord',
     'keywords_settings_tracking' => 'tracking, settings',
     'keywords_settings_integrations' => 'integrations, plex, jellyfin, emby, webhook, settings',

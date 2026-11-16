@@ -1,3 +1,4 @@
+import { identityProviders, passwordLoginEnabled } from '@/lib/pageContext';
 import type { NonEmpty } from '@/types';
 import {
     Bell,
@@ -12,6 +13,7 @@ import {
     Info,
     KeyRound,
     LayoutGrid,
+    Link2,
     List,
     ListChecks,
     Plug,
@@ -48,6 +50,8 @@ export interface NavEntry {
     keywords: () => string;
     /** Also lit on its subpages and on itself with a query. */
     prefix?: string;
+    /** Whether this instance has the place at all; absent, it always does. */
+    exists?: () => boolean;
 }
 
 /** The main menu, in its order. */
@@ -198,6 +202,16 @@ export const SETTINGS_NAV: NonEmpty<NavEntry> = [
         label: () => trans('common.password'),
         icon: KeyRound,
         keywords: () => trans('palette.keywords_settings_password'),
+        // Gone where identity providers are the only way in.
+        exists: passwordLoginEnabled,
+    },
+    {
+        id: 'settings.identities',
+        route: 'settings.identities.index',
+        label: () => trans('common.connected_accounts'),
+        icon: Link2,
+        keywords: () => trans('palette.keywords_settings_identities'),
+        exists: () => identityProviders().length > 0,
     },
     {
         id: 'settings.preferences',
@@ -256,6 +270,11 @@ export const SETTINGS_NAV: NonEmpty<NavEntry> = [
         keywords: () => trans('palette.keywords_settings_danger'),
     },
 ];
+
+/** The settings sidebar of this instance: the places it has, in their order. */
+export function settingsNav(): NavEntry[] {
+    return SETTINGS_NAV.filter((entry) => entry.exists?.() ?? true);
+}
 
 /** The address of a place, as a path; a user panel needs whose. */
 export function navHref(entry: NavEntry, username?: string): string {
