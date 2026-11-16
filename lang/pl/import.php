@@ -59,6 +59,8 @@ return [
     'movies_and_episodes_your_media_server' => 'Filmy i odcinki obejrzane do końca według Tracearr.',
     'myanimelist_profile' => 'Profil MyAnimeList',
     'myanimelist_export_xml' => 'Eksport z MyAnimeList (XML)',
+    'myanimelist_anime_list' => 'MyAnimeList: anime',
+    'myanimelist_manga_list' => 'MyAnimeList: manga',
     'an_anime_or_manga_list_in' => 'Lista anime albo mangi w formacie XML MyAnimeList, z MyAnimeList albo innego serwisu, który go zapisuje.',
     'on_myanimelist_open_export' => 'W MyAnimeList otwórz Export, wyeksportuj listę anime albo mangi i wgraj plik tak, jak przyszedł (.xml.gz):',
     'the_file_is_not_a_myanimelist' => 'Ten plik nie jest eksportem XML z MyAnimeList.',

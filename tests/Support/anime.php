@@ -7,14 +7,17 @@ use Illuminate\Support\Facades\Storage;
 
 /**
  * The pinned anime id map, already verified on disk — the test copy stands
- * in for the real revision.
+ * in for the real revision, or a map the test writes itself, AniDB entry by
+ * AniDB entry.
+ *
+ * @param  array<string, array<string, mixed>>|null  $entries
  */
-function seedAnimeIdMap(): void
+function seedAnimeIdMap(?array $entries = null): void
 {
     Storage::fake('local');
     Storage::disk('local')->put(
         'anime-ids/'.AnimeIdMap::REVISION.'.json',
-        (string) file_get_contents(fixture('transfer/anime/anime_ids.json')),
+        $entries === null ? (string) file_get_contents(fixture('transfer/anime/anime_ids.json')) : (string) json_encode($entries),
     );
 }
 

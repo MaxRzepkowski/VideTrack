@@ -10,7 +10,8 @@ use Illuminate\Support\Facades\Storage;
 /**
  * MyAnimeList id → TVDB series + season / IMDb id, from the community map
  * Kometa-Team/Anime-IDs (MIT). No anime tracker knows TMDB ids, and we track
- * anime as TMDB shows and films, so this is the bridge.
+ * anime as TMDB shows and films, so this is the bridge — both ways: an
+ * export asks it the other way round, from the MAL ids an import would place.
  *
  * Pinned to one revision with its SHA-256: a new revision
  * is a deliberate change to this file, never a silent download. The verified
@@ -36,6 +37,9 @@ final class AnimeIdMap
     /** @var array<int, AnimeMapping>|null MAL id => mapping, once loaded */
     private ?array $byMal = null;
 
+    /** @var array{seasons: array<int, array<int, list<MalSeasonPart>>>, films: array<string, int>}|null */
+    private ?array $reverse = null;
+
     public function __construct(private readonly AnimeIdMapClient $client) {}
 
     public function forMal(int $malId): ?AnimeMapping
@@ -46,6 +50,68 @@ final class AnimeIdMap
     public function isAvailable(): bool
     {
         return $this->index() !== [];
+    }
+
+    /**
+     * The MAL entries a TVDB series is split into, by season number, each
+     * season's parts in episode order.
+     *
+     * @return array<int, list<MalSeasonPart>>
+     */
+    public function seasonPartsOf(int $tvdbId): array
+    {
+        return $this->reverse()['seasons'][$tvdbId] ?? [];
+    }
+
+    /** The MAL entry an IMDb id places as a film. */
+    public function filmOf(string $imdbId): ?int
+    {
+        return $this->reverse()['films'][$imdbId] ?? null;
+    }
+
+    /**
+     * The forward index turned round, so an export names exactly the entry an
+     * import of it would place. A spot two MAL ids share (one AniDB entry
+     * naming several, all at the same season and episode) belongs to neither:
+     * which episodes are whose, the map does not say.
+     *
+     * @return array{seasons: array<int, array<int, list<MalSeasonPart>>>, films: array<string, int>}
+     */
+    private function reverse(): array
+    {
+        if ($this->reverse !== null) {
+            return $this->reverse;
+        }
+
+        $seasons = [];
+        $films = [];
+
+        foreach ($this->index() as $malId => $mapping) {
+            if ($mapping->isSeason()) {
+                $seasons[$mapping->tvdbId][$mapping->tvdbSeason][$mapping->episodeOffset][] = $malId;
+            } elseif (($imdb = $mapping->standaloneImdb()) !== null) {
+                $films[$imdb][] = $malId;
+            }
+        }
+
+        $parts = [];
+
+        foreach ($seasons as $tvdbId => $bySeason) {
+            foreach ($bySeason as $season => $byOffset) {
+                ksort($byOffset);
+
+                foreach ($byOffset as $offset => $malIds) {
+                    if (count($malIds) === 1) {
+                        $parts[$tvdbId][$season][] = new MalSeasonPart($malIds[0], $offset);
+                    }
+                }
+            }
+        }
+
+        return $this->reverse = [
+            'seasons' => $parts,
+            'films' => array_map(fn (array $malIds): int => $malIds[0], array_filter($films, fn (array $malIds): bool => count($malIds) === 1)),
+        ];
     }
 
     /**

@@ -30,6 +30,19 @@ enum MalXmlStatus: string
         return null;
     }
 
+    public static function of(ListStatus $status, ListMedium $medium): self
+    {
+        $anime = $medium === ListMedium::Anime;
+
+        return match ($status) {
+            ListStatus::Current => $anime ? self::Watching : self::Reading,
+            ListStatus::Completed => self::Completed,
+            ListStatus::OnHold => self::OnHold,
+            ListStatus::Dropped => self::Dropped,
+            ListStatus::Planned => $anime ? self::PlanToWatch : self::PlanToRead,
+        };
+    }
+
     public function listStatus(): ListStatus
     {
         return match ($this) {
