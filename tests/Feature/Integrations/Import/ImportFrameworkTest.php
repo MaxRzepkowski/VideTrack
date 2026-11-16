@@ -91,7 +91,7 @@ test('analyzing a file that is not the source export says so', function () {
 
 test('an export with a file that unpacks past the limit stops at analysis', function () {
     // One megabyte of limit, two of history: the worker never decodes it.
-    config(['tracker.imports.max_json_megabytes' => 1]);
+    config(['tracker.imports.max_unpacked_megabytes' => 1]);
 
     $tmp = scratchPath('trakt', '.zip');
     $zip = new ZipArchive;

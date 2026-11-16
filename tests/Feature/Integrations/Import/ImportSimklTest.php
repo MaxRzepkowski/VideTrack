@@ -3,7 +3,6 @@
 use App\Enums\MediaUserStatus;
 use App\Enums\PlayOutcome;
 use App\Enums\TaskRunStatus;
-use App\Integrations\Anime\AnimeIdMap;
 use App\Integrations\Connections\ConnectionRegistry;
 use App\Integrations\Connections\ConnectionStatus;
 use App\Integrations\Import\Data\ImportInput;
@@ -17,7 +16,6 @@ use App\Models\TaskRun;
 use App\Models\User;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Sleep;
 use Inertia\Testing\AssertableInertia;
 
@@ -74,26 +72,9 @@ function runSimklImport(ServiceConnection $connection): TaskRun
  */
 function simklCatalogue(): array
 {
-    $tree = function (string $ref): MediaItem {
-        $show = makeShowTree([1 => ['2011-04-17', '2011-04-24']]);
-        $show->update(['provider_ref' => $ref]);
+    $tree = fn (string $ref): MediaItem => showWithRefs($ref, [1 => ['2011-04-17', '2011-04-24']]);
 
-        foreach (MediaItem::query()->where('parent_id', $show->id)->get() as $season) {
-            $season->update(['provider_ref' => "{$ref}:{$season->number}"]);
-
-            foreach (MediaItem::query()->where('parent_id', $season->id)->get() as $episode) {
-                $episode->update(['provider_ref' => "{$ref}:{$season->number}:{$episode->number}"]);
-            }
-        }
-
-        return $show;
-    };
-
-    Storage::fake('local');
-    Storage::disk('local')->put(
-        'anime-ids/'.AnimeIdMap::REVISION.'.json',
-        (string) file_get_contents(base_path('tests/Fixtures/transfer/anime/anime_ids.json')),
-    );
+    seedAnimeIdMap();
 
     return [
         'got' => $tree('1399'),
