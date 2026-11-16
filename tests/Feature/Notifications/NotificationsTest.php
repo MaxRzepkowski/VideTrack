@@ -4,6 +4,8 @@ use App\Actions\Library\MarkWatched;
 use App\Actions\Library\SyncListMembership;
 use App\Actions\Media\SendMediaNotification;
 use App\Catalog\DatePrecision;
+use App\Catalog\EpisodeBadge;
+use App\Catalog\ItemMetadata;
 use App\Catalog\TitleStatus;
 use App\Enums\FollowMode;
 use App\Jobs\NotifyTodaysReleases;
@@ -139,15 +141,25 @@ test('the daily task notifies about a backlog premiere and an aired episode', fu
     expect($user->notifications()->count())->toBe(2);
 });
 
-test('an episode numbered 1 arrives as a season premiere', function () {
+test('the episode its provider marks as opening a season arrives as a season premiere, whatever its number', function () {
     $user = User::factory()->create();
-    $show = makeShowTree([1 => [today()->toDateString()]]);
+    // Numbering that runs on across seasons: season 2 opens on episode 11.
+    $show = MediaItem::factory()->show()->create();
+    $season = MediaItem::factory()->season($show, 2)->create();
+    $opener = MediaItem::factory()->episode($season, 11, today()->toDateString())
+        ->create(['metadata' => (new ItemMetadata(episodeBadge: EpisodeBadge::SeasonPremiere))->toStored()]);
+    $next = MediaItem::factory()->episode($season, 12, today()->toDateString())->create();
 
     Follow::factory()->create(['user_id' => $user->id, 'media_item_id' => $show->id, 'mode' => FollowMode::Follow]);
 
     runNotifyReleases();
 
-    expect($user->notifications()->firstOrFail()->data['event'])->toBe('season_premiere');
+    $events = $user->notifications()->get()->mapWithKeys(fn (DatabaseNotification $n) => [$n->data['media']['ref'] => $n->data['event']])->sortKeys()->all();
+
+    expect($events)->toBe([
+        $opener->provider_ref => 'season_premiere',
+        $next->provider_ref => 'episode_aired',
+    ]);
 });
 
 test('mute and the event-kind toggles silence the daily task', function () {
