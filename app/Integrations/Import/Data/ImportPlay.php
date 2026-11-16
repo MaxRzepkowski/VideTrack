@@ -19,6 +19,11 @@ use Carbon\CarbonImmutable;
  *
  * $dating says what $at is: the viewing's moment, or only the source's last
  * activity on the title — which moves from one export to the next.
+ *
+ * $playedSeconds is for a source that knows how long a playback ran but
+ * not whether it finished (a media server's playback log): the play stands
+ * only when it covers the completion threshold of the title's runtime,
+ * which the catalog knows once the title is placed.
  */
 final readonly class ImportPlay
 {
@@ -29,5 +34,6 @@ final readonly class ImportPlay
         public ?int $cycle = null,
         public bool $scrobbled = false,
         public PlayDating $dating = PlayDating::Viewing,
+        public ?int $playedSeconds = null,
     ) {}
 }

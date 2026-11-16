@@ -11,6 +11,7 @@ use App\Models\TaskRun;
 use App\Models\User;
 use App\Models\WebhookEndpoint;
 use Illuminate\Support\Facades\Storage;
+use Symfony\Component\Finder\Finder;
 use Tests\Fakes\FakeImportSource;
 use Tests\Fakes\FakeScrobbleSource;
 
@@ -88,4 +89,50 @@ function runFakeImport(User $user, array $rows, string $username = 'someone'): T
     ]);
 
     return $taskRun->refresh();
+}
+
+/** A fixture file under tests/Fixtures/transfer put on the fake local disk; its path there. */
+function putTransferFixture(string $source, string $name): string
+{
+    Storage::fake('local');
+    Storage::disk('local')->put("imports/{$name}", (string) file_get_contents(base_path("tests/Fixtures/transfer/{$source}/{$name}")));
+
+    return "imports/{$name}";
+}
+
+/**
+ * A ZIP of these files, path in the archive => body, put on the fake local
+ * disk as an upload; its path there.
+ *
+ * @param  array<string, string>  $files
+ */
+function putZip(array $files): string
+{
+    $zipPath = scratchPath('zip', '.zip');
+    $zip = new ZipArchive;
+    $zip->open($zipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE);
+
+    foreach ($files as $name => $body) {
+        $zip->addFromString($name, $body);
+    }
+
+    $zip->close();
+
+    Storage::fake('local');
+    Storage::disk('local')->put('imports/export.zip', (string) file_get_contents($zipPath));
+
+    return 'imports/export.zip';
+}
+
+/** A fixture directory under tests/Fixtures/transfer packed as the ZIP a service hands out, as {@see putZip()} puts it. */
+function putZipFixture(string $directory): string
+{
+    $root = base_path("tests/Fixtures/transfer/{$directory}");
+    $files = [];
+
+    foreach ((new Finder)->files()->in($root)->sortByName() as $file) {
+        $files[str_replace(DIRECTORY_SEPARATOR, '/', $file->getRelativePathname())] = $file->getContents();
+    }
+
+    return putZip($files);
 }

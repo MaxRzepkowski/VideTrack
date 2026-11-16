@@ -4,6 +4,7 @@ namespace App\Integrations\Import;
 
 use App\Catalog\Data\MediaSummary;
 use App\Catalog\Data\ResolvedMedia;
+use App\Catalog\HierarchyPath;
 use App\Catalog\ItemNotFoundException;
 use App\Catalog\Matching;
 use App\Catalog\MediaKind;
@@ -27,10 +28,21 @@ final class TitleMatcher
     public function __construct(
         private readonly MediaTypeRegistry $types,
         private readonly ProviderRegistry $providers,
+        private readonly HierarchyPath $hierarchy,
     ) {}
 
-    public function match(MediaKind $kind, TitleQuery $query, string $locale): ?ResolvedMedia
+    /**
+     * An episode is never searched for itself: its query names the show, and
+     * its season and number lead down from there.
+     */
+    public function match(MediaKind $kind, TitleQuery $query, string $locale, ?int $season = null, ?int $episode = null): ?ResolvedMedia
     {
+        if ($kind === MediaKind::Episode) {
+            $show = $season === null || $episode === null ? null : $this->match(MediaKind::Show, $query, $locale);
+
+            return $show === null ? null : $this->hierarchy->episode($show, $season, $episode);
+        }
+
         $type = $kind->value;
         $title = trim($query->title);
 
