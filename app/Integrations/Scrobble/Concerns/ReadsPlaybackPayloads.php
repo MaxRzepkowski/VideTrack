@@ -3,6 +3,7 @@
 namespace App\Integrations\Scrobble\Concerns;
 
 use App\Catalog\ExternalIdSource;
+use App\Integrations\EpisodeLabel;
 use App\Support\Payload;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\Request;
@@ -182,14 +183,6 @@ trait ReadsPlaybackPayloads
      */
     protected function episodeLabel(?string $series, ?int $season, ?int $number): ?string
     {
-        if ($series === null) {
-            return null;
-        }
-
-        if ($season === null || $number === null) {
-            return $series;
-        }
-
-        return sprintf('%s S%02dE%02d', $series, $season, $number);
+        return $series === null ? null : EpisodeLabel::of($series, $season, $number);
     }
 }

@@ -19,6 +19,19 @@ final readonly class HierarchyPath
     ) {}
 
     /**
+     * An episode of a show by its season and number; null when either is
+     * unknown or the root is not a show.
+     */
+    public function episode(ResolvedMedia $show, ?int $season, ?int $episode): ?ResolvedMedia
+    {
+        if ($season === null || $episode === null || $show->type !== MediaKind::Show->value) {
+            return null;
+        }
+
+        return $this->descend($show->type, $show->ref, [$season, $episode]);
+    }
+
+    /**
      * Null when a step leads nowhere: the type has no children here, or the
      * provider cannot compose the ref.
      *
