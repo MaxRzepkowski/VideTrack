@@ -1,5 +1,7 @@
-# A pull request is squashed into one commit named after its title, so the
-# title is what the changelog and the next version number are read from.
+# A single change is squashed into one commit named after the pull request's
+# title; a planned series is rebased, so each of its commits lands on main as
+# it is. Either way the title that lands is what the changelog and the next
+# version number are read from, so both are checked.
 name: pr-title
 
 on:
@@ -30,3 +32,24 @@ jobs:
             ci
             chore
             revert
+
+  commit-titles:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      # Read through the API, never checked out: this runs with the base
+      # repository's token, so a fork's code must not run here, and each
+      # title stays data, never part of the script.
+      - name: Every commit is titled in Conventional Commits
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          types='feat|fix|deps|perf|refactor|docs|test|build|ci|chore|revert'
+          gh api --paginate "repos/$REPO/pulls/$NUMBER/commits" --jq '.[] | select(.parents | length == 1) | .sha[0:8] + " " + (.commit.message | split("\n")[0])' > titles.txt
+          if grep -Ev "^[0-9a-f]{8} ($types)(\([a-z0-9-]+\))?!?: .+" titles.txt; then
+            echo "::error::The commits above are not titled in Conventional Commits (type: description)."
+            exit 1
+          fi
+          cat titles.txt

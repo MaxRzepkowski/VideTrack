@@ -1,5 +1,5 @@
-<!-- The title becomes the commit on main and the changelog line: Conventional Commits,
-     e.g. "fix: keep the calendar on the viewer's day". Add `!` when operators must act. -->
+<!-- What lands on main is the changelog: a squashed pull request's title, or each commit of a rebased series.
+     Title them in Conventional Commits, e.g. "fix: keep the calendar on the viewer's day". Add `!` when operators must act. -->
 
 Closes #
 
