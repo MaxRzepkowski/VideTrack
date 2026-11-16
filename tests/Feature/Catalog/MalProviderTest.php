@@ -1,10 +1,12 @@
 <?php
 
+use App\Catalog\Data\RankingPosition;
 use App\Catalog\ItemNotFoundException;
 use App\Catalog\MediaTypeRegistry;
 use App\Catalog\ProviderRegistry;
 use App\Catalog\ProviderRejected;
 use App\Catalog\Providers\Mal\MalProvider;
+use App\Catalog\RankingKind;
 use App\Catalog\TitleStatus;
 use Illuminate\Support\Facades\Http;
 
@@ -108,7 +110,7 @@ test('a manga MAL names in English is shown by that name, the Japanese one as it
         ->and($manga->summary->alternativeTitles)->toBe(['Shingeki no Kyojin', '進撃の巨人', 'AoT']);
 });
 
-test('a manga page names what each author did, its rank, its background and the years it ran', function () {
+test('a manga page names what each author did, its rankings, its background and the years it ran', function () {
     enableMangaModule();
     Http::fake(['api.myanimelist.net/v2/manga/2*' => Http::response([
         ...jsonFixture('mal/details'),
@@ -127,8 +129,7 @@ test('a manga page names what each author did, its rank, its background and the 
     expect($manga->extra['authorRoles'])->toBe(['Tsugumi Ohba' => ['story'], 'Takeshi Obata' => ['art'], 'Kentarou Miura' => ['story', 'art']])
         ->and($manga->summary->authors)->toBe(['Tsugumi Ohba', 'Takeshi Obata', 'Kentarou Miura', 'Kouji Mori'])
         ->and($manga->extra['endDate'])->toBe('2021-05-01')
-        ->and($manga->extra['rank'])->toBe(1)
-        ->and($manga->extra['popularity'])->toBe(1)
+        ->and($manga->rankings)->toEqual([new RankingPosition(RankingKind::Score, 1), new RankingPosition(RankingKind::Popularity, 1)])
         ->and($manga->extra['background'])->toStartWith('Berserk won the Award for Excellence');
 });
 

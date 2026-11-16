@@ -85,6 +85,8 @@ final readonly class MediaDetails implements JsonSerializable
         public ?MediaSummary $nextEpisodeToAir = null,
         /** Filed by the provider as adult material: never put forward next to another title. */
         public bool $adult = false,
+        /** @var list<RankingPosition> where the title stands in its provider's rankings, as the page shows them */
+        public array $rankings = [],
     ) {}
 
     /**
@@ -181,7 +183,8 @@ final readonly class MediaDetails implements JsonSerializable
      *     posters: list<string>,
      *     logos: list<string>,
      *     related: list<MediaSummary>,
-     *     similar: list<MediaSummary>
+     *     similar: list<MediaSummary>,
+     *     rankings: list<RankingPosition>
      * }
      */
     public function jsonSerialize(): array
@@ -210,6 +213,7 @@ final readonly class MediaDetails implements JsonSerializable
             'logos' => $this->logos,
             'related' => $this->related,
             'similar' => $this->similar,
+            'rankings' => $this->rankings,
         ];
     }
 }

@@ -519,6 +519,7 @@ export type MediaDetails = {
     readonly logos: string[];
     readonly related: MediaSummary[];
     readonly similar: MediaSummary[];
+    readonly rankings: RankingPosition[];
 };
 export type MediaEventType =
     | 'episode_aired'
@@ -679,6 +680,11 @@ export type ProgressUnit = 'minutes' | 'pages' | 'chapters' | 'issues';
 export type ProviderRating = {
     readonly score: number;
     readonly count: number;
+};
+export type RankingKind = 'score' | 'popularity';
+export type RankingPosition = {
+    readonly kind: RankingKind;
+    readonly position: number;
 };
 export type ReleaseDateMode = 'both' | 'cinema' | 'digital';
 export type ReleaseEntry = {

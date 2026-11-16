@@ -75,8 +75,6 @@
         },
         "endDate": null,
         "stillPublishing": true,
-        "rank": 1,
-        "popularity": 1,
         "background": "Berserk won the Award for Excellence at the sixth installment of Tezuka Osamu Cultural Prize in 2002."
     },
     "children": [],
@@ -164,5 +162,17 @@
     "collection": null,
     "lastEpisodeToAir": null,
     "nextEpisodeToAir": null,
-    "adult": false
+    "adult": false,
+    "rankings": [
+        {
+            "@class": "RankingPosition",
+            "kind": "score",
+            "position": 1
+        },
+        {
+            "@class": "RankingPosition",
+            "kind": "popularity",
+            "position": 1
+        }
+    ]
 }

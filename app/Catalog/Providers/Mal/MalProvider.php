@@ -6,9 +6,11 @@ use App\Catalog\Contracts\MetadataProvider;
 use App\Catalog\Contracts\SupportsTrending;
 use App\Catalog\Data\MediaDetails;
 use App\Catalog\Data\MediaSummary;
+use App\Catalog\Data\RankingPosition;
 use App\Catalog\ItemNotFoundException;
 use App\Catalog\Matching;
 use App\Catalog\ProviderRejected;
+use App\Catalog\RankingKind;
 use App\Support\Payload;
 use LogicException;
 
@@ -145,14 +147,13 @@ class MalProvider implements MetadataProvider, SupportsTrending
                 'endDate' => $this->payload->paddedDate($data, 'end_date'),
                 // Without an end, whether the years read "since 1989" or just "1989".
                 'stillPublishing' => $status?->isRunning() ?? false,
-                'rank' => Payload::positiveInt($data, 'rank'),
-                'popularity' => Payload::positiveInt($data, 'popularity'),
                 // Awards, sales, where it was published abroad: MAL's own notes, in English as the synopsis is.
                 'background' => Payload::string($data, 'background'),
             ],
             posters: array_slice($posters, 0, self::POSTERS_KEPT),
             related: $this->recommendations($data),
             adult: $this->payload->isAdult($data),
+            rankings: $this->rankings($data),
         );
     }
 
@@ -183,6 +184,27 @@ class MalProvider implements MetadataProvider, SupportsTrending
         usort($entries, fn (array $a, array $b): int => (Payload::int($b, 'num_recommendations') ?? 0) <=> (Payload::int($a, 'num_recommendations') ?? 0));
 
         return $this->payload->cards($entries);
+    }
+
+    /**
+     * MAL's two rankings of all manga: by score (`rank`) and by members (`popularity`).
+     *
+     * @param  array<array-key, mixed>  $data
+     * @return list<RankingPosition>
+     */
+    private function rankings(array $data): array
+    {
+        $rankings = [];
+
+        foreach (['rank' => RankingKind::Score, 'popularity' => RankingKind::Popularity] as $key => $kind) {
+            $position = Payload::positiveInt($data, $key);
+
+            if ($position !== null) {
+                $rankings[] = new RankingPosition($kind, $position);
+            }
+        }
+
+        return $rankings;
     }
 
     private function ttl(string $kind): int

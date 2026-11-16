@@ -20,7 +20,7 @@ const color = computed(() => mediaTypeMeta(props.type).color);
 
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <div v-for="tile in tiles" :key="tile.key" class="border-line-subtle bg-surface flex items-center gap-4 rounded-xl border p-5">
-                <component :is="tile.icon" class="size-7 shrink-0" :style="{ color }" :stroke-width="2" />
+                <component :is="tile.icon" class="size-7 shrink-0" :style="{ color }" :stroke-width="2" aria-hidden="true" />
                 <div class="min-w-0">
                     <div class="text-ink-muted text-sm font-bold">{{ tile.label }}</div>
                     <div class="text-ink text-xl font-extrabold">{{ tile.value }}</div>

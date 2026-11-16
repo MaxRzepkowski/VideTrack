@@ -1,10 +1,12 @@
 import ClampedText from '@/components/ClampedText.vue';
+import FactTilesSection from '@/components/media/FactTilesSection.vue';
 import MediaTitleHeader from '@/components/media/MediaTitleHeader.vue';
 import OverviewSection from '@/components/media/OverviewSection.vue';
 import RecommendationsBand from '@/components/media/RecommendationsBand.vue';
 import MangaDetails from '@/pages/media/MangaDetails.vue';
 import { mediaSummary, useMediaTypes } from '@/test/factories';
 import type { MangaExtra } from '@/types/extras';
+import type { RankingPosition } from '@/types/generated';
 import type { DetailRow, MediaDetails } from '@/types/media';
 import { shallowMount } from '@vue/test-utils';
 import { beforeEach, describe, expect, it } from 'vitest';
@@ -13,6 +15,7 @@ function manga(extra: MangaExtra = {}): MediaDetails<MangaExtra> {
     return {
         ...mediaSummary({ type: 'manga', ref: '23390', provider: 'mal', title: 'Attack on Titan' }),
         status: null,
+        rankings: [] as RankingPosition[],
         extra,
     } as MediaDetails<MangaExtra>;
 }
@@ -49,14 +52,26 @@ describe('MangaDetails', () => {
         expect(valueOf(detailRows, 'Alternative titles')).toBeNull();
     });
 
-    it('names the years it ran, its rank and its popularity as positions', () => {
-        const details = { ...manga({ endDate: '2021-05-01', rank: 1, popularity: 12 }), releaseDate: '1989-08-25' };
-        const detailRows: DetailRow[] = render(details).findComponent(MediaTitleHeader).props('detailRows');
+    it('names the years it ran among the details, and its rankings as tiles', () => {
+        const details = {
+            ...manga({ endDate: '2021-05-01' }),
+            releaseDate: '1989-08-25',
+            rankings: [
+                { kind: 'score' as const, position: 1 },
+                { kind: 'popularity' as const, position: 12 },
+            ],
+        };
+        const wrapper = render(details);
+        const detailRows: DetailRow[] = wrapper.findComponent(MediaTitleHeader).props('detailRows');
 
         expect(valueOf(detailRows, 'Published')).toBe('1989–2021');
-        expect(valueOf(detailRows, 'Rank')).toBe('#1');
-        expect(valueOf(detailRows, 'Popularity')).toBe('#12');
-        expect(valueOf(rows({}), 'Rank')).toBeNull();
+        expect(wrapper.findComponent(FactTilesSection).props('title')).toBe('Rankings');
+        expect(
+            wrapper
+                .findComponent(FactTilesSection)
+                .props('tiles')
+                .map((tile: { value: string }) => tile.value),
+        ).toEqual(['#1', '#12']);
     });
 
     it('credits the authors under what they did', () => {

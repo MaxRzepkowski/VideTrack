@@ -173,8 +173,6 @@ export interface MangaExtra extends TitleExtra {
     endDate?: string | null;
     /** Whether more is coming: the years then read "since", not a bare start year. */
     stillPublishing?: boolean;
-    rank?: number | null;
-    popularity?: number | null;
     background?: string | null;
 }
 

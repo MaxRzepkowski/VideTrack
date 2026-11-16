@@ -167,5 +167,6 @@
     "collection": null,
     "lastEpisodeToAir": null,
     "nextEpisodeToAir": null,
-    "adult": false
+    "adult": false,
+    "rankings": []
 }

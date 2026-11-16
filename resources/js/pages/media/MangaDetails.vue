@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import ClampedText from '@/components/ClampedText.vue';
+import FactTilesSection from '@/components/media/FactTilesSection.vue';
 import MediaHero from '@/components/media/MediaHero.vue';
 import MediaStatusPanel from '@/components/media/MediaStatusPanel.vue';
 import MediaTitleHeader from '@/components/media/MediaTitleHeader.vue';
@@ -10,6 +11,7 @@ import SectionHeading from '@/components/SectionHeading.vue';
 import StickyActionsPanel from '@/components/media/StickyActionsPanel.vue';
 import TitlePageLayout from '@/components/media/TitlePageLayout.vue';
 import { mangaAuthorCredits } from '@/lib/creators';
+import { rankingTiles } from '@/lib/factTiles';
 import { alternativeTitlesLine, formatCalendarDate, formatCountOrNull, formatYearSpan } from '@/lib/format';
 import { mangaFormatLabel } from '@/lib/mangaFormats';
 import { titleStatusLabel } from '@/lib/titleStatus';
@@ -31,8 +33,8 @@ const authors = computed(() => props.manga.extra.authors ?? []);
 // Authors as the byline under the overview, each under what they did, named without a page to link to.
 const authorPeople = computed(() => mangaAuthorCredits(authors.value, props.manga.extra.authorRoles ?? {}));
 
-// MAL's rank and popularity are positions, not counts: "#1".
-const position = (value: number | null | undefined): string | null => (value ? trans('media.rank_position', { position: String(value) }) : null);
+// Where it stands in MAL's rankings, as tiles beside the overview: what a reader weighs before starting one.
+const rankings = computed(() => rankingTiles(props.manga.rankings));
 
 const chapters = computed(() => props.manga.extra.chapters ?? null);
 
@@ -67,8 +69,6 @@ const detailRows = computed<DetailRow[]>(() => [
     { label: trans('media.volumes'), value: volumes.value !== null ? String(volumes.value) : null },
     { label: trans('media.readers'), value: formatCountOrNull(props.manga.extra.readersCount) },
     { label: trans('common.ratings'), value: formatCountOrNull(props.manga.extra.ratingsCount) },
-    { label: trans('media.rank'), value: position(props.manga.extra.rank) },
-    { label: trans('common.popularity'), value: position(props.manga.extra.popularity) },
     // Trivia, so it sits below the facts people came for, as on a film's page.
     { label: trans('media.alternative_titles'), value: alternativeTitlesLine(props.manga.extra.alternativeTitles) },
 ]);
@@ -95,6 +95,8 @@ const detailRows = computed<DetailRow[]>(() => [
 
         <OverviewSection :overview="manga.overview" :people="authorPeople" />
 
+        <FactTilesSection :title="trans('media.rankings')" :tiles="rankings" type="manga" />
+
         <!-- MAL's notes (awards, sales, editions abroad) beside the synopsis, in a card as the page's other facts are. -->
         <section v-if="manga.extra.background">
             <SectionHeading :title="trans('media.background')" />
@@ -103,19 +105,18 @@ const detailRows = computed<DetailRow[]>(() => [
             </div>
         </section>
 
-        <template #below>
+        <template #after>
+            <RecommendationsBand :related="manga.related" :related-title="trans('media.recommended_manga')" />
+        </template>
+
+        <template #recent>
             <RecentlyViewed
-                class="pt-16 md:pt-32"
                 :title="manga.title"
                 :type="manga.type"
                 :backdrop-path="manga.backdropPath"
                 color="var(--color-media-manga-shade)"
                 :items="recentlyViewed ?? []"
             />
-        </template>
-
-        <template #after>
-            <RecommendationsBand :related="manga.related" :related-title="trans('media.recommended_manga')" />
         </template>
     </TitlePageLayout>
 </template>
