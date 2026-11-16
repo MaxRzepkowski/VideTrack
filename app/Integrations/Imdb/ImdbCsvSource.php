@@ -3,6 +3,7 @@
 namespace App\Integrations\Imdb;
 
 use App\Catalog\ExternalIdSource;
+use App\Catalog\ImdbId;
 use App\Catalog\MediaKind;
 use App\Integrations\Import\Contracts\ExplainsSetup;
 use App\Integrations\Import\Contracts\ReadsFile;
@@ -137,7 +138,8 @@ final class ImdbCsvSource implements ExplainsSetup, ReadsFile
         $year = $this->year($row);
         $label = $title === '' ? trim($row['const']) : ($year === null ? $title : "{$title} ({$year})");
 
-        $id = $this->imdbId($row['const']);
+        // Older exports drop the tt prefix; TMDB's find needs it.
+        $id = ImdbId::read($row['const']);
 
         if ($id === null) {
             return new SkipRow('import.skip_imdb_no_id', ['label' => $label]);
@@ -176,18 +178,6 @@ final class ImdbCsvSource implements ExplainsSetup, ReadsFile
     private function rating(array $row): ?int
     {
         return RatingScale::readPoints(Payload::text($row, 'your rating'));
-    }
-
-    /** Older exports drop the tt prefix; TMDB's find needs it. */
-    private function imdbId(string $const): ?string
-    {
-        $const = trim($const);
-
-        if (preg_match('/^tt\d+$/', $const) === 1) {
-            return $const;
-        }
-
-        return ctype_digit($const) ? "tt{$const}" : null;
     }
 
     /**

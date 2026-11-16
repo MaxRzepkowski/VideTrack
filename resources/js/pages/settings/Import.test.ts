@@ -20,22 +20,21 @@ const source: ImportSourceDef = {
     connect: null,
 };
 
-function manifest(preselected: boolean): ImportManifest {
+function manifest(preselected: [boolean, boolean, boolean]): ImportManifest {
     return {
         valid: true,
         error: null,
         categories: [
-            { key: 'first', label: 'First', count: 3 },
-            { key: 'second', label: 'Second', count: 1 },
-            { key: 'empty', label: 'Empty', count: 0 },
+            { key: 'first', label: 'First', count: 3, preselected: preselected[0] },
+            { key: 'second', label: 'Second', count: 1, preselected: preselected[1] },
+            { key: 'empty', label: 'Empty', count: 0, preselected: preselected[2] },
         ],
         lists: [],
         supportsSelection: true,
-        preselected,
     };
 }
 
-async function analyzed(preselected: boolean) {
+async function analyzed(preselected: [boolean, boolean, boolean]) {
     answer = manifest(preselected);
 
     const wrapper = mount(Import, {
@@ -62,7 +61,7 @@ const ticked = (wrapper: Awaited<ReturnType<typeof analyzed>>) =>
 
 describe('Import', () => {
     it('ticks every category with something in it, as most exports want', async () => {
-        const wrapper = await analyzed(true);
+        const wrapper = await analyzed([true, true, true]);
 
         expect(ticked(wrapper)).toEqual([
             ['First', 'checked'],
@@ -72,8 +71,18 @@ describe('Import', () => {
         expect(wrapper.find('button[type="submit"]').attributes('disabled')).toBeUndefined();
     });
 
+    it('leaves a category for the user to tick when the source asks', async () => {
+        const wrapper = await analyzed([true, false, true]);
+
+        expect(ticked(wrapper)).toEqual([
+            ['First', 'checked'],
+            ['Second', 'unchecked'],
+            ['Empty', 'unchecked'],
+        ]);
+    });
+
     it('ticks nothing when the user has to pick, and starts nothing until they do', async () => {
-        const wrapper = await analyzed(false);
+        const wrapper = await analyzed([false, false, false]);
 
         expect(ticked(wrapper)).toEqual([
             ['First', 'unchecked'],

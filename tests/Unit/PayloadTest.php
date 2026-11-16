@@ -173,3 +173,27 @@ test('a list of objects reads entry by entry, dropping what does not read and ke
     expect(Payload::listOf([['name' => 'a'], ['name' => 1], 'not an object', ['name' => 'b']], $read))->toEqual([new KeywordData('a'), new KeywordData('b')])
         ->and(Payload::listOf('not a list', $read))->toBe([]);
 });
+
+test('a calendar day is read only when the value opens with one, year first', function (mixed $value, ?string $day) {
+    expect(Payload::calendarDay($value)?->toDateTimeString())->toBe($day);
+})->with([
+    'a day' => ['2024-04-25', '2024-04-25 12:00:00'],
+    'slashes, no padding' => ['2024/4/5', '2024-04-05 12:00:00'],
+    'the head of a moment' => ['2021-10-02T06:54:47Z', '2021-10-02 12:00:00'],
+    'no such day' => ['2023-02-30', null],
+    'a year alone' => ['2019', null],
+    'a placeholder' => ['None', null],
+    'day first' => ['16.11.2026', null],
+    'not text' => [20240425, null],
+]);
+
+test('a yes or no written as text is yes for true and yes in any case', function (string $value, bool $yes) {
+    expect(Payload::flag(['flag' => $value], 'flag'))->toBe($yes);
+})->with([
+    '.NET' => ['True', true],
+    'lower case' => ['true', true],
+    'yes' => ['yes', true],
+    'no' => ['no', false],
+    'false' => ['False', false],
+    'blank' => ['', false],
+]);

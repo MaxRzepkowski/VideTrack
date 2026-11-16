@@ -356,7 +356,6 @@ export type ImportManifest = {
     readonly categories: ManifestCategory[];
     readonly lists: ManifestList[];
     readonly supportsSelection: boolean;
-    readonly preselected: boolean;
 };
 export type ImportSourceDef = {
     readonly code: string;
@@ -454,6 +453,7 @@ export type ManifestCategory = {
     readonly key: string;
     readonly label: string;
     readonly count: number;
+    readonly preselected: boolean;
 };
 export type ManifestList = {
     readonly id: string;
