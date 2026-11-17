@@ -232,6 +232,21 @@ test('a title two creators back outlives losing either of them', function (strin
     'studio, then person' => ['company', 'person'],
 ]);
 
+test('a title two followed creators back is announced once, by the first to find it', function () {
+    fakeCreatorWorld();
+    $user = User::factory()->create();
+
+    bellCreator($user, 'person', 'follow');
+    bellCreator($user, 'company', 'follow');
+    runScheduledTask('refresh-followed-people');
+    runScheduledTask('refresh-followed-companies');
+
+    $notification = $user->notifications()->sole();
+
+    expect($notification->data['event'])->toBe('person_new_title')
+        ->and($notification->data['key'])->toBe('new_title:movie:603');
+});
+
 test('a title a creator and a followed saga both back outlives unfollowing the creator', function () {
     fakeCreatorWorld();
     $user = User::factory()->create();

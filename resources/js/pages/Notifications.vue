@@ -123,9 +123,9 @@ function goto(page: number): void {
                         width="48"
                         height="72"
                         loading="lazy"
-                        class="bg-surface aspect-poster w-12 shrink-0 rounded-md object-cover"
+                        class="bg-surface-overlay aspect-poster w-12 shrink-0 rounded-md object-cover"
                     />
-                    <span v-else class="bg-surface aspect-poster w-12 shrink-0 rounded-md" />
+                    <span v-else class="bg-surface-overlay aspect-poster w-12 shrink-0 rounded-md" aria-hidden="true" />
                     <span class="min-w-0 flex-1">
                         <a
                             :href="item.href"

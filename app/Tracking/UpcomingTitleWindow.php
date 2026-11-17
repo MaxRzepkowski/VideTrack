@@ -3,13 +3,15 @@
 namespace App\Tracking;
 
 use App\Catalog\Data\MediaSummary;
+use App\Catalog\MediaItemSummaries;
 use App\Catalog\MediaTypeRegistry;
 use App\Models\MediaItem;
 
 /**
  * Which of a followed creator's titles still count as upcoming. One rule for
- * people and companies alike, so following a director and following the
- * studio behind the same film announce the same moments.
+ * people, companies and collections alike, so following a director, the
+ * studio behind the same film and the saga it continues announce the same
+ * moments.
  *
  * A film is not done the day it opens. The day it becomes watchable outside
  * a cinema is a second event worth following, and measured over real
@@ -36,6 +38,18 @@ final readonly class UpcomingTitleWindow
 
         return $media->releaseDate > today()->toDateString()
             || ($this->comesHomeLater($media->type) && $media->releaseDate > $graceFloor);
+    }
+
+    /**
+     * A title already stored, judged as a credit is: admitted, and not a film
+     * already out at home. A part a followed collection gains has its row
+     * before anyone asks, so it goes through both steps at once.
+     */
+    public function admitsStored(MediaItem $item): bool
+    {
+        $summary = MediaItemSummaries::summary($item);
+
+        return $this->admits($summary) && ! $this->isSpent($summary, $item);
     }
 
     private function comesHomeLater(string $type): bool

@@ -78,31 +78,31 @@ function fakeHardcover(array $operations): void
  * Fakes Hardcover serving a book series: each `Series` query takes the next
  * answer (the last one repeats), and every volume stored is asked for its
  * details, which answer as the `hardcover/book` fixture under that volume's
- * id and title.
+ * id, title and, when the series names it, release date.
  *
  * @param  array<string, mixed>  ...$answers  `series_by_pk` responses, in the order they are served
  */
 function fakeHardcoverSeries(array ...$answers): void
 {
-    $titles = [];
+    $volumes = [];
 
     foreach ($answers as $answer) {
         foreach ($answer['data']['series_by_pk']['book_series'] as $member) {
-            $titles[$member['book']['id']] = $member['book']['title'];
+            $volumes[$member['book']['id']] = array_intersect_key($member['book'], array_flip(['title', 'release_date', 'release_year']));
         }
     }
 
     $asked = 0;
 
     Http::fake([
-        'api.hardcover.app/*' => function (Request $request) use ($answers, $titles, &$asked) {
+        'api.hardcover.app/*' => function (Request $request) use ($answers, $volumes, &$asked) {
             if (str_contains((string) data_get($request->data(), 'query'), 'query Series')) {
                 return Http::response($answers[min($asked++, count($answers) - 1)]);
             }
 
             $id = (int) data_get($request->data(), 'variables.id');
             $book = jsonFixture('hardcover/book');
-            $book['data']['books_by_pk'] = ['id' => $id, 'title' => $titles[$id]] + $book['data']['books_by_pk'];
+            $book['data']['books_by_pk'] = ['id' => $id, ...$volumes[$id]] + $book['data']['books_by_pk'];
 
             return Http::response($book);
         },

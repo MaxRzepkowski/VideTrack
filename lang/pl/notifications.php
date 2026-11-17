@@ -30,4 +30,6 @@ return [
     'other_titles' => 'Inne',
     'count_notification' => ':count powiadomienie|:count powiadomienia|:count powiadomień',
     'unread_title' => 'Nieprzeczytane: :title',
+    'count_new_episodes_of_title' => ':count nowy odcinek :title|:count nowe odcinki :title|:count nowych odcinków :title',
+    'count_new_episodes' => ':count nowy odcinek|:count nowe odcinki|:count nowych odcinków',
 ];

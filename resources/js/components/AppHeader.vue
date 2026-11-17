@@ -332,9 +332,9 @@ async function openNotification(item: NotificationEntry, event: MouseEvent): Pro
                                     width="36"
                                     height="54"
                                     loading="lazy"
-                                    class="bg-surface aspect-poster w-9 shrink-0 rounded-md object-cover"
+                                    class="bg-surface-overlay aspect-poster w-9 shrink-0 rounded-md object-cover"
                                 />
-                                <span v-else class="bg-surface aspect-poster w-9 shrink-0 rounded-md" />
+                                <span v-else class="bg-surface-overlay aspect-poster w-9 shrink-0 rounded-md" aria-hidden="true" />
                                 <span class="min-w-0 flex-1">
                                     <span class="text-ink line-clamp-2 block text-sm font-semibold"
                                         ><span v-if="!item.readAt" class="sr-only">{{ trans('common.unread') }}, </span>{{ item.title }}</span

@@ -3,6 +3,8 @@
 namespace App\Notifications;
 
 use App\Catalog\DatePrecision;
+use App\Catalog\EpisodeBadge;
+use App\Catalog\EpisodeCode;
 use App\Catalog\ImageUrls;
 use App\Catalog\MediaTypeRegistry;
 use App\Catalog\TitleStatus;
@@ -62,7 +64,9 @@ final readonly class NotificationCopy
         $title = $event->title();
 
         return match ($event->type) {
-            MediaEventType::EpisodeAired => __('notifications.new_episode_of_title', ['title' => $event->showTitle ?? $title], $locale),
+            MediaEventType::EpisodeAired => $event->listsSeveral()
+                ? trans_choice('notifications.count_new_episodes_of_title', count($event->titles()), ['title' => $event->showTitle ?? $title], $locale)
+                : __('notifications.new_episode_of_title', ['title' => $event->showTitle ?? $title], $locale),
             MediaEventType::SeasonPremiere => __('notifications.season_premiere_of_title', ['title' => $event->showTitle ?? $title], $locale),
             MediaEventType::Premiere => __('notifications.out_today_title', ['title' => $title], $locale),
             MediaEventType::HomeRelease => __('notifications.now_available_outside_cinemas_title', ['title' => $title], $locale),
@@ -93,11 +97,7 @@ final readonly class NotificationCopy
         switch ($event->type) {
             case MediaEventType::EpisodeAired:
             case MediaEventType::SeasonPremiere:
-                $extra = is_array($media['extra'] ?? null) ? $media['extra'] : [];
-                $season = $event->season ?? Payload::positiveInt($extra, 'seasonNumber') ?? 0;
-                $code = sprintf('S%02dE%02d', $season, Payload::positiveInt($media, 'number') ?? 0);
-
-                return $event->title() !== '' ? [$code, $event->title()] : [$code];
+                return $this->episodeDetail($event, $locale);
             case MediaEventType::Premiere:
                 $platform = Payload::string(is_array($media['extra'] ?? null) ? $media['extra'] : [], 'platform');
 
@@ -226,9 +226,11 @@ final readonly class NotificationCopy
 
                 return [
                     'subject' => $event->showTitle ?? $title,
-                    'label' => $event->type === MediaEventType::SeasonPremiere
-                        ? __('notifications.season_premiere', [], $locale)
-                        : __('notifications.new_episode', [], $locale),
+                    'label' => match (true) {
+                        $event->type === MediaEventType::SeasonPremiere => __('notifications.season_premiere', [], $locale),
+                        $event->listsSeveral() => trans_choice('notifications.count_new_episodes', count($event->titles()), [], $locale),
+                        default => __('notifications.new_episode', [], $locale),
+                    },
                     'meta' => $meta,
                 ];
             case MediaEventType::Premiere:
@@ -312,6 +314,32 @@ final readonly class NotificationCopy
         return $event->listsSeveral()
             ? trans_choice('notifications.count_new_parts_of_collection', count($event->titles()), $collection, $locale)
             : __('notifications.new_part_of_collection', $collection, $locale);
+    }
+
+    /**
+     * The facts under an episode's headline: its code and title. A show's
+     * episodes out together say only what the headline does not: how many a
+     * season opened with, else the finale among them.
+     *
+     * @return list<string>
+     */
+    private function episodeDetail(MediaEventPayload $event, string $locale): array
+    {
+        if ($event->listsSeveral()) {
+            if ($event->type === MediaEventType::SeasonPremiere) {
+                return [trans_choice('common.count_episode', count($event->titles()), [], $locale)];
+            }
+
+            $badges = array_map(fn (array $episode): ?EpisodeBadge => Payload::enum(Payload::map($episode['extra'] ?? null), 'episodeBadge', EpisodeBadge::class), $event->items ?? []);
+            $finale = array_find($badges, fn (?EpisodeBadge $badge): bool => $badge?->isFinale() === true);
+
+            return $finale === null ? [] : [$finale->label($locale)];
+        }
+
+        $extra = Payload::map($event->media['extra'] ?? null);
+        $code = EpisodeCode::of($event->season ?? Payload::positiveInt($extra, 'seasonNumber') ?? 0, Payload::positiveInt($event->media, 'number') ?? 0);
+
+        return $event->title() !== '' ? [$code, $event->title()] : [$code];
     }
 
     /**

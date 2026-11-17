@@ -2,6 +2,7 @@
 import MediaCard from '@/components/media/MediaCard.vue';
 import MediaGrid from '@/components/media/MediaGrid.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
+import { leafCode, showTitleOf } from '@/lib/badges';
 import { formatTimestampDate } from '@/lib/format';
 import type { MediaSummary } from '@/types/media';
 import type { NotificationEntry } from '@/types/notifications';
@@ -11,14 +12,14 @@ import { computed } from 'vue';
 
 const props = defineProps<{
     notification: NotificationEntry;
-    items: { media: MediaSummary; available: boolean }[];
+    items: { media: MediaSummary | null; available: boolean }[];
 }>();
 
 const title = props.notification.title;
 
-// A title nobody keeps any more has been deleted since; its card would lead
-// to a missing page, so it is only counted.
-const available = computed(() => props.items.filter((item) => item.available).map((item) => item.media));
+// A title nobody keeps any more has been deleted since; there is no card to
+// lead to, so it is only counted.
+const available = computed(() => props.items.flatMap((item) => (item.media === null ? [] : [item.media])));
 const deleted = computed(() => props.items.length - available.value.length);
 </script>
 
@@ -34,7 +35,15 @@ const deleted = computed(() => props.items.length - available.value.length);
             <p class="text-ink-faint m-0 mb-8 text-sm">{{ formatTimestampDate(notification.createdAt) }}</p>
 
             <MediaGrid v-if="available.length">
-                <MediaCard v-for="media in available" :key="`${media.type}-${media.ref}`" :media="media" show-type-badge with-actions />
+                <MediaCard
+                    v-for="media in available"
+                    :key="`${media.type}-${media.ref}`"
+                    :media="media"
+                    :subtitle="showTitleOf(media)"
+                    :corner-badge="leafCode(media)"
+                    show-type-badge
+                    with-actions
+                />
             </MediaGrid>
 
             <p v-if="deleted > 0" class="text-ink-muted mt-6 text-sm">

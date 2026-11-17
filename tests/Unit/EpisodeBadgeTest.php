@@ -27,3 +27,15 @@ test('a premiere of the series or of a season opens its season, a finale does no
         'season_finale' => false,
     ]);
 });
+
+test('a break, a season end and a series end are finales, a premiere is not', function () {
+    $finales = array_column(array_map(fn (EpisodeBadge $badge): array => [$badge->value, $badge->isFinale()], EpisodeBadge::cases()), 1, 0);
+
+    expect($finales)->toBe([
+        'series_premiere' => false,
+        'season_premiere' => false,
+        'mid_season_finale' => true,
+        'series_finale' => true,
+        'season_finale' => true,
+    ]);
+});
