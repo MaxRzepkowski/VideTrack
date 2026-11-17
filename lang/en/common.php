@@ -146,4 +146,9 @@ return [
     'label_with_count' => ':label (:count)',
     'notifications_unread' => 'Notifications, :count unread',
     'session_expired_reload' => 'Your session has expired. Reload the page and try again.',
+    'how_to_set_it_up' => 'How to set it up',
+    'optional_field' => '(optional)',
+    'this_is_not_a_web_address' => 'Enter a web address starting with http:// or https://.',
+    'this_address_could_not_be_found' => 'This address could not be found.',
+    'this_address_is_in_a_private_network' => 'This address is in a private network. Ask the administrator to add it to INTEGRATION_PRIVATE_HOSTS, or to set it up from an administrator account.',
 ];

@@ -56,6 +56,10 @@
         <env name="COMICVINE_API_KEY" value=""/>
         <env name="SIMKL_CLIENT_ID" value=""/>
         <env name="STEAM_API_KEY" value=""/>
+        <!-- Forced, in both places PHP keeps it: the development stack sets
+             it as a process variable, which a plain <env> would not replace. -->
+        <env name="APPRISE_API_URL" value="" force="true"/>
+        <server name="APPRISE_API_URL" value="" force="true"/>
         <env name="OIDC_CLIENT_ID" value=""/>
         <env name="GOOGLE_CLIENT_ID" value=""/>
         <env name="GITHUB_CLIENT_ID" value=""/>

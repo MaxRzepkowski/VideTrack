@@ -26,7 +26,7 @@ return [
     'run_now' => 'Run now',
     'running' => 'Running…',
     'scheduled_tasks' => 'Scheduled tasks',
-    'send_discord_digests' => 'Send Discord digests',
+    'send_daily_digests' => 'Send daily digests',
     'send_release_notifications' => 'Send release notifications',
     'show_count_detail' => 'Show :count note|Show :count notes',
     'show_count_error' => 'Show :count error|Show :count errors',

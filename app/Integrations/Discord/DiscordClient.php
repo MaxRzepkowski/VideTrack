@@ -2,6 +2,7 @@
 
 namespace App\Integrations\Discord;
 
+use App\Notifications\Channels\DeliveryAnswer;
 use App\Support\HttpRetry;
 use Closure;
 use Illuminate\Http\Client\ConnectionException;
@@ -10,10 +11,9 @@ use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
 
 /**
- * Posts to a user's Discord webhook — the instant ping, the daily digest and
- * the test button. The webhook keeps the name and avatar its owner gave it in
- * Discord: which product sends the messages is not ours to announce.
- * Best-effort by design: it answers how Discord took the message and never
+ * Posts to a Discord webhook — the instant ping, the daily digest and the
+ * test button. The webhook keeps the name and avatar its owner gave it in
+ * Discord. Best-effort by design: it answers how Discord took the message and never
  * throws, so a broken Discord fails no notification job.
  */
 final readonly class DiscordClient
@@ -27,7 +27,7 @@ final readonly class DiscordClient
     /**
      * @param  array<string, mixed>  $message  a Discord webhook payload (content, embeds)
      */
-    public function send(string $url, array $message): DiscordAnswer
+    public function send(string $url, array $message): DeliveryAnswer
     {
         return $this->answer(fn (): Response => $this->request()->post($url, $message));
     }
@@ -37,18 +37,28 @@ final readonly class DiscordClient
     {
         return Http::timeout(self::TIMEOUT_SECONDS)
             ->retry(self::RETRIES, self::RETRY_DELAY_MS, HttpRetry::isTransient(...), throw: false)
+            ->withUserAgent(config()->string('tracker.http.user_agent'))
             ->asJson();
     }
 
     /**
      * @param  Closure(): Response  $call
      */
-    private function answer(Closure $call): DiscordAnswer
+    private function answer(Closure $call): DeliveryAnswer
     {
         try {
-            return DiscordAnswer::ofStatus($call()->status());
+            $status = $call()->status();
         } catch (ConnectionException) {
-            return DiscordAnswer::Unavailable;
+            return DeliveryAnswer::Unavailable;
         }
+
+        return match (true) {
+            $status >= 200 && $status < 300 => DeliveryAnswer::Delivered,
+            // Deleted in Discord, or the address mistyped.
+            $status === 401 || $status === 404 => DeliveryAnswer::Gone,
+            $status === 429 => DeliveryAnswer::Throttled,
+            $status >= 500 => DeliveryAnswer::Unavailable,
+            default => DeliveryAnswer::Refused,
+        };
     }
 }

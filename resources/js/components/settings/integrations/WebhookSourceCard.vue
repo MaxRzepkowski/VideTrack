@@ -70,7 +70,7 @@ function connect(): void {
 
             <Collapsible v-if="props.source.instructions.length > 0" v-slot="{ open }" class="w-full">
                 <CollapsibleTrigger class="text-brand-soft flex items-center gap-1 text-sm font-medium hover:underline">
-                    {{ trans('integrations.how_to_set_it_up') }}
+                    {{ trans('common.how_to_set_it_up') }}
                     <ChevronDown class="size-4 transition-transform" :class="{ 'rotate-180': open }" aria-hidden="true" />
                 </CollapsibleTrigger>
                 <CollapsibleContent>

@@ -146,4 +146,9 @@ return [
     'label_with_count' => ':label (:count)',
     'notifications_unread' => 'Powiadomienia, nieprzeczytane: :count',
     'session_expired_reload' => 'Sesja wygasła. Odśwież stronę i spróbuj ponownie.',
+    'how_to_set_it_up' => 'Jak to skonfigurować',
+    'optional_field' => '(opcjonalne)',
+    'this_is_not_a_web_address' => 'Wpisz adres strony zaczynający się od http:// albo https://.',
+    'this_address_could_not_be_found' => 'Nie udało się znaleźć tego adresu.',
+    'this_address_is_in_a_private_network' => 'Ten adres należy do sieci prywatnej. Poproś administratora, żeby dopisał go do INTEGRATION_PRIVATE_HOSTS albo ustawił go z konta administratora.',
 ];

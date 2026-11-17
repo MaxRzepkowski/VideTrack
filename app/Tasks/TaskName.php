@@ -16,7 +16,7 @@ enum TaskName: string
     case RefreshFollowedPeople = 'refresh-followed-people';
     case RefreshFollowedCompanies = 'refresh-followed-companies';
     case NotifyReleases = 'notify-releases';
-    case DiscordDigest = 'discord-digest';
+    case ChannelDigest = 'channel-digest';
     case AutoImport = 'auto-import';
     case Cleanup = 'cleanup';
     case ProjectAiredEpisodes = 'project-aired-episodes';
@@ -35,7 +35,7 @@ enum TaskName: string
             self::RefreshFollowedPeople => __('tasks.refresh_followed_people'),
             self::RefreshFollowedCompanies => __('tasks.refresh_followed_companies'),
             self::NotifyReleases => __('tasks.send_release_notifications'),
-            self::DiscordDigest => __('tasks.send_discord_digests'),
+            self::ChannelDigest => __('tasks.send_daily_digests'),
             self::AutoImport => __('tasks.start_automatic_imports'),
             self::Cleanup => __('tasks.clean_up_expired_data'),
             self::ProjectAiredEpisodes => __('tasks.count_newly_aired_episodes'),

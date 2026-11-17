@@ -131,6 +131,7 @@ Everything is optional except `TMDB_API_KEY`. A media type exists only when its 
 | `COMICVINE_API_KEY` | | [ComicVine](https://comicvine.gamespot.com/api) key: **comics** |
 | `SIMKL_CLIENT_ID` | | client id of a Simkl **AUTH V2** app of type *TV, devices & command line* ([developer settings](https://simkl.com/settings/developer/)); users connect with a code, no callback address. Without it the Simkl import is not offered |
 | `STEAM_API_KEY` | | [Steam Web API key](https://steamcommunity.com/dev/apikey); with IGDB, users can import a public Steam library |
+| `APPRISE_API_URL` | `http://apprise:8000` in `compose.yaml` | address of the apprise-api container; empty, its services are not offered as notification channels ([below](#notifications-through-apprise)) |
 | `REGISTRATION_ENABLED` | open until the first account | `true` keeps sign-up open, `false` closed |
 | `ADMIN_EMAIL` / `ADMIN_PASSWORD` | | an administrator created on start |
 | `OIDC_ISSUER` / `OIDC_CLIENT_ID` / `OIDC_CLIENT_SECRET` / `OIDC_LABEL` | | logging in through your own OpenID Connect server ([above](#signing-in-with-an-identity-provider)) |
@@ -140,12 +141,12 @@ Everything is optional except `TMDB_API_KEY`. A media type exists only when its 
 | `PASSWORD_LOGIN_ENABLED` | `true` | `false` leaves the providers as the only way in (ignored while none is configured) |
 | `DEFAULT_LOCALE` | `en` | language of new accounts (`en` / `pl`); each user picks their own |
 | `APP_TIMEZONE` | `UTC` | storage time zone; display uses each user's preference |
-| `MAIL_MAILER` | `log` | how the password-reset link is sent; `log` only writes it to the container log. `smtp` with `MAIL_HOST`, `MAIL_PORT` (`587`), `MAIL_USERNAME`, `MAIL_PASSWORD`, `MAIL_SCHEME` |
-| `MAIL_FROM_ADDRESS` | `videtrack@localhost` | sender of the password-reset mail |
+| `MAIL_MAILER` | `log` | how the instance sends mail: password-reset links, and the e-mail notification channel, offered only when mail really goes out. `log` only writes it to the container log. `smtp` with `MAIL_HOST`, `MAIL_PORT` (`587`), `MAIL_USERNAME`, `MAIL_PASSWORD`, `MAIL_SCHEME` |
+| `MAIL_FROM_ADDRESS` | `videtrack@localhost` | sender of the mail the instance sends |
 | `TRUSTED_PROXIES` | `PRIVATE_SUBNETS` | whose `X-Forwarded-*` headers to believe (client address for throttling, HTTPS detection); list a proxy on a public address here. `*` is right only when nothing but the proxy can reach the app |
 | `SESSION_SECURE_COOKIE` | follows `APP_URL` | `true` sends the session cookie over HTTPS only; unset, it is `true` exactly when `APP_URL` starts with `https://` |
 | `SESSION_LIFETIME` | `43200` (30 days) | minutes of inactivity before a session ends; "remember me" keeps it about five years |
-| `INTEGRATION_PRIVATE_HOSTS` | | private-network hosts an ordinary account may connect an integration to (an administrator may use any), comma-separated: `tracearr.lan,192.168.1.20` |
+| `INTEGRATION_PRIVATE_HOSTS` | | private-network hosts an ordinary account may connect an integration or point a notification channel to (an administrator may use any), comma-separated: `tracearr.lan,192.168.1.20` |
 | `LOG_CHANNEL` / `LOG_LEVEL` | `stderr` / `warning` | `stderr` writes to `docker logs`; `daily` or `single` write a file on the storage volume |
 | `SOURCE_URL` | this repository | where About links for the source code; point it at your fork when you run a modified version (AGPL-3.0, section 13) |
 | `API_DOCS_URL` | `docs/api.md` in this repository | the API reference linked from Settings → API; point it at your fork's copy |
@@ -156,6 +157,26 @@ Everything is optional except `TMDB_API_KEY`. A media type exists only when its 
 | `SCROBBLE_DELIVERY_RETENTION_DAYS` | `30` | how long the delivery log of an integration is kept |
 | `API_RATE_LIMIT_PER_MINUTE` | `240` | requests a minute one API token (or address) may send |
 | `WEBHOOK_RATE_LIMIT_PER_MINUTE` | `60` | reports a minute one integration's webhook address may receive |
+
+## Notifications through Apprise
+
+On Settings → Notifications every user picks where their notifications go besides the bell: Discord,
+e-mail sent by this instance (when [mail is set up](#settings)), and every service
+[Apprise](https://github.com/caronc/apprise) delivers to: Telegram, ntfy, Signal, Matrix, Slack,
+Gotify, Pushover, e-mail through any mail server and [many more](https://github.com/caronc/apprise/wiki).
+Apprise runs as the second container in [`compose.yaml`](../deploy/compose.yaml)
+([apprise-api](https://github.com/caronc/apprise-api)), and `APPRISE_API_URL` there points VideTrack
+at it: nothing to set up. The list of services comes from that container, so a service Apprise adds
+appears with its next image.
+
+A user fills in the fields the service asks for (a bot token, a topic, a server…), and VideTrack puts
+the Apprise URL together. A field that names a server follows the same rule as the integrations: an
+ordinary account may not point it into a private network unless `INTEGRATION_PRIVATE_HOSTS` lists the
+host; an administrator may use any. The check runs when the channel is saved; Apprise looks the name up
+again when it sends.
+
+Without the container, delete the `apprise` service and the `APPRISE_API_URL` line from
+`compose.yaml`: its services disappear from the settings, and Discord and e-mail stay.
 
 ## Building the image yourself
 

@@ -18,17 +18,17 @@ use Illuminate\Support\Carbon;
 /**
  * What a media event says, in the recipient's language: the one place its
  * copy is written. The bell, the notifications pages and the API receive it
- * finished; Discord gets the same words as plain text.
+ * finished; a notification channel gets the same words as plain text.
  */
 final readonly class NotificationCopy
 {
-    /** The brand purple, for a title of no known type. */
-    private const BRAND_COLOR = 0x7337FF;
+    /** The brand purple, for a title of no known type and for what is about no title. */
+    public const BRAND_COLOR = 0x7337FF;
 
     /** How many titles a notification names before the rest is left to its page. */
     private const PREVIEW_TITLES = 3;
 
-    /** Discord carries plain text, so the facts a screen sets apart with a hairline are joined by a dash. */
+    /** A channel carries plain text, so the facts a screen sets apart with a hairline are joined by a dash. */
     private const PLAIN_SEPARATOR = ' – ';
 
     public function __construct(
@@ -158,7 +158,7 @@ final readonly class NotificationCopy
     }
 
     /**
-     * Where a Discord message links: a message has no notification page to
+     * Where a channel's message links: a message has no notification page to
      * open, so a list of titles leads to the archive, or to the collection
      * that gained them. The message reaches other people, so the address is
      * the instance's own, not the requesting browser's host.
@@ -199,13 +199,26 @@ final readonly class NotificationCopy
         return $parts === [] ? null : implode(self::PLAIN_SEPARATOR, $parts);
     }
 
+    /** The detail as plain text with the air time after it, when the position has one. */
+    public function timedDetail(MediaEventPayload $event, string $locale, string $timezone): ?string
+    {
+        $detail = $this->plainDetail($event, $locale);
+        $time = $this->airTime($event, $locale, $timezone);
+
+        if ($time === null) {
+            return $detail;
+        }
+
+        return $detail === null
+            ? __('notifications.at_time', ['time' => $time], $locale)
+            : __('notifications.detail_at_time', ['detail' => $detail, 'time' => $time], $locale);
+    }
+
     /**
-     * One digest line decomposed for "what happened" readability:
-     * `subject` (the linked media name), `label` (the event, spelled out —
-     * "New episode", "Out today", "Status change"…) and `meta` (episode code
-     * with air time, moved dates, platform…). The digest joins them as
-     * "subject — label: meta", so every row says what it means, unlike the
-     * bell feed where the icon and grouping carry that context.
+     * One digest line in parts: `subject` (the linked title), `label` (the
+     * event spelled out: "New episode", "Out today"…) and `meta` (episode
+     * code with air time, moved dates, platform…). Each row says what it
+     * means, unlike the bell, where the icon and grouping carry that.
      *
      * @return array{subject: string, label: string, meta: string|null}
      */
@@ -217,13 +230,6 @@ final readonly class NotificationCopy
         switch ($event->type) {
             case MediaEventType::EpisodeAired:
             case MediaEventType::SeasonPremiere:
-                $meta = $this->plainDetail($event, $locale);
-                $time = $this->airTime($event, $locale, $timezone);
-
-                if ($time !== null) {
-                    $meta = $meta === null ? "({$time})" : "{$meta} ({$time})";
-                }
-
                 return [
                     'subject' => $event->showTitle ?? $title,
                     'label' => match (true) {
@@ -231,7 +237,7 @@ final readonly class NotificationCopy
                         $event->listsSeveral() => trans_choice('notifications.count_new_episodes', count($event->titles()), [], $locale),
                         default => __('notifications.new_episode', [], $locale),
                     },
-                    'meta' => $meta,
+                    'meta' => $this->timedDetail($event, $locale, $timezone),
                 ];
             case MediaEventType::Premiere:
                 return ['subject' => $title, 'label' => __('notifications.out_today', [], $locale), 'meta' => $this->plainDetail($event, $locale)];
@@ -268,7 +274,7 @@ final readonly class NotificationCopy
         }
     }
 
-    /** The title type's palette colour as a Discord embed int; a part takes its root's. */
+    /** The title type's palette colour as an RGB int; a part takes its root's. */
     public function color(MediaEventPayload $event): int
     {
         $type = Payload::string($event->media, 'type');

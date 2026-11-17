@@ -9,6 +9,7 @@ import {
     formatCountOrNull,
     formatDateTime,
     formatDayKey,
+    formatHourOfDay,
     formatMoney,
     formatNumber,
     formatReleaseDate,
@@ -106,6 +107,14 @@ describe('dates and times', () => {
         expect(formatDateTime('2026-10-10T21:05:00Z')).toBe('Oct 10, 2026, 9:05 PM');
         expect(formatTime(null)).toBeNull();
         expect(formatDateTime(null)).toBeNull();
+    });
+
+    it('writes a whole hour of the day in the time format the viewer prefers', () => {
+        prefer({ timezone: 'Asia/Tokyo', time_format: '24' });
+        expect(formatHourOfDay(8)).toBe('08:00');
+
+        prefer({ timezone: 'Asia/Tokyo', time_format: '12' });
+        expect(formatHourOfDay(8)).toBe('8:00 AM');
     });
 
     it('reads today in the viewer timezone', () => {

@@ -1,7 +1,6 @@
 <?php
 
 use App\Accounts\Preferences\CompanyFollowScope;
-use App\Accounts\Preferences\DiscordMode;
 use App\Accounts\Preferences\NotificationEvent;
 use App\Accounts\Preferences\PersonFollowScope;
 use App\Accounts\Preferences\UserPreferences;
@@ -10,7 +9,6 @@ use App\Enums\UpNextSort;
 use App\Http\Requests\Settings\PreferencesUpdateRequest;
 use App\Tracking\Surface;
 use App\Tracking\TrackingSource;
-use Illuminate\Support\Arr;
 
 /*
  * Every setting's default, in the one place it lives. A changed default here
@@ -30,7 +28,6 @@ test('the typed reads of an untouched account', function () {
         ->and($preferences->upNextSort())->toBe(UpNextSort::Activity)
         ->and($preferences->personFollowScope())->toBe(PersonFollowScope::KnownFor)
         ->and($preferences->companyFollowScope())->toBe(CompanyFollowScope::Both)
-        ->and($preferences->discordMode())->toBe(DiscordMode::Digest)
         ->and(array_filter(NotificationEvent::cases(), $preferences->notifies(...)))->toBe(NotificationEvent::cases());
 });
 
@@ -63,14 +60,12 @@ test("a surface's toggles and release mode are its own", function () {
 test('a choice that no longer means anything reads as the default', function () {
     $preferences = UserPreferences::fromStored([
         'spoiler_protection' => 'yes',
-        'discord_mode' => 'hourly',
         'up_next_sort' => 'retired',
         'timezone' => '',
         'region' => 'Poland',
     ]);
 
     expect($preferences->spoilerProtection())->toBeTrue()
-        ->and($preferences->discordMode())->toBe(DiscordMode::Digest)
         ->and($preferences->upNextSort())->toBe(UpNextSort::Activity)
         ->and($preferences->resolved()['timezone'])->toBeNull()
         ->and($preferences->region())->toBeNull()
@@ -99,7 +94,7 @@ test('a partial write keeps every other choice, unknown ones too, and stores no 
 });
 
 test('every setting a page can save has a default to read it back by', function () {
-    $saved = array_keys(Arr::except((new PreferencesUpdateRequest)->rules(), ['discord_webhook_url']));
+    $saved = array_keys((new PreferencesUpdateRequest)->rules());
 
     expect(array_diff($saved, array_keys(UserPreferences::fromStored([])->resolved())))->toBe([]);
 });

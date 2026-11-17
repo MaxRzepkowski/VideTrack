@@ -1,11 +1,10 @@
 <script setup lang="ts">
 import HeadingSmall from '@/components/HeadingSmall.vue';
 import InputError from '@/components/InputError.vue';
+import CredentialFields from '@/components/settings/CredentialFields.vue';
 import ConnectionPanel from '@/components/settings/import/ConnectionPanel.vue';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/AppLayout.vue';
 import SettingsLayout from '@/layouts/settings/Layout.vue';
 import { jsonFetch } from '@/lib/http';
@@ -251,25 +250,12 @@ function submit(): void {
                     </div>
 
                     <div v-if="source?.inputKind === 'credentials'" class="space-y-4">
-                        <template v-for="field in source.credentials" :key="field.key">
-                            <label v-if="field.type === 'checkbox'" class="flex cursor-pointer items-start gap-3">
-                                <Checkbox
-                                    :checked="form.credentials[field.key] === '1'"
-                                    class="mt-0.5"
-                                    @update:checked="(v: boolean) => (form.credentials[field.key] = v ? '1' : '')"
-                                />
-                                <span class="min-w-0">
-                                    <span class="text-ink block text-sm">{{ field.label }}</span>
-                                    <span v-if="field.help" class="text-ink-muted mt-0.5 block text-sm">{{ field.help }}</span>
-                                </span>
-                            </label>
-                            <div v-else class="grid gap-2">
-                                <Label :for="`credential-${field.key}`">{{ field.label }}</Label>
-                                <Input :id="`credential-${field.key}`" v-model="form.credentials[field.key]" :type="field.type" autocomplete="off" />
-                                <p v-if="field.help" class="text-ink-muted text-sm">{{ field.help }}</p>
-                                <InputError :message="credentialError(field.key)" />
-                            </div>
-                        </template>
+                        <CredentialFields
+                            v-model="form.credentials"
+                            :fields="source.credentials"
+                            id-prefix="credential"
+                            :error-of="credentialError"
+                        />
                     </div>
 
                     <ConnectionPanel

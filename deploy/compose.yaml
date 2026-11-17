@@ -11,6 +11,10 @@ services:
     # to upgrade; see docs/upgrading.md.
     image: ghcr.io/maxrzepkowski/videtrack:${VIDETRACK_VERSION:-latest}
     env_file: .env
+    environment:
+      # Notifications to Telegram, ntfy, e-mail and more, through the apprise
+      # container below. To run without it, delete this line and that service.
+      APPRISE_API_URL: http://apprise:8000
     ports:
       # Loopback only: a reverse proxy on this machine serves it with TLS.
       # Without a proxy (a home network), use "8080:80" instead.
@@ -20,6 +24,13 @@ services:
       - videtrack-data:/data
       # Uploaded avatars, exports and caches.
       - videtrack-storage:/app/storage
+    restart: unless-stopped
+
+  # Delivers notifications to the services users name in their Apprise
+  # channels. Reachable by VideTrack alone: it publishes no port.
+  apprise:
+    # A minor version: `docker compose pull` brings its patches, a newer minor is set by hand.
+    image: caronc/apprise:2.1
     restart: unless-stopped
 
 volumes:

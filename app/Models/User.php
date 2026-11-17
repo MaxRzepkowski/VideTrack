@@ -24,9 +24,7 @@ use LogicException;
  * @property UserRole $role
  * @property string|null $password null for an account made through an identity provider
  * @property UserPreferences $preferences
- * @property string|null $discord_webhook_url encrypted; a credential, never in preferences
  * @property Carbon|null $blocked_at
- * @property Carbon|null $discord_digest_at
  * @property string|null $locale
  */
 class User extends Authenticatable implements HasLocalePreference
@@ -59,7 +57,6 @@ class User extends Authenticatable implements HasLocalePreference
         'remember_token',
         'calendar_token',
         'calendar_token_hash',
-        'discord_webhook_url',
     ];
 
     /**
@@ -110,11 +107,9 @@ class User extends Authenticatable implements HasLocalePreference
             'password' => 'hashed',
             'role' => UserRole::class,
             'preferences' => AsUserPreferences::class,
-            'discord_webhook_url' => 'encrypted',
             'calendar_token' => 'encrypted',
             'is_private' => 'boolean',
             'blocked_at' => 'datetime',
-            'discord_digest_at' => 'datetime',
         ];
     }
 
@@ -145,18 +140,6 @@ class User extends Authenticatable implements HasLocalePreference
     }
 
     /**
-     * The user's Discord webhook URL, or null when Discord delivery is off.
-     * Per-user webhooks (no bot, no OAuth) — the user creates the webhook in
-     * their own channel and pastes the URL in Preferences.
-     */
-    public function discordWebhookUrl(): ?string
-    {
-        $url = $this->discord_webhook_url;
-
-        return is_string($url) && $url !== '' ? $url : null;
-    }
-
-    /**
      * Newest first. The daily run writes many in the same second; their ids
      * are time-ordered, so the id settles which came last — otherwise it is
      * whatever the index answering the query happens to hold.
@@ -166,6 +149,14 @@ class User extends Authenticatable implements HasLocalePreference
     public function notifications(): MorphMany
     {
         return $this->morphMany(DatabaseNotification::class, 'notifiable')->latest()->orderByDesc('id');
+    }
+
+    /**
+     * @return HasMany<NotificationChannel, $this>
+     */
+    public function notificationChannels(): HasMany
+    {
+        return $this->hasMany(NotificationChannel::class);
     }
 
     /**

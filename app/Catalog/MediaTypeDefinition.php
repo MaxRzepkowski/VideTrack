@@ -40,7 +40,7 @@ final readonly class MediaTypeDefinition
         public ?ProgressUnit $progressUnit = null,
         /**
          * Translation key naming a group of titles of this type ("TV shows"),
-         * for text that sorts titles by type — the Discord digest's sections.
+         * for text that sorts titles by type — the daily digest's sections.
          * Parts of a hierarchy go under their root and need none.
          */
         public ?string $pluralLabel = null,

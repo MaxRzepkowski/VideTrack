@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import InputError from '@/components/InputError.vue';
+import CredentialFields from '@/components/settings/CredentialFields.vue';
 import SettingsSaveBar from '@/components/settings/SettingsSaveBar.vue';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ToggleSwitch } from '@/components/ui/toggle-switch';
 import { confirm } from '@/composables/useConfirm';
@@ -338,18 +337,13 @@ function displayUrl(url: string): string {
             </template>
 
             <form v-else class="space-y-4" @submit.prevent="choices ? connectByForm() : verify()">
-                <div v-for="field in connect.fields" :key="field.key" class="grid gap-2">
-                    <Label :for="`connect-${connect.service}-${field.key}`">{{ field.label }}</Label>
-                    <Input
-                        :id="`connect-${connect.service}-${field.key}`"
-                        v-model="values[field.key]"
-                        :type="field.type"
-                        autocomplete="off"
-                        @input="choices = null"
-                    />
-                    <p v-if="field.help" class="text-ink-muted text-sm">{{ field.help }}</p>
-                    <InputError :message="fieldErrors[field.key]" />
-                </div>
+                <CredentialFields
+                    v-model="values"
+                    :fields="connect.fields"
+                    :id-prefix="`connect-${connect.service}`"
+                    :error-of="(key) => fieldErrors[key]"
+                    @edit="choices = null"
+                />
 
                 <div v-if="choices" class="grid gap-2">
                     <Label :for="`connect-${connect.service}-choice`">{{ trans('import.which_user_are_you') }}</Label>

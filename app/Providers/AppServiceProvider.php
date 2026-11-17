@@ -111,7 +111,7 @@ class AppServiceProvider extends ServiceProvider
             ->by((string) $request->user()?->id));
 
         // Settings buttons that reach outside the instance, per user.
-        foreach (['discord-test' => 'discord_test', 'integration-test' => 'integration_test', 'connections' => 'connections'] as $limiter => $limit) {
+        foreach (['channel-test' => 'channel_test', 'integration-test' => 'integration_test', 'connections' => 'connections'] as $limiter => $limit) {
             RateLimiter::for($limiter, fn (Request $request): Limit => Limit::perMinute(self::limit($limit))
                 ->by((string) $request->user()?->id));
         }

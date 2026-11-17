@@ -1,0 +1,1164 @@
+{
+    "46elks": {
+        "file": "46elks.svg",
+        "width": 459,
+        "height": 293,
+        "source": "apprise-docs",
+        "licence": "CC BY 4.0"
+    },
+    "amqps": {
+        "file": "amqps.svg",
+        "width": 226,
+        "height": 226,
+        "source": "apprise-docs",
+        "licence": "CC BY 4.0"
+    },
+    "apprises": {
+        "file": "apprises.svg",
+        "width": 95,
+        "height": 89,
+        "source": "apprise-docs",
+        "licence": "CC BY 4.0"
+    },
+    "atalk": {
+        "file": "atalk.png",
+        "width": 214,
+        "height": 214,
+        "source": "apprise-docs",
+        "licence": "CC BY 4.0"
+    },
+    "azure": {
+        "file": "azure.svg",
+        "width": 42,
+        "height": 46,
+        "source": "apprise-docs",
+        "licence": "CC BY 4.0"
+    },
+    "barks": {
+        "file": "barks.svg",
+        "width": 1407,
+        "height": 371,
+        "source": "apprise-docs",
+        "licence": "CC BY 4.0"
+    },
+    "betterstack": {
+        "file": "betterstack.svg",
+        "width": 104,
+        "height": 104,
+        "source": "apprise-docs",
+        "licence": "CC BY 4.0"
+    },
+    "brevo": {
+        "file": "brevo.svg",
+        "width": 25,
+        "height": 25,
+        "source": "simple-icons",
+        "licence": "CC0"
+    },
+    "bsky": {
+        "file": "bsky.svg",
+        "width": 532,
+        "height": 532,
+        "source": "apprise-docs",
+        "licence": "CC BY 4.0"
+    },
+    "bulksms": {
+        "file": "bulksms.svg",
+        "width": 128,
+        "height": 128,
+        "source": "apprise-docs",
+        "licence": "CC BY 4.0"
+    },
+    "bulkvs": {
+        "file": "bulkvs.png",
+        "width": 127,
+        "height": 44,
+        "source": "https://www.bulkvs.com/img/logo.png",
+        "licence": "trademark of its owner"
+    },
+    "burstsms": {
+        "file": "burstsms.svg",
+        "width": 300,
+        "height": 295,
+        "source": "apprise-docs",
+        "licence": "CC BY 4.0"
+    },
+    "chanify": {
+        "file": "chanify.png",
+        "width": 180,
+        "height": 180,
+        "source": "https://github.com/chanify/chanify/blob/main/core/adminassets/logo.png",
+        "licence": "MIT; trademark of its owner"
+    },
+    "clickatell": {
+        "file": "clickatell.svg",
+        "width": 1363,
+        "height": 866,
+        "source": "apprise-docs",
+        "licence": "CC BY 4.0"
+    },
+    "clicksend": {
+        "file": "clicksend.svg",
+        "width": 43,
+        "height": 36,
+        "source": "https://www.clicksend.com/img/img-logo_mobile.svg",
+        "licence": "trademark of its owner"
+    },
+    "cliq": {
+        "file": "cliq.svg",
+        "width": 1065,
+        "height": 1065,
+        "source": "apprise-docs",
+        "licence": "CC BY 4.0"
+    },
+    "cm": {
+        "file": "cm.svg",
+        "width": 30,
+        "height": 30,
+        "source": "apprise-docs",
+        "licence": "CC BY 4.0"
+    },
+    "d7sms": {
+        "file": "d7sms.svg",
+        "width": 50,
+        "height": 42,
+        "source": "https://d7networks.com/static/assets/images/logo-icon.caf18bccbb75.svg",
+        "licence": "trademark of its owner"
+    },
+    "dapnet": {
+        "file": "dapnet.png",
+        "width": 256,
+        "height": 58,
+        "source": "https://commons.wikimedia.org/wiki/File:DAPNET-logo.png",
+        "licence": "public domain on Wikimedia Commons; trademark of its owner"
+    },
+    "deltachats": {
+        "file": "deltachats.svg",
+        "width": 50,
+        "height": 50,
+        "source": "apprise-docs",
+        "licence": "CC BY 4.0"
+    },
+    "dingtalk": {
+        "file": "dingtalk.svg",
+        "width": 1065,
+        "height": 1065,
+        "source": "apprise-docs",
+        "licence": "CC BY 4.0"
+    },
+    "discord": {
+        "file": "discord.svg",
+        "width": 25,
+        "height": 25,
+        "source": "simple-icons",
+        "licence": "CC0"
+    },
+    "dot": {
+        "file": "dot.svg",
+        "width": 150,
+        "height": 150,
+        "source": "https://dot.mindreset.tech/logo/single_logo.svg (in white, as the site shows it in its footer)",
+        "licence": "trademark of its owner"
+    },
+    "eight00com": {
+        "file": "eight00com.png",
+        "width": 256,
+        "height": 256,
+        "source": "apprise-docs",
+        "licence": "CC BY 4.0"
+    },
+    "embys": {
+        "file": "embys.svg",
+        "width": 25,
+        "height": 25,
+        "source": "simple-icons",
+        "licence": "CC0"
+    },
+    "evolutions": {
+        "file": "evolutions.png",
+        "width": 256,
+        "height": 256,
+        "source": "https://evolutionfoundation.com.br/favicon.png",
+        "licence": "trademark of its owner"
+    },
+    "exotel": {
+        "file": "exotel.svg",
+        "width": 120,
+        "height": 36,
+        "source": "https://exotel.com/ (the white logo in the site footer)",
+        "licence": "trademark of its owner"
+    },
+    "fcm": {
+        "file": "fcm.svg",
+        "width": 25,
+        "height": 25,
+        "source": "simple-icons",
+        "licence": "CC0"
+    },
+    "feishu": {
+        "file": "feishu.svg",
+        "width": 30,
+        "height": 30,
+        "source": "apprise-docs",
+        "licence": "CC BY 4.0"
+    },
+    "firehydrant": {
+        "file": "firehydrant.svg",
+        "width": 89,
+        "height": 79,
+        "source": "apprise-docs",
+        "licence": "CC BY 4.0"
+    },
+    "flock": {
+        "file": "flock.svg",
+        "width": 327,
+        "height": 317,
+        "source": "https://www.flock.com/hubfs/Flock%20Icon.svg",
+        "licence": "trademark of its owner"
+    },
+    "flowtriqs": {
+        "file": "flowtriqs.svg",
+        "width": 98,
+        "height": 42,
+        "source": "apprise-docs",
+        "licence": "CC BY 4.0"
+    },
+    "fluxers": {
+        "file": "fluxers.svg",
+        "width": 532,
+        "height": 532,
+        "source": "apprise-docs",
+        "licence": "CC BY 4.0"
+    },
+    "freemobile": {
+        "file": "freemobile.svg",
+        "width": 87,
+        "height": 33,
+        "source": "https://mobile.free.fr/",
+        "licence": "trademark of its owner"
+    },
+    "gchat": {
+        "file": "gchat.svg",
+        "width": 192,
+        "height": 192,
+        "source": "apprise-docs",
+        "licence": "CC BY 4.0"
+    },
+    "github": {
+        "file": "github.svg",
+        "width": 102,
+        "height": 100,
+        "source": "apprise-docs",
+        "licence": "CC BY 4.0"
+    },
+    "goalerts": {
+        "file": "goalerts.svg",
+        "width": 419,
+        "height": 419,
+        "source": "https://github.com/target/goalert/blob/master/web/src/app/public/logos/darkmode_logo.svg",
+        "licence": "Apache-2.0; trademark of its owner"
+    },
+    "gotifys": {
+        "file": "gotifys.svg",
+        "width": 390,
+        "height": 320,
+        "source": "apprise-docs",
+        "licence": "CC BY 4.0"
+    },
+    "groundmail": {
+        "file": "groundmail.svg",
+        "width": 33,
+        "height": 33,
+        "source": "apprise-docs",
+        "licence": "CC BY 4.0"
+    },
+    "groupme": {
+        "file": "groupme.svg",
+        "width": 100,
+        "height": 100,
+        "source": "apprise-docs",
+        "licence": "CC BY 4.0"
+    },
+    "growl": {
+        "file": "growl.png",
+        "width": 199,
+        "height": 199,
+        "source": "https://github.com/growl.png",
+        "licence": "trademark of its owner"
+    },
+    "guilded": {
+        "file": "guilded.svg",
+        "width": 25,
+        "height": 25,
+        "source": "simple-icons",
+        "licence": "CC0"
+    },
+    "gupshup": {
+        "file": "gupshup.svg",
+        "width": 1438,
+        "height": 1311,
+        "source": "apprise-docs",
+        "licence": "CC BY 4.0"
+    },
+    "hassios": {
+        "file": "hassios.svg",
+        "width": 1065,
+        "height": 1065,
+        "source": "apprise-docs",
+        "licence": "CC BY 4.0"
+    },
+    "httpsms": {
+        "file": "httpsms.svg",
+        "width": 299,
+        "height": 287,
+        "source": "https://github.com/NdoleStudio/httpsms/blob/main/web/public/img/logo.svg",
+        "licence": "trademark of its owner"
+    },
+    "humhubs": {
+        "file": "humhubs.svg",
+        "width": 532,
+        "height": 532,
+        "source": "apprise-docs",
+        "licence": "CC BY 4.0"
+    },
+    "ifttt": {
+        "file": "ifttt.png",
+        "width": 256,
+        "height": 256,
+        "source": "https://assets.ctfassets.net/mrsnpomeucef/56mSL68r4mxXPjP5Z21DHC/1fd912ad2919133db29f55ee3d121456/IFTTT.ai_Brand_Assets.zip",
+        "licence": "trademark of its owner"
+    },
+    "ilert": {
+        "file": "ilert.svg",
+        "width": 34,
+        "height": 35,
+        "source": "apprise-docs",
+        "licence": "CC BY 4.0"
+    },
+    "incidentio": {
+        "file": "incidentio.svg",
+        "width": 133,
+        "height": 168,
+        "source": "apprise-docs",
+        "licence": "CC BY 4.0"
+    },
+    "infobip": {
+        "file": "infobip.svg",
+        "width": 205,
+        "height": 205,
+        "source": "apprise-docs",
+        "licence": "CC BY 4.0"
+    },
+    "jellyfins": {
+        "file": "jellyfins.svg",
+        "width": 75,
+        "height": 75,
+        "source": "https://github.com/jellyfin/jellyfin-ux/blob/master/logos/SVG/jellyfin-icon--color-on-dark.svg",
+        "licence": "CC BY-SA 4.0; trademark of its owner"
+    },
+    "jira": {
+        "file": "jira.svg",
+        "width": 266,
+        "height": 266,
+        "source": "apprise-docs",
+        "licence": "CC BY 4.0"
+    },
+    "join": {
+        "file": "join.png",
+        "width": 256,
+        "height": 256,
+        "source": "https://play-lh.googleusercontent.com/ADH5E0wrxXpmEuFe-zpYBFRyAGF7npxj59ckZxO1Pa6qcR_360BjjBdmpqK3s-cZLmAYRXt0W7w_2L6xaxa2oN8=s256",
+        "licence": "trademark of its owner"
+    },
+    "kakaotalk": {
+        "file": "kakaotalk.svg",
+        "width": 266,
+        "height": 266,
+        "source": "apprise-docs",
+        "licence": "CC BY 4.0"
+    },
+    "kaleyra": {
+        "file": "kaleyra.svg",
+        "width": 1416,
+        "height": 1626,
+        "source": "apprise-docs",
+        "licence": "CC BY 4.0"
+    },
+    "kavenegar": {
+        "file": "kavenegar.svg",
+        "width": 500,
+        "height": 500,
+        "source": "https://kavenegar.com/images/logo.svg",
+        "licence": "trademark of its owner"
+    },
+    "kodis": {
+        "file": "kodis.svg",
+        "width": 532,
+        "height": 532,
+        "source": "apprise-docs",
+        "licence": "CC BY 4.0"
+    },
+    "kook": {
+        "file": "kook.svg",
+        "width": 532,
+        "height": 532,
+        "source": "apprise-docs",
+        "licence": "CC BY 4.0"
+    },
+    "kumulos": {
+        "file": "kumulos.svg",
+        "width": 207,
+        "height": 115,
+        "source": "https://web.archive.org/web/2022/https://www.kumulos.com/wp-content/uploads/2021/10/kumulos_symbol.svg",
+        "licence": "trademark of its owner"
+    },
+    "lametrics": {
+        "file": "lametrics.svg",
+        "width": 64,
+        "height": 17,
+        "source": "https://lametric.com/sites/default/files/icon/2025-04/Logo%20%282%29.svg",
+        "licence": "trademark of its owner"
+    },
+    "lark": {
+        "file": "lark.svg",
+        "width": 30,
+        "height": 30,
+        "source": "apprise-docs",
+        "licence": "CC BY 4.0"
+    },
+    "lauther": {
+        "file": "lauther.svg",
+        "width": 100,
+        "height": 100,
+        "source": "apprise-docs",
+        "licence": "CC BY 4.0"
+    },
+    "lfg": {
+        "file": "lfg.svg",
+        "width": 1065,
+        "height": 1065,
+        "source": "apprise-docs",
+        "licence": "CC BY 4.0"
+    },
+    "line": {
+        "file": "line.svg",
+        "width": 333,
+        "height": 333,
+        "source": "apprise-docs",
+        "licence": "CC BY 4.0"
+    },
+    "mailersend": {
+        "file": "mailersend.svg",
+        "width": 1040,
+        "height": 1040,
+        "source": "apprise-docs",
+        "licence": "CC BY 4.0"
+    },
+    "mailgun": {
+        "file": "mailgun.svg",
+        "width": 25,
+        "height": 25,
+        "source": "simple-icons",
+        "licence": "CC0"
+    },
+    "mastodons": {
+        "file": "mastodons.svg",
+        "width": 25,
+        "height": 25,
+        "source": "simple-icons",
+        "licence": "CC0"
+    },
+    "matrixs": {
+        "file": "matrixs.svg",
+        "width": 76,
+        "height": 33,
+        "source": "https://matrix.org/images/matrix-logo-white.svg",
+        "licence": "trademark of its owner"
+    },
+    "misskeys": {
+        "file": "misskeys.svg",
+        "width": 25,
+        "height": 25,
+        "source": "simple-icons",
+        "licence": "CC0"
+    },
+    "mmosts": {
+        "file": "mmosts.svg",
+        "width": 266,
+        "height": 266,
+        "source": "apprise-docs",
+        "licence": "CC BY 4.0"
+    },
+    "mobilemessage": {
+        "file": "mobilemessage.svg",
+        "width": 34,
+        "height": 25,
+        "source": "apprise-docs",
+        "licence": "CC BY 4.0"
+    },
+    "mqtts": {
+        "file": "mqtts.svg",
+        "width": 1100,
+        "height": 280,
+        "source": "apprise-docs",
+        "licence": "CC BY 4.0"
+    },
+    "msg91": {
+        "file": "msg91.svg",
+        "width": 3,
+        "height": 2,
+        "source": "https://msg91.com/assets/brand/favicon.svg",
+        "licence": "trademark of its owner"
+    },
+    "msgbird": {
+        "file": "msgbird.svg",
+        "width": 33,
+        "height": 33,
+        "source": "https://bird.com/favicon.svg",
+        "licence": "trademark of its owner"
+    },
+    "nclouds": {
+        "file": "nclouds.svg",
+        "width": 25,
+        "height": 25,
+        "source": "simple-icons",
+        "licence": "CC0"
+    },
+    "nctalks": {
+        "file": "nctalks.svg",
+        "width": 16,
+        "height": 16,
+        "source": "https://github.com/nextcloud/spreed/blob/main/img/app.svg",
+        "licence": "AGPL-3.0-or-later; trademark of its owner"
+    },
+    "nostr": {
+        "file": "nostr.png",
+        "width": 256,
+        "height": 256,
+        "source": "apprise-docs",
+        "licence": "CC BY 4.0"
+    },
+    "noticas": {
+        "file": "noticas.png",
+        "width": 180,
+        "height": 180,
+        "source": "https://notica.us/apple-touch-icon.png",
+        "licence": "trademark of its owner"
+    },
+    "notifiarr": {
+        "file": "notifiarr.svg",
+        "width": 1999,
+        "height": 1999,
+        "source": "https://github.com/Notifiarr/notifiarr/blob/main/frontend/src/assets/notifiarr.svg",
+        "licence": "MIT; trademark of its owner"
+    },
+    "notificos": {
+        "file": "notificos.png",
+        "width": 48,
+        "height": 48,
+        "source": "https://notifico.tech/assets/images/favicon.png",
+        "licence": "trademark of its owner"
+    },
+    "notifyre": {
+        "file": "notifyre.svg",
+        "width": 50,
+        "height": 50,
+        "source": "https://notifyre.com/favicon.svg",
+        "licence": "trademark of its owner"
+    },
+    "ntfys": {
+        "file": "ntfys.svg",
+        "width": 52,
+        "height": 52,
+        "source": "apprise-docs",
+        "licence": "CC BY 4.0"
+    },
+    "octopush": {
+        "file": "octopush.svg",
+        "width": 146,
+        "height": 42,
+        "source": "https://cdn.prod.website-files.com/6a91acc85d4f92dde457d018/6a91acc85d4f92dde457d04a_Logo%20Octopush.svg",
+        "licence": "trademark of its owner"
+    },
+    "onebots": {
+        "file": "onebots.png",
+        "width": 256,
+        "height": 256,
+        "source": "https://raw.githubusercontent.com/botuniverse/onebot/master/specs/assets/images/logo-white.png",
+        "licence": "MIT; trademark of its owner"
+    },
+    "onesignal": {
+        "file": "onesignal.svg",
+        "width": 1040,
+        "height": 1040,
+        "source": "https://onesignal.com/favicon.svg",
+        "licence": "trademark of its owner"
+    },
+    "opsgenie": {
+        "file": "opsgenie.svg",
+        "width": 317,
+        "height": 317,
+        "source": "apprise-docs",
+        "licence": "CC BY 4.0"
+    },
+    "pagerduty": {
+        "file": "pagerduty.svg",
+        "width": 512,
+        "height": 512,
+        "source": "apprise-docs",
+        "licence": "CC BY 4.0"
+    },
+    "pagertree": {
+        "file": "pagertree.svg",
+        "width": 1039,
+        "height": 272,
+        "source": "https://pagertree.com/docs/img/logo-inverted.svg",
+        "licence": "trademark of its owner"
+    },
+    "parseps": {
+        "file": "parseps.svg",
+        "width": 1158,
+        "height": 1143,
+        "source": "https://parseplatform.org/assets/favicon-Bkmig-Or.svg",
+        "licence": "trademark of its owner"
+    },
+    "pbul": {
+        "file": "pbul.svg",
+        "width": 25,
+        "height": 25,
+        "source": "simple-icons",
+        "licence": "CC0"
+    },
+    "pinglets": {
+        "file": "pinglets.svg",
+        "width": 61,
+        "height": 61,
+        "source": "apprise-docs",
+        "licence": "CC BY 4.0"
+    },
+    "pingram": {
+        "file": "pingram.svg",
+        "width": 119,
+        "height": 119,
+        "source": "apprise-docs",
+        "licence": "CC BY 4.0"
+    },
+    "pjets": {
+        "file": "pjets.svg",
+        "width": 323,
+        "height": 322,
+        "source": "https://github.com/Pushjet/Pushjet-Website/blob/master/images/pushjet.svg",
+        "licence": "BSD-2-Clause; trademark of its owner"
+    },
+    "plivo": {
+        "file": "plivo.svg",
+        "width": 66,
+        "height": 24,
+        "source": "https://www.plivo.com/images/plivo-logo-white.svg",
+        "licence": "trademark of its owner"
+    },
+    "postmark": {
+        "file": "postmark.svg",
+        "width": 67,
+        "height": 67,
+        "source": "apprise-docs",
+        "licence": "CC BY 4.0"
+    },
+    "pover": {
+        "file": "pover.png",
+        "width": 256,
+        "height": 54,
+        "source": "https://pushover.net/ (site header logo, 2x image)",
+        "licence": "trademark of its owner"
+    },
+    "prowl": {
+        "file": "prowl.png",
+        "width": 180,
+        "height": 180,
+        "source": "https://www.prowl.app/apple-touch-icon.png",
+        "licence": "trademark of its owner"
+    },
+    "psafers": {
+        "file": "psafers.png",
+        "width": 196,
+        "height": 196,
+        "source": "https://www.pushsafer.com/icon196.png",
+        "licence": "trademark of its owner"
+    },
+    "push": {
+        "file": "push.png",
+        "width": 177,
+        "height": 177,
+        "source": "https://push.techulus.com/logo192.png",
+        "licence": "trademark of its owner"
+    },
+    "pushdeers": {
+        "file": "pushdeers.png",
+        "width": 256,
+        "height": 256,
+        "source": "https://github.com/easychen/pushdeer/blob/main/doc/design_and_resource/%E5%AE%8C%E6%95%B4logo.png",
+        "licence": "trademark of its owner"
+    },
+    "pushed": {
+        "file": "pushed.png",
+        "width": 256,
+        "height": 256,
+        "source": "https://web.archive.org/web/2021/https://s3-eu-west-1.amazonaws.com/pushed.co/assets/pushed/media/favicon.png",
+        "licence": "trademark of its owner"
+    },
+    "pushme": {
+        "file": "pushme.png",
+        "width": 256,
+        "height": 256,
+        "source": "https://github.com/yafoo/pushme/blob/master/app/src/main/ic_launcher-playstore.png",
+        "licence": "trademark of its owner"
+    },
+    "pushplus": {
+        "file": "pushplus.png",
+        "width": 236,
+        "height": 236,
+        "source": "apprise-docs",
+        "licence": "CC BY 4.0"
+    },
+    "pushward": {
+        "file": "pushward.png",
+        "width": 256,
+        "height": 256,
+        "source": "apprise-docs",
+        "licence": "CC BY 4.0"
+    },
+    "pushy": {
+        "file": "pushy.png",
+        "width": 230,
+        "height": 230,
+        "source": "https://github.com/pushy.png",
+        "licence": "trademark of its owner"
+    },
+    "qq": {
+        "file": "qq.svg",
+        "width": 25,
+        "height": 25,
+        "source": "simple-icons",
+        "licence": "CC0"
+    },
+    "reddit": {
+        "file": "reddit.svg",
+        "width": 75,
+        "height": 75,
+        "source": "apprise-docs",
+        "licence": "CC BY 4.0"
+    },
+    "resend": {
+        "file": "resend.svg",
+        "width": 1800,
+        "height": 1800,
+        "source": "https://cdn.resend.com/brand/resend-icon-white.svg",
+        "licence": "trademark of its owner"
+    },
+    "revolt": {
+        "file": "revolt.svg",
+        "width": 25,
+        "height": 25,
+        "source": "simple-icons",
+        "licence": "CC0"
+    },
+    "ringc": {
+        "file": "ringc.svg",
+        "width": 2770,
+        "height": 433,
+        "source": "apprise-docs",
+        "licence": "CC BY 4.0"
+    },
+    "rockets": {
+        "file": "rockets.svg",
+        "width": 25,
+        "height": 25,
+        "source": "simple-icons",
+        "licence": "CC0"
+    },
+    "ryver": {
+        "file": "ryver.png",
+        "width": 256,
+        "height": 256,
+        "source": "https://github.com/RyverApp.png",
+        "licence": "trademark of its owner"
+    },
+    "schan": {
+        "file": "schan.png",
+        "width": 256,
+        "height": 256,
+        "source": "https://the7.ft07.com/sct/images/favicon.png",
+        "licence": "trademark of its owner"
+    },
+    "sendgrid": {
+        "file": "sendgrid.svg",
+        "width": 603,
+        "height": 156,
+        "source": "https://www.twilio.com/en-us/sendgrid",
+        "licence": "trademark of its owner"
+    },
+    "sendpulse": {
+        "file": "sendpulse.svg",
+        "width": 17,
+        "height": 17,
+        "source": "https://sendpulse.com/templates/sendpulsev1/img/favicons/favicon.svg",
+        "licence": "trademark of its owner"
+    },
+    "serwersms": {
+        "file": "serwersms.png",
+        "width": 256,
+        "height": 97,
+        "source": "apprise-docs",
+        "licence": "CC BY 4.0"
+    },
+    "ses": {
+        "file": "ses.svg",
+        "width": 299,
+        "height": 299,
+        "source": "apprise-docs",
+        "licence": "CC BY 4.0"
+    },
+    "sessions": {
+        "file": "sessions.svg",
+        "width": 192,
+        "height": 192,
+        "source": "apprise-docs",
+        "licence": "CC BY 4.0"
+    },
+    "seven": {
+        "file": "seven.svg",
+        "width": 819,
+        "height": 182,
+        "source": "https://www.seven.io/wp-content/uploads/Logo-white.svg",
+        "licence": "trademark of its owner"
+    },
+    "sfr": {
+        "file": "sfr.svg",
+        "width": 47,
+        "height": 46,
+        "source": "https://static.s-sfr.fr/assets/logos/SFR.svg",
+        "licence": "trademark of its owner"
+    },
+    "signalgrid": {
+        "file": "signalgrid.png",
+        "width": 256,
+        "height": 256,
+        "source": "apprise-docs",
+        "licence": "CC BY 4.0"
+    },
+    "signals": {
+        "file": "signals.svg",
+        "width": 166,
+        "height": 166,
+        "source": "https://signal.org/brand/ (Signal Logo.zip, Logo/SVG/Signal-Logo-Ultramarine.svg)",
+        "licence": "trademark of its owner"
+    },
+    "signl4": {
+        "file": "signl4.png",
+        "width": 236,
+        "height": 236,
+        "source": "apprise-docs",
+        "licence": "CC BY 4.0"
+    },
+    "sinch": {
+        "file": "sinch.png",
+        "width": 256,
+        "height": 256,
+        "source": "https://sinch.com/wp-content/themes/simpletexting-theme-blank/assets/favicon/apple-touch-icon-512x512.png",
+        "licence": "trademark of its owner"
+    },
+    "slack": {
+        "file": "slack.svg",
+        "width": 100,
+        "height": 100,
+        "source": "apprise-docs",
+        "licence": "CC BY 4.0"
+    },
+    "smsc": {
+        "file": "smsc.png",
+        "width": 256,
+        "height": 31,
+        "source": "https://smsc.ru/im/new/smsc_logo.png",
+        "licence": "trademark of its owner"
+    },
+    "smseagles": {
+        "file": "smseagles.png",
+        "width": 256,
+        "height": 86,
+        "source": "https://www.smseagle.eu/wpsite/wp-content/uploads/2023/11/logo-poziom_white.png",
+        "licence": "trademark of its owner"
+    },
+    "smsmgr": {
+        "file": "smsmgr.svg",
+        "width": 204,
+        "height": 68,
+        "source": "https://smsmanager.cz/img/logo.svg",
+        "licence": "trademark of its owner"
+    },
+    "smstunnel": {
+        "file": "smstunnel.svg",
+        "width": 12,
+        "height": 12,
+        "source": "apprise-docs",
+        "licence": "CC BY 4.0"
+    },
+    "smtp2go": {
+        "file": "smtp2go.svg",
+        "width": 120,
+        "height": 60,
+        "source": "apprise-docs",
+        "licence": "CC BY 4.0"
+    },
+    "sns": {
+        "file": "sns.svg",
+        "width": 257,
+        "height": 257,
+        "source": "apprise-docs",
+        "licence": "CC BY 4.0"
+    },
+    "sparkpost": {
+        "file": "sparkpost.svg",
+        "width": 25,
+        "height": 25,
+        "source": "simple-icons",
+        "licence": "CC0"
+    },
+    "spike": {
+        "file": "spike.svg",
+        "width": 539,
+        "height": 188,
+        "source": "https://spike.sh/_astro/spike-logo-white.ZBiMTNte_ZEPiNO.svg",
+        "licence": "trademark of its owner"
+    },
+    "splunk": {
+        "file": "splunk.svg",
+        "width": 305,
+        "height": 118,
+        "source": "https://assets.portal.heretto.com/splunk/25-02-28/logo_splunk-corporate_rgb-w.svg",
+        "licence": "trademark of its owner"
+    },
+    "spugpush": {
+        "file": "spugpush.png",
+        "width": 256,
+        "height": 256,
+        "source": "https://github.com/openspug.png",
+        "licence": "trademark of its owner"
+    },
+    "spush": {
+        "file": "spush.png",
+        "width": 256,
+        "height": 256,
+        "source": "apprise-docs",
+        "licence": "CC BY 4.0"
+    },
+    "squadcast": {
+        "file": "squadcast.svg",
+        "width": 26,
+        "height": 20,
+        "source": "apprise-docs",
+        "licence": "CC BY 4.0"
+    },
+    "stackfield": {
+        "file": "stackfield.svg",
+        "width": 200,
+        "height": 200,
+        "source": "apprise-docs",
+        "licence": "CC BY 4.0"
+    },
+    "strmlabs": {
+        "file": "strmlabs.svg",
+        "width": 25,
+        "height": 25,
+        "source": "simple-icons",
+        "licence": "CC0"
+    },
+    "synologys": {
+        "file": "synologys.png",
+        "width": 256,
+        "height": 256,
+        "source": "apprise-docs",
+        "licence": "CC BY 4.0"
+    },
+    "telesign": {
+        "file": "telesign.svg",
+        "width": 413,
+        "height": 279,
+        "source": "apprise-docs",
+        "licence": "CC BY 4.0"
+    },
+    "telnyx": {
+        "file": "telnyx.svg",
+        "width": 29,
+        "height": 29,
+        "source": "apprise-docs",
+        "licence": "CC BY 4.0"
+    },
+    "tgram": {
+        "file": "tgram.svg",
+        "width": 250,
+        "height": 250,
+        "source": "apprise-docs",
+        "licence": "CC BY 4.0"
+    },
+    "threema": {
+        "file": "threema.svg",
+        "width": 25,
+        "height": 25,
+        "source": "simple-icons",
+        "licence": "CC0"
+    },
+    "trigvs": {
+        "file": "trigvs.svg",
+        "width": 265,
+        "height": 246,
+        "source": "apprise-docs",
+        "licence": "CC BY 4.0"
+    },
+    "twilio": {
+        "file": "twilio.svg",
+        "width": 266,
+        "height": 266,
+        "source": "apprise-docs",
+        "licence": "CC BY 4.0"
+    },
+    "twist": {
+        "file": "twist.svg",
+        "width": 33,
+        "height": 33,
+        "source": "https://twist.com/assets/favicons/icon.svg",
+        "licence": "trademark of its owner"
+    },
+    "vapid": {
+        "file": "vapid.svg",
+        "width": 460,
+        "height": 573,
+        "source": "apprise-docs",
+        "licence": "CC BY 4.0"
+    },
+    "viber": {
+        "file": "viber.svg",
+        "width": 5,
+        "height": 2,
+        "source": "apprise-docs",
+        "licence": "CC BY 4.0"
+    },
+    "voipms": {
+        "file": "voipms.svg",
+        "width": 25,
+        "height": 25,
+        "source": "simple-icons",
+        "licence": "CC0"
+    },
+    "vonage": {
+        "file": "vonage.svg",
+        "width": 713,
+        "height": 624,
+        "source": "https://www.vonage.com/content/dam/vonage/us-en/brand/logos/VonageLogo_Symbol_White.svg",
+        "licence": "trademark of its owner"
+    },
+    "wechat": {
+        "file": "wechat.svg",
+        "width": 25,
+        "height": 25,
+        "source": "simple-icons",
+        "licence": "CC0"
+    },
+    "wecombot": {
+        "file": "wecombot.png",
+        "width": 120,
+        "height": 120,
+        "source": "https://wwcdn.weixin.qq.com/node/ww/wwmng/style/images/index_share_logo$13c64306.png",
+        "licence": "trademark of its owner"
+    },
+    "whapi": {
+        "file": "whapi.svg",
+        "width": 292,
+        "height": 188,
+        "source": "apprise-docs",
+        "licence": "CC BY 4.0"
+    },
+    "whatsapp": {
+        "file": "whatsapp.svg",
+        "width": 175,
+        "height": 176,
+        "source": "apprise-docs",
+        "licence": "CC BY 4.0"
+    },
+    "workflow": {
+        "file": "workflow.svg",
+        "width": 100,
+        "height": 100,
+        "source": "apprise-docs",
+        "licence": "CC BY 4.0"
+    },
+    "wpush": {
+        "file": "wpush.png",
+        "width": 236,
+        "height": 236,
+        "source": "apprise-docs",
+        "licence": "CC BY 4.0"
+    },
+    "wxpusher": {
+        "file": "wxpusher.png",
+        "width": 256,
+        "height": 256,
+        "source": "https://wxpusher.zjiecode.com/imgs/logo512.png",
+        "licence": "trademark of its owner"
+    },
+    "wxteams": {
+        "file": "wxteams.svg",
+        "width": 108,
+        "height": 80,
+        "source": "https://github.com/momentum-design/momentum-design/blob/main/packages/assets/brand-visuals/src/logos/webex-symbol-dark-bw-outline.svg",
+        "licence": "MIT; trademark of its owner"
+    },
+    "x": {
+        "file": "x.svg",
+        "width": 1248,
+        "height": 1275,
+        "source": "https://about.x.com/content/dam/about-twitter/x/brand-toolkit/x-logo.zip",
+        "licence": "trademark of its owner"
+    },
+    "xmatters": {
+        "file": "xmatters.svg",
+        "width": 67,
+        "height": 67,
+        "source": "apprise-docs",
+        "licence": "CC BY 4.0"
+    },
+    "xmpps": {
+        "file": "xmpps.svg",
+        "width": 200,
+        "height": 200,
+        "source": "apprise-docs",
+        "licence": "CC BY 4.0"
+    },
+    "youlmk": {
+        "file": "youlmk.svg",
+        "width": 200,
+        "height": 200,
+        "source": "apprise-docs",
+        "licence": "CC BY 4.0"
+    },
+    "zalo": {
+        "file": "zalo.svg",
+        "width": 52,
+        "height": 52,
+        "source": "apprise-docs",
+        "licence": "CC BY 4.0"
+    },
+    "zoom": {
+        "file": "zoom.svg",
+        "width": 32,
+        "height": 32,
+        "source": "apprise-docs",
+        "licence": "CC BY 4.0"
+    },
+    "zulip": {
+        "file": "zulip.svg",
+        "width": 266,
+        "height": 266,
+        "source": "apprise-docs",
+        "licence": "CC BY 4.0"
+    }
+}

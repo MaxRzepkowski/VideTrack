@@ -77,7 +77,6 @@ final readonly class UserPreferences
         'notify_collection_items' => true,
         'person_follow_scope' => PersonFollowScope::KnownFor,
         'company_follow_scope' => CompanyFollowScope::Both,
-        'discord_mode' => DiscordMode::Digest,
     ];
 
     /**
@@ -142,7 +141,7 @@ final readonly class UserPreferences
      * The timezone this user's clock is read in: their explicit choice, else
      * the zone their browser last reported, else the instance's. "Automatic"
      * stores no choice — the browser resolves it — so work done in a queue
-     * (the Discord digest above all) would otherwise land on the instance's
+     * (the daily digest above all) would otherwise land on the instance's
      * timezone and fire at the wrong local hour.
      */
     public function effectiveTimezone(): string
@@ -210,11 +209,6 @@ final readonly class UserPreferences
     public function companyFollowScope(): CompanyFollowScope
     {
         return $this->choice('company_follow_scope', CompanyFollowScope::class);
-    }
-
-    public function discordMode(): DiscordMode
-    {
-        return $this->choice('discord_mode', DiscordMode::class);
     }
 
     private static function surfaceKey(Surface $surface): string

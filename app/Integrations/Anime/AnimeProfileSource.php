@@ -3,11 +3,11 @@
 namespace App\Integrations\Anime;
 
 use App\Integrations\Import\Contracts\ReadsCredentials;
-use App\Integrations\Import\Data\CredentialField;
 use App\Integrations\Import\Data\ImportInput;
 use App\Integrations\Import\Data\ImportManifest;
 use App\Integrations\Import\Rows\SkipRow;
 use App\Support\ExternalServiceException;
+use App\Support\Forms\CredentialField;
 
 /**
  * A public anime/manga list read by username — MyAnimeList, AniList, Kitsu.

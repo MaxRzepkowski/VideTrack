@@ -3,7 +3,6 @@
 namespace App\Http\Requests\Settings;
 
 use App\Accounts\Preferences\CompanyFollowScope;
-use App\Accounts\Preferences\DiscordMode;
 use App\Accounts\Preferences\EpisodeImage;
 use App\Accounts\Preferences\PersonFollowScope;
 use App\Accounts\Preferences\TimeFormat;
@@ -13,7 +12,6 @@ use App\Enums\ReleaseDateMode;
 use App\Enums\UpNextSort;
 use App\Support\Payload;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Arr;
 use Illuminate\Validation\Rule;
 
 class PreferencesUpdateRequest extends FormRequest
@@ -74,12 +72,6 @@ class PreferencesUpdateRequest extends FormRequest
             'person_follow_scope' => ['sometimes', 'string', Rule::enum(PersonFollowScope::class)],
             // Which roles of a followed company feed auto-follows.
             'company_follow_scope' => ['sometimes', 'string', Rule::enum(CompanyFollowScope::class)],
-            // Empty = Discord delivery off.
-            'discord_webhook_url' => [
-                'sometimes', 'nullable', 'string', 'max:400', 'url',
-                'starts_with:https://discord.com/api/webhooks/,https://discordapp.com/api/webhooks/',
-            ],
-            'discord_mode' => ['sometimes', 'string', Rule::enum(DiscordMode::class)],
             // Which image an episode shows on the countdowns page.
             'countdown_episode_image' => ['sometimes', 'string', Rule::enum(EpisodeImage::class)],
             // An ISO 3166-1 country; empty = automatic (derived from the UI locale).
@@ -95,15 +87,14 @@ class PreferencesUpdateRequest extends FormRequest
 
     /**
      * The settings the page sent, as the preferences store them: flags as
-     * booleans, a country in capitals. The webhook is a credential, not a
-     * preference ({@see webhookUrl()}).
+     * booleans, a country in capitals.
      *
      * @return array<string, mixed>
      */
     public function preferences(): array
     {
         $rules = $this->rules();
-        $preferences = Payload::named(Arr::except($this->validated(), ['discord_webhook_url']));
+        $preferences = Payload::named($this->validated());
 
         foreach (array_keys($preferences) as $key) {
             if (is_array($rules[$key] ?? null) && in_array('boolean', $rules[$key], true)) {
@@ -116,13 +107,5 @@ class PreferencesUpdateRequest extends FormRequest
         }
 
         return $preferences;
-    }
-
-    /** The webhook to deliver to; null turns Discord off. */
-    public function webhookUrl(): ?string
-    {
-        $url = $this->validated('discord_webhook_url');
-
-        return is_string($url) ? $url : null;
     }
 }

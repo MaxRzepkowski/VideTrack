@@ -275,7 +275,7 @@ test('an ordinary account cannot point the server at an address in its private n
     $this->actingAs(User::factory()->create())
         ->postJson(route('settings.connections.verify', ['service' => 'tracearr']), ['values' => ['url' => $address, 'key' => 'trr_pub_secret']])
         ->assertUnprocessable()
-        ->assertJsonValidationErrors(['values.url' => __('import.this_address_is_in_a_private_network')]);
+        ->assertJsonValidationErrors(['values.url' => __('common.this_address_is_in_a_private_network')]);
 
     Http::assertNothingSent();
 })->with([

@@ -1,0 +1,56 @@
+<script setup lang="ts">
+import HeadingSmall from '@/components/HeadingSmall.vue';
+import AddChannelForm from '@/components/settings/channels/AddChannelForm.vue';
+import ChannelPanel from '@/components/settings/channels/ChannelPanel.vue';
+import AppLayout from '@/layouts/AppLayout.vue';
+import SettingsLayout from '@/layouts/settings/Layout.vue';
+import type { ChannelsPage } from '@/types/generated';
+import { Head } from '@inertiajs/vue3';
+import { trans } from 'laravel-vue-i18n';
+import { computed } from 'vue';
+
+/**
+ * Where notifications go beyond the bell. Every kind of channel comes from
+ * the server's registry: a kind added later needs nothing here.
+ */
+const props = defineProps<{ page: ChannelsPage }>();
+
+const rows = computed(() =>
+    props.page.channels.map((channel) => ({
+        channel,
+        kind: props.page.kinds.find((kind) => kind.driver === channel.driver && kind.code === channel.kind) ?? null,
+    })),
+);
+</script>
+
+<template>
+    <AppLayout>
+        <Head :title="trans('common.notifications')" />
+
+        <SettingsLayout>
+            <div class="space-y-6">
+                <HeadingSmall :title="trans('common.notifications')" :description="trans('settings.where_your_notifications_go_besides_the')" />
+
+                <p v-if="props.page.channels.length === 0" class="text-ink-muted text-sm">
+                    {{ trans('settings.no_channels_yet_notifications_show_only') }}
+                </p>
+
+                <ChannelPanel
+                    v-for="row in rows"
+                    :key="row.channel.id"
+                    :channel="row.channel"
+                    :kind="row.kind"
+                    :label-max="props.page.labelMax"
+                    :digest-hour="props.page.digestHour"
+                />
+
+                <AddChannelForm
+                    :kinds="props.page.kinds"
+                    :label-max="props.page.labelMax"
+                    :digest-hour="props.page.digestHour"
+                    :default-mode="props.page.defaultMode"
+                />
+            </div>
+        </SettingsLayout>
+    </AppLayout>
+</template>

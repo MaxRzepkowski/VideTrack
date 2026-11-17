@@ -11,7 +11,7 @@ use Illuminate\Http\Response;
 
 /**
  * Records the timezone the client resolved "Automatic" to, so queued work —
- * the Discord digest above all — knows it too. See UserPreferences::effectiveTimezone().
+ * the daily digest above all — knows it too. See UserPreferences::effectiveTimezone().
  *
  * Deliberately not part of PreferencesController::update(): this is reported
  * in the background, and that endpoint answers with a redirect, which Inertia

@@ -36,6 +36,14 @@ Images are tagged `X.Y.Z`, `X.Y` and `latest`, one set per release.
   web request PHP fills `HTTP_USER_AGENT` with the visitor's browser header, so an instance running
   without a cached configuration sent that header to the services it talks to.
 
+- **`docker compose pull` updates images, not your `compose.yaml`.** The services next to VideTrack
+  are in [`deploy/compose.yaml`](../deploy/compose.yaml): the `apprise` container, which sends
+  notifications to Telegram, ntfy, e-mail and more, with the `APPRISE_API_URL` line that names it.
+  Without them the instance offers Discord and e-mail alone; copy both into your file to offer the
+  Apprise services too.
+- **The `apprise` container is pinned to a minor version** (`caronc/apprise:2.1`): `docker compose pull`
+  brings its patches. A newer minor, with the services Apprise added, is the tag you set in `compose.yaml`.
+
 ## Going back
 
 A migration changes the database, so an older image cannot simply run on it. To return to the

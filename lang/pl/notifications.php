@@ -32,4 +32,6 @@ return [
     'unread_title' => 'Nieprzeczytane: :title',
     'count_new_episodes_of_title' => ':count nowy odcinek :title|:count nowe odcinki :title|:count nowych odcinków :title',
     'count_new_episodes' => ':count nowy odcinek|:count nowe odcinki|:count nowych odcinków',
+    'detail_at_time' => ':detail (:time)',
+    'at_time' => '(:time)',
 ];

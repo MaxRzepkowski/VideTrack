@@ -15,7 +15,7 @@ use App\Jobs\RefreshEvents;
 use App\Jobs\RefreshFollowedCreators;
 use App\Jobs\RefreshRelations;
 use App\Jobs\RefreshSuggestionSets;
-use App\Jobs\SendDiscordDigests;
+use App\Jobs\SendChannelDigests;
 
 /**
  * Single source of truth for the recurring background tasks.
@@ -90,10 +90,10 @@ class ScheduledTasks
             // offset by :30 or :45 (India, Nepal) still gets it within the
             // hour — the slot is a floor, not an alarm.
             new ScheduledTask(
-                name: TaskName::DiscordDigest,
+                name: TaskName::ChannelDigest,
                 cron: '0 * * * *',
                 frequency: 'common.hourly',
-                queue: fn () => SendDiscordDigests::queueTask(),
+                queue: fn () => SendChannelDigests::queueTask(),
             ),
             // Imports through connected accounts; each source keeps its own
             // pace (Simkl daily, Tracearr hourly), this only looks for due ones.

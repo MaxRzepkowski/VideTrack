@@ -29,7 +29,7 @@ tells you when the next episode or release is out, and keeps all of it on your o
 - 🎬 Track movies, TV shows, games, books, manga and comics in one place.
 - ⏭️ See the next episode of every show you watch, and the games and books you are in the middle of.
 - 📅 Follow upcoming releases in a calendar and countdowns, or subscribe to them in your own calendar app or feed reader.
-- 🔔 Ring the bell on a title, a person or a studio to hear about new releases, in the app or on Discord.
+- 🔔 Ring the bell on a title, a person or a studio to hear about new releases, in the app, on Discord or through Apprise (Telegram, ntfy, e-mail…).
 - ⭐ Rate, favorite and collect titles in a backlog and in your own lists.
 - 📊 Keep a full history with rewatches and see how much time went into it.
 - ✨ Get suggestions based on what you finished. They wait on their own page and never nag.
@@ -38,7 +38,7 @@ tells you when the next episode or release is out, and keeps all of it on your o
 - 📤 Export everything as a backup, as CSV, or as files for IMDb, Letterboxd, Goodreads and MyAnimeList.
 - 👥 Give everyone at home their own account, in English or Polish.
 - 🔑 Log in with a password or through your own OpenID Connect server, Google, GitHub or GitLab.
-- 🐳 Run it as a single Docker container with one SQLite file.
+- 🐳 Run it as one Docker container with one SQLite file, plus an optional one for notifications.
 
 ## Screenshots
 
@@ -71,11 +71,17 @@ You need [Docker](https://docs.docker.com/get-docker/) and a free
 2. Open `.env` and paste your key after `TMDB_API_KEY=`.
 3. Open a terminal in that folder and run:
 
-   ```sh
-   docker compose up -d
-   ```
+    ```sh
+    docker compose up -d
+    ```
 
 Then open `http://localhost:8080` and register. The first account becomes the administrator.
+
+Notifications reach Discord, and through the bundled [Apprise](https://github.com/caronc/apprise)
+container Telegram, ntfy, e-mail, Slack and [many more](https://github.com/caronc/apprise/wiki).
+Each user adds their own on Settings → Notifications, as messages the moment something comes out
+or as one digest a day. The second container is optional; see
+[Notifications through Apprise](docs/install.md#notifications-through-apprise).
 
 Games, books, manga and comics turn on when you add their keys. See the
 [installation guide](docs/install.md) for that, for reverse proxies and for every setting.
@@ -100,3 +106,8 @@ linters and architecture rules) before it lands.
 ## License
 
 VideTrack is licensed under the [GNU AGPL-3.0](LICENSE).
+
+The service logos in `public/images/channels` are trademarks of their owners, shown only to name the
+service a notification goes to. Most come from the [Apprise documentation](https://github.com/caronc/apprise-docs)
+(CC BY 4.0) and [Simple Icons](https://simpleicons.org) (CC0); the others from each service's own site.
+`resources/js/lib/channelLogos.json` names the source of every file.

@@ -1,6 +1,6 @@
 import { registerMediaTypes, type MediaTypeDefinition } from '@/lib/mediaTypes';
 import type { UserPreferences } from '@/types';
-import type { CreditData, UserMediaState } from '@/types/generated';
+import type { ChannelData, ChannelKindData, CredentialField, CreditData, UserMediaState } from '@/types/generated';
 import type { MediaSummary } from '@/types/media';
 import ALL_MODULES_TYPES from '../../../tests/Fixtures/media-types/all-modules.json';
 import DEFAULT_PREFERENCES from '../../../tests/Fixtures/preferences/defaults.json';
@@ -93,6 +93,40 @@ export function credit(overrides: Partial<CreditData> = {}): CreditData {
         order: 0,
         episodeCount: null,
         roles: [],
+        ...overrides,
+    };
+}
+
+/** One field of a form a module describes (an import source, a channel). */
+export function credentialField(overrides: Partial<CredentialField> = {}): CredentialField {
+    return { key: 'webhook_url', label: 'Webhook address', type: 'url', help: null, optional: false, secret: false, ...overrides };
+}
+
+/** A kind of notification channel the instance offers; Discord unless told otherwise. */
+export function channelKind(overrides: Partial<ChannelKindData> = {}): ChannelKindData {
+    return {
+        driver: 'discord',
+        code: 'discord',
+        label: 'Discord',
+        fields: [credentialField({ secret: true })],
+        setupUrl: null,
+        popular: true,
+        ...overrides,
+    };
+}
+
+/** One of the user's notification channels as the settings page lists it. */
+export function channelData(overrides: Partial<ChannelData> = {}): ChannelData {
+    return {
+        id: 4,
+        driver: 'discord',
+        kind: 'discord',
+        kindLabel: 'Discord',
+        label: 'Movie night',
+        mode: 'digest',
+        enabled: true,
+        values: {},
+        lastFailure: null,
         ...overrides,
     };
 }

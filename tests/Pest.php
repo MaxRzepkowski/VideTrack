@@ -48,6 +48,7 @@ pest()->afterEach(fn () => removeScratch())->in('Unit');
 
 require_once __DIR__.'/Support/accounts.php';
 require_once __DIR__.'/Support/anime.php';
+require_once __DIR__.'/Support/channels.php';
 require_once __DIR__.'/Support/fakes.php';
 require_once __DIR__.'/Support/files.php';
 require_once __DIR__.'/Support/fixtures.php';
