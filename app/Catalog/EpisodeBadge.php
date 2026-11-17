@@ -37,4 +37,21 @@ enum EpisodeBadge: string
     {
         return $this === self::SeriesPremiere || $this === self::SeasonPremiere;
     }
+
+    /** The episode closes a run of the show: a season, its first half, or the series. */
+    public function isFinale(): bool
+    {
+        return $this === self::MidSeasonFinale || $this === self::SeasonFinale || $this === self::SeriesFinale;
+    }
+
+    public function label(?string $locale = null): string
+    {
+        return match ($this) {
+            self::SeriesPremiere => __('common.series_premiere', [], $locale),
+            self::SeasonPremiere => __('common.season_premiere', [], $locale),
+            self::MidSeasonFinale => __('common.mid_season_finale', [], $locale),
+            self::SeasonFinale => __('common.season_finale', [], $locale),
+            self::SeriesFinale => __('common.series_finale', [], $locale),
+        };
+    }
 }

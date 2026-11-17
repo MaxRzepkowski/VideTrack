@@ -1,7 +1,10 @@
 <?php
 
+use App\Actions\Media\NotifyCollectionAdditions;
 use App\Enums\FollowMode;
 use App\Jobs\RefreshCollections;
+use App\Library\Data\CollectionSyncResult;
+use App\Models\Follow;
 use App\Models\MediaItem;
 use App\Models\MediaList;
 use App\Models\User;
@@ -83,12 +86,50 @@ test('a new part notifies whoever follows the collection', function () {
         ->and($notification->data['collectionTitle'])->toBe('The Matrix Collection')
         ->and($notification->data['collectionProvider'])->toBe('tmdb')
         ->and($notification->data['collectionRef'])->toBe('2344')
-        ->and($notification->data['key'])->toStartWith("collection_item:{$list->id}:");
+        ->and($notification->data['key'])->toBe('new_title:movie:624860');
+});
+
+test('a part the provider files under the saga long after it came out is not news', function () {
+    Http::fake([
+        ...matrixSequence([
+            ...matrixGrown(),
+            ['id' => 55931, 'title' => 'The Animatrix', 'poster_path' => '/a.jpg', 'release_date' => '2003-06-03'],
+            ['id' => 999001, 'title' => 'The Matrix: Untitled', 'poster_path' => null, 'release_date' => ''],
+        ]),
+        '*/movie/55931*' => Http::response(['id' => 55931, 'title' => 'The Animatrix', 'poster_path' => '/a.jpg', 'release_date' => '2003-06-03']),
+        '*/movie/999001*' => Http::response(['id' => 999001, 'title' => 'The Matrix: Untitled', 'poster_path' => null, 'release_date' => '']),
+    ]);
+
+    $user = User::factory()->create();
+    $list = openMatrix($user);
+    followCollection($user, $list, FollowMode::Follow);
+
+    runRefresh();
+
+    // The same window as a followed director's: only what is still ahead.
+    expect($user->notifications()->get()->pluck('data.media.title')->all())->toBe(['The Matrix Resurrections'])
+        ->and($list->items()->count())->toBe(5);
+});
+
+test("a game series' next game is news once it has a date, an undated one not yet", function () {
+    enableGamesModule();
+    $user = User::factory()->create();
+    $series = MediaList::factory()->collection('igdb', '62')->create(['title' => 'The Witcher']);
+    Follow::factory()->create(['user_id' => $user->id, 'list_id' => $series->id]);
+
+    $dated = MediaItem::factory()->game()->create(['title' => 'The Witcher 4', 'release_date' => today()->addYear()->toDateString()]);
+    $undated = MediaItem::factory()->game()->create(['title' => 'The Witcher Remake', 'release_date' => null]);
+
+    app(NotifyCollectionAdditions::class)->execute(new CollectionSyncResult($series, [$dated->id, $undated->id], [], wasCreated: false));
+
+    expect($user->notifications()->get()->pluck('data.media.title')->all())->toBe(['The Witcher 4']);
 });
 
 test("a book series' new volume notifies its followers, a new companion nobody", function () {
     enableBooksModule();
     $grown = jsonFixture('hardcover/series');
+    // The Two Towers stands in for a volume still to come.
+    $grown['data']['series_by_pk']['book_series'][4]['book']['release_date'] = today()->addMonths(3)->toDateString();
     $grown['data']['series_by_pk']['book_series'][] = ['position' => 3.5, 'book' => ['id' => 9001, 'title' => 'A companion novella']];
     $first = $grown;
     // Before: The Two Towers not out yet, the novella not written.

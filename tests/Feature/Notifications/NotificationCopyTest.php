@@ -53,6 +53,25 @@ test('every event in both languages', function (array $data, array $en, array $p
         ['Season premiere of The Return', ['S02E05', 'The Return']],
         ['Premiera sezonu The Return', ['S02E05', 'The Return']],
     ],
+    "a show's episodes out together are counted in the headline alone" => [
+        ['event' => 'episode_aired', 'media' => $episode, 'showTitle' => 'Severance', 'items' => [$episode, [...$episode, 'number' => 6], [...$episode, 'number' => 7]]],
+        ['3 new episodes of Severance', []],
+        ['3 nowe odcinki Severance', []],
+    ],
+    'several episodes ending a season name the finale' => [
+        ['event' => 'episode_aired', 'media' => $episode, 'showTitle' => 'Severance', 'items' => [$episode, [...$episode, 'number' => 6, 'extra' => ['seasonNumber' => 2, 'episodeBadge' => 'season_finale']]]],
+        ['2 new episodes of Severance', ['Season finale']],
+        ['2 nowe odcinki Severance', ['Finał sezonu']],
+    ],
+    'a season opening with several episodes counts them, a finale among them left to the page' => [
+        ['event' => 'season_premiere', 'media' => $episode, 'showTitle' => 'Severance', 'items' => [
+            [...$episode, 'number' => 1, 'extra' => ['seasonNumber' => 2, 'episodeBadge' => 'season_premiere']],
+            [...$episode, 'number' => 2],
+            [...$episode, 'number' => 3, 'extra' => ['seasonNumber' => 2, 'episodeBadge' => 'season_finale']],
+        ]],
+        ['Season premiere of Severance', ['3 episodes']],
+        ['Premiera sezonu Severance', ['3 odcinki']],
+    ],
     'a premiere adds its platform' => [
         ['event' => 'premiere', 'media' => notifiedMedia(['extra' => ['platform' => 'PS5']])],
         ['Out today: Dune', ['PS5']],
@@ -155,4 +174,14 @@ test("Discord links a title to its page and paints it in its type colour, a part
         ->and($copy->color($film))->toBe(0x2E90FA)
         ->and($copy->color($unknown))->toBe(0x7337FF)
         ->and($copy->plainDetail($episode, 'en'))->toBe('S02E05 – The Return');
+});
+
+test("the Discord digest counts a show's episodes out together and links the first of them", function () {
+    $copy = app(NotificationCopy::class);
+    $episode = notifiedMedia(['type' => 'episode', 'ref' => '10:2:5', 'title' => 'The Return', 'number' => 5, 'extra' => ['seasonNumber' => 2]]);
+    $event = MediaEventPayload::fromStored(['event' => 'episode_aired', 'media' => $episode, 'showTitle' => 'Severance', 'items' => [$episode, [...$episode, 'number' => 6]]]);
+
+    expect($copy->digestParts($event, 'en', 'UTC'))->toBe(['subject' => 'Severance', 'label' => '2 new episodes', 'meta' => null])
+        ->and($copy->digestParts($event, 'pl', 'UTC')['label'])->toBe('2 nowe odcinki')
+        ->and($copy->url($event))->toBe(route('episode.details', ['ref' => '10', 'number' => '2', 'episode' => '5']));
 });

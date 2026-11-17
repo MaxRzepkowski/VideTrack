@@ -12,6 +12,7 @@ use App\Jobs\NotifyTodaysReleases;
 use App\Library\WatchedAt;
 use App\Models\Follow;
 use App\Models\MediaItem;
+use App\Models\MediaList;
 use App\Models\TaskRun;
 use App\Models\User;
 use App\Notifications\MediaEvent;
@@ -146,20 +147,100 @@ test('the episode its provider marks as opening a season arrives as a season pre
     // Numbering that runs on across seasons: season 2 opens on episode 11.
     $show = MediaItem::factory()->show()->create();
     $season = MediaItem::factory()->season($show, 2)->create();
+    MediaItem::factory()->episode($season, 10, '2020-01-01')->create();
     $opener = MediaItem::factory()->episode($season, 11, today()->toDateString())
         ->create(['metadata' => (new ItemMetadata(episodeBadge: EpisodeBadge::SeasonPremiere))->toStored()]);
-    $next = MediaItem::factory()->episode($season, 12, today()->toDateString())->create();
 
     Follow::factory()->create(['user_id' => $user->id, 'media_item_id' => $show->id, 'mode' => FollowMode::Follow]);
 
     runNotifyReleases();
 
-    $events = $user->notifications()->get()->mapWithKeys(fn (DatabaseNotification $n) => [$n->data['media']['ref'] => $n->data['event']])->sortKeys()->all();
+    $notification = $user->notifications()->sole();
 
-    expect($events)->toBe([
-        $opener->provider_ref => 'season_premiere',
-        $next->provider_ref => 'episode_aired',
-    ]);
+    expect($notification->data['event'])->toBe('season_premiere')
+        ->and($notification->data['media']['ref'])->toBe($opener->provider_ref);
+});
+
+test("a show's episodes out on one day arrive as one notification listing them", function () {
+    $user = User::factory()->create();
+    $show = MediaItem::factory()->show()->create(['title' => 'Crystal Lake', 'poster_path' => '/crystal-lake.jpg']);
+    $season = MediaItem::factory()->season($show, 1)->create();
+    $badge = fn (EpisodeBadge $badge): array => ['metadata' => (new ItemMetadata(episodeBadge: $badge))->toStored()];
+    MediaItem::factory()->episode($season, 1, today()->toDateString())->create($badge(EpisodeBadge::SeriesPremiere));
+    MediaItem::factory()->episode($season, 2, today()->toDateString())->create();
+    MediaItem::factory()->episode($season, 3, today()->toDateString())->create($badge(EpisodeBadge::SeasonFinale));
+
+    Follow::factory()->create(['user_id' => $user->id, 'media_item_id' => $show->id, 'mode' => FollowMode::Follow]);
+
+    runNotifyReleases();
+
+    $notification = $user->notifications()->sole();
+
+    expect($notification->data['event'])->toBe('season_premiere')
+        ->and($notification->data['showTitle'])->toBe('Crystal Lake')
+        ->and(array_column($notification->data['items'], 'number'))->toBe([1, 2, 3])
+        ->and($notification->data['key'])->toStartWith("episodes_released:{$show->id}:".today()->toDateString().':');
+
+    // A catch-up re-run says nothing new.
+    runNotifyReleases();
+
+    expect($user->notifications()->count())->toBe(1);
+
+    // Its page lists the episodes.
+    $this->actingAs($user)
+        ->get(route('notifications.show', $notification->id))
+        ->assertInertia(fn ($page) => $page->component('NotificationDetails')
+            ->has('items', 3)
+            // Each as the history shows it: under the show's poster and name.
+            ->where('items.0.media.posterPath', '/crystal-lake.jpg')
+            ->where('items.0.media.extra.showTitle', 'Crystal Lake')
+            ->where('items.2.media.extra.seasonNumber', 1)
+            ->where('items.0.available', true));
+});
+
+test('a second run the same day says only the episodes not said yet', function () {
+    $user = User::factory()->create();
+    $show = MediaItem::factory()->show()->create();
+    $season = MediaItem::factory()->season($show, 1)->create();
+    $today = today()->toDateString();
+    MediaItem::factory()->episode($season, 1, $today)->create();
+    Follow::factory()->create(['user_id' => $user->id, 'media_item_id' => $show->id, 'mode' => FollowMode::Follow]);
+
+    runNotifyReleases();
+
+    // The provider dates two more episodes today after the run.
+    MediaItem::factory()->episode($season, 2, $today)->create();
+    MediaItem::factory()->episode($season, 3, $today)->create();
+    refreshTitle($show);
+
+    runNotifyReleases();
+
+    // One more for the pair; the first episode is not listed again.
+    MediaItem::factory()->episode($season, 4, $today)->create();
+    refreshTitle($show);
+
+    runNotifyReleases();
+
+    $said = $user->notifications()->get()
+        ->map(fn (DatabaseNotification $n): array => array_column($n->data['items'] ?? [$n->data['media']], 'number'))
+        ->sortBy(fn (array $numbers): int => $numbers[0])
+        ->values()
+        ->all();
+
+    expect($said)->toBe([[1], [2, 3], [4]]);
+});
+
+test('a new title a creator and a followed collection both announce is one notification, signed by the first', function () {
+    $user = User::factory()->create();
+    $film = MediaItem::factory()->movie()->create(['release_date' => today()->addMonth()->toDateString()]);
+    $saga = MediaList::factory()->collection('tmdb', '2344')->create(['title' => 'The Saga']);
+    $send = app(SendMediaNotification::class);
+
+    $send->execute($user, MediaEventPayload::creatorTitle(MediaEventType::PersonNewTitle, $film, 'Denis'));
+    $send->execute($user, MediaEventPayload::creatorTitle(MediaEventType::CompanyNewTitle, $film, 'A24'));
+    $send->execute($user, MediaEventPayload::collectionParts($saga, [$film]));
+
+    expect($user->notifications()->sole()->data)->toMatchArray(['event' => 'person_new_title', 'personName' => 'Denis']);
 });
 
 test('mute and the event-kind toggles silence the daily task', function () {
@@ -198,6 +279,41 @@ test('metadata diffs detect a moved date, a status change and a new season', fun
         ->and($events['date_changed']->oldDate)->toBe('2020-01-01')
         ->and($events['show_status']->status)->toBe('ended')
         ->and($events['season_announced']->season)->toBe(2);
+});
+
+test('a new season takes in the show coming back from the same refresh, not a date or another status', function () {
+    $detect = app(MetadataChanges::class);
+
+    $show = makeShowTree([1 => ['2020-01-01']]);
+    $show->update(['status' => TitleStatus::Ended]);
+    $before = $detect->snapshot($show->refresh());
+
+    // Renewed: back to running, a second season listed.
+    $show->update(['status' => TitleStatus::ReturningSeries]);
+    MediaItem::factory()->season($show, 2)->create();
+
+    expect(array_map(fn (MediaEventPayload $event): ?MediaEventType => $event->type, $detect->diff($show->refresh(), $before)))
+        ->toBe([MediaEventType::SeasonAnnounced]);
+
+    // The status alone, with no season, is still said.
+    $quiet = makeShowTree([1 => ['2020-01-01']]);
+    $quiet->update(['status' => TitleStatus::Ended]);
+    $quietBefore = $detect->snapshot($quiet->refresh());
+    $quiet->update(['status' => TitleStatus::ReturningSeries]);
+
+    expect(array_map(fn (MediaEventPayload $event): ?MediaEventType => $event->type, $detect->diff($quiet->refresh(), $quietBefore)))
+        ->toBe([MediaEventType::ShowStatus]);
+
+    // A new season beside a status that says anything else, and a moved date,
+    // stay their own news.
+    $cut = makeShowTree([1 => ['2020-01-01']]);
+    $cut->update(['status' => TitleStatus::ReturningSeries, 'release_date' => '2020-01-01']);
+    $cutBefore = $detect->snapshot($cut->refresh());
+    $cut->update(['status' => TitleStatus::Canceled, 'release_date' => today()->addMonth()->toDateString()]);
+    MediaItem::factory()->season($cut, 2)->create();
+
+    expect(array_map(fn (MediaEventPayload $event): ?MediaEventType => $event->type, $detect->diff($cut->refresh(), $cutBefore)))
+        ->toBe([MediaEventType::DateChanged, MediaEventType::ShowStatus, MediaEventType::SeasonAnnounced]);
 });
 
 test('a date correction on something already out is not an announcement', function () {

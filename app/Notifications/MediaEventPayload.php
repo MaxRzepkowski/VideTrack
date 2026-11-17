@@ -2,6 +2,7 @@
 
 namespace App\Notifications;
 
+use App\Catalog\Data\MediaSummary;
 use App\Catalog\DatePrecision;
 use App\Catalog\MediaItemSummaries;
 use App\Enums\ReleaseKind;
@@ -107,6 +108,36 @@ final readonly class MediaEventPayload
     }
 
     /**
+     * Several episodes of one show out today, as one event that lists them: a
+     * season dropped at once is one piece of news. It premieres the season
+     * when one of them opens it, and leads with that one. Keyed by the show,
+     * the day and the episodes, so a catch-up re-run says nothing new; its
+     * producer leaves out the episodes already said, so the ones dated today
+     * after the day's run arrive in a notification of their own.
+     *
+     * @param  list<ReleaseEntry>  $episodes  of one show, in season and episode order
+     */
+    public static function episodesReleased(array $episodes, string $today): self
+    {
+        if (count($episodes) < 2) {
+            throw new InvalidArgumentException('One episode is released(); this lists several.');
+        }
+
+        $opener = array_find($episodes, fn (ReleaseEntry $entry): bool => $entry->opensSeason());
+        $lead = $opener ?? $episodes[0];
+
+        return new self(
+            type: $opener === null ? MediaEventType::EpisodeAired : MediaEventType::SeasonPremiere,
+            key: "episodes_released:{$lead->rootId}:{$today}:".md5(implode(',', array_map(fn (ReleaseEntry $entry): string => $entry->media->ref, $episodes))),
+            media: $lead->media->jsonSerialize(),
+            showTitle: $lead->showTitle,
+            date: $today,
+            season: $lead->media->seasonNumber,
+            items: array_map(fn (ReleaseEntry $entry): array => $entry->media->jsonSerialize(), $episodes),
+        );
+    }
+
+    /**
      * A film reaching homes today — also one premiering the same day, for a
      * viewer who follows home releases and not premieres. Its key is its own,
      * so it neither collides with the premiere of the same title nor changes
@@ -170,12 +201,16 @@ final readonly class MediaEventPayload
         );
     }
 
-    /** A new title of a followed person or company, named after them. */
+    /**
+     * A new title of a followed person or company, named after them. Its key
+     * is the title's own, shared with a collection's new part: whichever bell
+     * finds the title first announces it, and the others find it said.
+     */
     public static function creatorTitle(MediaEventType $type, MediaItem $item, string $creatorName): self
     {
         return new self(
             type: $type,
-            key: "{$type->value}:{$item->type}:{$item->provider_ref}",
+            key: self::newTitleKey($item),
             media: MediaItemSummaries::summary($item)->jsonSerialize(),
             date: $item->release_date?->toDateString(),
             personName: $type === MediaEventType::PersonNewTitle ? $creatorName : null,
@@ -184,9 +219,10 @@ final readonly class MediaEventPayload
     }
 
     /**
-     * Parts a followed collection gained: one per (collection, part), so a
-     * re-run of the weekly sync never repeats itself; several at once are one
-     * event that lists them.
+     * Parts a followed collection gained. One part is a new title, keyed as a
+     * creator's is, so a re-run of the weekly sync never repeats it and a
+     * director's bell that said it first is not echoed. Several at once (a
+     * re-indexed saga) are one event that lists them, keyed by the set.
      *
      * @param  list<MediaItem>  $parts
      */
@@ -203,7 +239,7 @@ final readonly class MediaEventPayload
             type: MediaEventType::CollectionNewItem,
             key: $several
                 ? "collection_items:{$collection->id}:".md5(implode(',', $ids))
-                : "collection_item:{$collection->id}:{$first->id}",
+                : self::newTitleKey($first),
             media: $summaries[0],
             date: $several ? null : $first->release_date?->toDateString(),
             items: $several ? $summaries : null,
@@ -272,6 +308,28 @@ final readonly class MediaEventPayload
         return array_map(fn (array $item): string => (string) Payload::string($item, 'title'), $this->items ?? [$this->media]);
     }
 
+    /**
+     * The `type:ref` of every title the event lists, as `MediaSummary::key()`
+     * names a card.
+     *
+     * @return list<string>
+     */
+    public function cardKeys(): array
+    {
+        $keys = [];
+
+        foreach ($this->items ?? [$this->media] as $card) {
+            $type = Payload::string($card, 'type');
+            $ref = Payload::string($card, 'ref');
+
+            if ($type !== null && $ref !== null) {
+                $keys[] = MediaSummary::keyOf($type, $ref);
+            }
+        }
+
+        return $keys;
+    }
+
     /** An event about several titles has a page of its own. */
     public function listsSeveral(): bool
     {
@@ -306,5 +364,11 @@ final readonly class MediaEventPayload
                 'collectionRef' => $this->collectionRef,
             ]),
         ];
+    }
+
+    /** The fact "this title is new", whichever bell brought it. */
+    private static function newTitleKey(MediaItem $item): string
+    {
+        return "new_title:{$item->type}:{$item->provider_ref}";
     }
 }

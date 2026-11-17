@@ -13,7 +13,8 @@ use App\Support\Numbers;
  * Diff-based media events around a metadata refresh: the caller snapshots a
  * root before TitleStore::refresh() and diffs after. Detected
  * here: a moved (or first-announced) release date still in the future, a show
- * status change and a newly announced season. Date-REACHED events (aired
+ * status change and a newly announced season, which takes in the status
+ * change that only says the show is back. Date-REACHED events (aired
  * episodes, premieres) are not diffs — the daily notify-releases task derives
  * them from the same engine as the calendar.
  */
@@ -61,15 +62,20 @@ final readonly class MetadataChanges
             $events[] = MediaEventPayload::dateChanged($root, $before['release_date'], $before['release_date_precision']);
         }
 
+        $maxSeason = $this->maxSeason($root);
+        $newSeason = $maxSeason !== null && $before['maxSeason'] !== null && $maxSeason > $before['maxSeason'];
         $status = $this->status($root);
 
-        if ($status !== null && $before['status'] !== null && $status !== $before['status']) {
+        // A renewed show comes back with its next season: the season says
+        // it, and the status turning to running is the same news. A status
+        // that says anything else is its own.
+        $cameBack = $newSeason && $root->status?->isRunning() === true;
+
+        if ($status !== null && $before['status'] !== null && $status !== $before['status'] && ! $cameBack) {
             $events[] = MediaEventPayload::statusChanged($root, $status, $before['status']);
         }
 
-        $maxSeason = $this->maxSeason($root);
-
-        if ($maxSeason !== null && $before['maxSeason'] !== null && $maxSeason > $before['maxSeason']) {
+        if ($newSeason) {
             $events[] = MediaEventPayload::seasonAnnounced($root, $maxSeason);
         }
 

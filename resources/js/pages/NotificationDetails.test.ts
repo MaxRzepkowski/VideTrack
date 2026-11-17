@@ -21,7 +21,10 @@ function details(notification: NotificationEntry, available: boolean[]) {
     return mount(NotificationDetails, {
         props: {
             notification,
-            items: available.map((isAvailable, index) => ({ media: mediaSummary({ ref: String(index) }), available: isAvailable })),
+            items: available.map((isAvailable, index) => ({
+                media: isAvailable ? mediaSummary({ ref: String(index) }) : null,
+                available: isAvailable,
+            })),
         },
         global: {
             stubs: { AppLayout: { template: '<div><slot /></div>' }, MediaGrid: { template: '<div class="grid"><slot /></div>' }, MediaCard: true },
@@ -41,5 +44,23 @@ describe('NotificationDetails', () => {
     it('leads to the archive only from titles gone from their source', () => {
         expect(details(removed, [true]).text()).toContain('All archived titles in your library');
         expect(details({ ...removed, event: 'collection_new_item' }, [true]).text()).not.toContain('All archived titles in your library');
+    });
+
+    it("shows an episode as the history does: its show's name under it, its code in the corner", () => {
+        const episode = mediaSummary({ type: 'episode', ref: '10:1:2', number: 2, extra: { seasonNumber: 1, showTitle: 'Crystal Lake' } });
+        const wrapper = mount(NotificationDetails, {
+            props: { notification: { ...removed, event: 'episode_aired' }, items: [{ media: episode, available: true }] },
+            global: {
+                stubs: {
+                    AppLayout: { template: '<div><slot /></div>' },
+                    MediaGrid: { template: '<div class="grid"><slot /></div>' },
+                    MediaCard: true,
+                },
+            },
+        });
+        const card = wrapper.findComponent({ name: 'MediaCard' });
+
+        expect(card.props('subtitle')).toBe('Crystal Lake');
+        expect(card.props('cornerBadge')).toBe('S01E02');
     });
 });

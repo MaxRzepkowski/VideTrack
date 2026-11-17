@@ -2,7 +2,7 @@
 
 namespace App\Tracking\Surfaces;
 
-use App\Catalog\EpisodeBadge;
+use App\Catalog\EpisodeCode;
 use App\Catalog\ImageUrls;
 use App\Enums\ReleaseKind;
 use App\Http\CardPages;
@@ -34,7 +34,7 @@ final readonly class FeedItems
         $media = $entry->media;
 
         if ($entry->showTitle !== null) {
-            $code = sprintf('S%02dE%02d', $media->seasonNumber ?? 0, $media->number ?? 0);
+            $code = EpisodeCode::of($media->seasonNumber ?? 0, $media->number ?? 0);
 
             return "{$entry->showTitle} {$code} – {$media->title}";
         }
@@ -58,7 +58,7 @@ final readonly class FeedItems
         $facts = [];
 
         if ($media->episodeBadge !== null) {
-            $facts[] = $this->badge($media->episodeBadge);
+            $facts[] = $media->episodeBadge->label();
         }
 
         if (in_array($media->releaseKind, [ReleaseKind::Home, ReleaseKind::Both], true)) {
@@ -116,16 +116,5 @@ final readonly class FeedItems
             ...($media->releaseStatus === null ? [] : [$media->releaseStatus]),
             $date,
         ]).'@videtrack';
-    }
-
-    private function badge(EpisodeBadge $badge): string
-    {
-        return match ($badge) {
-            EpisodeBadge::SeriesPremiere => __('common.series_premiere'),
-            EpisodeBadge::SeasonPremiere => __('common.season_premiere'),
-            EpisodeBadge::MidSeasonFinale => __('common.mid_season_finale'),
-            EpisodeBadge::SeasonFinale => __('common.season_finale'),
-            EpisodeBadge::SeriesFinale => __('common.series_finale'),
-        };
     }
 }
