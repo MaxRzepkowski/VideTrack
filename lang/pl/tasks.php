@@ -26,7 +26,7 @@ return [
     'run_now' => 'Uruchom teraz',
     'running' => 'Uruchamianie…',
     'scheduled_tasks' => 'Zadania cykliczne',
-    'send_discord_digests' => 'Wysyłka przeglądów na Discorda',
+    'send_daily_digests' => 'Wysyłka dziennych przeglądów',
     'send_release_notifications' => 'Wysyłka powiadomień o premierach',
     'show_count_detail' => 'Pokaż :count informację|Pokaż :count informacje|Pokaż :count informacji',
     'show_count_error' => 'Pokaż :count błąd|Pokaż :count błędy|Pokaż :count błędów',

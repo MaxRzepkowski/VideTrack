@@ -159,7 +159,7 @@ test('every event in both languages', function (array $data, array $en, array $p
     ],
 ]);
 
-test("Discord links a title to its page and paints it in its type colour, a part of a show in the show's", function () {
+test("a channel message links a title to its page and paints it in its type colour, a part of a show in the show's", function () {
     $copy = app(NotificationCopy::class);
     $episode = MediaEventPayload::fromStored(['event' => 'episode_aired', 'media' => notifiedMedia(['type' => 'episode', 'ref' => '10:2:5', 'title' => 'The Return', 'number' => 5, 'extra' => ['seasonNumber' => 2]])]);
     $season = MediaEventPayload::fromStored(['event' => 'season_announced', 'media' => notifiedMedia(['type' => 'season', 'ref' => '10:2'])]);
@@ -176,7 +176,7 @@ test("Discord links a title to its page and paints it in its type colour, a part
         ->and($copy->plainDetail($episode, 'en'))->toBe('S02E05 – The Return');
 });
 
-test("the Discord digest counts a show's episodes out together and links the first of them", function () {
+test("the digest counts a show's episodes out together and links the first of them", function () {
     $copy = app(NotificationCopy::class);
     $episode = notifiedMedia(['type' => 'episode', 'ref' => '10:2:5', 'title' => 'The Return', 'number' => 5, 'extra' => ['seasonNumber' => 2]]);
     $event = MediaEventPayload::fromStored(['event' => 'episode_aired', 'media' => $episode, 'showTitle' => 'Severance', 'items' => [$episode, [...$episode, 'number' => 6]]]);
@@ -184,4 +184,29 @@ test("the Discord digest counts a show's episodes out together and links the fir
     expect($copy->digestParts($event, 'en', 'UTC'))->toBe(['subject' => 'Severance', 'label' => '2 new episodes', 'meta' => null])
         ->and($copy->digestParts($event, 'pl', 'UTC')['label'])->toBe('2 nowe odcinki')
         ->and($copy->url($event))->toBe(route('episode.details', ['ref' => '10', 'number' => '2', 'episode' => '5']));
+});
+
+test('a status change reads in the language of the message, not the provider', function () {
+    $event = MediaEventPayload::fromStored(['event' => 'show_status', 'status' => 'ended', 'oldStatus' => 'returning_series', 'media' => ['type' => 'show', 'ref' => '1', 'title' => 'Fargo']]);
+
+    expect(app(NotificationCopy::class)->plainDetail($event, 'en'))->toBe('Returning series → Ended')
+        ->and(app(NotificationCopy::class)->plainDetail($event, 'pl'))->toBe('Powracający serial → Zakończony');
+});
+
+test('parts a collection gained at once are counted, previewed and lead to the collection', function () {
+    $parts = array_map(fn (int $n): array => ['type' => 'movie', 'ref' => (string) $n, 'title' => "Part {$n}"], range(1, 6));
+    $event = MediaEventPayload::fromStored(['event' => 'collection_new_item', 'collectionTitle' => 'Dune', 'collectionProvider' => 'tmdb', 'collectionRef' => '9', 'media' => $parts[0], 'items' => $parts]);
+    $copy = app(NotificationCopy::class);
+
+    expect($copy->title($event, 'en'))->toBe('6 new parts of Dune')
+        ->and($copy->title($event, 'pl'))->toBe('6 nowych części serii Dune')
+        ->and($copy->plainDetail($event, 'en'))->toBe('Part 1 – Part 2 – Part 3 – 3 more')
+        ->and($copy->url($event))->toBe(route('collections.show', ['provider' => 'tmdb', 'ref' => '9']));
+});
+
+test('parts without a collection address lead to the first of them', function () {
+    $parts = array_map(fn (int $n): array => ['type' => 'movie', 'ref' => (string) $n, 'title' => "Part {$n}"], range(1, 2));
+    $event = MediaEventPayload::fromStored(['event' => 'collection_new_item', 'collectionTitle' => 'Dune', 'collectionId' => 9, 'media' => $parts[0], 'items' => $parts]);
+
+    expect(app(NotificationCopy::class)->url($event))->toBe(route('movie.details', ['ref' => '1']));
 });

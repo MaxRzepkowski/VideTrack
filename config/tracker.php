@@ -346,6 +346,21 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Apprise (notification channels to many services)
+    |--------------------------------------------------------------------------
+    |
+    | The address of an apprise-api container (https://github.com/caronc/apprise-api).
+    | Set, every service it delivers to (Telegram, ntfy, e-mail, Slack…) is a
+    | kind of notification channel; unset, none of them is offered.
+    |
+    */
+
+    'apprise' => [
+        'url' => env('APPRISE_API_URL'),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | ComicVine metadata provider (comics)
     |--------------------------------------------------------------------------
     |
@@ -487,8 +502,9 @@ return [
         'account_forms' => 6,
         // Settings actions that read or write a whole library.
         'library_heavy' => 10,
-        // A test message to the user's own Discord webhook.
-        'discord_test' => 5,
+        // A test message to one of the user's notification channels: a
+        // service blocks an address that sends too many.
+        'channel_test' => 5,
         // A webhook dry run, which reaches out to the metadata provider.
         'integration_test' => 20,
         // A connect card waiting on a device flow polls every few seconds.

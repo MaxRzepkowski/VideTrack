@@ -31,7 +31,7 @@ return [
     'keywords_settings_profile' => 'profil, ustawienia, język, profile, settings, language',
     'keywords_settings_password' => 'hasło, ustawienia, password, settings',
     'keywords_settings_identities' => 'połączone konta, sso, oidc, google, github, gitlab, logowanie, ustawienia, login, settings',
-    'keywords_settings_preferences' => 'preferencje, ustawienia, discord, preferences, settings',
+    'keywords_settings_preferences' => 'preferencje, ustawienia, preferences, settings',
     'keywords_settings_tracking' => 'śledzenie, ustawienia, tracking, settings',
     'keywords_settings_integrations' => 'integracje, ustawienia, plex, jellyfin, emby, webhook, integrations, settings',
     'keywords_settings_import' => 'import, trakt, ustawienia, settings',
@@ -40,4 +40,5 @@ return [
     'keywords_settings_tasks' => 'zadania, kolejka, ustawienia, tasks, queue, settings',
     'keywords_settings_danger' => 'strefa zagrożenia, usuń, ustawienia, danger, delete, settings',
     'keywords_log_out' => 'wyloguj, log out, logout, sign out',
+    'keywords_settings_channels' => 'powiadomienia, kanały, discord, apprise, przegląd, webhook, notifications, channels',
 ];

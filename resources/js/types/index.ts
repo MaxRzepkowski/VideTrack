@@ -1,7 +1,6 @@
 import type { MediaTypeDefinition } from '@/lib/mediaTypes';
 import type {
     CompanyFollowScope,
-    DiscordMode,
     EpisodeImage,
     EventEntry,
     IdentityProviderOption,
@@ -129,5 +128,4 @@ export interface UserPreferences {
     notify_collection_items: boolean;
     person_follow_scope: PersonFollowScope;
     company_follow_scope: CompanyFollowScope;
-    discord_mode: DiscordMode;
 }

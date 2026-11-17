@@ -18,7 +18,7 @@ function guardVisits(): () => void {
     return router.on('before', (event) => {
         const visit = event.detail.visit;
 
-        // Saves and independent actions (such as Discord tests) keep their
+        // Saves and independent actions (such as a channel's test message) keep their
         // draft. Prefetching must never prompt just for hovering a link.
         if (leaving || visit.method !== 'get' || visit.prefetch || ![...drafts].some((isDirty) => isDirty())) {
             return;

@@ -22,7 +22,7 @@ function page(timezone: string | null) {
     });
 
     return mount(Preferences, {
-        props: { regions: { PL: 'Poland' }, defaultRegion: 'PL', discordWebhookEnding: null },
+        props: { regions: { PL: 'Poland' }, defaultRegion: 'PL' },
         global: { stubs: { AppLayout: { template: '<div><slot /></div>' }, SettingsLayout: { template: '<div><slot /></div>' } } },
     });
 }

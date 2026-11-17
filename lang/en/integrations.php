@@ -35,7 +35,6 @@ return [
     'give_this_endpoint_a_new_address' => 'Give this endpoint a new address? The current one stops working right away.',
     'go_to_plex_tv_settings_webhooks' => 'Go to plex.tv → Settings → Webhooks. Webhooks live on the account, not on the server.',
     'hide_what_arrived' => 'Hide what arrived',
-    'how_to_set_it_up' => 'How to set it up',
     'in_emby_go_to_settings_notifications' => 'In Emby go to Settings → Notifications (or Webhooks on older builds) and add a webhook.',
     'in_jellyfin_open_dashboard_plugins_catalog' => 'In Jellyfin open Dashboard → Plugins → Catalog and install Webhook, then restart the server.',
     'in_tautulli_open_settings_notification_agents' => 'In Tautulli open Settings → Notification Agents → Add a new notification agent and choose Webhook.',

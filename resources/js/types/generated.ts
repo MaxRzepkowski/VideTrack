@@ -61,6 +61,33 @@ export type CertificationData = {
     readonly code: string;
     readonly meaning: string | null;
 };
+export type ChannelData = {
+    readonly id: number;
+    readonly driver: string;
+    readonly kind: string;
+    readonly kindLabel: string | null;
+    readonly label: string;
+    readonly mode: ChannelMode;
+    readonly enabled: boolean;
+    readonly values: Record<string, string>;
+    readonly lastFailure: string | null;
+};
+export type ChannelKindData = {
+    readonly driver: string;
+    readonly code: string;
+    readonly label: string;
+    readonly fields: CredentialField[];
+    readonly setupUrl: string | null;
+    readonly popular: boolean;
+};
+export type ChannelMode = 'digest' | 'instant';
+export type ChannelsPage = {
+    readonly channels: ChannelData[];
+    readonly kinds: ChannelKindData[];
+    readonly labelMax: number;
+    readonly defaultMode: ChannelMode;
+    readonly digestHour: number;
+};
 export type ClosesRun = 'series' | 'season';
 export type CollectionBannerData = {
     readonly provider: string;
@@ -168,8 +195,10 @@ export type CredentialField = {
     readonly label: string;
     readonly type: CredentialFieldType;
     readonly help: string | null;
+    readonly optional: boolean;
+    readonly secret: boolean;
 };
-export type CredentialFieldType = 'text' | 'url' | 'password' | 'checkbox';
+export type CredentialFieldType = 'text' | 'url' | 'password' | 'email' | 'checkbox';
 export type CreditData = {
     readonly personRef: string;
     readonly name: string;
@@ -243,7 +272,6 @@ export type Department =
     | 'visual_effects'
     | 'lighting'
     | 'crew';
-export type DiscordMode = 'digest' | 'instant';
 export type DiscoverFilter = {
     readonly key: string;
     readonly label: string;

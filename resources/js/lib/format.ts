@@ -192,6 +192,11 @@ export function formatDateTime(date: string | null): string | null {
     }).format(new Date(date));
 }
 
+/** A whole hour of the viewer's day, as their time format writes it: "8:00" / "8:00 AM". */
+export function formatHourOfDay(hour: number): string {
+    return new Intl.DateTimeFormat(pageLocale(), { timeStyle: 'short', timeZone: 'UTC', ...timeFormatOptions() }).format(Date.UTC(2000, 0, 1, hour));
+}
+
 /** Localized time-of-day only, in the viewer's timezone, e.g. "9:00 PM" / "21:00". */
 export function formatTime(datetime: string | null): string | null {
     if (!datetime) {

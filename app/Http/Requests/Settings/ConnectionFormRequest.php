@@ -2,12 +2,13 @@
 
 namespace App\Http\Requests\Settings;
 
+use App\Http\Requests\Settings\Concerns\ReadsCredentialFields;
 use App\Integrations\Connections\ConnectionRegistry;
 use App\Integrations\Connections\Contracts\AuthorizesByForm;
 use App\Integrations\Connections\UnusableAddress;
 use App\Integrations\Connections\UserAddresses;
-use App\Integrations\Import\Data\CredentialFieldType;
 use App\Models\User;
+use App\Support\Forms\CredentialFieldType;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Validator;
 
@@ -22,6 +23,11 @@ use Illuminate\Validation\Validator;
  */
 class ConnectionFormRequest extends FormRequest
 {
+    use ReadsCredentialFields;
+
+    /** A sign-in value may be a long address or token. */
+    private const VALUE_MAX = 2048;
+
     private ?AuthorizesByForm $connectable = null;
 
     /**
@@ -29,13 +35,10 @@ class ConnectionFormRequest extends FormRequest
      */
     public function rules(): array
     {
-        $rules = ['choice' => ['nullable', 'string', 'max:255']];
-
-        foreach ($this->connectable()->connectionFields() as $field) {
-            $rules["values.{$field->key}"] = ['required', 'string', 'max:2048'];
-        }
-
-        return $rules;
+        return [
+            'choice' => ['nullable', 'string', 'max:255'],
+            ...$this->fieldRules($this->connectable()->connectionFields(), 'values', self::VALUE_MAX),
+        ];
     }
 
     /**
@@ -87,13 +90,7 @@ class ConnectionFormRequest extends FormRequest
      */
     public function values(): array
     {
-        $values = [];
-
-        foreach ($this->connectable()->connectionFields() as $field) {
-            $values[$field->key] = $this->string("values.{$field->key}")->trim()->value();
-        }
-
-        return $values;
+        return $this->fieldValues($this->connectable()->connectionFields(), 'values');
     }
 
     /** The account picked from the verified list; null where the service lists none. */

@@ -2,10 +2,9 @@
 
 namespace App\Notifications;
 
-use App\Accounts\Preferences\DiscordMode;
 use App\Models\User;
-use App\Notifications\Channels\DiscordWebhookChannel;
 use App\Notifications\Channels\MediaEventDatabaseChannel;
+use App\Notifications\Channels\UserChannels;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Str;
 
@@ -30,15 +29,12 @@ class MediaEvent extends Notification
      */
     public function via(object $notifiable): array
     {
+        // The bell, and whatever instant channels the user set up; digest
+        // channels hear about it in their daily batch (SendChannelDigests).
         $channels = [MediaEventDatabaseChannel::class];
 
-        // Instant Discord pings ride along with the database write; the
-        // default digest mode delivers in one daily batch instead
-        // (SendDiscordDigests).
-        if ($notifiable instanceof User
-            && $notifiable->preferences->discordMode() === DiscordMode::Instant
-            && $notifiable->discordWebhookUrl() !== null) {
-            $channels[] = DiscordWebhookChannel::class;
+        if ($notifiable instanceof User) {
+            $channels[] = UserChannels::class;
         }
 
         return $channels;

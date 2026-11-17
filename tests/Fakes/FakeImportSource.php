@@ -3,12 +3,12 @@
 namespace Tests\Fakes;
 
 use App\Integrations\Import\Contracts\ReadsCredentials;
-use App\Integrations\Import\Data\CredentialField;
 use App\Integrations\Import\Data\ImportInput;
 use App\Integrations\Import\Data\ImportManifest;
 use App\Integrations\Import\Data\ImportSelection;
 use App\Integrations\Import\Data\ManifestCategory;
 use App\Integrations\Import\Rows\ImportRow;
+use App\Support\Forms\CredentialField;
 use Generator;
 use Throwable;
 

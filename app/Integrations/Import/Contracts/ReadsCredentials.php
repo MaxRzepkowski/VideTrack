@@ -2,7 +2,7 @@
 
 namespace App\Integrations\Import\Contracts;
 
-use App\Integrations\Import\Data\CredentialField;
+use App\Support\Forms\CredentialField;
 
 /** An import source whose input is a one-off form: a public username, a profile address. */
 interface ReadsCredentials extends ImportSource

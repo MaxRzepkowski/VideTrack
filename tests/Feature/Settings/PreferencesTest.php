@@ -103,7 +103,6 @@ test('each settings page saves its complete form without overwriting the other p
         'up_next_target' => 'show',
         'up_next_keep_finished' => false,
         'up_next_sort' => 'remaining',
-        'discord_mode' => 'instant',
     ];
     $tracking = [
         'calendar_active' => false,
@@ -143,9 +142,7 @@ test('each settings page saves its complete form without overwriting the other p
 
     $this->actingAs($user)
         ->from('/settings/preferences')
-        // The Discord URL rides with the form but is kept apart from the
-        // preferences blob: it is a credential.
-        ->patch('/settings/preferences', [...$preferences, 'discord_webhook_url' => null])
+        ->patch('/settings/preferences', $preferences)
         ->assertSessionHasNoErrors()
         ->assertRedirect('/settings/preferences');
 
@@ -174,15 +171,6 @@ test('a validation error prevents a settings form from being partially saved', f
         ->assertSessionHasErrors('timezone');
 
     expect($user->refresh()->preferences->toStored())->toEqual($original);
-});
-
-test('a refused save never keeps the typed Discord webhook in the session', function () {
-    $this->actingAs(User::factory()->create())
-        ->from('/settings/preferences')
-        ->patch('/settings/preferences', ['discord_webhook_url' => 'https://discord.com/api/webhooks/1/secret', 'timezone' => 'invalid'])
-        ->assertSessionHasErrors('timezone');
-
-    expect(session()->getOldInput())->toHaveKey('timezone')->not->toHaveKey('discord_webhook_url');
 });
 
 test('the reported timezone persists on its own and only backs up an unset preference', function () {
@@ -350,8 +338,7 @@ test('every page shares every setting, defaults filled in, so the front keeps no
     $this->actingAs($user)->get('/settings/preferences')->assertInertia(fn (Assert $page) => $page
         ->where('auth.user.preferences', $user->preferences->resolved())
         ->where('auth.user.preferences.countdown_dropped', true)
-        ->where('auth.user.preferences.notifications_dropped', false)
-        ->where('auth.user.preferences.discord_mode', 'digest'));
+        ->where('auth.user.preferences.notifications_dropped', false));
 });
 
 test('a flag sent as a form value is stored as a flag, a country in capitals', function () {

@@ -23,7 +23,8 @@ under **Settings → Tasks**. Administrators also see system jobs and the schedu
 ## Backup
 
 The database is a single SQLite file on the `videtrack-data` volume, next to the app key
-(`/data/app.key`). Keep the two together: stored tokens cannot be read without the key.
+(`/data/app.key`). Keep the two together: stored tokens and the addresses of notification
+channels cannot be read without the key.
 
 The queue and the scheduler write to the database all the time, so a plain `cp` may capture a
 half-finished write. Use `.backup`, which takes a consistent snapshot:

@@ -2,10 +2,10 @@
 
 use App\Http\Controllers\Settings\ApiTokenController;
 use App\Http\Controllers\Settings\CalendarTokenController;
+use App\Http\Controllers\Settings\ChannelsController;
 use App\Http\Controllers\Settings\ConnectionController;
 use App\Http\Controllers\Settings\DangerZoneController;
 use App\Http\Controllers\Settings\DetectedTimezoneController;
-use App\Http\Controllers\Settings\DiscordTestController;
 use App\Http\Controllers\Settings\ExportController;
 use App\Http\Controllers\Settings\IdentitiesController;
 use App\Http\Controllers\Settings\ImportController;
@@ -40,11 +40,18 @@ Route::middleware(['auth', 'throttle:web'])->name('settings.')->group(function (
     // background, and going through preferences.update would send back a
     // redirect that re-renders the page under whatever the user is doing.
     Route::patch('settings/detected-timezone', DetectedTimezoneController::class)->name('timezone.detected');
-    // Every click is two requests to Discord from the instance's address,
-    // and Discord blocks an address that sends too many.
-    Route::post('settings/discord/test', DiscordTestController::class)->middleware('throttle:discord-test')->name('discord.test');
 
     Route::get('settings/tracking', [TrackingController::class, 'edit'])->name('tracking.edit');
+
+    Route::get('settings/channels', [ChannelsController::class, 'index'])->name('channels.index');
+    Route::post('settings/channels', [ChannelsController::class, 'store'])->name('channels.store');
+    Route::patch('settings/channels/{channel}', [ChannelsController::class, 'update'])->name('channels.update');
+    Route::delete('settings/channels/{channel}', [ChannelsController::class, 'destroy'])->name('channels.destroy');
+    // Every click reaches the service from the instance's address, and a
+    // service blocks an address that sends too many.
+    Route::post('settings/channels/{channel}/test', [ChannelsController::class, 'test'])
+        ->middleware('throttle:channel-test')
+        ->name('channels.test');
 
     Route::get('settings/integrations', [IntegrationsController::class, 'index'])->name('integrations.index');
     Route::post('settings/integrations/{source}', [IntegrationsController::class, 'store'])->name('integrations.store');

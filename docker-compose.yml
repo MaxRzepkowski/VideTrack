@@ -10,6 +10,8 @@ x-app: &app
     - .:/app
   environment:
     HOME: /tmp
+    # The apprise service below, for notification channels to Telegram, ntfy, e-mail…
+    APPRISE_API_URL: http://apprise:8000
   restart: unless-stopped
 
 services:
@@ -21,6 +23,7 @@ services:
       - "${DEV_BIND_ADDRESS:-127.0.0.1}:8080:8000"
     environment:
       HOME: /tmp
+      APPRISE_API_URL: http://apprise:8000
       # Must be a real process env var: `artisan serve` runs PHP's built-in
       # server (php -S), which reads PHP_CLI_SERVER_WORKERS via getenv — the
       # .env value never reaches it (Laravel's immutable Dotenv skips putenv),
@@ -51,3 +54,9 @@ services:
     ports:
       - "${DEV_BIND_ADDRESS:-127.0.0.1}:5173:5173"
     command: npm run dev -- --host 0.0.0.0
+
+  # Delivers notifications through Apprise URLs; no port, VideTrack alone reaches it.
+  apprise:
+    # A minor version: `docker compose pull` brings its patches, a newer minor is set by hand.
+    image: caronc/apprise:2.1
+    restart: unless-stopped

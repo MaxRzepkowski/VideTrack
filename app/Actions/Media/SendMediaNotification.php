@@ -33,8 +33,9 @@ final readonly class SendMediaNotification
             return false;
         }
 
-        // Other channels (outgoing webhooks, push) carry the same fact — they
-        // subscribe here rather than re-running the detection themselves.
+        // The user's own channels ride on the notification (MediaEvent::via);
+        // whatever else carries the same fact subscribes here rather than
+        // re-running the detection itself.
         Event::dispatch(new MediaEventDetected(userId: $user->id, event: $event));
 
         return true;

@@ -29,20 +29,20 @@ final readonly class UserAddresses
         $host = parse_url($url, PHP_URL_HOST);
 
         if (! in_array($scheme, ['http', 'https'], true) || ! is_string($host) || $host === '') {
-            throw new AddressRefused('import.this_is_not_a_web_address');
+            throw new AddressRefused('common.this_is_not_a_web_address');
         }
 
         $host = strtolower(trim($host, '[]'));
         $ips = $this->resolve($host);
 
         if ($ips === []) {
-            throw new AddressNotFound('import.this_address_could_not_be_found');
+            throw new AddressNotFound('common.this_address_could_not_be_found');
         }
 
         $mayReachPrivate = $owner->isAdmin() || in_array($host, $this->operatorHosts(), true);
 
         if (! $mayReachPrivate && array_filter($ips, fn (string $ip): bool => ! self::isPublic($ip)) !== []) {
-            throw new AddressRefused('import.this_address_is_in_a_private_network');
+            throw new AddressRefused('common.this_address_is_in_a_private_network');
         }
 
         $port = parse_url($url, PHP_URL_PORT);

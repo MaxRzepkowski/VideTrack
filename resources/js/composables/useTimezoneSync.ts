@@ -5,7 +5,7 @@ import { onMounted } from 'vue';
 
 // The "Automatic" timezone preference is resolved here, from `Intl` — the
 // server never sees it. Queued work has no browser, so without reporting it
-// the Discord digest would read the instance timezone and fire at the wrong
+// the daily digest would read the instance timezone and fire at the wrong
 // local hour.
 //
 // Reported with a plain fetch against an endpoint that answers 204, never

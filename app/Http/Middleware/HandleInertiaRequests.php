@@ -135,8 +135,8 @@ class HandleInertiaRequests extends Middleware
     /**
      * The signed-in user as every page sees them: the profile and the display
      * preferences, picked field by field so a new column never reaches the
-     * page by accident. Credentials (the Discord webhook URL) stay out; the
-     * page that edits one is handed it on its own.
+     * page by accident. Credentials (a notification channel's address) stay
+     * out, here and on the page that edits them.
      *
      * @return array<string, mixed>|null
      */

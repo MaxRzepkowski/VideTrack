@@ -4,6 +4,7 @@ namespace App\Integrations\Import\Data;
 
 use App\Integrations\Connections\ConnectMethod;
 use App\Integrations\Connections\Data\ConnectionCard;
+use App\Support\Forms\CredentialField;
 use Spatie\TypeScriptTransformer\Attributes\TypeScript;
 
 /**

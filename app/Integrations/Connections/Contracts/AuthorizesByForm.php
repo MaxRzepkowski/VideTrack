@@ -6,8 +6,8 @@ use App\Integrations\Connections\ConnectionRejected;
 use App\Integrations\Connections\Data\ConnectionChoice;
 use App\Integrations\Connections\Data\ConnectionGrant;
 use App\Integrations\Connections\UnusableAddress;
-use App\Integrations\Import\Data\CredentialField;
 use App\Models\User;
+use App\Support\Forms\CredentialField;
 
 /**
  * The user pastes what the service gave them (an address and an API key)

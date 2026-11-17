@@ -315,7 +315,4 @@ return [
     'shelf_did_not_finish' => 'Did not finish',
     'watch_history' => 'Watch history',
     'library_on_a_list' => 'Your library, on the :source list',
-    'this_is_not_a_web_address' => 'Enter a web address starting with http:// or https://.',
-    'this_address_could_not_be_found' => 'This address could not be found.',
-    'this_address_is_in_a_private_network' => 'This address is in a private network. Ask the administrator to add it to INTEGRATION_PRIVATE_HOSTS, or to connect it from an administrator account.',
 ];

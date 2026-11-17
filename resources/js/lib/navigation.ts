@@ -18,6 +18,7 @@ import {
     ListChecks,
     Plug,
     Search,
+    Send,
     SlidersHorizontal,
     Sparkles,
     Star,
@@ -226,6 +227,13 @@ export const SETTINGS_NAV: NonEmpty<NavEntry> = [
         label: () => trans('common.tracking'),
         icon: ListChecks,
         keywords: () => trans('palette.keywords_settings_tracking'),
+    },
+    {
+        id: 'settings.channels',
+        route: 'settings.channels.index',
+        label: () => trans('common.notifications'),
+        icon: Send,
+        keywords: () => trans('palette.keywords_settings_channels'),
     },
     {
         id: 'settings.integrations',

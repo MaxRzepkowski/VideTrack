@@ -3,6 +3,7 @@
 namespace App\Integrations\Import\Data;
 
 use App\Integrations\Import\ImportInputKind;
+use App\Support\Forms\CredentialField;
 use Spatie\TypeScriptTransformer\Attributes\TypeScript;
 
 /**

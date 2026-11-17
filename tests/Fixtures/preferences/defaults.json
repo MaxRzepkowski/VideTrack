@@ -41,6 +41,5 @@
     "notify_company_titles": true,
     "notify_collection_items": true,
     "person_follow_scope": "known_for",
-    "company_follow_scope": "both",
-    "discord_mode": "digest"
+    "company_follow_scope": "both"
 }

@@ -1,0 +1,503 @@
+{
+    "version": "2.2.0",
+    "schemas": [
+        {
+            "service_name": "Discord",
+            "service_url": "https://discord.com/",
+            "setup_url": "https://appriseit.com/services/discord/",
+            "details": {
+                "templates": [
+                    "{schema}://{webhook_id}/{webhook_token}",
+                    "{schema}://{botname}@{webhook_id}/{webhook_token}"
+                ],
+                "tokens": {
+                    "botname": {
+                        "name": "Bot Name",
+                        "type": "string",
+                        "map_to": "user",
+                        "required": false,
+                        "private": false
+                    },
+                    "webhook_id": {
+                        "name": "Webhook ID",
+                        "type": "string",
+                        "private": true,
+                        "required": true,
+                        "map_to": "webhook_id"
+                    },
+                    "webhook_token": {
+                        "name": "Webhook Token",
+                        "type": "string",
+                        "private": true,
+                        "required": true,
+                        "map_to": "webhook_token"
+                    },
+                    "schema": {
+                        "name": "Schema",
+                        "type": "choice:string",
+                        "required": true,
+                        "values": [
+                            "discord"
+                        ],
+                        "map_to": "schema",
+                        "default": "discord",
+                        "private": false
+                    }
+                }
+            },
+            "attachment_support": true,
+            "category": "native",
+            "enabled": true,
+            "protocols": null,
+            "secure_protocols": [
+                "discord"
+            ]
+        },
+        {
+            "service_name": "JSON",
+            "service_url": null,
+            "setup_url": "https://appriseit.com/services/json/",
+            "details": {
+                "templates": [
+                    "{schema}://{host}",
+                    "{schema}://{host}:{port}",
+                    "{schema}://{user}@{host}",
+                    "{schema}://{user}@{host}:{port}",
+                    "{schema}://{user}:{password}@{host}",
+                    "{schema}://{user}:{password}@{host}:{port}"
+                ],
+                "tokens": {
+                    "host": {
+                        "name": "Hostname",
+                        "type": "string",
+                        "required": true,
+                        "map_to": "host",
+                        "private": false
+                    },
+                    "port": {
+                        "name": "Port",
+                        "type": "int",
+                        "min": 1,
+                        "max": 65535,
+                        "map_to": "port",
+                        "required": false,
+                        "private": false
+                    },
+                    "user": {
+                        "name": "Username",
+                        "type": "string",
+                        "map_to": "user",
+                        "required": false,
+                        "private": false
+                    },
+                    "password": {
+                        "name": "Password",
+                        "type": "string",
+                        "private": true,
+                        "map_to": "password",
+                        "required": false
+                    },
+                    "schema": {
+                        "name": "Schema",
+                        "type": "choice:string",
+                        "required": true,
+                        "values": [
+                            "json",
+                            "jsons"
+                        ],
+                        "map_to": "schema",
+                        "private": false
+                    }
+                }
+            },
+            "attachment_support": true,
+            "category": "native",
+            "enabled": true,
+            "protocols": [
+                "json"
+            ],
+            "secure_protocols": [
+                "jsons"
+            ]
+        },
+        {
+            "service_name": "ntfy",
+            "service_url": "https://ntfy.sh/",
+            "setup_url": "https://appriseit.com/services/ntfy/",
+            "details": {
+                "templates": [
+                    "{schema}://{topic}",
+                    "{schema}://{host}/{targets}",
+                    "{schema}://{host}:{port}/{targets}",
+                    "{schema}://{user}@{host}/{targets}",
+                    "{schema}://{user}@{host}:{port}/{targets}",
+                    "{schema}://{user}:{password}@{host}/{targets}",
+                    "{schema}://{user}:{password}@{host}:{port}/{targets}",
+                    "{schema}://{token}@{host}/{targets}",
+                    "{schema}://{token}@{host}:{port}/{targets}"
+                ],
+                "tokens": {
+                    "host": {
+                        "name": "Hostname",
+                        "type": "string",
+                        "map_to": "host",
+                        "required": false,
+                        "private": false
+                    },
+                    "port": {
+                        "name": "Port",
+                        "type": "int",
+                        "min": 1,
+                        "max": 65535,
+                        "map_to": "port",
+                        "required": false,
+                        "private": false
+                    },
+                    "user": {
+                        "name": "Username",
+                        "type": "string",
+                        "map_to": "user",
+                        "required": false,
+                        "private": false
+                    },
+                    "password": {
+                        "name": "Password",
+                        "type": "string",
+                        "private": true,
+                        "map_to": "password",
+                        "required": false
+                    },
+                    "token": {
+                        "name": "Token",
+                        "type": "string",
+                        "private": true,
+                        "map_to": "token",
+                        "required": false
+                    },
+                    "topic": {
+                        "name": "Topic",
+                        "type": "string",
+                        "map_to": "targets",
+                        "regex": [
+                            "^[a-z0-9_-]{1,64}$",
+                            "i"
+                        ],
+                        "required": false,
+                        "private": false
+                    },
+                    "targets": {
+                        "name": "Targets",
+                        "type": "list:string",
+                        "required": true,
+                        "map_to": "targets",
+                        "delim": [
+                            "/"
+                        ],
+                        "group": [
+                            "topic"
+                        ],
+                        "private": false
+                    },
+                    "schema": {
+                        "name": "Schema",
+                        "type": "choice:string",
+                        "required": true,
+                        "values": [
+                            "ntfy",
+                            "ntfys"
+                        ],
+                        "map_to": "schema",
+                        "private": false
+                    }
+                }
+            },
+            "attachment_support": true,
+            "category": "native",
+            "enabled": true,
+            "protocols": [
+                "ntfy"
+            ],
+            "secure_protocols": [
+                "ntfys"
+            ]
+        },
+        {
+            "service_name": "Pushover",
+            "service_url": "https://pushover.net/",
+            "setup_url": "https://appriseit.com/services/pushover/",
+            "details": {
+                "templates": [
+                    "{schema}://{user_key}@{token}",
+                    "{schema}://{user_key}@{token}/{targets}"
+                ],
+                "tokens": {
+                    "user_key": {
+                        "name": "User Key",
+                        "type": "string",
+                        "private": true,
+                        "required": true,
+                        "map_to": "user_key"
+                    },
+                    "token": {
+                        "name": "Access Token",
+                        "type": "string",
+                        "private": true,
+                        "required": true,
+                        "map_to": "token"
+                    },
+                    "target_device": {
+                        "name": "Target Device",
+                        "type": "string",
+                        "regex": [
+                            "^[a-z0-9_-]{1,25}$",
+                            "i"
+                        ],
+                        "map_to": "targets",
+                        "required": false,
+                        "private": false
+                    },
+                    "target_group": {
+                        "name": "Target Group",
+                        "type": "string",
+                        "prefix": "#",
+                        "map_to": "targets",
+                        "required": false,
+                        "private": false
+                    },
+                    "targets": {
+                        "name": "Targets",
+                        "type": "list:string",
+                        "map_to": "targets",
+                        "delim": [
+                            "/"
+                        ],
+                        "group": [
+                            "target_device",
+                            "target_group"
+                        ],
+                        "required": false,
+                        "private": false
+                    },
+                    "schema": {
+                        "name": "Schema",
+                        "type": "choice:string",
+                        "required": true,
+                        "values": [
+                            "pover"
+                        ],
+                        "map_to": "schema",
+                        "default": "pover",
+                        "private": false
+                    }
+                }
+            },
+            "attachment_support": true,
+            "category": "native",
+            "enabled": true,
+            "protocols": null,
+            "secure_protocols": [
+                "pover"
+            ]
+        },
+        {
+            "service_name": "Telegram",
+            "service_url": "https://telegram.org/",
+            "setup_url": "https://appriseit.com/services/telegram/",
+            "details": {
+                "templates": [
+                    "{schema}://{bot_token}",
+                    "{schema}://{bot_token}/{targets}"
+                ],
+                "tokens": {
+                    "bot_token": {
+                        "name": "Bot Token",
+                        "type": "string",
+                        "private": true,
+                        "required": true,
+                        "regex": [
+                            "^(bot)?(?P<key>[0-9]+:[a-z0-9_-]+)$",
+                            "i"
+                        ],
+                        "map_to": "bot_token"
+                    },
+                    "target_user": {
+                        "name": "Target Chat ID",
+                        "type": "string",
+                        "map_to": "targets",
+                        "regex": [
+                            "^((-?[0-9]{1,32})|([a-z_-][a-z0-9_-]+))$",
+                            "i"
+                        ],
+                        "required": false,
+                        "private": false
+                    },
+                    "targets": {
+                        "name": "Targets",
+                        "type": "list:string",
+                        "map_to": "targets",
+                        "delim": [
+                            "/"
+                        ],
+                        "group": [
+                            "target_user"
+                        ],
+                        "required": false,
+                        "private": false
+                    },
+                    "schema": {
+                        "name": "Schema",
+                        "type": "choice:string",
+                        "required": true,
+                        "values": [
+                            "tgram"
+                        ],
+                        "map_to": "schema",
+                        "default": "tgram",
+                        "private": false
+                    }
+                }
+            },
+            "attachment_support": true,
+            "category": "native",
+            "enabled": true,
+            "protocols": null,
+            "secure_protocols": [
+                "tgram"
+            ]
+        },
+        {
+            "service_name": "Windows Notification",
+            "service_url": null,
+            "setup_url": "https://appriseit.com/services/windows/",
+            "details": {
+                "templates": [
+                    "{schema}://"
+                ],
+                "tokens": {
+                    "schema": {
+                        "name": "Schema",
+                        "type": "choice:string",
+                        "required": true,
+                        "values": [
+                            "windows"
+                        ],
+                        "map_to": "schema",
+                        "default": "windows",
+                        "private": false
+                    }
+                }
+            },
+            "attachment_support": false,
+            "category": "native",
+            "enabled": false,
+            "protocols": [
+                "windows"
+            ],
+            "secure_protocols": null
+        },
+        {
+            "service_name": "E-Mail",
+            "service_url": null,
+            "setup_url": "https://appriseit.com/services/email/",
+            "details": {
+                "templates": [
+                    "{schema}://{host}",
+                    "{schema}://{host}:{port}",
+                    "{schema}://{host}:{port}/{targets}",
+                    "{schema}://{host}/{targets}",
+                    "{schema}://{user}@{host}",
+                    "{schema}://{user}@{host}/{targets}",
+                    "{schema}://{user}@{host}:{port}",
+                    "{schema}://{user}@{host}/{targets}",
+                    "{schema}://{user}@{host}:{port}/{targets}",
+                    "{schema}://{user}:{password}@{host}",
+                    "{schema}://{user}:{password}@{host}/{targets}",
+                    "{schema}://{user}:{password}@{host}:{port}",
+                    "{schema}://{user}:{password}@{host}:{port}/{targets}"
+                ],
+                "tokens": {
+                    "user": {
+                        "name": "User Name",
+                        "type": "string",
+                        "map_to": "user",
+                        "required": false,
+                        "private": false
+                    },
+                    "password": {
+                        "name": "Password",
+                        "type": "string",
+                        "private": true,
+                        "map_to": "password",
+                        "required": false
+                    },
+                    "host": {
+                        "name": "Domain",
+                        "type": "string",
+                        "required": true,
+                        "map_to": "host",
+                        "private": false
+                    },
+                    "port": {
+                        "name": "Port",
+                        "type": "int",
+                        "min": 1,
+                        "max": 65535,
+                        "map_to": "port",
+                        "required": false,
+                        "private": false
+                    },
+                    "target_email": {
+                        "name": "Target Email",
+                        "type": "string",
+                        "map_to": "targets",
+                        "required": false,
+                        "private": false
+                    },
+                    "targets": {
+                        "name": "Targets",
+                        "type": "list:string",
+                        "map_to": "targets",
+                        "delim": [
+                            "/"
+                        ],
+                        "group": [
+                            "target_email"
+                        ],
+                        "required": false,
+                        "private": false
+                    },
+                    "schema": {
+                        "name": "Schema",
+                        "type": "choice:string",
+                        "required": true,
+                        "values": [
+                            "mailto",
+                            "mailtos"
+                        ],
+                        "map_to": "schema",
+                        "private": false
+                    }
+                },
+                "kwargs": {
+                    "headers": {
+                        "name": "Email Header",
+                        "prefix": "+",
+                        "map_to": "headers",
+                        "type": "string",
+                        "required": false,
+                        "private": false
+                    }
+                }
+            },
+            "attachment_support": true,
+            "category": "native",
+            "enabled": true,
+            "protocols": [
+                "mailto"
+            ],
+            "secure_protocols": [
+                "mailtos"
+            ]
+        }
+    ]
+}

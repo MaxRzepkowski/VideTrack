@@ -7,9 +7,9 @@ use App\Integrations\Connections\Contracts\AuthorizesByForm;
 use App\Integrations\Connections\Data\ConnectionChoice;
 use App\Integrations\Connections\Data\ConnectionGrant;
 use App\Integrations\Connections\UserAddresses;
-use App\Integrations\Import\Data\CredentialField;
-use App\Integrations\Import\Data\CredentialFieldType;
 use App\Models\User;
+use App\Support\Forms\CredentialField;
+use App\Support\Forms\CredentialFieldType;
 
 /**
  * Connecting a Tracearr instance: its address and an API key from its

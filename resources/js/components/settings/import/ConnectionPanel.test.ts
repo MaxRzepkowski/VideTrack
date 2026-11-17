@@ -24,8 +24,8 @@ const tracearr: ConnectDef = {
     name: 'Tracearr',
     method: 'form',
     fields: [
-        { key: 'url', label: 'Address', type: 'url', help: null },
-        { key: 'key', label: 'API key', type: 'password', help: 'Settings – API' },
+        { key: 'url', label: 'Address', type: 'url', help: null, optional: false, secret: false },
+        { key: 'key', label: 'API key', type: 'password', help: 'Settings – API', optional: false, secret: false },
     ],
     autoImportMinutes: 60,
     connection: null,

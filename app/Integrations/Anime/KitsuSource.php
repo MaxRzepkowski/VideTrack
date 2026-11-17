@@ -3,9 +3,9 @@
 namespace App\Integrations\Anime;
 
 use App\Integrations\Export\ListStatus;
-use App\Integrations\Import\Data\CredentialField;
 use App\Integrations\Import\Data\SetupNote;
 use App\Integrations\Import\Rows\SkipRow;
+use App\Support\Forms\CredentialField;
 use App\Support\Payload;
 
 /**

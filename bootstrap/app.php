@@ -84,9 +84,10 @@ return Application::configure(basePath: dirname(__DIR__))
             fn (Request $request): bool => $request->is('api/*') || $request->expectsJson()
         );
 
-        // A failed validation flashes the input into the session; a Discord
-        // webhook and a service's sign-in values are credentials and stay out.
-        $exceptions->dontFlash(['discord_webhook_url', 'webhook_url', 'values']);
+        // A failed validation flashes the input into the session; a
+        // notification channel's settings and a service's sign-in values are
+        // credentials and stay out.
+        $exceptions->dontFlash(['config', 'values']);
 
         // A rule of the library refused the change: the same validation error
         // on the web (back with errors) and in the API (422).

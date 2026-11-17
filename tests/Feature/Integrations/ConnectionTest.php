@@ -8,7 +8,6 @@ use App\Integrations\Connections\Contracts\AuthorizesByForm;
 use App\Integrations\Connections\Data\ConnectionGrant;
 use App\Integrations\Connections\DeviceAttempts;
 use App\Integrations\Connections\DevicePoll;
-use App\Integrations\Import\Data\CredentialFieldType;
 use App\Integrations\Import\Data\ImportInput;
 use App\Integrations\Import\Data\ImportSelection;
 use App\Integrations\Import\ImportInputKind;
@@ -17,6 +16,7 @@ use App\Jobs\RunImport;
 use App\Models\ServiceConnection;
 use App\Models\TaskRun;
 use App\Models\User;
+use App\Support\Forms\CredentialFieldType;
 use App\Support\ServiceUnavailable;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Crypt;
@@ -473,7 +473,7 @@ test('every service with an address field keeps an ordinary account out of the s
             if ($field->type === CredentialFieldType::Url) {
                 $this->actingAs(User::factory()->create())
                     ->postJson(route('settings.connections.verify', ['service' => $code]), ['values' => $values])
-                    ->assertJsonValidationErrors(["values.{$field->key}" => __('import.this_address_is_in_a_private_network')]);
+                    ->assertJsonValidationErrors(["values.{$field->key}" => __('common.this_address_is_in_a_private_network')]);
                 $checked++;
             }
         }
