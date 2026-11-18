@@ -1,6 +1,7 @@
 import { monthCells } from '@/lib/calendar';
 import { pageLocale } from '@/lib/pageContext';
 import { RATING_MAX, RATING_MIN } from '@/lib/ratings';
+import type { RatingPoint } from '@/types/generated';
 
 /**
  * The shapes the statistics charts draw: a step on the sequential scale, the
@@ -205,3 +206,32 @@ export function releaseColumns<T extends { year: number }>(dots: T[], rank: (dot
 export function middleOut(index: number): number {
     return index % 2 === 0 ? -index / 2 : (index + 1) / 2;
 }
+
+/** Where a rating sits along a 1–10 axis, from 0 at its lowest to 1 at its highest; an average below the scale sits at its bottom. */
+export function ratingShare(value: number): number {
+    return (Math.min(RATING_MAX, Math.max(RATING_MIN, value)) - RATING_MIN) / (RATING_MAX - RATING_MIN);
+}
+
+/** Each of the user's ratings given at all, highest first, with its titles and everyone else's average over them. */
+export function ratingRows(points: RatingPoint[]): { rating: number; titles: number; community: number }[] {
+    const rows = new Map<number, { titles: number; sum: number }>();
+
+    for (const point of points) {
+        const row = rows.get(point.rating) ?? { titles: 0, sum: 0 };
+        rows.set(point.rating, { titles: row.titles + point.titles, sum: row.sum + point.community * point.titles });
+    }
+
+    return [...rows.entries()].sort(([a], [b]) => b - a).map(([rating, row]) => ({ rating, titles: row.titles, community: row.sum / row.titles }));
+}
+
+/**
+ * Where the n-th dot of a rating's row sits across the row, between −½ and
+ * ½: the golden-ratio sequence, so dots spread evenly at any count and land
+ * in the same place on every draw.
+ */
+export function rowSpread(index: number): number {
+    return ((index * GOLDEN_FRACTION) % 1) - 0.5;
+}
+
+/** The golden ratio's fractional part: stepping by it never lands twice in the same place. */
+const GOLDEN_FRACTION = 0.6180339887;

@@ -791,6 +791,17 @@ export type RatedTitle = {
     readonly media: MediaSummary;
     readonly rating: number | null;
 };
+export type RatingGap = {
+    readonly media: MediaSummary;
+    readonly rating: number;
+    readonly community: number;
+};
+export type RatingPoint = {
+    readonly type: string;
+    readonly rating: number;
+    readonly community: number;
+    readonly titles: number;
+};
 export type ReleaseDateMode = 'both' | 'cinema' | 'digital';
 export type ReleaseDot = {
     readonly year: number;
@@ -876,6 +887,16 @@ export type StatisticsPage = {
     readonly titles: PeriodTitles;
     readonly first: Bookend | null;
     readonly last: Bookend | null;
+};
+export type StatisticsRatings = {
+    readonly points: RatingPoint[];
+    readonly ratedHigher: number;
+    readonly ratedLower: number;
+    readonly ratedSame: number;
+    readonly best: RatedTitle[];
+    readonly bestTied: number;
+    readonly higher: RatingGap[];
+    readonly lower: RatingGap[];
 };
 export type StatisticsTaste = {
     readonly readIn: ProgressUnit | null;
