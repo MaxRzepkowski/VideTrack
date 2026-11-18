@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import ChartTable from '@/components/statistics/ChartTable.vue';
 import TypeLegend from '@/components/statistics/TypeLegend.vue';
 import { formatNumber } from '@/lib/format';
 import { mediaTypeMeta } from '@/lib/mediaTypes';
@@ -144,12 +145,12 @@ const diagonalAngle = computed(() => (plotWidth.value === 0 ? 0 : (-Math.atan(pl
             />
         </div>
 
-        <table class="sr-only">
+        <ChartTable>
             <tbody>
                 <tr v-for="row in rows" :key="row.rating">
                     <td>{{ describe(row) }}</td>
                 </tr>
             </tbody>
-        </table>
+        </ChartTable>
     </div>
 </template>

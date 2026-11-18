@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import Hairline from '@/components/Hairline.vue';
+import MetaLine from '@/components/MetaLine.vue';
 import { durationTerms, formatNumber, formatTotalRuntime } from '@/lib/format';
 import { mediaTypeMeta, readUnitOf } from '@/lib/mediaTypes';
 import { RATING_MIN } from '@/lib/ratings';
@@ -55,12 +56,11 @@ const daily = computed(() => {
     return time === null ? null : trans('statistics.hero_daily', { time });
 });
 
+/** One type's totals under the time, said first and brighter. */
+const totals = computed(() => (props.stats === null || props.type === null ? [] : statCounts(props.type, props.stats)));
+
 /** Under the time: one type's totals first, then the daily average and, if reading went in, that it is estimated. */
-const captions = computed(() => [
-    ...(props.stats === null || props.type === null ? [] : statCounts(props.type, props.stats).map((text) => ({ text, strong: true }))),
-    ...(daily.value === null ? [] : [{ text: daily.value, strong: false }]),
-    ...(estimated.value ? [{ text: trans('statistics.hero_reading_estimated'), strong: false }] : []),
-]);
+const captions = computed(() => [...totals.value, daily.value, estimated.value ? trans('statistics.hero_reading_estimated') : null]);
 
 const rows = computed(() =>
     timeRows(props.summary.time).map((row) => {
@@ -122,24 +122,27 @@ const ratingHeight = (count: number): string => `${count === 0 ? 0 : Math.max(4,
 
             <div class="flex flex-col gap-1.5">
                 <p class="text-ink-muted m-0 text-base">{{ trans('statistics.hero_label') }}</p>
-                <p class="text-ink m-0 flex flex-wrap items-baseline gap-x-2.5 gap-y-1 leading-none">
-                    <span v-if="estimated" class="text-ink-muted text-[2.5rem] font-semibold">{{ trans('common.estimate_sign') }}</span>
+                <p class="text-ink m-0 flex flex-wrap items-baseline gap-x-1.5 gap-y-1 leading-none sm:gap-x-2.5">
+                    <span v-if="estimated" class="text-ink-muted text-[1.625rem] font-semibold sm:text-[2.5rem]">{{
+                        trans('common.estimate_sign')
+                    }}</span>
                     <span
                         v-for="(term, index) in hero"
                         :key="term.unit"
-                        class="inline-flex items-baseline gap-x-2.5"
-                        :class="index > 0 ? 'ml-2' : ''"
+                        class="inline-flex items-baseline gap-x-1 sm:gap-x-2.5"
+                        :class="index > 0 ? 'ml-1 sm:ml-2' : ''"
                     >
-                        <span class="text-[4rem] font-bold tracking-tight">{{ term.value }}</span>
-                        <span class="text-ink-secondary text-[1.375rem]">{{ term.unit }}</span>
+                        <span class="text-[2.25rem] font-bold tracking-tight sm:text-[4rem]">{{ term.value }}</span>
+                        <span class="text-ink-secondary text-base sm:text-[1.375rem]">{{ term.unit }}</span>
                     </span>
                 </p>
-                <p v-if="captions.length > 0" class="text-ink-muted m-0 mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-base">
-                    <template v-for="(caption, index) in captions" :key="caption.text">
-                        <Hairline v-if="index > 0" class="mx-0" />
-                        <span :class="caption.strong ? 'text-ink-secondary font-semibold' : ''">{{ caption.text }}</span>
-                    </template>
-                </p>
+                <MetaLine
+                    v-if="captions.some((caption) => caption !== null)"
+                    :parts="captions"
+                    :lead="totals.length"
+                    wrap
+                    class="text-ink-muted mt-1 text-base leading-7"
+                />
             </div>
 
             <ul v-if="rows.length > 1" class="m-0 flex list-none flex-col gap-3 p-0">
@@ -210,12 +213,7 @@ const ratingHeight = (count: number): string => `${count === 0 ? 0 : Math.max(4,
                 <div class="bg-line h-2 overflow-hidden rounded" aria-hidden="true">
                     <div class="bg-ink-secondary h-full rounded" :style="{ width: `${activeWidth}%` }" />
                 </div>
-                <p v-if="activeNotes.length > 0" class="text-ink-muted m-0 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
-                    <template v-for="(note, index) in activeNotes" :key="note">
-                        <Hairline v-if="index > 0" class="mx-0" />
-                        <span>{{ note }}</span>
-                    </template>
-                </p>
+                <MetaLine v-if="activeNotes.length > 0" :parts="activeNotes" wrap class="text-ink-muted text-sm leading-6" />
             </div>
 
             <div class="flex flex-col gap-2.5 px-6 py-6 md:px-7">
@@ -234,7 +232,12 @@ const ratingHeight = (count: number): string => `${count === 0 ? 0 : Math.max(4,
                             communityComparison(summary.communityDelta)
                         }}</span>
                     </p>
-                    <div class="flex h-12 items-end gap-1">
+                    <ul class="sr-only">
+                        <li v-for="(count, index) in summary.ratingCounts" :key="index">
+                            {{ trans('statistics.rating_bar', { rating: String(index + RATING_MIN), count: formatNumber(count) }) }}
+                        </li>
+                    </ul>
+                    <div class="flex h-12 items-end gap-1" aria-hidden="true">
                         <span
                             v-for="(count, index) in summary.ratingCounts"
                             :key="index"

@@ -10,7 +10,9 @@ import { Link } from '@inertiajs/vue3';
  * under them, what the row is about. Scrolls sideways where it does not fit.
  * Columns are poster-sized and as many as fit, so one or two titles keep
  * that size instead of stretching across the card; titles beyond them add
- * columns of the same size.
+ * columns of the same size. The row is positioned so that what a title
+ * hides for screen readers stays inside its scroll box instead of widening
+ * the page.
  */
 defineProps<{
     titles: T[];
@@ -24,7 +26,7 @@ defineSlots<{
 
 <template>
     <ol
-        class="m-0 grid list-none auto-cols-[minmax(8.5rem,1fr)] grid-flow-col grid-cols-[repeat(auto-fill,minmax(8.5rem,1fr))] gap-4 overflow-x-auto p-0 pb-1"
+        class="relative m-0 grid list-none auto-cols-[minmax(8.5rem,1fr)] grid-flow-col grid-cols-[repeat(auto-fill,minmax(8.5rem,1fr))] gap-4 overflow-x-auto p-0 pb-1"
     >
         <li v-for="title in titles" :key="`${title.media.type}-${title.media.ref}`" class="min-w-0">
             <Link

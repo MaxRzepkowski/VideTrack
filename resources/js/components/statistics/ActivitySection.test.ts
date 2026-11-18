@@ -54,6 +54,17 @@ describe('ActivitySection', () => {
         expect(wrapper.findComponent(DayHeatmap).exists()).toBe(true);
     });
 
+    it('tells screen readers what the day map shows, month by month', () => {
+        const rows = mountSection({ activity: activity() })
+            .findComponent(DayHeatmap)
+            .findAll('tbody tr')
+            .map((row) => row.text());
+
+        expect(rows).toHaveLength(12);
+        expect(rows[5]).toMatch(/June 2025\s*2 completed\s*1 active day/);
+        expect(rows[0]).toMatch(/January 2025\s*0 completed\s*0 active days/);
+    });
+
     it("gives one type's view one chart that names its busiest month", () => {
         const text = mountSection({
             activity: activity({ series: [{ type: 'movie', counts: [0, 0, 0, 0, 0, 13, 0, 0, 0, 0, 0, 1] }] }),
@@ -78,5 +89,11 @@ describe('ActivitySection', () => {
 
         expect(wrapper.text()).toContain('Completed each year, per type');
         expect(wrapper.findComponent(MonthGrid).props('years')).toEqual([2019, 2020]);
+
+        // Screen readers get the grid as a table: a row a year, a cell a month.
+        const rows = wrapper.findComponent(MonthGrid).findAll('tbody tr');
+        expect(rows.map((row) => row.find('th').text())).toEqual(['2019', '2020']);
+        expect(rows[0]?.findAll('td')[2]?.text()).toBe('4');
+        expect(rows[1]?.findAll('td')[10]?.text()).toBe('6');
     });
 });

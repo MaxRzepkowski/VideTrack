@@ -15,6 +15,9 @@ import { computed } from 'vue';
  * after, a year, or in the panel beside it any range of days or the whole
  * history) and the type on the right. A period the panel picked shows in the
  * year list as an entry that cannot be picked there.
+ *
+ * On a phone the strip keeps one row, so it drops what has a stand-in: the
+ * year list does the arrows' job, and the range button keeps only its icon.
  */
 const props = defineProps<{ page: StatisticsPage }>();
 
@@ -57,7 +60,7 @@ const type = computed({
                     v-tooltip="trans('statistics.previous_year')"
                     type="button"
                     data-toolbar-control
-                    :class="ICON_BUTTON_CLASS"
+                    :class="[ICON_BUTTON_CLASS, 'max-md:hidden']"
                     :disabled="older === null"
                     :aria-label="trans('statistics.previous_year')"
                     @click="older !== null && emit('visit', { period: older, type: page.type })"
@@ -75,7 +78,7 @@ const type = computed({
                     v-tooltip="trans('statistics.next_year')"
                     type="button"
                     data-toolbar-control
-                    :class="ICON_BUTTON_CLASS"
+                    :class="[ICON_BUTTON_CLASS, 'max-md:hidden']"
                     :disabled="newer === null"
                     :aria-label="trans('statistics.next_year')"
                     @click="newer !== null && emit('visit', { period: newer, type: page.type })"

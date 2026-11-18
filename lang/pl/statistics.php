@@ -117,6 +117,7 @@ return [
     'period_sentence' => ':period.',
     'chart_of_type' => ':type: :chart',
     'share_below' => '<:value',
+    'count_active_days' => ':count aktywny dzień|:count aktywne dni|:count aktywnych dni',
     'count_completed' => ':amount ukończony|:amount ukończone|:amount ukończonych',
     'count_in_progress' => ':amount w trakcie|:amount w trakcie|:amount w trakcie',
     'count_on_hold' => ':amount wstrzymany|:amount wstrzymane|:amount wstrzymanych',

@@ -1,6 +1,7 @@
 import StatTile from '@/components/dashboard/StatTile.vue';
 import TypeFilter from '@/components/TypeFilter.vue';
 import { vTooltip } from '@/directives/tooltip';
+import { RATING_MAX, RATING_MIN } from '@/lib/ratings';
 import Statistics from '@/pages/Statistics.vue';
 import { mediaSummary, useMediaTypes } from '@/test/factories';
 import { setPageProps } from '@/test/page';
@@ -99,6 +100,15 @@ describe('Statistics', () => {
         expect(text).toContain('most common: 7');
         expect(text).toContain('Alpha');
         expect(text).toContain('359 days');
+    });
+
+    it('reads the ratings chart out to screen readers', () => {
+        const items = page(statisticsPage())
+            .findAll('ul.sr-only li')
+            .map((item) => item.text());
+
+        expect(items).toHaveLength(RATING_MAX - RATING_MIN + 1);
+        expect(items[7 - RATING_MIN]).toBe('Rated 7: 2');
     });
 
     it('leads with the time the period took, an estimate once reading is in it', () => {

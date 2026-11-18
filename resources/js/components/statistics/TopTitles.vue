@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import Hairline from '@/components/Hairline.vue';
 import PosterRow from '@/components/statistics/PosterRow.vue';
 import { formatRuntime } from '@/lib/format';
 import { leafType, mediaTypeMeta } from '@/lib/mediaTypes';
@@ -41,16 +40,11 @@ const estimate = (title: TimeTitle, readIn: ReadUnit | null): string | null =>
 <template>
     <PosterRow :titles="titles">
         <template #detail="{ title }">
-            <span class="flex flex-wrap items-center gap-x-2 text-sm">
+            <!-- A line each: a poster's column is too narrow to set them apart with a rule. -->
+            <span class="flex flex-col gap-0.5 text-sm">
                 <span class="text-ink-secondary text-base font-semibold">{{ amount(title, readIn) }}</span>
-                <template v-if="estimate(title, readIn)">
-                    <Hairline class="mx-0" />
-                    <span class="text-ink-muted">{{ estimate(title, readIn) }}</span>
-                </template>
-                <template v-if="title.parts !== null">
-                    <Hairline class="mx-0" />
-                    <span class="text-ink-muted">{{ mediaTypeMeta(leafType(title.media.type)).count(title.parts) }}</span>
-                </template>
+                <span v-if="estimate(title, readIn)" class="text-ink-muted">{{ estimate(title, readIn) }}</span>
+                <span v-if="title.parts !== null" class="text-ink-muted">{{ mediaTypeMeta(leafType(title.media.type)).count(title.parts) }}</span>
             </span>
         </template>
     </PosterRow>

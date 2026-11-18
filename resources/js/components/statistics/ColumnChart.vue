@@ -1,7 +1,10 @@
 <script setup lang="ts">
+import ChartTable from '@/components/statistics/ChartTable.vue';
 import { formatNumber } from '@/lib/format';
+import { thinTicks } from '@/lib/statisticsCharts';
+import { useElementSize } from '@vueuse/core';
 import { trans } from 'laravel-vue-i18n';
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 
 /**
  * Vertical bars over a row of labels: months of a year, hours of a day, days
@@ -43,6 +46,20 @@ const props = withDefaults(
 
 const max = computed(() => Math.max(1, ...props.values));
 
+// The labels under the axis thin out on a narrow card instead of running into one another.
+const axisRow = ref<HTMLElement | null>(null);
+const { width } = useElementSize(axisRow);
+const labelled = computed(() => {
+    const shown = props.tickLabels ?? props.labels;
+
+    return thinTicks(
+        shown.map((_, index) => index).filter((index) => props.ticks(index)),
+        shown.length,
+        width.value,
+        shown,
+    );
+});
+
 const barHeight = (value: number): string => (value === 0 ? '0' : `max(2px, ${(value / max.value) * 100}%)`);
 </script>
 
@@ -82,18 +99,18 @@ const barHeight = (value: number): string => (value === 0 ? '0' : `max(2px, ${(v
                         />
                     </div>
                 </div>
-                <div class="text-ink-faint mt-2 flex gap-[3px] text-sm">
+                <div ref="axisRow" class="text-ink-faint mt-2 flex gap-[3px] text-sm">
                     <span
                         v-for="(label, index) in tickLabels ?? labels"
                         :key="index"
                         class="min-w-0 flex-1 overflow-visible text-center whitespace-nowrap"
                     >
-                        {{ ticks(index) ? label : '' }}
+                        {{ labelled.has(index) ? label : '' }}
                     </span>
                 </div>
             </div>
         </div>
-        <table class="sr-only">
+        <ChartTable>
             <caption>
                 {{
                     caption
@@ -105,6 +122,6 @@ const barHeight = (value: number): string => (value === 0 ? '0' : `max(2px, ${(v
                     <td>{{ formatNumber(values[index] ?? 0) }}</td>
                 </tr>
             </tbody>
-        </table>
+        </ChartTable>
     </div>
 </template>

@@ -117,6 +117,7 @@ return [
     'period_sentence' => ':period.',
     'chart_of_type' => ':type: :chart',
     'share_below' => '<:value',
+    'count_active_days' => ':count active day|:count active days',
     'count_completed' => ':amount completed|:amount completed',
     'count_in_progress' => ':amount in progress|:amount in progress',
     'count_on_hold' => ':amount on hold|:amount on hold',

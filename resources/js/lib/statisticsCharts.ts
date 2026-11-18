@@ -118,8 +118,87 @@ export function weekdayNames(style: 'long' | 'short', firstWeekday = 1): string[
 }
 
 /** A month's short name, January being 0: "Jan". */
-export function monthName(month: number, style: 'short' | 'long' = 'short'): string {
+export function monthName(month: number, style: 'narrow' | 'short' | 'long' = 'short'): string {
     return new Intl.DateTimeFormat(pageLocale(), { month: style, timeZone: 'UTC' }).format(Date.UTC(2024, month, 1));
+}
+
+/** "March 2019" for a month key ('2019-03'), as the locale writes a month of a year. */
+export function monthOfYear(month: string): string {
+    return new Intl.DateTimeFormat(pageLocale(), { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(
+        Date.UTC(Number(month.slice(0, 4)), Number(month.slice(5, 7)) - 1, 1),
+    );
+}
+
+/**
+ * Every month from `from` to `to` (YYYY-MM-DD) with what its days add up to:
+ * the screen readers' account of a day-by-day map, which square by square
+ * would be a year of rows.
+ */
+export function monthsOfDays(from: string, to: string, days: Record<string, number>): { month: string; completed: number; activeDays: number }[] {
+    const months: { month: string; completed: number; activeDays: number }[] = [];
+    const last = to.slice(0, 7);
+
+    for (let year = Number(from.slice(0, 4)), month = Number(from.slice(5, 7)); ; month === 12 ? ((month = 1), year++) : month++) {
+        const key = `${year}-${String(month).padStart(2, '0')}`;
+        const counts = Object.entries(days).filter(([day, count]) => day.startsWith(key) && count > 0 && day >= from && day <= to);
+
+        months.push({ month: key, completed: counts.reduce((sum, [, count]) => sum + count, 0), activeDays: counts.length });
+
+        if (key >= last) {
+            return months;
+        }
+    }
+}
+
+/** About how wide one character of an axis label is (`text-sm`), and the least room left between two labels, in pixels. */
+const LABEL_CHAR_PX = 8.4;
+const LABEL_GAP_PX = 8;
+
+const labelWidth = (label: string): number => label.length * LABEL_CHAR_PX;
+
+/**
+ * Which of an axis's ticks keep their label at the chart's width: every
+ * k-th of them, k as small as lets the longest label clear its neighbour
+ * (labels sit centred under their columns). Hours ticked every three come
+ * out every six on a phone. A width not measured yet (0) keeps them all.
+ */
+export function thinTicks(ticked: readonly number[], columns: number, width: number, labels: readonly string[]): Set<number> {
+    const gaps = ticked.slice(1).map((index, at) => index - (ticked[at] ?? 0));
+
+    if (width <= 0 || columns === 0 || gaps.length === 0) {
+        return new Set(ticked);
+    }
+
+    const longest = Math.max(...ticked.map((index) => labelWidth(labels[index] ?? '')));
+    const room = Math.min(...gaps) * (width / columns);
+    const stride = Math.max(1, Math.ceil((longest + LABEL_GAP_PX) / room));
+
+    return new Set(ticked.filter((_, at) => at % stride === 0));
+}
+
+/**
+ * Which of an axis's uneven ticks keep their label, the last one first:
+ * walking leftwards, a label stays where it clears the one kept to its right
+ * (labels sit centred under columns `pitch` pixels apart). A pitch not
+ * measured yet (0) keeps them all.
+ */
+export function fittingTicks(ticked: readonly number[], pitch: number, labels: readonly string[]): Set<number> {
+    if (pitch <= 0) {
+        return new Set(ticked);
+    }
+
+    const kept: number[] = [];
+
+    for (const index of [...ticked].reverse()) {
+        const right = kept.at(-1);
+        const label = labels[index] ?? '';
+
+        if (right === undefined || (right - index) * pitch >= (labelWidth(label) + labelWidth(labels[right] ?? '')) / 2 + LABEL_GAP_PX) {
+            kept.push(index);
+        }
+    }
+
+    return new Set(kept);
 }
 
 /** The index of the largest value, the first one on a tie; null when all are zero. */

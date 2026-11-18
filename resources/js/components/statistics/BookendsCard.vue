@@ -3,7 +3,6 @@ import PosterThumb from '@/components/statistics/PosterThumb.vue';
 import { leafCode, showTitleOf } from '@/lib/badges';
 import { formatNumber, formatTime, localDateKey } from '@/lib/format';
 import { mediaTypeMeta } from '@/lib/mediaTypes';
-import { pageLocale } from '@/lib/pageContext';
 import { daysBetween, typeAndYear, weekdayDate } from '@/lib/statistics';
 import { mediaUrl } from '@/lib/urls';
 import type { Bookend, PeriodSpan } from '@/types/generated';
@@ -32,7 +31,7 @@ const heading = (which: 'first' | 'last'): string => {
 /** The title it belongs to: an episode's show, anything else itself. */
 const titleOf = (bookend: Bookend): string => showTitleOf(bookend.media) ?? bookend.media.title;
 
-/** What was finished within that title: "S04E06", or the type and year ("movie, 1983"). */
+/** What was finished within that title: "S04E06", or the type and year ("Movie, 1983"), as every title on the page says it. */
 const partOf = (bookend: Bookend): string => {
     const code = leafCode(bookend.media);
 
@@ -40,7 +39,7 @@ const partOf = (bookend: Bookend): string => {
         return code;
     }
 
-    return typeAndYear(bookend.media.type, bookend.media.year).toLocaleLowerCase(pageLocale());
+    return typeAndYear(bookend.media.type, bookend.media.year);
 };
 
 const when = (bookend: Bookend): string =>
@@ -74,7 +73,9 @@ const sides = computed(() => [
 
                 <span class="flex min-w-0 flex-col gap-0.5">
                     <span class="text-ink-muted text-sm">{{ side.heading }}</span>
-                    <span class="text-ink truncate text-base font-semibold group-hover:underline">{{ titleOf(side.bookend) }}</span>
+                    <span class="text-ink line-clamp-2 text-base font-semibold group-hover:underline md:line-clamp-1">{{
+                        titleOf(side.bookend)
+                    }}</span>
                     <span class="text-ink-secondary flex items-center gap-1.5 text-sm" :class="index === 1 ? 'md:justify-end' : ''">
                         <component
                             :is="mediaTypeMeta(side.bookend.media.type).icon"

@@ -1,7 +1,7 @@
 <script setup lang="ts">
+import ChartTable from '@/components/statistics/ChartTable.vue';
 import { formatNumber } from '@/lib/format';
-import { pageLocale } from '@/lib/pageContext';
-import { monthName, MONTH_THRESHOLDS, scaleColor, scaleLegend, scaleStep } from '@/lib/statisticsCharts';
+import { monthName, monthOfYear, MONTH_THRESHOLDS, scaleColor, scaleLegend, scaleStep } from '@/lib/statisticsCharts';
 import { trans } from 'laravel-vue-i18n';
 import { computed } from 'vue';
 
@@ -22,17 +22,20 @@ const legend = computed(() => scaleLegend(MONTH_THRESHOLDS, (value) => trans('st
 const key = (year: number, month: number): string => `${year}-${String(month + 1).padStart(2, '0')}`;
 const count = (year: number, month: number): number => props.months[key(year, month)] ?? 0;
 
-/** "March 2019", as the locale writes a month of a year. */
-const monthOf = (year: number, month: number): string =>
-    new Intl.DateTimeFormat(pageLocale(), { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(Date.UTC(year, month, 1));
+/** "March 2019". */
+const monthOf = (year: number, month: number): string => monthOfYear(key(year, month));
 </script>
 
 <template>
     <div class="flex min-w-0 flex-col gap-6">
         <div class="overflow-x-auto pb-1" aria-hidden="true">
-            <div class="inline-grid grid-cols-[auto_repeat(12,minmax(2.25rem,4rem))] items-center gap-1">
+            <!-- Twelve columns that narrow to the card: on a phone a month is a letter, its name in the tooltip. -->
+            <div class="inline-grid w-full max-w-max grid-cols-[auto_repeat(12,minmax(1rem,4rem))] items-center gap-1">
                 <span />
-                <span v-for="month in 12" :key="month" class="text-ink-faint text-center text-sm">{{ monthName(month - 1) }}</span>
+                <span v-for="month in 12" :key="month" class="text-ink-faint text-center text-sm">
+                    <span class="sm:hidden">{{ monthName(month - 1, 'narrow') }}</span>
+                    <span class="max-sm:hidden">{{ monthName(month - 1) }}</span>
+                </span>
                 <template v-for="year in years" :key="year">
                     <span class="text-ink-faint pr-2 text-sm tabular-nums">{{ year }}</span>
                     <span
@@ -45,6 +48,21 @@ const monthOf = (year: number, month: number): string =>
                 </template>
             </div>
         </div>
+
+        <ChartTable>
+            <thead>
+                <tr>
+                    <td />
+                    <th v-for="month in 12" :key="month" scope="col">{{ monthName(month - 1, 'long') }}</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr v-for="year in years" :key="year">
+                    <th scope="row">{{ year }}</th>
+                    <td v-for="month in 12" :key="month">{{ formatNumber(count(year, month - 1)) }}</td>
+                </tr>
+            </tbody>
+        </ChartTable>
 
         <p class="text-ink-muted m-0 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
             <span>{{ legendLabel }}</span>

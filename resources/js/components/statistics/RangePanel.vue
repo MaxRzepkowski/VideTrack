@@ -99,16 +99,17 @@ const FIELD =
     <PopoverRoot v-model:open="open">
         <PopoverTrigger
             data-toolbar-control
-            class="border-line bg-surface text-ink-secondary hover:border-line-strong data-[state=open]:border-brand-soft focus-visible:ring-brand flex h-10 items-center gap-1.5 rounded-lg border pr-3.5 pl-3 text-base font-semibold transition-colors focus-visible:ring-2 focus-visible:outline-hidden"
+            class="border-line bg-surface text-ink-secondary hover:border-line-strong data-[state=open]:border-brand-soft focus-visible:ring-brand flex h-10 items-center gap-1.5 rounded-lg border text-base font-semibold transition-colors focus-visible:ring-2 focus-visible:outline-hidden max-md:w-10 max-md:justify-center md:pr-3.5 md:pl-3"
         >
             <CalendarClock class="text-ink-muted size-4" aria-hidden="true" />
-            {{ trans('statistics.range') }}
+            <span class="max-md:sr-only">{{ trans('statistics.range') }}</span>
         </PopoverTrigger>
 
         <PopoverPortal>
             <PopoverContent
                 align="end"
                 :side-offset="8"
+                :collision-padding="16"
                 class="border-line bg-surface-overlay shadow-card z-50 flex w-[22rem] max-w-[calc(100vw-2rem)] flex-col gap-4 rounded-xl border p-5"
             >
                 <h2 class="text-ink m-0 text-base font-semibold">{{ trans('statistics.date_range') }}</h2>
