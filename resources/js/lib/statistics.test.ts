@@ -8,8 +8,10 @@ import {
     formatPercent,
     formatRating,
     lowerList,
+    partRange,
     periodDates,
     periodTitle,
+    rangeLabel,
     rangeShortcuts,
     rankGenres,
     scopeName,
@@ -177,6 +179,17 @@ describe('numbers and words', () => {
     it('names a title by its type and year, the type alone without a year', () => {
         expect(typeAndYear('movie', 1983)).toBe('Movie, 1983');
         expect(typeAndYear('movie', null)).toBe('Movie');
+    });
+
+    it('spells two days out with long months when asked', () => {
+        expect(rangeLabel('2025-05-25', '2025-06-29')).toBe('May 25\u2009–\u2009Jun 29, 2025');
+        expect(rangeLabel('2025-05-25', '2025-06-29', 'long')).toBe('May 25\u2009–\u2009June 29, 2025');
+    });
+
+    it('names a run of parts by episode codes, by bare numbers without a season', () => {
+        expect(partRange({ season: 2, number: 11 }, { season: 4, number: 3 })).toBe('S02E11–S04E03');
+        expect(partRange({ season: null, number: 1 }, { season: null, number: 13 })).toBe('1–13');
+        expect(partRange({ season: 1, number: null }, { season: 1, number: 2 })).toBeNull();
     });
 
     it("compares a rating with everyone else's, a rounding away from them being the same", () => {

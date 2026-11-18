@@ -10,6 +10,7 @@ import DeferredSection from '@/components/statistics/DeferredSection.vue';
 import PeriodBar from '@/components/statistics/PeriodBar.vue';
 import PeriodCard from '@/components/statistics/PeriodCard.vue';
 import RatingsSection from '@/components/statistics/RatingsSection.vue';
+import RecordsSection from '@/components/statistics/RecordsSection.vue';
 import TasteSection from '@/components/statistics/TasteSection.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { statisticsParams, type StatisticsQuery } from '@/lib/statistics';
@@ -19,6 +20,7 @@ import type {
     StatisticsOrigins,
     StatisticsPage,
     StatisticsRatings,
+    StatisticsRecords,
     StatisticsTaste,
 } from '@/types/generated';
 import { Head, router } from '@inertiajs/vue3';
@@ -43,6 +45,8 @@ const props = defineProps<{
     creators?: StatisticsCreators;
     /** Deferred: absent until the follow-up request lands. */
     ratings?: StatisticsRatings;
+    /** Deferred: absent until the follow-up request lands. */
+    records?: StatisticsRecords;
 }>();
 
 function visit(query: StatisticsQuery): void {
@@ -102,6 +106,10 @@ const hasTitles = computed(() => props.page.titles.titles.total > 0);
                         :type="page.type"
                         :community-delta="page.summary.communityDelta"
                     />
+                </DeferredSection>
+
+                <DeferredSection data="records">
+                    <RecordsSection v-if="records" :records="records" />
                 </DeferredSection>
             </template>
 

@@ -8,12 +8,14 @@ use App\Actions\Users\BuildStatisticsCreators;
 use App\Actions\Users\BuildStatisticsOrigins;
 use App\Actions\Users\BuildStatisticsPage;
 use App\Actions\Users\BuildStatisticsRatings;
+use App\Actions\Users\BuildStatisticsRecords;
 use App\Actions\Users\BuildStatisticsTaste;
 use App\Http\Data\StatisticsActivity;
 use App\Http\Data\StatisticsCreators;
 use App\Http\Data\StatisticsOrigins;
 use App\Http\Data\StatisticsPage;
 use App\Http\Data\StatisticsRatings;
+use App\Http\Data\StatisticsRecords;
 use App\Http\Data\StatisticsTaste;
 use App\Http\Requests\StatisticsRequest;
 use App\Models\User;
@@ -39,6 +41,7 @@ class StatisticsController extends Controller
         BuildStatisticsOrigins $origins,
         BuildStatisticsCreators $creators,
         BuildStatisticsRatings $ratings,
+        BuildStatisticsRecords $records,
     ): Response {
         $scope = $history->scope($viewer, $request->period(UserCalendar::of($viewer)->today()->year), $request->type());
 
@@ -50,6 +53,7 @@ class StatisticsController extends Controller
             'origins' => Inertia::defer(fn (): StatisticsOrigins => $origins->execute($viewer, $scope)),
             'creators' => Inertia::defer(fn (): StatisticsCreators => $creators->execute($scope)),
             'ratings' => Inertia::defer(fn (): StatisticsRatings => $ratings->execute($viewer, $scope)),
+            'records' => Inertia::defer(fn (): StatisticsRecords => $records->execute($viewer, $scope)),
         ]);
     }
 }

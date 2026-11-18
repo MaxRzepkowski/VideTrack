@@ -37,6 +37,10 @@ export type Bookend = {
     readonly media: MediaSummary;
     readonly at: string;
 };
+export type BusiestDay = {
+    readonly day: DayCount;
+    readonly week: DayCount[];
+};
 export type CalendarDay = {
     readonly date: string;
     readonly entries: CalendarEntry[];
@@ -515,6 +519,14 @@ export type ManifestList = {
     readonly itemCount: number;
     readonly isPublic: boolean;
 };
+export type Marathon = {
+    readonly media: MediaSummary;
+    readonly day: string;
+    readonly parts: number;
+    readonly first: PartNumber;
+    readonly last: PartNumber;
+    readonly minutes: number;
+};
 export type MediaDetails = {
     readonly type: string;
     readonly ref: string;
@@ -679,6 +691,10 @@ export type PageInfo = {
     readonly currentPage: number;
     readonly totalPages: number;
     readonly total: number;
+};
+export type PartNumber = {
+    readonly season: number | null;
+    readonly number: number | null;
 };
 export type PeriodKind = 'year' | 'all' | 'range';
 export type PeriodSpan = {
@@ -898,6 +914,12 @@ export type StatisticsRatings = {
     readonly higher: RatingGap[];
     readonly lower: RatingGap[];
 };
+export type StatisticsRecords = {
+    readonly streak: Streak | null;
+    readonly busiestDay: BusiestDay | null;
+    readonly marathon: Marathon | null;
+    readonly firstWeekday: number;
+};
 export type StatisticsTaste = {
     readonly readIn: ProgressUnit | null;
     readonly readingEstimated: boolean;
@@ -910,6 +932,14 @@ export type StoreLink = {
     readonly store: GameStore;
     readonly url: string;
     readonly subscription: boolean;
+};
+export type Streak = {
+    readonly from: string;
+    readonly to: string;
+    readonly days: number;
+    readonly shownFrom: string;
+    readonly shownTo: string;
+    readonly otherDays: string[];
 };
 export type SubscriptionFeed = {
     readonly url: string;
