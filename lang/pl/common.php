@@ -157,4 +157,5 @@ return [
     'zoom_in_hint' => 'Przybliż (także Ctrl + kółko myszy)',
     'zoom_out' => 'Oddal',
     'zoom_reset' => 'Pokaż całość',
+    'webhooks' => 'Webhooki',
 ];

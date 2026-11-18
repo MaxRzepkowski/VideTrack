@@ -1,7 +1,17 @@
 import { registerMediaTypes, type MediaTypeDefinition } from '@/lib/mediaTypes';
 import type { UserPreferences } from '@/types';
-import type { ChannelData, ChannelKindData, CredentialField, CreditData, UserMediaState } from '@/types/generated';
+import type {
+    ChannelData,
+    ChannelKindData,
+    CredentialField,
+    CreditData,
+    OutgoingWebhookData,
+    UserMediaState,
+    WebhookEventGroup,
+    WebhookGroupOption,
+} from '@/types/generated';
 import type { MediaSummary } from '@/types/media';
+import { trans } from 'laravel-vue-i18n';
 import ALL_MODULES_TYPES from '../../../tests/Fixtures/media-types/all-modules.json';
 import DEFAULT_PREFERENCES from '../../../tests/Fixtures/preferences/defaults.json';
 
@@ -127,6 +137,32 @@ export function channelData(overrides: Partial<ChannelData> = {}): ChannelData {
         enabled: true,
         values: {},
         lastFailure: null,
+        ...overrides,
+    };
+}
+
+/** The groups of events a webhook can hear about, worded as the server words them. */
+export function webhookGroups(): WebhookGroupOption[] {
+    const codes: WebhookEventGroup[] = ['activity', 'ratings', 'favorites', 'status', 'lists', 'notifications'];
+
+    return codes.map((code) => ({
+        code,
+        label: trans(`settings.webhook_events_${code}`),
+        description: trans(`settings.webhook_events_${code}_help`),
+    }));
+}
+
+/** One of the user's webhooks as the settings page lists it. */
+export function outgoingWebhookData(overrides: Partial<OutgoingWebhookData> = {}): OutgoingWebhookData {
+    return {
+        id: 3,
+        label: 'Home Assistant',
+        host: 'homeassistant.local:8123',
+        events: ['ratings'],
+        enabled: true,
+        lastFailure: null,
+        // The public test vector of the Standard Webhooks libraries, no real secret.
+        newSecret: 'whsec_MfKQ9r8GKYqrTwjUPD8ILPZIo2LaLaSw', // gitleaks:allow
         ...overrides,
     };
 }

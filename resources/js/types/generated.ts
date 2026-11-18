@@ -687,6 +687,23 @@ export type OriginTally = {
     readonly code: string;
     readonly titles: number;
 };
+export type OutgoingWebhookData = {
+    readonly id: number;
+    readonly label: string;
+    readonly host: string;
+    readonly events: WebhookEventGroup[];
+    readonly enabled: boolean;
+    readonly lastFailure: string | null;
+    readonly newSecret: string;
+};
+export type OutgoingWebhooksPage = {
+    readonly webhooks: OutgoingWebhookData[];
+    readonly groups: WebhookGroupOption[];
+    readonly newSecret: string;
+    readonly labelMax: number;
+    readonly urlMax: number;
+    readonly limit: number;
+};
 export type PageInfo = {
     readonly currentPage: number;
     readonly totalPages: number;
@@ -1132,6 +1149,12 @@ export type WebhookEndpointData = {
     readonly lastReceivedAt: string | null;
     readonly lastError: string | null;
     readonly deliveries: DeliveryRow[];
+};
+export type WebhookEventGroup = 'activity' | 'ratings' | 'favorites' | 'status' | 'lists' | 'notifications';
+export type WebhookGroupOption = {
+    readonly code: WebhookEventGroup;
+    readonly label: string;
+    readonly description: string;
 };
 export type WeekStart = 'auto' | 'monday' | 'sunday';
 export type WholeLength = {

@@ -160,6 +160,14 @@ class User extends Authenticatable implements HasLocalePreference
     }
 
     /**
+     * @return HasMany<OutgoingWebhook, $this>
+     */
+    public function outgoingWebhooks(): HasMany
+    {
+        return $this->hasMany(OutgoingWebhook::class);
+    }
+
+    /**
      * @return HasMany<Play, $this>
      */
     public function plays(): HasMany

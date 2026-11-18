@@ -505,6 +505,9 @@ return [
         // A test message to one of the user's notification channels: a
         // service blocks an address that sends too many.
         'channel_test' => 5,
+        // A test message to one of the user's own webhooks: their own
+        // receiver blocks nobody, so it may take more than a service.
+        'webhook_test' => 10,
         // A webhook dry run, which reaches out to the metadata provider.
         'integration_test' => 20,
         // A connect card waiting on a device flow polls every few seconds.

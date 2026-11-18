@@ -27,6 +27,7 @@ import {
     TriangleAlert,
     Upload,
     UserRound,
+    Webhook,
     type LucideIcon,
 } from '@lucide/vue';
 import { trans } from 'laravel-vue-i18n';
@@ -271,6 +272,13 @@ export const SETTINGS_NAV: NonEmpty<NavEntry> = [
         label: () => trans('common.api'),
         icon: Braces,
         keywords: () => trans('palette.keywords_settings_api'),
+    },
+    {
+        id: 'settings.webhooks',
+        route: 'settings.webhooks.index',
+        label: () => trans('common.webhooks'),
+        icon: Webhook,
+        keywords: () => trans('palette.keywords_settings_webhooks'),
     },
     {
         id: 'settings.tasks',

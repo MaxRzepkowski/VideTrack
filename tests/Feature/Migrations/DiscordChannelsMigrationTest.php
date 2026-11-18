@@ -14,7 +14,13 @@ use Illuminate\Support\Facades\DB;
  * the schema before the move.
  */
 
-const CHANNEL_MIGRATIONS = 4;
+/** The migrations from the channels table on: rolled back, they leave the schema the move starts from. */
+function channelMigrations(): int
+{
+    $files = array_map(basename(...), glob(database_path('migrations/*.php')) ?: []);
+
+    return count(array_filter($files, fn (string $file): bool => strcmp($file, '2026_11_17_000001_create_notification_channels_table.php') >= 0));
+}
 
 function scratchBeforeChannels(): ConnectionInterface
 {
@@ -22,7 +28,7 @@ function scratchBeforeChannels(): ConnectionInterface
     config(['database.connections.scratch' => [...config()->array('database.connections.sqlite'), 'database' => $file]]);
 
     Artisan::call('migrate', ['--database' => 'scratch', '--force' => true]);
-    Artisan::call('migrate:rollback', ['--database' => 'scratch', '--force' => true, '--step' => CHANNEL_MIGRATIONS]);
+    Artisan::call('migrate:rollback', ['--database' => 'scratch', '--force' => true, '--step' => channelMigrations()]);
 
     return DB::connection('scratch');
 }
@@ -74,7 +80,7 @@ test('rolling back puts the first Discord channel back on the user', function ()
     $alex = scratchUser($db, 'alex', 'https://discord.com/api/webhooks/1/a', ['discord_mode' => 'instant'], '2026-10-10 06:00:00');
     Artisan::call('migrate', ['--database' => 'scratch', '--force' => true]);
 
-    Artisan::call('migrate:rollback', ['--database' => 'scratch', '--force' => true, '--step' => CHANNEL_MIGRATIONS - 1]);
+    Artisan::call('migrate:rollback', ['--database' => 'scratch', '--force' => true, '--step' => channelMigrations() - 1]);
 
     $user = $db->table('users')->where('id', $alex)->first();
 
