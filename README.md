@@ -31,7 +31,7 @@ tells you when the next episode or release is out, and keeps all of it on your o
 - 📅 Follow upcoming releases in a calendar and countdowns, or subscribe to them in your own calendar app or feed reader.
 - 🔔 Ring the bell on a title, a person or a studio to hear about new releases, in the app, on Discord or through Apprise (Telegram, ntfy, e-mail…).
 - ⭐ Rate, favorite and collect titles in a backlog and in your own lists.
-- 📊 Keep a full history with rewatches and see how much time went into it.
+- 📊 Keep a full history with rewatches and see it in statistics: time spent, activity, genres, where titles come from, who made them and how your ratings compare with everyone else's.
 - ✨ Get suggestions based on what you finished. They wait on their own page and never nag.
 - 📥 Import from Trakt, Letterboxd, TV Time, Simkl, IMDb, Goodreads, StoryGraph, MyAnimeList, AniList, Kitsu, Steam and more.
 - 📡 Log what you watch automatically from Plex, Jellyfin, Emby or Tautulli.
@@ -48,16 +48,23 @@ tells you when the next episode or release is out, and keeps all of it on your o
     <td width="50%" align="center"><a href="docs/screenshots/show.webp"><img src="docs/screenshots/show.webp" alt="Show page" /></a><br /><sub>Show page</sub></td>
   </tr>
   <tr>
+    <td width="50%" align="center"><a href="docs/screenshots/person.webp"><img src="docs/screenshots/person.webp" alt="Person page" /></a><br /><sub>Person page</sub></td>
+    <td width="50%" align="center"><a href="docs/screenshots/ratings.webp"><img src="docs/screenshots/ratings.webp" alt="Ratings" /></a><br /><sub>Ratings</sub></td>
+  </tr>
+  <tr>
+    <td width="50%" align="center"><a href="docs/screenshots/discover.webp"><img src="docs/screenshots/discover.webp" alt="Discover" /></a><br /><sub>Discover</sub></td>
+    <td width="50%" align="center"><a href="docs/screenshots/suggestions.webp"><img src="docs/screenshots/suggestions.webp" alt="Suggestions" /></a><br /><sub>Suggestions</sub></td>
+  </tr>
+  <tr>
     <td width="50%" align="center"><a href="docs/screenshots/calendar.webp"><img src="docs/screenshots/calendar.webp" alt="Calendar" /></a><br /><sub>Calendar</sub></td>
     <td width="50%" align="center"><a href="docs/screenshots/countdowns.webp"><img src="docs/screenshots/countdowns.webp" alt="Countdowns" /></a><br /><sub>Countdowns</sub></td>
   </tr>
   <tr>
-    <td width="50%" align="center"><a href="docs/screenshots/suggestions.webp"><img src="docs/screenshots/suggestions.webp" alt="Suggestions" /></a><br /><sub>Suggestions</sub></td>
+    <td width="50%" align="center"><a href="docs/screenshots/statistics.webp"><img src="docs/screenshots/statistics.webp" alt="Statistics" /></a><br /><sub>Statistics</sub></td>
     <td width="50%" align="center"><a href="docs/screenshots/lists.webp"><img src="docs/screenshots/lists.webp" alt="Lists" /></a><br /><sub>Lists</sub></td>
   </tr>
   <tr>
-    <td width="50%" align="center"><a href="docs/screenshots/game.webp"><img src="docs/screenshots/game.webp" alt="Game page" /></a><br /><sub>Game page</sub></td>
-    <td width="50%" align="center"><a href="docs/screenshots/person.webp"><img src="docs/screenshots/person.webp" alt="Person page" /></a><br /><sub>Person page</sub></td>
+    <td colspan="2" align="center"><a href="docs/screenshots/mobile.webp"><img src="docs/screenshots/mobile.webp" alt="Dashboard, show page and statistics on a phone" /></a><br /><sub>On a phone</sub></td>
   </tr>
 </table>
 
