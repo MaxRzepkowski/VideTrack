@@ -26,6 +26,16 @@ final readonly class Hierarchy
     public function __construct(private MediaTypeRegistry $types) {}
 
     /**
+     * The season a part sits in, read off its parent: a parent with a parent
+     * of its own is a season and gives its number; a parent without one is
+     * the title itself, and the part sits in no season.
+     */
+    public static function seasonNumber(MediaItem $parent): ?int
+    {
+        return $parent->parent_id === null ? null : $parent->number;
+    }
+
+    /**
      * The item and every ancestor above it, item first, root last. A parent
      * already loaded on a node is taken as it is — a run placing many
      * episodes of one show loads the show once.

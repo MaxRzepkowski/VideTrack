@@ -16,6 +16,7 @@ import {
     statisticsParams,
     timeRows,
     titleMarks,
+    typeAndYear,
     typeNoun,
     weekdayDate,
     yearWindow,
@@ -171,6 +172,11 @@ describe('numbers and words', () => {
             ['onHold', '0 on hold'],
             ['dropped', '2 dropped'],
         ]);
+    });
+
+    it('names a title by its type and year, the type alone without a year', () => {
+        expect(typeAndYear('movie', 1983)).toBe('Movie, 1983');
+        expect(typeAndYear('movie', null)).toBe('Movie');
     });
 
     it("compares a rating with everyone else's, a rounding away from them being the same", () => {

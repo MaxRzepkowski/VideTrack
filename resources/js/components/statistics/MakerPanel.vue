@@ -1,8 +1,8 @@
 <script setup lang="ts">
+import PosterThumb from '@/components/statistics/PosterThumb.vue';
 import { formatNumber } from '@/lib/format';
-import { mediaImage } from '@/lib/images';
-import { mediaTypeMeta } from '@/lib/mediaTypes';
 import { Button } from '@/components/ui/button';
+import { typeAndYear } from '@/lib/statistics';
 import { creatorHref, mediaUrl } from '@/lib/urls';
 import type { MakerTally, RatedTitle } from '@/types/generated';
 import { Link } from '@inertiajs/vue3';
@@ -53,27 +53,11 @@ const rating = (title: RatedTitle): { value: string; whose: string } | null => {
                     :href="mediaUrl(title.media)"
                     class="group focus-visible:ring-brand flex items-center gap-3 rounded-lg focus-visible:ring-2 focus-visible:outline-hidden"
                 >
-                    <img
-                        v-if="mediaImage(title.media.posterPath, 'w92')"
-                        :src="mediaImage(title.media.posterPath, 'w92') ?? undefined"
-                        alt=""
-                        width="92"
-                        height="138"
-                        loading="lazy"
-                        class="bg-surface-raised aspect-poster w-11 shrink-0 rounded object-cover"
-                    />
-                    <span v-else class="bg-surface-raised aspect-poster block w-11 shrink-0 rounded" aria-hidden="true" />
+                    <PosterThumb :path="title.media.posterPath" size="w92" :width="92" :height="138" class="aspect-poster w-11 rounded" />
                     <span class="flex min-w-0 flex-1 flex-col gap-0.5">
                         <span class="text-ink truncate text-base font-semibold group-hover:underline">{{ title.media.title }}</span>
                         <span class="text-ink-muted truncate text-sm">
-                            {{
-                                title.media.year === null
-                                    ? mediaTypeMeta(title.media.type).label()
-                                    : trans('statistics.type_and_year', {
-                                          type: mediaTypeMeta(title.media.type).label(),
-                                          year: String(title.media.year),
-                                      })
-                            }}
+                            {{ typeAndYear(title.media.type, title.media.year) }}
                         </span>
                     </span>
                     <span v-if="rating(title)" class="flex shrink-0 flex-col items-end">

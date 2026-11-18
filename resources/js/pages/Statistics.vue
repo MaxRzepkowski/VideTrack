@@ -6,6 +6,7 @@ import PageMasthead from '@/components/PageMasthead.vue';
 import ActivitySection from '@/components/statistics/ActivitySection.vue';
 import BookendsCard from '@/components/statistics/BookendsCard.vue';
 import CreatorsSection from '@/components/statistics/CreatorsSection.vue';
+import DeferredSection from '@/components/statistics/DeferredSection.vue';
 import PeriodBar from '@/components/statistics/PeriodBar.vue';
 import PeriodCard from '@/components/statistics/PeriodCard.vue';
 import RatingsSection from '@/components/statistics/RatingsSection.vue';
@@ -20,7 +21,7 @@ import type {
     StatisticsRatings,
     StatisticsTaste,
 } from '@/types/generated';
-import { Deferred, Head, router } from '@inertiajs/vue3';
+import { Head, router } from '@inertiajs/vue3';
 import { ChartNoAxesColumn } from '@lucide/vue';
 import { trans } from 'laravel-vue-i18n';
 import { computed } from 'vue';
@@ -81,31 +82,19 @@ const hasTitles = computed(() => props.page.titles.titles.total > 0);
                 </div>
                 <BookendsCard v-if="page.first && page.last" :first="page.first" :last="page.last" :period="page.period" />
 
-                <Deferred data="activity">
-                    <template #fallback>
-                        <div class="border-line-subtle bg-surface mt-12 h-96 animate-pulse rounded-xl border" aria-hidden="true" />
-                    </template>
+                <DeferredSection data="activity">
                     <ActivitySection v-if="activity" :activity="activity" :period="page.period" :type="page.type" />
-                </Deferred>
+                </DeferredSection>
 
-                <Deferred :data="['taste', 'origins']">
-                    <template #fallback>
-                        <div class="border-line-subtle bg-surface mt-12 h-96 animate-pulse rounded-xl border" aria-hidden="true" />
-                    </template>
+                <DeferredSection :data="['taste', 'origins']">
                     <TasteSection v-if="taste && origins" :taste="taste" :origins="origins" :period="page.period" :type="page.type" />
-                </Deferred>
+                </DeferredSection>
 
-                <Deferred data="creators">
-                    <template #fallback>
-                        <div class="border-line-subtle bg-surface mt-12 h-96 animate-pulse rounded-xl border" aria-hidden="true" />
-                    </template>
+                <DeferredSection data="creators">
                     <CreatorsSection v-if="creators" :creators="creators" :period="page.period" :type="page.type" />
-                </Deferred>
+                </DeferredSection>
 
-                <Deferred data="ratings">
-                    <template #fallback>
-                        <div class="border-line-subtle bg-surface mt-12 h-96 animate-pulse rounded-xl border" aria-hidden="true" />
-                    </template>
+                <DeferredSection data="ratings">
                     <RatingsSection
                         v-if="ratings"
                         :ratings="ratings"
@@ -113,7 +102,7 @@ const hasTitles = computed(() => props.page.titles.titles.total > 0);
                         :type="page.type"
                         :community-delta="page.summary.communityDelta"
                     />
-                </Deferred>
+                </DeferredSection>
             </template>
 
             <EmptyState v-else :message="trans('statistics.no_completions')" />

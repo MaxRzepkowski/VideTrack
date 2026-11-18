@@ -22,6 +22,13 @@ export function typeNoun(type: string | null): string {
     return type === null ? trans('statistics.titles_word') : mediaTypeMeta(type).plural().toLocaleLowerCase();
 }
 
+/** A title's type and year: "Movie, 1983", or the type alone when the year is not known. */
+export function typeAndYear(type: string, year: number | null): string {
+    const label = mediaTypeMeta(type).label();
+
+    return year === null ? label : trans('statistics.type_and_year', { type: label, year: String(year) });
+}
+
 /** The scope a subtitle names: "all types together", or the one type ("movies"). */
 export function scopeName(type: string | null): string {
     return type === null ? trans('statistics.all_types_together') : mediaTypeMeta(type).plural().toLocaleLowerCase();

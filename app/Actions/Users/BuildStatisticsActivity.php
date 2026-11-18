@@ -2,12 +2,13 @@
 
 namespace App\Actions\Users;
 
+use App\Accounts\UserCalendar;
 use App\Catalog\MediaTypeRegistry;
 use App\Http\Data\StatisticsActivity;
 use App\Library\ReadingTime;
 use App\Models\User;
 use App\Users\Statistics\ActivityBucket;
-use App\Users\Statistics\Data\DayCount;
+use App\Users\Statistics\DailyCounts;
 use App\Users\Statistics\Data\HistoryEntry;
 use App\Users\Statistics\Data\TypeSeries;
 use App\Users\Statistics\PeriodKind;
@@ -52,8 +53,8 @@ final readonly class BuildStatisticsActivity
         $daily = $from !== null && $size !== ActivityBucket::Day && $from->diffInDays($to) < self::DAILY_UP_TO_DAYS;
         $monthGrid = $from !== null && $size !== ActivityBucket::Day && ! $daily;
 
+        $perDay = DailyCounts::of($scope->completions);
         $series = [];
-        $perDay = [];
         $perMonth = [];
         $weekdays = array_fill(0, 7, 0);
         $hours = array_fill(0, 24, 0);
@@ -67,7 +68,6 @@ final readonly class BuildStatisticsActivity
                 $series[$entry->rootType][$index[$bucket]]++;
             }
 
-            $perDay[$entry->day] = ($perDay[$entry->day] ?? 0) + 1;
             $month = substr($entry->day, 0, 7);
             $perMonth[$month] = ($perMonth[$month] ?? 0) + 1;
             $weekdays[$entry->at->dayOfWeekIso - 1]++;
@@ -84,11 +84,11 @@ final readonly class BuildStatisticsActivity
             completions: count($scope->completions),
             watchMinutes: array_sum(array_map(fn (HistoryEntry $entry): int => $entry->loggedMinutes(), $scope->shown)),
             readingMinutes: array_sum(array_map(fn (HistoryEntry $entry): int => $entry->readMinutes($reading) ?? 0, $scope->shown)),
-            days: $daily ? $perDay : null,
+            days: $daily ? $perDay->counts : null,
             months: $monthGrid ? $perMonth : null,
             weekdays: array_values($weekdays),
             hours: array_values($hours),
-            busiestDay: $this->busiest($perDay),
+            busiestDay: $perDay->busiest(),
             firstWeekday: $firstWeekday,
         );
     }
@@ -173,25 +173,9 @@ final readonly class BuildStatisticsActivity
 
         return match ($size) {
             ActivityBucket::Day => $date->toDateString(),
-            ActivityBucket::Week => $date->subDays(($date->dayOfWeekIso - $firstWeekday + 7) % 7)->toDateString(),
+            ActivityBucket::Week => UserCalendar::weekStart($date, $firstWeekday)->toDateString(),
             ActivityBucket::Month => $date->startOfMonth()->toDateString(),
             ActivityBucket::Year => $date->startOfYear()->toDateString(),
         };
-    }
-
-    /**
-     * @param  array<string, int>  $perDay
-     */
-    private function busiest(array $perDay): ?DayCount
-    {
-        $best = null;
-
-        foreach ($perDay as $day => $count) {
-            if ($best === null || $count > $best->count) {
-                $best = new DayCount((string) $day, $count);
-            }
-        }
-
-        return $best;
     }
 }

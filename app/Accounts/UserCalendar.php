@@ -58,6 +58,15 @@ final readonly class UserCalendar
         return $this->onDay($day)->endOfDay();
     }
 
+    /**
+     * The first day of the week a date falls in, for a week that opens on the
+     * given weekday (ISO: 1 is Monday, 7 Sunday; see UserPreferences::firstWeekday).
+     */
+    public static function weekStart(CarbonImmutable $date, int $firstWeekday): CarbonImmutable
+    {
+        return $date->subDays(($date->dayOfWeekIso - $firstWeekday + 7) % 7);
+    }
+
     private function onDay(string $day): CarbonImmutable
     {
         return CarbonImmutable::createFromFormat('!Y-m-d', $day, $this->timezone) ?: throw new InvalidArgumentException("Not a day: [{$day}].");
