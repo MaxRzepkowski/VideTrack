@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import TypeLegend from '@/components/statistics/TypeLegend.vue';
 import { inRegistryOrder, mediaTypeMeta } from '@/lib/mediaTypes';
 import { countTitles, formatRating } from '@/lib/statistics';
 import { middleOut, RATING_LEGEND, ratingColor, releaseColumns } from '@/lib/statisticsCharts';
@@ -73,8 +74,6 @@ const peak = computed(() => {
         ? null
         : { index, label: trans('statistics.release_column', { year: yearName(columns.value[index]?.year ?? null), titles: count(busiest.value) }) };
 });
-
-const legendTypes = computed(() => inRegistryOrder(typeOrder.value));
 </script>
 
 <template>
@@ -90,12 +89,7 @@ const legendTypes = computed(() => inRegistryOrder(typeOrder.value));
                 {{ trans('statistics.not_rated') }}
             </span>
         </p>
-        <p v-else class="m-0 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
-            <span v-for="code in legendTypes" :key="code" class="text-ink-secondary flex items-center gap-1.5">
-                <component :is="mediaTypeMeta(code).icon" class="size-[18px]" :style="{ color: mediaTypeMeta(code).color }" aria-hidden="true" />
-                {{ mediaTypeMeta(code).plural() }}
-            </span>
-        </p>
+        <TypeLegend v-else :types="typeOrder" />
 
         <div ref="box" class="relative w-full" :style="{ height: `${PLOT_HEIGHT + 28}px` }" aria-hidden="true">
             <svg v-if="width > 0" :width="width" :height="PLOT_HEIGHT" class="block overflow-visible">
