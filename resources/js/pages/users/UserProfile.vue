@@ -2,6 +2,7 @@
 import PageMasthead from '@/components/PageMasthead.vue';
 import PageSection from '@/components/PageSection.vue';
 import SectionHeading from '@/components/SectionHeading.vue';
+import SectionMoreLink from '@/components/SectionMoreLink.vue';
 import StatTile from '@/components/dashboard/StatTile.vue';
 import MediaCard from '@/components/media/MediaCard.vue';
 import MediaGrid from '@/components/media/MediaGrid.vue';
@@ -78,10 +79,13 @@ const statColumns = computed(() => (Math.ceil(statKinds.value.length / 2) >= 3 ?
         <PageSection :class="favorites.length === 0 ? 'pb-20' : ''">
             <SectionHeading :title="trans('users.stats')">
                 <template #icon><ChartNoAxesColumnIncreasing class="size-6" /></template>
+                <!-- Statistics are of the viewer's own library only. -->
+                <SectionMoreLink v-if="isOwner" :href="route('statistics')" :label="trans('statistics.title')" placement="heading" />
             </SectionHeading>
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2" :class="statColumns">
                 <StatTile v-for="kind in statKinds" :key="kind" :kind="kind" :stats="stats[kind]" :username="profile.username" />
             </div>
+            <SectionMoreLink v-if="isOwner" :href="route('statistics')" :label="trans('statistics.title')" placement="below" />
         </PageSection>
 
         <!-- Favorites. The shelf wears the same card as every other shelf in
