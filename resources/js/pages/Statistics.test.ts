@@ -29,11 +29,7 @@ function statisticsPage(overrides: Partial<StatisticsPage> = {}): StatisticsPage
     return {
         period: { kind: 'year', year: 2025, from: '2025-01-01', to: '2025-12-31', days: 365 },
         type: null,
-        years: [
-            { year: 2024, completions: 40 },
-            { year: 2025, completions: 12 },
-        ],
-        allTime: 52,
+        years: [2024, 2025],
         types: [
             { type: 'movie', count: 2 },
             { type: 'show', count: 10 },
@@ -120,6 +116,24 @@ describe('Statistics', () => {
         const book = wrapper.findAllComponents(StatTile).find((tile) => tile.props('kind') === 'book');
         expect(book?.text()).toMatch(/≈\s*22\s*hours\s*35\s*minutes/);
         expect(book?.text()).toMatch(/8 books.*1,355 pages/);
+    });
+
+    it('picks a year, the whole history or the next year from the strip, and names a range it cannot pick', async () => {
+        const wrapper = page(statisticsPage());
+        const select = wrapper.find('select[aria-label="Period"]');
+
+        expect(select.findAll('option').map((option) => option.text())).toEqual(['2025', '2024']);
+        expect(wrapper.find('button[aria-label="Next year"]').attributes('disabled')).toBeDefined();
+
+        await wrapper.find('button[aria-label="Previous year"]').trigger('click');
+        expect(visits.at(-1)?.[1]).toEqual({ period: '2024' });
+
+        const ranged = page(statisticsPage({ period: { kind: 'range', year: null, from: '2024-03-12', to: '2025-01-05', days: 300 } }));
+        const options = ranged.find('select[aria-label="Period"]').findAll('option');
+
+        expect(options.at(-1)?.text()).toBe('Mar 12, 2024\u2009–\u2009Jan 5, 2025');
+        expect(options.at(-1)?.attributes('disabled')).toBeDefined();
+        expect(ranged.find('button[aria-label="Previous year"]').attributes('disabled')).toBeDefined();
     });
 
     it('changes the type and keeps the period', async () => {

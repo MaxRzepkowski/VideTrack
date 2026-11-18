@@ -7,10 +7,10 @@ import ActivitySection from '@/components/statistics/ActivitySection.vue';
 import BookendsCard from '@/components/statistics/BookendsCard.vue';
 import CreatorsSection from '@/components/statistics/CreatorsSection.vue';
 import DeferredSection from '@/components/statistics/DeferredSection.vue';
-import PeriodBar from '@/components/statistics/PeriodBar.vue';
 import PeriodCard from '@/components/statistics/PeriodCard.vue';
 import RatingsSection from '@/components/statistics/RatingsSection.vue';
 import RecordsSection from '@/components/statistics/RecordsSection.vue';
+import StatisticsToolbar from '@/components/statistics/StatisticsToolbar.vue';
 import TasteSection from '@/components/statistics/TasteSection.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { statisticsParams, type StatisticsQuery } from '@/lib/statistics';
@@ -68,9 +68,9 @@ const hasTitles = computed(() => props.page.titles.titles.total > 0);
             </div>
         </PageMasthead>
 
-        <PeriodBar :page="page" @visit="visit" />
+        <StatisticsToolbar :page="page" @visit="visit" />
 
-        <div class="max-w-content mx-auto flex w-full flex-1 flex-col gap-6 px-4 pt-10 pb-20 md:px-10">
+        <div class="max-w-content mx-auto flex w-full flex-1 flex-col gap-6 px-4 pb-20 md:px-10">
             <PeriodCard
                 :period="page.period"
                 :summary="page.summary"

@@ -16,7 +16,6 @@ use App\Users\Statistics\Data\HistoryEntry;
 use App\Users\Statistics\Data\PeriodSummary;
 use App\Users\Statistics\Data\PeriodTitles;
 use App\Users\Statistics\Data\TypeTally;
-use App\Users\Statistics\Data\YearCount;
 use App\Users\Statistics\PeriodMarks;
 use App\Users\Statistics\StatisticsScope;
 use App\Users\Statistics\TitleLookups;
@@ -49,7 +48,6 @@ final readonly class BuildStatisticsPage
             period: $scope->span(),
             type: $scope->type,
             years: $this->years($scope->entries),
-            allTime: count(array_filter($scope->entries, fn (HistoryEntry $entry): bool => $entry->completed)),
             types: $this->typeOptions($scope),
             earliest: $scope->firstCompletion()?->day,
             summary: new PeriodSummary(
@@ -88,7 +86,7 @@ final readonly class BuildStatisticsPage
 
     /**
      * @param  list<HistoryEntry>  $entries
-     * @return list<YearCount>
+     * @return list<int>
      */
     private function years(array $entries): array
     {
@@ -96,14 +94,13 @@ final readonly class BuildStatisticsPage
 
         foreach ($entries as $entry) {
             if ($entry->completed) {
-                $year = (int) substr($entry->day, 0, 4);
-                $years[$year] = ($years[$year] ?? 0) + 1;
+                $years[(int) substr($entry->day, 0, 4)] = true;
             }
         }
 
         ksort($years);
 
-        return array_map(fn (int $year, int $count): YearCount => new YearCount($year, $count), array_keys($years), $years);
+        return array_keys($years);
     }
 
     /**
