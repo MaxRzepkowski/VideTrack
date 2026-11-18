@@ -10,6 +10,7 @@ use App\Notifications\Channels\ChannelMode;
 use App\Notifications\Channels\ChannelRegistry;
 use App\Notifications\Channels\DailyDigests;
 use App\Support\Delivery\DeliveryAnswer;
+use App\Support\Delivery\DeliveryRetry;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
@@ -97,7 +98,7 @@ test('a message the service could not take is tried again later, one to an addre
 
     $retried = (new DeliverChannelMessage($unavailable, $message))->withFakeQueueInteractions();
     $retried->handle(app(ChannelRegistry::class));
-    $retried->assertReleased(DeliverChannelMessage::RETRY_AFTER[0]);
+    $retried->assertReleased(DeliveryRetry::UNAVAILABLE_AFTER[0]);
 
     $dropped = (new DeliverChannelMessage($gone, $message))->withFakeQueueInteractions();
     $dropped->handle(app(ChannelRegistry::class));
