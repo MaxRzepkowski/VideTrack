@@ -392,6 +392,17 @@ export function splitAtPlaceholder(text: string, placeholder: string): { before:
     return at === -1 ? { before: text, after: null } : { before: text.slice(0, at), after: text.slice(at + placeholder.length) };
 }
 
+/**
+ * A fact cut before its last word, so the word can be held on one line with
+ * whatever is drawn after it (a rule between facts). `head` keeps its
+ * trailing space; a single word is all `last`.
+ */
+export function splitLastWord(text: string): { head: string; last: string } {
+    const at = text.lastIndexOf(' ') + 1;
+
+    return { head: text.slice(0, at), last: text.slice(at) };
+}
+
 /** A count the provider may or may not have sent, formatted; null when it sent none. */
 export function formatCountOrNull(value: unknown): string | null {
     return typeof value === 'number' ? formatNumber(value) : null;

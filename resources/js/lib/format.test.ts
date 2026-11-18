@@ -25,6 +25,7 @@ import {
     localDateTimeInput,
     relativeTime,
     splitAtPlaceholder,
+    splitLastWord,
     todayDateKey,
     versionLabel,
     withCount,
@@ -212,6 +213,13 @@ describe('getInitials', () => {
     it('has nothing for no name', () => {
         expect(getInitials('')).toBe('');
         expect(getInitials(undefined)).toBe('');
+    });
+});
+
+describe('splitLastWord', () => {
+    it('cuts a fact before its last word, keeping the space with the head', () => {
+        expect(splitLastWord('about every other day')).toEqual({ head: 'about every other ', last: 'day' });
+        expect(splitLastWord('2026')).toEqual({ head: '', last: '2026' });
     });
 });
 

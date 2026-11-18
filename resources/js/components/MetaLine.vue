@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import Hairline from '@/components/Hairline.vue';
+import { splitLastWord } from '@/lib/format';
 import { computed } from 'vue';
 
 /**
@@ -15,7 +16,14 @@ import { computed } from 'vue';
 // `tone` is the rule's surface, forwarded untouched ({@see Hairline.vue}):
 // a line of facts over a backdrop or on a filled colour says so here, because
 // the rule cannot see what it lies on.
-const props = defineProps<{ parts: (string | null | undefined)[]; wrap?: boolean; tone?: 'surface' | 'media' | 'accent' }>();
+// `lead` is how many of the shown parts open the line in a brighter weight:
+// a title's own totals ("8 books | 1,355 pages") before the notes about them.
+const props = withDefaults(
+    defineProps<{ parts: (string | null | undefined)[]; wrap?: boolean; tone?: 'surface' | 'media' | 'accent'; lead?: number }>(),
+    { wrap: false, tone: undefined, lead: 0 },
+);
+
+const LEAD = 'text-ink-secondary font-semibold';
 
 const shown = computed<string[]>(() => props.parts.filter((part): part is string => typeof part === 'string' && part !== ''));
 
@@ -43,19 +51,25 @@ const BREAK = '\u200B';
         <!-- Wrapping mode is running text, not a row of boxes: the facts flow
              into one another and a line breaks mid-fact, so what follows the
              rule keeps the rule's own line and only the overflow drops down.
-             The rule is glued to the text before it — no whitespace there, and
-             a zero-width space after it — so the only break the browser can
+             The rule is glued to the last word before it — both held on one
+             line, since a browser may break before any inline box — and a
+             zero-width space follows it, so the only break the browser can
              take near the rule is the one AFTER it, and no line ever opens
              with a dangling hairline. -->
         <template v-if="wrap">
             <template v-for="(part, index) in shown" :key="index"
-                ><Hairline v-if="index > 0" :tone="tone" />{{ index > 0 ? BREAK + part : part }}</template
+                ><span :class="index < lead ? LEAD : undefined"
+                    ><template v-if="index < shown.length - 1"
+                        >{{ splitLastWord(part).head
+                        }}<span class="whitespace-nowrap">{{ splitLastWord(part).last }}<Hairline :tone="tone" /></span></template
+                    ><template v-else>{{ part }}</template></span
+                ><template v-if="index < shown.length - 1">{{ BREAK }}</template></template
             >
         </template>
         <template v-else>
             <template v-for="(part, index) in shown" :key="index">
                 <Hairline v-if="index > 0" :tone="tone" class="mx-0" />
-                <span :class="index === flexible ? 'min-w-0 truncate' : 'shrink-0 whitespace-nowrap'">{{ part }}</span>
+                <span :class="[index === flexible ? 'min-w-0 truncate' : 'shrink-0 whitespace-nowrap', index < lead ? LEAD : '']">{{ part }}</span>
             </template>
         </template>
     </span>
