@@ -1,10 +1,10 @@
 <script setup lang="ts">
+import PosterThumb from '@/components/statistics/PosterThumb.vue';
 import { leafCode, showTitleOf } from '@/lib/badges';
 import { formatNumber, formatTime, localDateKey } from '@/lib/format';
-import { mediaImage } from '@/lib/images';
 import { mediaTypeMeta } from '@/lib/mediaTypes';
 import { pageLocale } from '@/lib/pageContext';
-import { daysBetween, weekdayDate } from '@/lib/statistics';
+import { daysBetween, typeAndYear, weekdayDate } from '@/lib/statistics';
 import { mediaUrl } from '@/lib/urls';
 import type { Bookend, PeriodSpan } from '@/types/generated';
 import { Link } from '@inertiajs/vue3';
@@ -40,9 +40,7 @@ const partOf = (bookend: Bookend): string => {
         return code;
     }
 
-    const type = mediaTypeMeta(bookend.media.type).label().toLocaleLowerCase(pageLocale());
-
-    return bookend.media.year === null ? type : trans('statistics.type_and_year', { type, year: String(bookend.media.year) });
+    return typeAndYear(bookend.media.type, bookend.media.year).toLocaleLowerCase(pageLocale());
 };
 
 const when = (bookend: Bookend): string =>
@@ -72,16 +70,7 @@ const sides = computed(() => [
                 class="group focus-visible:ring-brand flex min-w-0 items-center gap-4 rounded-md focus-visible:ring-2 focus-visible:outline-hidden"
                 :class="index === 1 ? 'md:flex-row-reverse md:text-right' : ''"
             >
-                <img
-                    v-if="mediaImage(side.bookend.media.posterPath, 'w185')"
-                    :src="mediaImage(side.bookend.media.posterPath, 'w185') ?? undefined"
-                    alt=""
-                    width="64"
-                    height="96"
-                    loading="lazy"
-                    class="bg-surface-raised h-24 w-16 shrink-0 rounded-md object-cover"
-                />
-                <span v-else class="bg-surface-raised h-24 w-16 shrink-0 rounded-md" aria-hidden="true" />
+                <PosterThumb :path="side.bookend.media.posterPath" size="w185" :width="64" :height="96" class="h-24 w-16 rounded-md" />
 
                 <span class="flex min-w-0 flex-col gap-0.5">
                     <span class="text-ink-muted text-sm">{{ side.heading }}</span>

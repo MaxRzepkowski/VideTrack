@@ -1,10 +1,9 @@
 <script setup lang="ts" generic="T extends { media: MediaSummary }">
-import { mediaImage, mediaImageSrcSet } from '@/lib/images';
-import { mediaTypeMeta } from '@/lib/mediaTypes';
+import PosterThumb from '@/components/statistics/PosterThumb.vue';
+import TypeYear from '@/components/statistics/TypeYear.vue';
 import { mediaUrl } from '@/lib/urls';
 import type { MediaSummary } from '@/types/generated';
 import { Link } from '@inertiajs/vue3';
-import { trans } from 'laravel-vue-i18n';
 
 /**
  * A row of the period's titles as posters, each with its type and year and,
@@ -27,34 +26,17 @@ defineSlots<{
                 :href="mediaUrl(title.media)"
                 class="group focus-visible:ring-brand flex flex-col gap-2 rounded-lg focus-visible:ring-2 focus-visible:outline-hidden"
             >
-                <img
-                    v-if="mediaImage(title.media.posterPath, 'w342')"
-                    :src="mediaImage(title.media.posterPath, 'w342') ?? undefined"
-                    :srcset="mediaImageSrcSet(title.media.posterPath, [185, 342])"
+                <PosterThumb
+                    :path="title.media.posterPath"
+                    size="w342"
+                    :width="342"
+                    :height="513"
+                    :widths="[185, 342]"
                     sizes="9rem"
-                    alt=""
-                    width="342"
-                    height="513"
-                    loading="lazy"
-                    class="bg-surface-raised aspect-poster w-full rounded-lg object-cover"
+                    class="aspect-poster w-full rounded-lg"
                 />
-                <span v-else class="bg-surface-raised aspect-poster block w-full rounded-lg" aria-hidden="true" />
                 <span class="text-ink truncate text-base font-semibold group-hover:underline">{{ title.media.title }}</span>
-                <span class="text-ink-muted flex items-center gap-1.5 text-sm">
-                    <component
-                        :is="mediaTypeMeta(title.media.type).icon"
-                        class="size-4 shrink-0"
-                        :style="{ color: mediaTypeMeta(title.media.type).color }"
-                        aria-hidden="true"
-                    />
-                    <span class="truncate">
-                        {{
-                            title.media.year === null
-                                ? mediaTypeMeta(title.media.type).label()
-                                : trans('statistics.type_and_year', { type: mediaTypeMeta(title.media.type).label(), year: String(title.media.year) })
-                        }}
-                    </span>
-                </span>
+                <TypeYear :type="title.media.type" :year="title.media.year" />
                 <slot name="detail" :title="title" />
             </Link>
         </li>

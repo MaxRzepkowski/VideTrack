@@ -89,7 +89,7 @@ final readonly class MediaItemSummaries
         return self::summary(
             $child,
             MediaSummary::extraFromStored($metadata->extra),
-            seasonNumber: $parent->parent_id === null ? null : $parent->number,
+            seasonNumber: Hierarchy::seasonNumber($parent),
             runtime: $child->runtime,
             overview: $child->overview,
             episodeType: $metadata->episodeType,
@@ -130,7 +130,7 @@ final readonly class MediaItemSummaries
             extra: [...$this->context($item, $parent, $root), ...($parent === null ? $this->kindOf($item) : []), ...$extra],
             posterPath: $item->posterIn(App::getLocale()) ?? $parent?->posterIn(App::getLocale()) ?? $root?->posterIn(App::getLocale()),
             releaseDate: $releaseDate,
-            seasonNumber: $root === null ? null : $parent->number,
+            seasonNumber: $parent === null ? null : Hierarchy::seasonNumber($parent),
             releaseKind: $releaseKind,
             progressTotal: $this->totals->of($item),
             episodeType: $metadata?->episodeType,

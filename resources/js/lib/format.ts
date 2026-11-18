@@ -222,8 +222,10 @@ export function formatTime(datetime: string | null): string | null {
  * UTC on purpose: the key already encodes the right calendar day, so no
  * timezone may shift it again.
  */
+export function formatDayKey(day: string): string;
+export function formatDayKey(day: string | null): string | null;
 export function formatDayKey(day: string | null): string | null {
-    if (!day) {
+    if (day === null) {
         return null;
     }
 
