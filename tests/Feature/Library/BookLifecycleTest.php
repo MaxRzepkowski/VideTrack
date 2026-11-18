@@ -167,5 +167,8 @@ test('book statistics count every attempt and pages separately from watch time',
         ->and($stats['book']->plays)->toBe(2)
         ->and($stats['movie']->minutes)->toBe(90)
         ->and($stats['movie']->watched)->toBe(1)
-        ->and($stats['movie']->plays)->toBe(1);
+        ->and($stats['movie']->plays)->toBe(1)
+        // Pages read as time at the default pace; a film's minutes are no estimate.
+        ->and($stats['book']->estimatedMinutes)->toBe((int) round((320 + 120 + 102) * 60 / jsonFixture('preferences/defaults')['reading_pace_pages']))
+        ->and($stats['movie']->estimatedMinutes)->toBeNull();
 });

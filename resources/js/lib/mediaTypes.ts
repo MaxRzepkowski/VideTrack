@@ -33,6 +33,8 @@ export interface MediaTypeMeta {
     maker?: { label: () => string; icon: LucideIcon };
     /** A line on what the type holds, under its name in the Discover menu; absent for parts of a series. */
     description?: () => string;
+    /** The statistics page's length card, for a type watched whole: its title and what its two figures are. */
+    length?: { title: () => string; longest: () => string; average: () => string };
 }
 
 export const MEDIA_TYPE_META: Record<string, MediaTypeMeta | undefined> = {
@@ -47,6 +49,11 @@ export const MEDIA_TYPE_META: Record<string, MediaTypeMeta | undefined> = {
         release: () => trans('calendar.movie_release'),
         maker: { label: () => trans('media.studio'), icon: Building2 },
         description: () => trans('app.films_cinema'),
+        length: {
+            title: () => trans('statistics.movie_length'),
+            longest: () => trans('statistics.longest_movie'),
+            average: () => trans('statistics.average_movie_length'),
+        },
     },
     show: {
         label: () => trans('media.tv'),
@@ -241,6 +248,13 @@ export function leafType(type: string): string {
     }
 
     return code;
+}
+
+/** The unit a type is read in (pages, chapters, issues); null for what is watched or played, counted in time. */
+export function readUnitOf(type: string): Exclude<ProgressUnit, 'minutes'> | null {
+    const unit = mediaTypeDefinition(type).progressUnit;
+
+    return unit === 'minutes' ? null : unit;
 }
 
 /** The type whose progress counts in this unit — the medium a counter of pages, chapters or hours belongs to. */

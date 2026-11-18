@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import Hairline from '@/components/Hairline.vue';
 import { durationTerms } from '@/lib/format';
-import { leafType, mediaTypeDefinition, mediaTypeMeta } from '@/lib/mediaTypes';
+import { mediaTypeMeta } from '@/lib/mediaTypes';
 import { viewerUsername } from '@/lib/pageContext';
-import { unitWord } from '@/lib/progress';
+import { amountTerms, statCounts } from '@/lib/progress';
 import type { WatchStats } from '@/types/media';
 import { Link } from '@inertiajs/vue3';
+import { trans } from 'laravel-vue-i18n';
 import { computed } from 'vue';
 
 const props = withDefaults(
@@ -23,7 +24,7 @@ const props = withDefaults(
     { stats: undefined, username: null },
 );
 
-const stats = computed(() => props.stats ?? { minutes: 0, watched: 0, plays: 0, titles: 0 });
+const stats = computed(() => props.stats ?? { minutes: 0, watched: 0, plays: 0, titles: 0, estimatedMinutes: null });
 
 // Glyph and colour come from the shared type vocabulary, so a tile names its
 // type exactly the way every badge, calendar entry and countdown card does.
@@ -38,39 +39,22 @@ const href = computed(() => route('users.history', { user: props.username ?? vie
 const label = computed(() => meta.value.plural());
 
 /**
- * One headline term: the number set large, the unit set small next to it.
- * The unit comes from a plural key of its own ("page|pages") rather than from
- * subtracting the number out of ":count pages" — `transChoice` writes the raw
- * number into `:count` itself, so the two would not always match.
- */
-const term = (count: number, unit: string) => ({ value: String(count), unit });
-
-/**
  * Total watch time as "3 days 7 hours 12 minutes" (games: real logged hours
  * only) — the shared spelling, which the progress tooltips quote too. Reading
  * types count positions, not time: the `minutes` field carries the
- * progress-unit total, so their tiles read it as pages / chapters / issues.
+ * progress-unit total, and the tile leads with the time it took, estimated at
+ * the user's pace and marked as an estimate, naming what was read beneath it.
  */
-const headline = computed(() => {
-    const unit = mediaTypeDefinition(props.kind).progressUnit;
+const estimated = computed(() => stats.value.estimatedMinutes !== null);
 
-    return unit === null || unit === 'minutes'
-        ? durationTerms(stats.value.minutes)
-        : [term(stats.value.minutes, unitWord(unit, stats.value.minutes))];
-});
+const headline = computed(() => (estimated.value ? durationTerms(stats.value.estimatedMinutes ?? 0) : amountTerms(props.kind, stats.value.minutes)));
 
 /**
  * How many things are behind the headline. A container names both levels —
  * the headline is time, so neither the show count nor the episode count is
  * implied by it; every other type has only the one level to name.
  */
-const detail = computed(() => {
-    const leaf = leafType(props.kind);
-
-    return leaf === props.kind
-        ? [meta.value.count(stats.value.watched)]
-        : [meta.value.count(stats.value.titles), mediaTypeMeta(leaf).count(stats.value.watched)];
-});
+const detail = computed(() => statCounts(props.kind, stats.value));
 </script>
 
 <template>
@@ -108,6 +92,7 @@ const detail = computed(() => {
                  screen there, and "3 days 7 hours 12 minutes" set at `lg`
                  wraps to three lines inside it. -->
             <p class="text-ink flex flex-wrap items-baseline gap-x-2 text-base leading-tight font-bold sm:text-lg">
+                <span v-if="(stats.estimatedMinutes ?? 0) > 0" class="text-ink-muted font-medium">{{ trans('common.estimate_sign') }}</span>
                 <span v-for="entry in headline" :key="entry.unit" class="inline-flex items-baseline gap-x-1">
                     <span>{{ entry.value }}</span>
                     <span class="font-medium">{{ entry.unit }}</span>

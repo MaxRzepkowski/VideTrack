@@ -29,6 +29,7 @@ return [
     'count_item' => ':count item|:count items',
     'count_movie' => ':count movie|:count movies',
     'count_page' => ':count page|:count pages',
+    'count_title' => ':count title|:count titles',
     'countdowns' => 'Countdowns',
     'country_of_origin' => 'Country of origin',
     'create_list' => 'Create list',
@@ -151,4 +152,5 @@ return [
     'this_is_not_a_web_address' => 'Enter a web address starting with http:// or https://.',
     'this_address_could_not_be_found' => 'This address could not be found.',
     'this_address_is_in_a_private_network' => 'This address is in a private network. Ask the administrator to add it to INTEGRATION_PRIVATE_HOSTS, or to set it up from an administrator account.',
+    'estimate_sign' => '≈',
 ];

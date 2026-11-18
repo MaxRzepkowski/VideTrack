@@ -29,6 +29,7 @@ return [
     'count_item' => ':count pozycja|:count pozycje|:count pozycji',
     'count_movie' => ':count film|:count filmy|:count filmów',
     'count_page' => ':count strona|:count strony|:count stron',
+    'count_title' => ':count tytuł|:count tytuły|:count tytułów',
     'countdowns' => 'Odliczania',
     'country_of_origin' => 'Kraj pochodzenia',
     'create_list' => 'Utwórz listę',
@@ -151,4 +152,5 @@ return [
     'this_is_not_a_web_address' => 'Wpisz adres strony zaczynający się od http:// albo https://.',
     'this_address_could_not_be_found' => 'Nie udało się znaleźć tego adresu.',
     'this_address_is_in_a_private_network' => 'Ten adres należy do sieci prywatnej. Poproś administratora, żeby dopisał go do INTEGRATION_PRIVATE_HOSTS albo ustawił go z konta administratora.',
+    'estimate_sign' => '≈',
 ];

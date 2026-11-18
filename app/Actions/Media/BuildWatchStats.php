@@ -7,15 +7,16 @@ use App\Catalog\MediaTypeRegistry;
 use App\Enums\PlayOutcome;
 use App\Library\Data\WatchStats;
 use App\Library\PlayCost;
+use App\Library\ReadingTime;
 use App\Models\MediaUserState;
 use App\Models\Play;
 use App\Models\User;
 use App\Support\Numbers;
-use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Collection;
 
 /**
- * Watch-time statistics for the dashboard tiles, keyed by
+ * Watch-time statistics for the dashboard tiles (reading estimated as time
+ * beside its own unit, at the user's pace), keyed by
  * ROOT type code ('show', 'movie'): watch time = plays × runtime, unique
  * watched items, total plays and the number of distinct root titles. An item
  * whose own runtime is missing is priced at the one its hierarchy declares —
@@ -36,10 +37,8 @@ final readonly class BuildWatchStats
     {
         $stats = [];
 
-        foreach ($this->types->all() as $definition) {
-            if ($definition->isRoot() && $definition->searchable) {
-                $stats[$definition->code] = ['minutes' => 0, 'watched' => 0, 'plays' => 0, 'titles' => 0];
-            }
+        foreach ($this->types->titleCodes() as $code) {
+            $stats[$code] = ['minutes' => 0, 'watched' => 0, 'plays' => 0, 'titles' => 0];
         }
 
         // Counting rules: movies and episodes
@@ -54,19 +53,17 @@ final readonly class BuildWatchStats
         [$cost, $costBindings] = $this->cost->sql();
 
         $completed = PlayOutcome::Completed->value;
-        $rows = Play::query()
+        $plays = Play::query()
             ->where('plays.user_id', $user->id)
             ->join('media_items', 'media_items.id', '=', 'plays.media_item_id')
-            ->leftJoin('library_entries', fn (JoinClause $join) => $join
-                ->on('library_entries.media_item_id', '=', 'plays.media_item_id')
-                ->on('library_entries.user_id', '=', 'plays.user_id'))
-            ->leftJoin('media_items as roots', 'roots.id', '=', 'library_entries.root_id')
+            ->toBase();
+
+        $rows = $this->cost->joinTitles($plays)
             ->groupBy('media_items.id', 'media_items.type', 'media_items.runtime', 'library_entries.root_id')
             ->selectRaw('media_items.id as item_id, media_items.type as type, media_items.runtime as runtime, library_entries.root_id as root_id')
             ->selectRaw('sum(case when plays.outcome = ? then 1 else 0 end) as play_count', [$completed])
             ->selectRaw('count(*) as attempt_count')
             ->selectRaw("sum({$cost}) as minutes", $costBindings)
-            ->toBase()
             ->get();
 
         // A type whose module the instance switched off has no tile to count into.
@@ -75,7 +72,7 @@ final readonly class BuildWatchStats
         foreach ($rows->groupBy('type')->filter($served) as $type => $group) {
             $definition = $this->types->get((string) $type);
             $code = $this->rootCode($definition);
-            $attemptCounting = $definition->progressUnit !== null;
+            $attemptCounting = $definition->countsEveryAttempt();
 
             $countedRows = $attemptCounting
                 ? $group
@@ -115,7 +112,14 @@ final readonly class BuildWatchStats
             }
         }
 
-        return array_map(fn (array $tile): WatchStats => new WatchStats(...$tile), $stats);
+        $reading = new ReadingTime($user->preferences);
+        $tiles = [];
+
+        foreach ($stats as $code => $tile) {
+            $tiles[$code] = new WatchStats(...$tile, estimatedMinutes: $reading->of($this->types->get($code)->progressUnit, $tile['minutes']));
+        }
+
+        return $tiles;
     }
 
     private function rootCode(MediaTypeDefinition $definition): string

@@ -4,6 +4,7 @@ import {
     Bell,
     Braces,
     CalendarDays,
+    ChartNoAxesColumn,
     CirclePlay,
     Cog,
     Compass,
@@ -95,6 +96,14 @@ export const MAIN_NAV: NonEmpty<NavEntry> = [
         icon: Timer,
         keywords: () => trans('palette.keywords_countdowns'),
         prefix: '/countdowns',
+    },
+    {
+        id: 'statistics',
+        route: 'statistics',
+        label: () => trans('statistics.title'),
+        icon: ChartNoAxesColumn,
+        keywords: () => trans('palette.keywords_statistics'),
+        prefix: '/statistics',
     },
 ];
 

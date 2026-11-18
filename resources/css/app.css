@@ -117,6 +117,14 @@
     --color-chart-line: #4a4a52;
     --color-skeleton-shine: #31313c;
 
+    /* A sequential scale in the brand's hue, from a trace to the most there
+       is: how busy a day was, how many titles came from a country, how a
+       title was rated. Nothing at all is `surface-raised` beneath step 1. */
+    --color-scale-1: #33246b;
+    --color-scale-2: #5226c9;
+    --color-scale-3: #8a5cff;
+    --color-scale-4: #cdb6ff;
+
     /* The perfect-10 ring: a gold sweep and its glow, warmer than the plain
        rating amber. */
     --color-rating-gold-light: #ffe08a;

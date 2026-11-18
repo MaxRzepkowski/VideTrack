@@ -128,4 +128,8 @@ export interface UserPreferences {
     notify_collection_items: boolean;
     person_follow_scope: PersonFollowScope;
     company_follow_scope: CompanyFollowScope;
+    /** How many pages, chapters and issues the user reads in an hour: the statistics' estimated reading time. */
+    reading_pace_pages: number;
+    reading_pace_chapters: number;
+    reading_pace_issues: number;
 }

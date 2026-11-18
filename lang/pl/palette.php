@@ -16,6 +16,7 @@ return [
     'keywords_discover' => 'odkrywaj, przeglądaj, discover, browse',
     'keywords_lists' => 'listy, backlog, watchlist, lists',
     'keywords_calendar' => 'kalendarz, premiery, calendar, releases',
+    'keywords_statistics' => 'statystyki, podsumowanie, rok, wykresy, statistics, stats',
     'keywords_countdowns' => 'odliczanie, odliczania, countdowns, timer',
     'keywords_suggestions' => 'propozycje, nadrobić, brakujące, suggestions, rekomendacje',
     'keywords_search' => 'szukaj, wyszukiwanie, search',

@@ -1,5 +1,6 @@
 <?php
 
+use App\Accounts\Preferences\UserPreferences;
 use App\Actions\Users\UpdatePreferences;
 use App\Enums\UpNextSort;
 use App\Models\User;
@@ -349,4 +350,20 @@ test('a flag sent as a form value is stored as a flag, a country in capitals', f
         ->assertSessionHasNoErrors();
 
     expect($user->refresh()->preferences->toStored())->toBe(['calendar_dropped' => false, 'notify_episodes' => true, 'region' => 'DE']);
+});
+
+test('a reading pace persists as a whole number and is validated', function () {
+    $user = User::factory()->create();
+
+    $this->actingAs($user)
+        ->from(route('settings.preferences.edit'))
+        ->patch(route('settings.preferences.update'), ['reading_pace_pages' => '45', 'reading_pace_issues' => 4])
+        ->assertSessionHasNoErrors();
+
+    expect($user->refresh()->preferences->toStored())->toMatchArray(['reading_pace_pages' => 45, 'reading_pace_issues' => 4]);
+
+    $this->actingAs($user)
+        ->from(route('settings.preferences.edit'))
+        ->patch(route('settings.preferences.update'), ['reading_pace_chapters' => 0, 'reading_pace_pages' => UserPreferences::READING_PACE_MAX + 1])
+        ->assertSessionHasErrors(['reading_pace_chapters', 'reading_pace_pages']);
 });

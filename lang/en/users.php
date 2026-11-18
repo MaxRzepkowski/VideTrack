@@ -3,7 +3,6 @@
 return [
     'activity_date' => 'Activity date',
     'all_kinds' => 'All kinds',
-    'count_title' => ':count title|:count titles',
     'grid' => 'Grid',
     'grouped_by_day' => 'Grouped by day',
     'hide_listed' => 'Hide listed',

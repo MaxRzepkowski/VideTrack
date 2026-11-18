@@ -1,3 +1,4 @@
+export type ActivityBucket = 'day' | 'week' | 'month' | 'year';
 export type ActivityFilters = {
     readonly sort: ActivitySort;
     readonly dir: SortDirection;
@@ -32,6 +33,10 @@ export type BookKind =
     'novella' | 'short_story' | 'graphic_novel' | 'fan_fiction' | 'research' | 'poetry' | 'anthology' | 'web_novel' | 'light_novel';
 export type BookRole =
     'translator' | 'illustrator' | 'narrator' | 'cover_artist' | 'editor' | 'foreword' | 'afterword' | 'adaptation' | 'original_author';
+export type Bookend = {
+    readonly media: MediaSummary;
+    readonly at: string;
+};
 export type CalendarDay = {
     readonly date: string;
     readonly entries: CalendarEntry[];
@@ -228,6 +233,10 @@ export type DataSourceCredit = {
     readonly licenseUrl: string | null;
 };
 export type DatePrecision = 'day' | 'month' | 'quarter' | 'year';
+export type DayCount = {
+    readonly day: string;
+    readonly count: number;
+};
 export type DeliveryNote =
     | 'already_played'
     | 'below_threshold'
@@ -371,6 +380,13 @@ export type GameStore =
 export type GenreOption = {
     readonly ref: string;
     readonly name: string;
+};
+export type GenreStat = {
+    readonly name: string;
+    readonly titles: number;
+    readonly amount: number;
+    readonly averageRating: number | null;
+    readonly rated: number;
 };
 export type IdentityProviderOption = {
     readonly code: string;
@@ -650,6 +666,30 @@ export type PageInfo = {
     readonly totalPages: number;
     readonly total: number;
 };
+export type PeriodKind = 'year' | 'all' | 'range';
+export type PeriodSpan = {
+    readonly kind: PeriodKind;
+    readonly year: number | null;
+    readonly from: string | null;
+    readonly to: string | null;
+    readonly days: number;
+};
+export type PeriodSummary = {
+    readonly time: TypeTally;
+    readonly readingMinutes: number;
+    readonly activeDays: number;
+    readonly ratings: number;
+    readonly averageRating: number | null;
+    readonly ratingCounts: number[];
+    readonly communityDelta: number | null;
+};
+export type PeriodTitles = {
+    readonly titles: TypeTally;
+    readonly completed: TypeTally;
+    readonly inProgress: TypeTally;
+    readonly onHold: TypeTally;
+    readonly dropped: TypeTally;
+};
 export type PersonCredit = {
     readonly media: MediaSummary;
     readonly department: Department;
@@ -727,6 +767,11 @@ export type RankingPosition = {
     readonly position: number;
 };
 export type ReleaseDateMode = 'both' | 'cinema' | 'digital';
+export type ReleaseDot = {
+    readonly year: number;
+    readonly type: string;
+    readonly rating: number | null;
+};
 export type ReleaseEntry = {
     readonly region: string;
     readonly kind: FilmReleaseType;
@@ -768,6 +813,41 @@ export type SetupStep = {
 };
 export type ShelfSort = 'suggested' | 'release' | 'title' | 'rating' | 'added' | 'remaining' | 'progress';
 export type SortDirection = 'asc' | 'desc';
+export type StatisticsActivity = {
+    readonly bucket: ActivityBucket;
+    readonly buckets: string[];
+    readonly series: TypeSeries[];
+    readonly completions: number;
+    readonly watchMinutes: number;
+    readonly readingMinutes: number;
+    readonly days: Record<string, number> | null;
+    readonly months: Record<string, number> | null;
+    readonly weekdays: number[];
+    readonly hours: number[];
+    readonly busiestDay: DayCount | null;
+    readonly firstWeekday: number;
+};
+export type StatisticsPage = {
+    readonly period: PeriodSpan;
+    readonly type: string | null;
+    readonly years: YearCount[];
+    readonly allTime: number;
+    readonly types: TypeCount[];
+    readonly earliest: string | null;
+    readonly summary: PeriodSummary;
+    readonly tiles: Record<string, WatchStats>;
+    readonly titles: PeriodTitles;
+    readonly first: Bookend | null;
+    readonly last: Bookend | null;
+};
+export type StatisticsTaste = {
+    readonly readIn: ProgressUnit | null;
+    readonly readingEstimated: boolean;
+    readonly top: TimeTitle[];
+    readonly releases: ReleaseDot[];
+    readonly genres: GenreStat[];
+    readonly lengths: WholeLength[];
+};
 export type StoreLink = {
     readonly store: GameStore;
     readonly url: string;
@@ -815,6 +895,12 @@ export type TaskRunItem = {
 };
 export type TaskRunStatus = 'pending' | 'started' | 'success' | 'failure';
 export type TimeFormat = 'auto' | '12' | '24';
+export type TimeTitle = {
+    readonly media: MediaSummary;
+    readonly amount: number;
+    readonly estimatedMinutes: number | null;
+    readonly parts: number | null;
+};
 export type TitleRelation = 'spin_off' | 'spin_off_of' | 'next' | 'previous' | 'same_universe';
 export type TitleStatus =
     | 'rumored'
@@ -845,6 +931,14 @@ export type TrackingSource = 'on_hold' | 'dropped' | 'backlog' | 'activity' | 'f
 export type TypeCount = {
     readonly type: string;
     readonly count: number;
+};
+export type TypeSeries = {
+    readonly type: string;
+    readonly counts: number[];
+};
+export type TypeTally = {
+    readonly total: number;
+    readonly byType: TypeCount[];
 };
 export type UpNextEntry = {
     readonly show: MediaSummary;
@@ -938,6 +1032,7 @@ export type WatchStats = {
     readonly watched: number;
     readonly plays: number;
     readonly titles: number;
+    readonly estimatedMinutes: number | null;
 };
 export type WebhookDeliveryStatus = 'received' | 'accepted' | 'ignored' | 'unmatched' | 'error' | 'test';
 export type WebhookEndpointData = {
@@ -952,3 +1047,15 @@ export type WebhookEndpointData = {
     readonly deliveries: DeliveryRow[];
 };
 export type WeekStart = 'auto' | 'monday' | 'sunday';
+export type WholeLength = {
+    readonly type: string;
+    readonly titles: number;
+    readonly total: number;
+    readonly average: number;
+    readonly longest: MediaSummary;
+    readonly longestRuntime: number;
+};
+export type YearCount = {
+    readonly year: number;
+    readonly completions: number;
+};

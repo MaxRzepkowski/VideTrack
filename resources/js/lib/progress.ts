@@ -1,7 +1,7 @@
-import { formatNumber, formatWatchTime } from '@/lib/format';
-import { mediaTypeDefinition, mediaTypeMeta, typeCountingIn } from '@/lib/mediaTypes';
+import { durationTerms, formatNumber, formatWatchTime, type DurationTerm } from '@/lib/format';
+import { leafType, mediaTypeDefinition, mediaTypeMeta, readUnitOf, typeCountingIn } from '@/lib/mediaTypes';
 import type { TooltipRow } from '@/lib/tooltip';
-import type { ActivityEntry, MediaSummary, ProgressUnit } from '@/types/media';
+import type { ActivityEntry, MediaSummary, ProgressUnit, WatchStats } from '@/types/media';
 import type { LucideIcon } from '@lucide/vue';
 import { trans, transChoice } from 'laravel-vue-i18n';
 
@@ -265,13 +265,21 @@ export function progressFromInput(media: MediaSummary, value: string | number): 
     return max === null ? amount : Math.min(amount, max);
 }
 
+/** A unit something is read in: a position counter, not time. */
+export type ReadUnit = Exclude<ProgressUnit, 'minutes'>;
+
+/** A progress unit as one that is read; null for time. */
+export function asReadUnit(unit: ProgressUnit | null): ReadUnit | null {
+    return unit === null || unit === 'minutes' ? null : unit;
+}
+
 /**
  * An amount named in its own unit, e.g. "320 pages" / "12 chapters". Minutes
  * are the odd one out: they read as a duration, so the caller picks the
  * duration format that fits its surface (short "3h 20min", spelled-out
  * "3 hours 20 minutes") and this one only spells the counters.
  */
-export function formatUnitAmount(unit: Exclude<ProgressUnit, 'minutes'>, amount: number): string {
+export function formatUnitAmount(unit: ReadUnit, amount: number): string {
     // `:amount`, not `:count`: transChoice writes the raw number into :count,
     // which would drop the thousands separator.
     const replacements = { amount: formatNumber(amount) };
@@ -373,6 +381,17 @@ export function unitGlyph(unit: ProgressUnit): LucideIcon | null {
     return type === null ? null : mediaTypeMeta(type).icon;
 }
 
+/**
+ * A type's total as headline terms: time spelled out ("3 days 7 hours") for
+ * what is watched or played, the unit's count ("320 pages") for what is read.
+ * Reading types count positions, not time, so their total is in that unit.
+ */
+export function amountTerms(type: string, amount: number): DurationTerm[] {
+    const unit = readUnitOf(type);
+
+    return unit === null ? durationTerms(amount) : [{ value: formatNumber(amount), unit: unitWord(unit, amount) }];
+}
+
 /** The unit's own word beside a number set large ("320" / "pages"). */
 export function unitWord(unit: Exclude<ProgressUnit, 'minutes'>, count: number): string {
     switch (unit) {
@@ -383,4 +402,23 @@ export function unitWord(unit: Exclude<ProgressUnit, 'minutes'>, count: number):
         case 'issues':
             return transChoice('dashboard.issue', count);
     }
+}
+
+/**
+ * What a type's totals are made of, each in its own words: "82 movies",
+ * "51 shows" and "1,203 episodes" for a container, "8 books" and "1,355
+ * pages" for a type that is read, whose time is an estimate and so names
+ * what was read beside it.
+ */
+export function statCounts(type: string, stats: WatchStats): string[] {
+    const meta = mediaTypeMeta(type);
+    const leaf = leafType(type);
+
+    const unit = readUnitOf(type);
+
+    if (stats.estimatedMinutes !== null && unit !== null) {
+        return [meta.count(stats.titles), formatUnitAmount(unit, stats.minutes)];
+    }
+
+    return leaf === type ? [meta.count(stats.watched)] : [meta.count(stats.titles), mediaTypeMeta(leaf).count(stats.watched)];
 }

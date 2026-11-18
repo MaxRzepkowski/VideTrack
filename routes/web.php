@@ -22,6 +22,7 @@ use App\Http\Controllers\Media\SeasonDetailsController;
 use App\Http\Controllers\Media\ShowDetailsController;
 use App\Http\Controllers\Media\TitleDetailsController;
 use App\Http\Controllers\NotificationsController;
+use App\Http\Controllers\StatisticsController;
 use App\Http\Controllers\SuggestionsController;
 use App\Http\Controllers\Users\UserFavoritesController;
 use App\Http\Controllers\Users\UserFollowingController;
@@ -43,6 +44,7 @@ Route::middleware(['auth', 'throttle:web'])->group(function () {
     Route::get('about', AboutController::class)->name('about');
     Route::get('calendar', [CalendarController::class, 'index'])->name('calendar');
     Route::get('countdowns', [CountdownController::class, 'index'])->name('countdowns');
+    Route::get('statistics', StatisticsController::class)->name('statistics');
     Route::get('suggestions', [SuggestionsController::class, 'index'])->name('suggestions.index');
     Route::get('suggestions/{shelf}', [SuggestionsController::class, 'show'])
         ->where('shelf', '[a-z-]+')->name('suggestions.show');

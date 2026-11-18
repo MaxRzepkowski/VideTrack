@@ -2,11 +2,13 @@
 
 namespace App\Accounts\Preferences;
 
+use App\Catalog\ProgressUnit;
 use App\Enums\ReleaseDateMode;
 use App\Enums\UpNextSort;
 use App\Tracking\Surface;
 use App\Tracking\TrackingSource;
 use BackedEnum;
+use IntlCalendar;
 use LogicException;
 
 /**
@@ -17,11 +19,14 @@ use LogicException;
  */
 final readonly class UserPreferences
 {
+    /** The fastest reading pace a setting takes, per hour in any unit. */
+    public const READING_PACE_MAX = 1000;
+
     /**
      * Every setting and its default: a flag, a choice (its enum's default
-     * case) or a text that stays null until the user picks one.
+     * case), a whole number or a text that stays null until the user picks one.
      *
-     * @var array<string, bool|BackedEnum|null>
+     * @var array<string, bool|int|BackedEnum|null>
      */
     private const DEFAULTS = [
         'spoiler_protection' => true,
@@ -77,6 +82,12 @@ final readonly class UserPreferences
         'notify_collection_items' => true,
         'person_follow_scope' => PersonFollowScope::KnownFor,
         'company_follow_scope' => CompanyFollowScope::Both,
+
+        // How fast the user reads, per hour in each unit a type is read in:
+        // what turns pages, chapters and issues into an estimate of time.
+        'reading_pace_pages' => 50,
+        'reading_pace_chapters' => 12,
+        'reading_pace_issues' => 6,
     ];
 
     /**
@@ -115,7 +126,7 @@ final readonly class UserPreferences
      * Every setting, the user's choice or its default — what the front reads,
      * so it never keeps defaults of its own.
      *
-     * @return array<string, bool|string|null>
+     * @return array<string, bool|int|string|null>
      */
     public function resolved(): array
     {
@@ -211,6 +222,36 @@ final readonly class UserPreferences
         return $this->choice('company_follow_scope', CompanyFollowScope::class);
     }
 
+    /**
+     * Which weekday opens the user's week (ISO: 1 is Monday, 7 Sunday): their
+     * choice, else their language's own week, as the browser's calendar
+     * reads it — Monday in Poland, Sunday in the US.
+     */
+    public function firstWeekday(string $locale): int
+    {
+        return match ($this->choice('week_start', WeekStart::class)) {
+            WeekStart::Monday => 1,
+            WeekStart::Sunday => 7,
+            // ICU counts from Sunday (1) to Saturday (7).
+            WeekStart::Auto => (IntlCalendar::createInstance(null, $locale)->getFirstDayOfWeek() + 5) % 7 + 1,
+        };
+    }
+
+    /**
+     * How many of a unit the user reads in an hour; null for a unit that is
+     * time already.
+     */
+    public function readingPace(ProgressUnit $unit): ?int
+    {
+        if (! $unit->isRead()) {
+            return null;
+        }
+
+        $value = $this->value('reading_pace_'.$unit->value);
+
+        return is_int($value) ? $value : null;
+    }
+
     private static function surfaceKey(Surface $surface): string
     {
         return match ($surface) {
@@ -233,7 +274,7 @@ final readonly class UserPreferences
     }
 
     /** The user's choice if it still means something, else the default. */
-    private function value(string $key): bool|string|null
+    private function value(string $key): bool|int|string|null
     {
         if (! array_key_exists($key, self::DEFAULTS)) {
             throw new LogicException("No preference named {$key}.");
@@ -244,6 +285,10 @@ final readonly class UserPreferences
 
         if (is_bool($default)) {
             return is_bool($stored) ? $stored : $default;
+        }
+
+        if (is_int($default)) {
+            return is_int($stored) && $stored > 0 ? $stored : $default;
         }
 
         if ($default instanceof BackedEnum) {

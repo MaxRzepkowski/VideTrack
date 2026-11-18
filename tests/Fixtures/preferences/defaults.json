@@ -41,5 +41,8 @@
     "notify_company_titles": true,
     "notify_collection_items": true,
     "person_follow_scope": "known_for",
-    "company_follow_scope": "both"
+    "company_follow_scope": "both",
+    "reading_pace_pages": 50,
+    "reading_pace_chapters": 12,
+    "reading_pace_issues": 6
 }

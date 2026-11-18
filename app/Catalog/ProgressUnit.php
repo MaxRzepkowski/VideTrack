@@ -16,4 +16,10 @@ enum ProgressUnit: string
     case Pages = 'pages';
     case Chapters = 'chapters';
     case Issues = 'issues';
+
+    /** A position counter of something read (pages, chapters, issues), not time: its time can only be estimated. */
+    public function isRead(): bool
+    {
+        return $this !== self::Minutes;
+    }
 }
