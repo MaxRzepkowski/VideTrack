@@ -7,9 +7,10 @@ import { PopoverClose, PopoverContent, PopoverPortal, PopoverRoot, PopoverTrigge
 import { computed, ref, watch } from 'vue';
 
 /**
- * Any stretch of days, beside the year axis: ready-made ranges and two date
- * fields. Nothing changes until "Apply", so typing a date does not reload the
- * page under the user. Escape closes it and focus goes back to its button.
+ * Any stretch of days, beside the period picker: ready-made ranges, the
+ * whole history, and two date fields. Nothing changes until "Apply", so
+ * typing a date does not reload the page under the user. Escape closes it and
+ * focus goes back to its button.
  */
 const props = defineProps<{
     /** The range on show, if any (YYYY-MM-DD). */
@@ -17,19 +18,29 @@ const props = defineProps<{
     to: string | null;
     /** The day something was first finished (YYYY-MM-DD), the earliest day worth picking. */
     earliest: string | null;
+    /** The whole history is on show. */
+    whole: boolean;
 }>();
 
-const emit = defineEmits<{ apply: [from: string, to: string] }>();
+const emit = defineEmits<{ apply: [from: string, to: string]; whole: [] }>();
 
 const today = todayDateKey();
 const open = ref(false);
 const from = ref(props.from ?? today);
 const to = ref(props.to ?? today);
 
+/**
+ * The whole history is its own period, not a range that happens to start on
+ * the first day: picked here, it stays picked while its days are untouched.
+ */
+const wholePicked = ref(false);
+const pickedIsWhole = computed(() => wholePicked.value && props.earliest !== null && from.value === props.earliest && to.value === today);
+
 // Each opening starts from what the page shows, not from what was typed and abandoned.
 watch(open, (isOpen) => {
     if (isOpen) {
-        from.value = props.from ?? `${today.slice(0, 4)}-01-01`;
+        wholePicked.value = props.whole && props.earliest !== null;
+        from.value = props.from ?? (wholePicked.value && props.earliest !== null ? props.earliest : `${today.slice(0, 4)}-01-01`);
         to.value = props.to ?? today;
     }
 });
@@ -52,8 +63,15 @@ const summary = computed(() => {
 });
 
 function pick(shortcutFrom: string, shortcutTo: string): void {
+    wholePicked.value = false;
     from.value = shortcutFrom;
     to.value = shortcutTo;
+}
+
+function pickWhole(earliest: string): void {
+    wholePicked.value = true;
+    from.value = earliest;
+    to.value = today;
 }
 
 function apply(): void {
@@ -62,8 +80,16 @@ function apply(): void {
     }
 
     open.value = false;
-    emit('apply', from.value, to.value);
+
+    if (pickedIsWhole.value) {
+        emit('whole');
+    } else {
+        emit('apply', from.value, to.value);
+    }
 }
+
+const SHORTCUT =
+    'border-line text-ink-secondary hover:border-line-strong hover:text-ink focus-visible:ring-brand rounded-md border px-2.5 py-1.5 text-sm transition-colors focus-visible:ring-2 focus-visible:outline-hidden';
 
 const FIELD =
     'border-line bg-surface-control text-ink focus:border-brand h-11 w-full rounded-lg border px-3 text-base tabular-nums [color-scheme:dark] focus:outline-hidden';
@@ -72,6 +98,7 @@ const FIELD =
 <template>
     <PopoverRoot v-model:open="open">
         <PopoverTrigger
+            data-toolbar-control
             class="border-line bg-surface text-ink-secondary hover:border-line-strong data-[state=open]:border-brand-soft focus-visible:ring-brand flex h-10 items-center gap-1.5 rounded-lg border pr-3.5 pl-3 text-base font-semibold transition-colors focus-visible:ring-2 focus-visible:outline-hidden"
         >
             <CalendarClock class="text-ink-muted size-4" aria-hidden="true" />
@@ -91,10 +118,13 @@ const FIELD =
                         v-for="shortcut in shortcuts"
                         :key="shortcut.key"
                         type="button"
-                        class="border-line text-ink-secondary hover:border-line-strong hover:text-ink focus-visible:ring-brand rounded-md border px-2.5 py-1.5 text-sm transition-colors focus-visible:ring-2 focus-visible:outline-hidden"
+                        :class="SHORTCUT"
                         @click="pick(shortcut.from, shortcut.to)"
                     >
                         {{ shortcut.label }}
+                    </button>
+                    <button v-if="earliest !== null" type="button" :class="SHORTCUT" @click="pickWhole(earliest)">
+                        {{ trans('statistics.whole_history') }}
                     </button>
                 </div>
 

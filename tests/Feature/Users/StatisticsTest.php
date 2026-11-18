@@ -40,7 +40,7 @@ test('a year counts what was finished on the user\'s own calendar', function () 
             ->where('page.titles.completed.total', 2)
             ->where('page.summary.activeDays', 2)
             ->where('page.tiles.movie.minutes', 190)
-            ->where('page.years', [['year' => 2025, 'completions' => 2]])
+            ->where('page.years', [2025])
             ->where('page.first.media.title', $movie->title)
             ->where('page.first.at', '2025-01-01T00:30:00+01:00'));
 });
@@ -198,8 +198,7 @@ test('the whole history starts at what was first finished', function () {
         ->assertInertia(fn (Assert $page) => $page
             ->where('page.period.kind', 'all')
             ->where('page.period.from', '2026-10-01')
-            ->where('page.period.days', 10)
-            ->where('page.allTime', 1));
+            ->where('page.period.days', 10));
 });
 
 test('an address that no longer makes sense falls back to the current year and every type', function () {

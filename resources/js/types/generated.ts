@@ -894,8 +894,7 @@ export type StatisticsOrigins = {
 export type StatisticsPage = {
     readonly period: PeriodSpan;
     readonly type: string | null;
-    readonly years: YearCount[];
-    readonly allTime: number;
+    readonly years: number[];
     readonly types: TypeCount[];
     readonly earliest: string | null;
     readonly summary: PeriodSummary;
@@ -1142,8 +1141,4 @@ export type WholeLength = {
     readonly average: number;
     readonly longest: MediaSummary;
     readonly longestRuntime: number;
-};
-export type YearCount = {
-    readonly year: number;
-    readonly completions: number;
 };

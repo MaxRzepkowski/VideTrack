@@ -1,5 +1,6 @@
 import {
     activeEvery,
+    adjacentYear,
     commonestRating,
     communityComparison,
     countTitles,
@@ -11,6 +12,7 @@ import {
     partRange,
     periodDates,
     periodTitle,
+    pickableYears,
     rangeLabel,
     rangeShortcuts,
     rankGenres,
@@ -21,11 +23,10 @@ import {
     typeAndYear,
     typeNoun,
     weekdayDate,
-    yearWindow,
 } from '@/lib/statistics';
 import { useMediaTypes } from '@/test/factories';
 import { setPageProps } from '@/test/page';
-import type { PeriodSpan, YearCount } from '@/types/generated';
+import type { PeriodSpan } from '@/types/generated';
 import { trans } from 'laravel-vue-i18n';
 import { beforeEach, describe, expect, it } from 'vitest';
 
@@ -42,9 +43,6 @@ const span = (overrides: Partial<PeriodSpan> = {}): PeriodSpan => ({
     days: 365,
     ...overrides,
 });
-
-const years = (from: number, to: number): YearCount[] =>
-    Array.from({ length: to - from + 1 }, (_, index) => ({ year: from + index, completions: 10 }));
 
 describe('statisticsParams', () => {
     it('writes a range of days instead of a period', () => {
@@ -95,29 +93,21 @@ describe('period labels', () => {
     });
 });
 
-describe('yearWindow', () => {
-    it('shows every year when they fit', () => {
-        expect(yearWindow(years(2020, 2023), 2022, 8)).toEqual({ shown: years(2020, 2023), before: false, after: false });
+describe('period picker', () => {
+    it('offers the years with something finished newest first, and the chosen year when it has nothing', () => {
+        expect(pickableYears([2023, 2025], span({ year: 2025 }))).toEqual([2025, 2023]);
+        expect(pickableYears([2023, 2025], span({ year: 2026 }))).toEqual([2026, 2025, 2023]);
+        expect(pickableYears([2023], span({ kind: 'all', year: null }))).toEqual([2023]);
     });
 
-    it('ends at the newest years by default', () => {
-        const visible = yearWindow(years(2010, 2026), 2025, 8);
+    it("steps to the picker's next older or newer year, nowhere past its ends or outside a year", () => {
+        const years = [2021, 2023, 2025];
 
-        expect(visible.shown.map((entry) => entry.year)).toEqual([2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026]);
-        expect(visible.before).toBe(true);
-        expect(visible.after).toBe(false);
-    });
-
-    it('keeps an older chosen year in view, its next year beside it', () => {
-        const visible = yearWindow(years(2000, 2026), 2005, 4);
-
-        expect(visible.shown.map((entry) => entry.year)).toEqual([2003, 2004, 2005, 2006]);
-        expect(visible.after).toBe(true);
-    });
-
-    it('pages back by whole windows and stops at the first year', () => {
-        expect(yearWindow(years(2010, 2026), null, 8, 1).shown.map((entry) => entry.year)).toEqual([2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018]);
-        expect(yearWindow(years(2010, 2026), null, 8, 5).shown[0]?.year).toBe(2010);
+        expect(adjacentYear(years, span({ year: 2023 }), 'older')).toBe(2021);
+        expect(adjacentYear(years, span({ year: 2023 }), 'newer')).toBe(2025);
+        expect(adjacentYear(years, span({ year: 2025 }), 'newer')).toBeNull();
+        expect(adjacentYear(years, span({ year: 2021 }), 'older')).toBeNull();
+        expect(adjacentYear(years, span({ kind: 'all', year: null }), 'older')).toBeNull();
     });
 });
 

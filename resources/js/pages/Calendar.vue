@@ -81,7 +81,12 @@ onBeforeUnmount(() => clearTimeout(jumpTimer));
                             <CalendarPlus class="size-4" />
                             {{ trans('common.subscribe') }}
                         </a>
-                        <a v-tooltip="trans('common.download_ics')" :href="feedUrl" :class="ICON_BUTTON_CLASS">
+                        <a
+                            v-tooltip="trans('common.download_ics')"
+                            :aria-label="trans('common.download_ics')"
+                            :href="feedUrl"
+                            :class="ICON_BUTTON_CLASS"
+                        >
                             <Download class="size-4" />
                         </a>
                         <a v-tooltip="trans('common.rss_feed')" :aria-label="trans('common.rss_feed')" :href="rssUrl" :class="ICON_BUTTON_CLASS">

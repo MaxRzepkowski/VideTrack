@@ -8,7 +8,6 @@ use App\Users\Statistics\Data\Bookend;
 use App\Users\Statistics\Data\PeriodSpan;
 use App\Users\Statistics\Data\PeriodSummary;
 use App\Users\Statistics\Data\PeriodTitles;
-use App\Users\Statistics\Data\YearCount;
 use Spatie\TypeScriptTransformer\Attributes\TypeScript;
 
 /** The top of the statistics page: the period picker, the period's card, its tiles, titles and bookends. */
@@ -16,7 +15,7 @@ use Spatie\TypeScriptTransformer\Attributes\TypeScript;
 final readonly class StatisticsPage
 {
     /**
-     * @param  list<YearCount>  $years  every year something of the chosen type was finished in, oldest first
+     * @param  list<int>  $years  every year something of the chosen type was finished in, oldest first
      * @param  list<TypeCount>  $types  every type with titles, with what was finished in the period
      * @param  array<string, WatchStats>  $tiles  per root type, in the registry's order
      */
@@ -25,8 +24,6 @@ final readonly class StatisticsPage
         /** The chosen root type; null for every type. */
         public ?string $type,
         public array $years,
-        /** What of the chosen type was finished over the whole history. */
-        public int $allTime,
         public array $types,
         /** The day something of the chosen type was first finished, Y-m-d. */
         public ?string $earliest,

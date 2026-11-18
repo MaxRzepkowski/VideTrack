@@ -2,7 +2,7 @@ import { addDays, parseDay } from '@/lib/calendar';
 import { episodeCode, formatNumber } from '@/lib/format';
 import { mediaTypeMeta } from '@/lib/mediaTypes';
 import { pageLocale, viewerTimeZone } from '@/lib/pageContext';
-import type { PartNumber, PeriodKind, PeriodSpan, PeriodTitles, TypeTally, YearCount } from '@/types/generated';
+import type { PartNumber, PeriodKind, PeriodSpan, PeriodTitles, TypeTally } from '@/types/generated';
 import { trans, transChoice } from 'laravel-vue-i18n';
 
 /**
@@ -130,27 +130,26 @@ export function daysBetween(from: string, to: string): number {
 }
 
 /**
- * The years the axis shows at once: `size` of them, the newest ones unless
- * the chosen year is older (then it sits second from the right, its next
- * year beside it), moved `offset` windows back. Says whether anything lies
- * before or after the window.
+ * The years the period picker offers, newest first: every year with
+ * something finished, and the chosen year even when it has nothing (the
+ * current one, early on).
  */
-export function yearWindow(
-    years: YearCount[],
-    anchor: number | null,
-    size: number,
-    offset = 0,
-): { shown: YearCount[]; before: boolean; after: boolean } {
-    if (years.length <= size) {
-        return { shown: years, before: false, after: false };
+export function pickableYears(years: number[], period: PeriodSpan): number[] {
+    const chosen = period.kind === 'year' && period.year !== null && !years.includes(period.year) ? [period.year] : [];
+
+    return [...years, ...chosen].sort((a, b) => b - a);
+}
+
+/** The year beside the chosen one in the picker, older or newer; null at either end and outside a year. */
+export function adjacentYear(years: number[], period: PeriodSpan, step: 'older' | 'newer'): number | null {
+    if (period.kind !== 'year' || period.year === null) {
+        return null;
     }
 
-    const anchorIndex = anchor === null ? -1 : years.findIndex((entry) => entry.year === anchor);
-    const natural = anchorIndex === -1 ? years.length : Math.min(years.length, anchorIndex + 2);
-    const end = Math.min(years.length, Math.max(size, natural - offset * size));
-    const start = end - size;
+    const pickable = pickableYears(years, period);
+    const index = pickable.indexOf(period.year);
 
-    return { shown: years.slice(start, end), before: start > 0, after: end < years.length };
+    return pickable[step === 'older' ? index + 1 : index - 1] ?? null;
 }
 
 /** The ready-made ranges of the range panel, ending today (YYYY-MM-DD). */
