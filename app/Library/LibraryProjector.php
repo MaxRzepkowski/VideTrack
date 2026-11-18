@@ -4,6 +4,7 @@ namespace App\Library;
 
 use App\Catalog\Hierarchy;
 use App\Catalog\MediaTypeRegistry;
+use App\Library\Events\LibraryProjected;
 use App\Models\LibraryEntry;
 use App\Models\MediaItem;
 use App\Models\MediaUserState;
@@ -158,6 +159,7 @@ final class LibraryProjector
     public function forget(User $user): void
     {
         LibraryEntry::query()->where('user_id', $user->id)->delete();
+        event(new LibraryProjected($user->id));
     }
 
     /**
@@ -199,6 +201,10 @@ final class LibraryProjector
 
             foreach (array_chunk($changed, self::ENTRIES_PER_UPSERT) as $rows) {
                 LibraryEntry::query()->upsert($rows, ['user_id', 'media_item_id']);
+            }
+
+            if ($stale->isNotEmpty() || $changed !== []) {
+                event(new LibraryProjected($user->id));
             }
         }, self::WRITE_ATTEMPTS);
     }
