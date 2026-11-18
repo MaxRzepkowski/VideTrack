@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import PosterThumb from '@/components/statistics/PosterThumb.vue';
-import Hairline from '@/components/Hairline.vue';
+import MetaLine from '@/components/MetaLine.vue';
 import CalendarGrid from '@/components/statistics/CalendarGrid.vue';
 import ColumnChart from '@/components/statistics/ColumnChart.vue';
 import RecordCard from '@/components/statistics/RecordCard.vue';
@@ -145,13 +145,11 @@ const cards = computed(() => [streak.value, busiest.value, marathon.value].filte
                     <span class="flex min-w-0 flex-col gap-1">
                         <span class="text-ink text-base font-semibold group-hover:underline">{{ marathon.media.title }}</span>
                         <TypeYear :type="marathon.media.type" :year="marathon.media.year" />
-                        <span class="text-ink-secondary flex flex-wrap items-center gap-x-2 text-sm">
-                            <template v-if="partRange(marathon.first, marathon.last)">
-                                <span>{{ partRange(marathon.first, marathon.last) }}</span>
-                                <Hairline v-if="marathon.minutes > 0" class="mx-0" />
-                            </template>
-                            <span v-if="marathon.minutes > 0">{{ formatRuntime(marathon.minutes) }}</span>
-                        </span>
+                        <MetaLine
+                            :parts="[partRange(marathon.first, marathon.last), marathon.minutes > 0 ? formatRuntime(marathon.minutes) : null]"
+                            wrap
+                            class="text-ink-secondary text-sm"
+                        />
                     </span>
                 </Link>
             </RecordCard>

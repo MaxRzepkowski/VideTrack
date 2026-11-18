@@ -1,8 +1,9 @@
 <script setup lang="ts">
+import ChartTable from '@/components/statistics/ChartTable.vue';
 import TypeLegend from '@/components/statistics/TypeLegend.vue';
 import { inRegistryOrder, mediaTypeMeta } from '@/lib/mediaTypes';
 import { countTitles, formatRating } from '@/lib/statistics';
-import { middleOut, RATING_LEGEND, ratingColor, releaseColumns } from '@/lib/statisticsCharts';
+import { fittingTicks, middleOut, RATING_LEGEND, ratingColor, releaseColumns } from '@/lib/statisticsCharts';
 import type { ReleaseDot } from '@/types/generated';
 import { useElementSize } from '@vueuse/core';
 import { trans } from 'laravel-vue-i18n';
@@ -56,16 +57,20 @@ const describe = (column: { year: number | null; dots: ReleaseDot[] }): string =
           });
 };
 
-/** Under the axis: the "earlier" column, every decade and the newest year. */
-const tick = (index: number): string | null => {
-    const column = columns.value[index];
-
-    if (column === undefined) {
-        return null;
-    }
-
-    return column.year === null || column.year % 10 === 0 || index === columns.value.length - 1 ? yearName(column.year) : null;
-};
+/** Under the axis: the "earlier" column, every decade and the newest year, as many as fit from the newest leftwards. */
+const tickLabels = computed(() =>
+    columns.value.map((column, index) =>
+        column.year === null || column.year % 10 === 0 || index === columns.value.length - 1 ? yearName(column.year) : null,
+    ),
+);
+const ticked = computed(() =>
+    fittingTicks(
+        tickLabels.value.flatMap((label, index) => (label === null ? [] : [index])),
+        pitchX.value,
+        tickLabels.value.map((label) => label ?? ''),
+    ),
+);
+const tick = (index: number): string | null => (ticked.value.has(index) ? (tickLabels.value[index] ?? null) : null);
 
 const peak = computed(() => {
     const index = columns.value.findIndex((column) => column.dots.length === busiest.value);
@@ -129,12 +134,12 @@ const peak = computed(() => {
             </div>
         </div>
 
-        <table class="sr-only">
+        <ChartTable>
             <tbody>
                 <tr v-for="(column, index) in columns.filter((entry) => entry.dots.length > 0)" :key="index">
                     <td>{{ describe(column) }}</td>
                 </tr>
             </tbody>
-        </table>
+        </ChartTable>
     </div>
 </template>

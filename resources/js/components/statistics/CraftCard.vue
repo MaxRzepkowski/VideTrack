@@ -63,7 +63,9 @@ const pageOf = (person: PersonTally): string | null => creatorHref({ kind: 'pers
                         {{ getInitials(person.name) }}
                     </span>
                     <span class="flex flex-col">
-                        <span class="text-ink line-clamp-2 text-sm font-medium group-hover:underline">{{ person.name }}</span>
+                        <span class="text-ink line-clamp-2 text-sm font-medium wrap-break-word hyphens-auto group-hover:underline">{{
+                            person.name
+                        }}</span>
                         <span class="text-ink-muted text-sm">{{ countTitles(type, person.titles) }}</span>
                     </span>
                 </component>

@@ -1,8 +1,9 @@
 <script setup lang="ts">
+import ChartTable from '@/components/statistics/ChartTable.vue';
 import CalendarGrid from '@/components/statistics/CalendarGrid.vue';
 import { formatDayKey, formatNumber } from '@/lib/format';
-import { DAY_THRESHOLDS, scaleColor, scaleLegend, scaleStep } from '@/lib/statisticsCharts';
-import { trans } from 'laravel-vue-i18n';
+import { DAY_THRESHOLDS, monthOfYear, monthsOfDays, scaleColor, scaleLegend, scaleStep } from '@/lib/statisticsCharts';
+import { trans, transChoice } from 'laravel-vue-i18n';
 import { computed } from 'vue';
 
 /**
@@ -11,7 +12,7 @@ import { computed } from 'vue';
  * not a share of the busiest day, so one day of a bulk entry cannot pale the
  * rest of the year.
  */
-defineProps<{
+const props = defineProps<{
     from: string;
     to: string;
     days: Record<string, number>;
@@ -22,6 +23,9 @@ defineProps<{
 }>();
 
 const legend = computed(() => scaleLegend(DAY_THRESHOLDS, (value) => trans('statistics.value_or_more', { value: String(value) })));
+
+/** What the squares say, month by month, for screen readers. */
+const months = computed(() => monthsOfDays(props.from, props.to, props.days));
 
 const tooltip = (day: string, count: number): string => trans('statistics.chart_value', { label: formatDayKey(day), value: formatNumber(count) });
 </script>
@@ -36,6 +40,16 @@ const tooltip = (day: string, count: number): string => trans('statistics.chart_
             :color="(_day, count) => scaleColor(scaleStep(count, DAY_THRESHOLDS))"
             :tooltip="tooltip"
         />
+
+        <ChartTable>
+            <tbody>
+                <tr v-for="month in months" :key="month.month">
+                    <th scope="row">{{ monthOfYear(month.month) }}</th>
+                    <td>{{ transChoice('statistics.count_completed', month.completed, { amount: formatNumber(month.completed) }) }}</td>
+                    <td>{{ transChoice('statistics.count_active_days', month.activeDays, { count: formatNumber(month.activeDays) }) }}</td>
+                </tr>
+            </tbody>
+        </ChartTable>
 
         <p class="text-ink-muted m-0 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
             <span>{{ legendLabel }}</span>
