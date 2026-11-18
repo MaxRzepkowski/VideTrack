@@ -28,6 +28,7 @@ use App\Integrations\Letterboxd\LetterboxdServiceProvider;
 use App\Integrations\LibraryThing\LibraryThingServiceProvider;
 use App\Integrations\Mail\MailServiceProvider;
 use App\Integrations\Netflix\NetflixServiceProvider;
+use App\Integrations\OutgoingWebhooks\OutgoingWebhooksServiceProvider;
 use App\Integrations\Playnite\PlayniteServiceProvider;
 use App\Integrations\Plex\PlexServiceProvider;
 use App\Integrations\Simkl\SimklServiceProvider;
@@ -92,6 +93,9 @@ return [
     DiscordServiceProvider::class,
     MailServiceProvider::class,
     AppriseServiceProvider::class,
+
+    // Where the library's changes go: addresses of the user's own.
+    OutgoingWebhooksServiceProvider::class,
 
     SuggestionServiceProvider::class,
 

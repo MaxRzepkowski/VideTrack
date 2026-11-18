@@ -148,6 +148,7 @@ return [
     'remove_this_channel_notifications_stop_going' => 'Remove this channel? Notifications stop going there.',
     'the_test_message_did_not_arrive' => 'The test message did not arrive.',
     'delivery_failure_gone' => 'The service no longer knows this address. Check it or paste a new one.',
+    'delivery_failure_closed' => 'The receiver said this address is closed for good.',
     'delivery_failure_refused' => 'The service refused the last message.',
     'delivery_failure_throttled' => 'The service was busy and did not take the last message.',
     'delivery_failure_unavailable' => 'The service could not be reached for the last message.',

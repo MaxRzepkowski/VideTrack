@@ -10,6 +10,9 @@ enum DeliveryAnswer: string
     /** The address leads nowhere: deleted at the service, or mistyped. */
     case Gone = 'gone';
 
+    /** The receiver said the address is closed for good: nothing more should go there. */
+    case Closed = 'closed';
+
     /** The service answered and refused the message. */
     case Refused = 'refused';
 
@@ -42,6 +45,7 @@ enum DeliveryAnswer: string
 
         return __(match ($answer) {
             self::Gone => 'settings.delivery_failure_gone',
+            self::Closed => 'settings.delivery_failure_closed',
             self::Refused => 'settings.delivery_failure_refused',
             self::Throttled => 'settings.delivery_failure_throttled',
             self::Unavailable => 'settings.delivery_failure_unavailable',

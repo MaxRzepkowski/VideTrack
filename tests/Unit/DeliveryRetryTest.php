@@ -19,4 +19,4 @@ test('a receiver that was not there is waited out longer, a few times only', fun
 
 test('an answer that will not change stands', function (DeliveryAnswer $answer) {
     expect(DeliveryRetry::after($answer, 1))->toBeNull();
-})->with([DeliveryAnswer::Delivered, DeliveryAnswer::Gone, DeliveryAnswer::Refused]);
+})->with([DeliveryAnswer::Delivered, DeliveryAnswer::Gone, DeliveryAnswer::Closed, DeliveryAnswer::Refused]);

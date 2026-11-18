@@ -17,8 +17,11 @@ final readonly class WebhookClient
 {
     private const TIMEOUT_SECONDS = 10;
 
-    /** Mistyped, or closed for good. */
-    private const GONE = [404, 410];
+    /** Mistyped, or not set up yet at the receiver. */
+    private const GONE = [404];
+
+    /** Standard Webhooks: the receiver asks to be sent nothing more. */
+    private const CLOSED = [410];
 
     public function __construct(private DeliveryHttpClient $http) {}
 
@@ -26,7 +29,7 @@ final readonly class WebhookClient
     {
         $body = $message->body();
 
-        return $this->http->deliver(self::TIMEOUT_SECONDS, self::GONE, function (PendingRequest $request) use ($url, $secret, $message, $body): Response {
+        return $this->http->deliver(self::TIMEOUT_SECONDS, self::GONE, closed: self::CLOSED, send: function (PendingRequest $request) use ($url, $secret, $message, $body): Response {
             $timestamp = now()->getTimestamp();
 
             return $request->withoutRedirecting()
