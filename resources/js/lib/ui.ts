@@ -16,6 +16,13 @@ export const SELECT_CLASS =
     'border-line bg-surface text-ink hover:border-line-strong focus:border-brand h-10 cursor-pointer rounded-lg border px-3.5 text-base font-semibold transition-colors duration-150 outline-none';
 
 /**
+ * A square icon button at the shared 40px control height (previous / next, a
+ * feed link). Dimmed while it has nowhere to go.
+ */
+export const ICON_BUTTON_CLASS =
+    'border-line bg-surface text-ink-secondary hover:border-line-strong flex size-10 items-center justify-center rounded-lg border transition-colors duration-150 disabled:cursor-default disabled:opacity-40';
+
+/**
  * The same select inside a `bg-surface` card (ratings panels, watch
  * providers) — one step up, or it sinks into the card it sits on.
  */

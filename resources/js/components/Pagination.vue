@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ICON_BUTTON_CLASS } from '@/lib/ui';
 import { trans } from 'laravel-vue-i18n';
 import { ChevronLeft, ChevronRight } from '@lucide/vue';
 import { computed } from 'vue';
@@ -53,7 +54,7 @@ function goto(page: number): void {
             v-tooltip="trans('common.previous')"
             :aria-label="trans('common.previous')"
             type="button"
-            class="border-line bg-surface text-ink-secondary hover:border-line-strong flex size-10 items-center justify-center rounded-lg border transition-colors duration-150 disabled:cursor-default disabled:opacity-40"
+            :class="ICON_BUTTON_CLASS"
             :disabled="currentPage <= 1"
             @click="goto(currentPage - 1)"
         >
@@ -82,7 +83,7 @@ function goto(page: number): void {
             v-tooltip="trans('common.next')"
             :aria-label="trans('common.next')"
             type="button"
-            class="border-line bg-surface text-ink-secondary hover:border-line-strong flex size-10 items-center justify-center rounded-lg border transition-colors duration-150 disabled:cursor-default disabled:opacity-40"
+            :class="ICON_BUTTON_CLASS"
             :disabled="currentPage >= totalPages"
             @click="goto(currentPage + 1)"
         >
