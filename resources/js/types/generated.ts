@@ -187,6 +187,11 @@ export type CountdownEntry = {
     readonly filterType: string;
 };
 export type CountdownSort = 'premiere' | 'title';
+export type CraftPeople = {
+    readonly department: Department;
+    readonly types: string[];
+    readonly people: PersonTally[];
+};
 export type CreatorKind = 'person' | 'company' | 'network' | 'collection';
 export type CreatorLink = {
     readonly name: string;
@@ -721,6 +726,13 @@ export type PersonDetails = {
     readonly credits: PersonCredit[];
 };
 export type PersonFollowScope = 'known_for' | 'all';
+export type PersonTally = {
+    readonly name: string;
+    readonly provider: string | null;
+    readonly ref: string | null;
+    readonly profilePath: string | null;
+    readonly titles: number;
+};
 export type PlatformDetails = {
     readonly ref: string;
     readonly name: string;
@@ -839,6 +851,9 @@ export type StatisticsActivity = {
     readonly hours: number[];
     readonly busiestDay: DayCount | null;
     readonly firstWeekday: number;
+};
+export type StatisticsCreators = {
+    readonly crafts: CraftPeople[];
 };
 export type StatisticsOrigins = {
     readonly countries: OriginTally[];

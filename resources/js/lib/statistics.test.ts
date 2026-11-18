@@ -12,6 +12,7 @@ import {
     periodTitle,
     rangeShortcuts,
     rankGenres,
+    scopeName,
     statisticsParams,
     timeRows,
     titleMarks,
@@ -22,6 +23,7 @@ import {
 import { useMediaTypes } from '@/test/factories';
 import { setPageProps } from '@/test/page';
 import type { PeriodSpan, YearCount } from '@/types/generated';
+import { trans } from 'laravel-vue-i18n';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 beforeEach(() => {
@@ -137,6 +139,8 @@ describe('numbers and words', () => {
         expect(countTitles('movie', 1)).toBe('1 movie');
         expect(typeNoun(null)).toBe('titles');
         expect(typeNoun('movie')).toBe('movies');
+        expect(scopeName(null)).toBe(trans('statistics.all_types_together'));
+        expect(scopeName('movie')).toBe('movies');
     });
 
     it("writes shares, ratings and lists the locale's way", () => {

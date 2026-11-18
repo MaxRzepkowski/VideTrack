@@ -22,6 +22,11 @@ export function typeNoun(type: string | null): string {
     return type === null ? trans('statistics.titles_word') : mediaTypeMeta(type).plural().toLocaleLowerCase();
 }
 
+/** The scope a subtitle names: "all types together", or the one type ("movies"). */
+export function scopeName(type: string | null): string {
+    return type === null ? trans('statistics.all_types_together') : mediaTypeMeta(type).plural().toLocaleLowerCase();
+}
+
 /** What the page is asked for: a year, the whole history, or two days; and a type. */
 export interface StatisticsQuery {
     period?: number | Extract<PeriodKind, 'all'> | null;

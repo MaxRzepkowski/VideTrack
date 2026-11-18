@@ -143,4 +143,10 @@ return [
     'makers_click_hint' => 'Click another circle to see its titles.',
     'maker_open_network' => 'Network page',
     'maker_open_studio' => 'Studio page',
+    'creators_title' => 'Creators',
+    'creators_subtitle' => ':period, :scope. The people with the most titles; a portrait leads to the person\'s page.',
+    'craft_acting' => 'Cast',
+    'craft_directing' => 'Directing',
+    'craft_writing' => 'Writing',
+    'craft_author' => 'Authors',
 ];

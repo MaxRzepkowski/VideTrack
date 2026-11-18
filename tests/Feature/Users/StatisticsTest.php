@@ -1,10 +1,13 @@
 <?php
 
+use App\Catalog\Department;
 use App\Catalog\ProgressUnit;
 use App\Enums\MediaUserStatus;
 use App\Library\RatingScale;
+use App\Models\Credit;
 use App\Models\MediaItem;
 use App\Models\MediaUserState;
+use App\Models\Person;
 use App\Models\Play;
 use App\Models\Rating;
 use App\Models\User;
@@ -410,4 +413,44 @@ test('a maker\'s best titles go by the user\'s rating, or everyone else\'s where
                 ->where('origins.titles.1.rating', null)
                 ->where('origins.titles.1.media.communityRating', 9)
                 ->where('origins.titles.3.media.title', $disliked->title)));
+});
+
+test('creators count the period\'s titles per person in the cast, as the lead director or writer, and per author', function () {
+    enableBooksModule();
+    $user = statisticsUser();
+    $lead = Person::factory()->create(['name' => 'Alex Morgan']);
+    $director = Person::factory()->create(['name' => 'Sam Rivera']);
+    $assistant = Person::factory()->create(['name' => 'Jo Park']);
+    $films = MediaItem::factory()->movie()->count(2)->create();
+    $book = MediaItem::factory()->book()->create(['metadata' => ['authors' => ['Joanne Rowling']]]);
+    $other = MediaItem::factory()->book()->create(['metadata' => ['authors' => ['J. K. Rowling', 'Owen King']]]);
+
+    foreach ($films as $film) {
+        Credit::factory()->for($film, 'mediaItem')->for($lead)->create(['department' => Department::Acting->value]);
+        Credit::factory()->for($film, 'mediaItem')->for($director)->create(['department' => Department::Directing->value, 'role' => 'Director']);
+        Credit::factory()->for($film, 'mediaItem')->for($assistant)->create(['department' => Department::Directing->value, 'role' => 'First Assistant Director']);
+        Play::factory()->for($user)->for($film, 'mediaItem')->create(['watched_at' => '2025-03-01 20:00:00']);
+    }
+    foreach ([$book, $other] as $read) {
+        Play::factory()->for($user)->for($read, 'mediaItem')->create(['watched_at' => '2025-03-02 20:00:00']);
+    }
+    projectLibrary($user);
+
+    $this->actingAs($user)
+        ->get(route('statistics', ['period' => 2025]))
+        ->assertInertia(fn (Assert $page) => $page
+            ->missing('creators')
+            ->loadDeferredProps(fn (Assert $reload) => $reload
+                ->has('creators.crafts', 3)
+                ->where('creators.crafts.0.department', Department::Acting->value)
+                ->where('creators.crafts.0.types', ['movie'])
+                ->where('creators.crafts.0.people.0.name', 'Alex Morgan')
+                ->where('creators.crafts.0.people.0.titles', 2)
+                ->where('creators.crafts.1.department', Department::Directing->value)
+                ->has('creators.crafts.1.people', 1)
+                ->where('creators.crafts.1.people.0.name', 'Sam Rivera')
+                ->where('creators.crafts.2.department', Department::Author->value)
+                ->where('creators.crafts.2.types', ['book'])
+                ->where('creators.crafts.2.people.0', ['name' => 'Joanne Rowling', 'provider' => null, 'ref' => null, 'profilePath' => null, 'titles' => 2])
+                ->where('creators.crafts.2.people.1.name', 'Owen King')));
 });
