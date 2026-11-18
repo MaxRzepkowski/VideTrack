@@ -3,7 +3,7 @@
 namespace App\Http\Resources\Api\V1;
 
 use App\Catalog\Data\MediaSummary;
-use App\Catalog\ImageUrls;
+use App\Catalog\PublicShapes;
 use App\Library\Data\UserMediaState;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -67,12 +67,7 @@ class MediaSummaryResource extends ApiResource
         $summary = $this->resource;
 
         return [
-            // The card the pages render, field for field.
-            ...$summary->jsonSerialize(),
-            // The images as addresses a client can load; the paths beside
-            // them are the providers' own.
-            'posterUrl' => ImageUrls::of($summary->posterPath, ImageUrls::POSTER),
-            'backdropUrl' => ImageUrls::of($summary->backdropPath, ImageUrls::BACKDROP),
+            ...PublicShapes::card($summary),
             'state' => $this->when($this->state !== null, $this->state),
         ];
     }
