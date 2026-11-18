@@ -16,7 +16,10 @@ use Illuminate\Support\Str;
  */
 final readonly class TestOutgoingWebhook
 {
-    public function __construct(private WebhookClient $client) {}
+    public function __construct(
+        private WebhookClient $client,
+        private RecordOutgoingWebhookAnswer $record,
+    ) {}
 
     public function execute(OutgoingWebhook $webhook): DeliveryAnswer
     {
@@ -27,7 +30,7 @@ final readonly class TestOutgoingWebhook
             ['url' => PublicUrl::to(route('settings.webhooks.index', absolute: false))],
         ));
 
-        $webhook->update(['last_failure' => $answer->failure()]);
+        $this->record->execute($webhook, $answer);
 
         return $answer;
     }

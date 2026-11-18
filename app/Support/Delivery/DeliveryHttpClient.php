@@ -26,8 +26,9 @@ final readonly class DeliveryHttpClient
     /**
      * @param  list<int>  $gone  the statuses by which the service says the address leads nowhere
      * @param  Closure(PendingRequest): Response  $send  the service's own request, on the shared one
+     * @param  list<int>  $closed  the statuses by which it says the address is closed for good
      */
-    public function deliver(int $timeoutSeconds, array $gone, Closure $send): DeliveryAnswer
+    public function deliver(int $timeoutSeconds, array $gone, Closure $send, array $closed = []): DeliveryAnswer
     {
         $request = Http::timeout($timeoutSeconds)
             ->retry(self::TRIES, self::RETRY_DELAY_MS, HttpRetry::isTransient(...), throw: false)
@@ -42,6 +43,7 @@ final readonly class DeliveryHttpClient
         return match (true) {
             $status >= 200 && $status < 300 => DeliveryAnswer::Delivered,
             in_array($status, $gone, true) => DeliveryAnswer::Gone,
+            in_array($status, $closed, true) => DeliveryAnswer::Closed,
             $status === 429 => DeliveryAnswer::Throttled,
             $status >= 500 => DeliveryAnswer::Unavailable,
             default => DeliveryAnswer::Refused,

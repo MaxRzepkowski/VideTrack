@@ -96,7 +96,7 @@ way, in [Signing in with an identity provider](docs/install.md#signing-in-with-a
 
 - [Installing](docs/install.md) and [upgrading](docs/upgrading.md)
 - [Administration](docs/administration.md): user accounts, backup and restore
-- [API](docs/api.md) for your own scripts
+- [API and webhooks](docs/api.md) for your own scripts
 - [Changelog](CHANGELOG.md)
 
 ## AI disclosure

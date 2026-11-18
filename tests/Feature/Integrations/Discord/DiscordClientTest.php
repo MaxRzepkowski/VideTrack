@@ -17,6 +17,8 @@ test("Discord's answers read as delivered, gone, throttled, refused or unavailab
     'not found' => [404, DeliveryAnswer::Gone],
     'unauthorized' => [401, DeliveryAnswer::Gone],
     'too many' => [429, DeliveryAnswer::Throttled],
+    // Closed for good is a webhook's word, not Discord's.
+    'gone' => [410, DeliveryAnswer::Refused],
     'malformed' => [400, DeliveryAnswer::Refused],
     'bad gateway' => [502, DeliveryAnswer::Unavailable],
 ]);

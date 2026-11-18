@@ -8,6 +8,7 @@ use App\Notifications\MediaEvent;
 use App\Notifications\MediaEventPayload;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\Event;
+use LogicException;
 
 /**
  * Delivers one media event to one user, once per event key:
@@ -26,8 +27,10 @@ final readonly class SendMediaNotification
             return false;
         }
 
+        $notification = new MediaEvent($event);
+
         try {
-            $user->notify(new MediaEvent($event));
+            $user->notify($notification);
         } catch (UniqueConstraintViolationException) {
             // Another run wrote the same event between the look and the write.
             return false;
@@ -36,7 +39,11 @@ final readonly class SendMediaNotification
         // The user's own channels ride on the notification (MediaEvent::via);
         // whatever else carries the same fact subscribes here rather than
         // re-running the detection itself.
-        Event::dispatch(new MediaEventDetected(userId: $user->id, event: $event));
+        Event::dispatch(new MediaEventDetected(
+            userId: $user->id,
+            event: $event,
+            notificationId: $notification->id ?? throw new LogicException('A media event has its id from the start.'),
+        ));
 
         return true;
     }

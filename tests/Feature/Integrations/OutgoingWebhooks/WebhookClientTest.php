@@ -40,7 +40,7 @@ test("the receiver's answers read as delivered, gone, throttled, refused or unav
     'ok' => [200, DeliveryAnswer::Delivered],
     'accepted' => [202, DeliveryAnswer::Delivered],
     'not found' => [404, DeliveryAnswer::Gone],
-    'gone' => [410, DeliveryAnswer::Gone],
+    'closed for good' => [410, DeliveryAnswer::Closed],
     'too many' => [429, DeliveryAnswer::Throttled],
     'unauthorized' => [401, DeliveryAnswer::Refused],
     'moved' => [301, DeliveryAnswer::Refused],

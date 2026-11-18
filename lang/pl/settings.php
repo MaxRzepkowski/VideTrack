@@ -148,6 +148,7 @@ return [
     'remove_this_channel_notifications_stop_going' => 'Usunąć ten kanał? Powiadomienia przestaną tam trafiać.',
     'the_test_message_did_not_arrive' => 'Testowa wiadomość nie dotarła.',
     'delivery_failure_gone' => 'Usługa nie zna już tego adresu. Sprawdź go albo wklej nowy.',
+    'delivery_failure_closed' => 'Odbiorca zgłosił, że ten adres jest zamknięty na stałe.',
     'delivery_failure_refused' => 'Usługa odrzuciła ostatnią wiadomość.',
     'delivery_failure_throttled' => 'Usługa była zajęta i nie przyjęła ostatniej wiadomości.',
     'delivery_failure_unavailable' => 'Nie udało się połączyć z usługą przy ostatniej wiadomości.',

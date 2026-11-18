@@ -13,14 +13,16 @@ use JsonException;
 final readonly class WebhookMessage
 {
     /**
-     * @param  string  $timestamp  when it happened (ISO 8601), not when a retry delivered it
+     * @param  string  $timestamp  when it happened, or for a change to the library when this message was made, normally seconds after (ISO 8601); never when a retry delivered it
      * @param  array<string, mixed>  $data
+     * @param  string|null  $source  where a change to the library came in from (`ui`, `api`, `scrobble:<name>`)
      */
     public function __construct(
         public string $id,
         public WebhookEventType $type,
         public string $timestamp,
         public array $data,
+        public ?string $source = null,
     ) {}
 
     /**
@@ -33,6 +35,7 @@ final readonly class WebhookMessage
         return json_encode([
             'type' => $this->type->value,
             'timestamp' => $this->timestamp,
+            ...($this->source === null ? [] : ['source' => $this->source]),
             'data' => $this->data,
         ], JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
     }

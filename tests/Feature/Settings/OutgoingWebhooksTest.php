@@ -128,7 +128,7 @@ test('the test button sends a signed test now and says when it did not arrive', 
     $this->post(route('settings.webhooks.test', $webhook))->assertSessionHasNoErrors();
     Http::assertSent(fn (Request $request): bool => $request['type'] === 'webhook.test'
         && $request['data']['url'] === url(route('settings.webhooks.index', absolute: false))
-        && $request->header('webhook-signature')[0] === WebhookSignature::sign(WEBHOOK_SECRET, $request->header('webhook-id')[0], (int) $request->header('webhook-timestamp')[0], $request->body()));
+        && signedByWebhook($request));
     expect($webhook->refresh()->last_failure)->toBeNull();
 
     $this->post(route('settings.webhooks.test', $webhook))->assertSessionHasErrors('test');
