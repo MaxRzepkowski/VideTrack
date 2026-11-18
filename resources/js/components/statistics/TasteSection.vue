@@ -9,7 +9,7 @@ import StatisticsSection from '@/components/statistics/StatisticsSection.vue';
 import TopTitles from '@/components/statistics/TopTitles.vue';
 import { mediaTypeMeta } from '@/lib/mediaTypes';
 import { asReadUnit } from '@/lib/progress';
-import { periodTitle, typeNoun } from '@/lib/statistics';
+import { periodTitle, scopeName, typeNoun } from '@/lib/statistics';
 import type { PeriodSpan, StatisticsOrigins, StatisticsTaste } from '@/types/generated';
 import { Shapes } from '@lucide/vue';
 import { trans } from 'laravel-vue-i18n';
@@ -30,7 +30,7 @@ const props = defineProps<{
 const periodName = computed(() => periodTitle(props.period));
 const readIn = computed(() => asReadUnit(props.taste.readIn));
 const typePlural = computed(() => (props.type === null ? null : mediaTypeMeta(props.type).plural()));
-const scope = computed(() => (typePlural.value === null ? trans('statistics.all_types_together') : typePlural.value.toLocaleLowerCase()));
+const scope = computed(() => scopeName(props.type));
 
 const topTitle = computed(() => {
     if (readIn.value !== null) {

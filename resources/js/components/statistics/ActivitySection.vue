@@ -7,7 +7,7 @@ import MonthGrid from '@/components/statistics/MonthGrid.vue';
 import StatisticsSection from '@/components/statistics/StatisticsSection.vue';
 import { formatCalendarDate, formatHourOfDay, formatNumber } from '@/lib/format';
 import { mediaTypeMeta } from '@/lib/mediaTypes';
-import { periodTitle } from '@/lib/statistics';
+import { periodTitle, scopeName } from '@/lib/statistics';
 import { averages, bucketName, bucketTick, tickEvery } from '@/lib/statisticsActivity';
 import { fromWeekday, peakIndex, weekdayNames } from '@/lib/statisticsCharts';
 import type { ActivityBucket, PeriodSpan, StatisticsActivity } from '@/types/generated';
@@ -32,7 +32,7 @@ const color = computed(() => (props.type === null ? BRAND : mediaTypeMeta(props.
 const highlight = computed(() => (props.type === null ? 'var(--color-brand-soft)' : 'var(--color-ink-secondary)'));
 
 const periodName = computed(() => periodTitle(props.period));
-const scope = computed(() => (props.type === null ? trans('statistics.all_types_together') : mediaTypeMeta(props.type).plural().toLocaleLowerCase()));
+const scope = computed(() => scopeName(props.type));
 const ticks = computed(() => props.activity.buckets.map((bucket) => bucketTick(bucket, props.activity.bucket)));
 const names = computed(() => props.activity.buckets.map((bucket) => bucketName(bucket, props.activity.bucket)));
 

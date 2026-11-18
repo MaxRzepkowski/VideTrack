@@ -87,9 +87,9 @@ final readonly class BuildStatisticsOrigins
 
         return new StatisticsOrigins(
             countries: $this->origins($countries),
-            countryTypes: $this->inOrder($countryTypes),
+            countryTypes: $this->types->ordered(array_keys($countryTypes)),
             languages: $this->origins($languages),
-            languageTypes: $this->inOrder($languageTypes),
+            languageTypes: $this->types->ordered(array_keys($languageTypes)),
             makers: $makers,
             makerKind: $makers === [] ? null : ($networks !== [] ? CreatorKind::Network : CreatorKind::Company),
             titles: $shown,
@@ -172,14 +172,5 @@ final readonly class BuildStatisticsOrigins
         usort($ids, fn (int $a, int $b): int => $rank($a) <=> $rank($b));
 
         return array_slice($ids, 0, self::BEST);
-    }
-
-    /**
-     * @param  array<string, true>  $types
-     * @return list<string>
-     */
-    private function inOrder(array $types): array
-    {
-        return array_values(array_filter($this->types->titleCodes(), fn (string $code): bool => isset($types[$code])));
     }
 }

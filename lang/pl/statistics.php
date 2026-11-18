@@ -143,4 +143,10 @@ return [
     'makers_click_hint' => 'Kliknij inne koło, żeby zobaczyć jego tytuły.',
     'maker_open_network' => 'Strona stacji',
     'maker_open_studio' => 'Strona studia',
+    'creators_title' => 'Twórcy',
+    'creators_subtitle' => ':period, :scope. Osoby z największą liczbą tytułów; zdjęcie prowadzi do strony osoby.',
+    'craft_acting' => 'Obsada',
+    'craft_directing' => 'Reżyseria',
+    'craft_writing' => 'Scenariusz',
+    'craft_author' => 'Autorzy',
 ];

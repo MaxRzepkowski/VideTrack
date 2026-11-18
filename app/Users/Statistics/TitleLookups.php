@@ -2,16 +2,21 @@
 
 namespace App\Users\Statistics;
 
+use App\Catalog\Department;
 use App\Models\MediaItem;
+use App\Models\Person;
 use App\Models\Rating;
 use App\Models\User;
+use App\Support\Numbers;
+use App\Support\QueryRow;
 use App\Users\Statistics\Data\HistoryEntry;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 /**
  * What the statistics read about a period's titles besides their history:
- * the rows themselves and the user's ratings of them, in chunks a `whereIn`
- * can take.
+ * the rows themselves, the user's ratings of them and who is credited on
+ * them, in chunks a `whereIn` can take.
  */
 final readonly class TitleLookups
 {
@@ -64,5 +69,49 @@ final readonly class TitleLookups
         }
 
         return $ratings;
+    }
+
+    /**
+     * How many of the given titles credit each person in a department, in
+     * the given jobs only when `$roles` is not null, and which titles credit
+     * anyone that way at all.
+     *
+     * @param  list<int>  $ids
+     * @param  list<string>|null  $roles
+     * @return array{people: array<int, int>, titles: list<int>} person id => titles; the titles crediting anyone
+     */
+    public function credited(array $ids, Department $department, ?array $roles): array
+    {
+        $people = [];
+        $titles = [];
+
+        foreach (array_chunk($ids, self::CHUNK) as $chunk) {
+            $credits = DB::table('credits')
+                ->whereIn('media_item_id', $chunk)
+                ->where('department', $department->value);
+
+            if ($roles !== null) {
+                $credits->whereIn('role', $roles);
+            }
+
+            // A title's chunk holds all its credits, so counts from different chunks add up.
+            foreach ((clone $credits)->groupBy('person_id')->get(['person_id', DB::raw('count(distinct media_item_id) as titles')]) as $row) {
+                $person = QueryRow::int($row, 'person_id');
+                $people[$person] = ($people[$person] ?? 0) + QueryRow::int($row, 'titles');
+            }
+
+            array_push($titles, ...Numbers::ints($credits->distinct()->pluck('media_item_id')));
+        }
+
+        return ['people' => $people, 'titles' => $titles];
+    }
+
+    /**
+     * @param  list<int>  $ids
+     * @return Collection<int, Person> keyed by id
+     */
+    public function people(array $ids): Collection
+    {
+        return Person::query()->whereKey($ids)->get(['id', 'name', 'provider', 'provider_ref', 'profile_path'])->keyBy('id');
     }
 }

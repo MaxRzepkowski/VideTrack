@@ -5,12 +5,13 @@ import PageHeading from '@/components/PageHeading.vue';
 import PageMasthead from '@/components/PageMasthead.vue';
 import ActivitySection from '@/components/statistics/ActivitySection.vue';
 import BookendsCard from '@/components/statistics/BookendsCard.vue';
+import CreatorsSection from '@/components/statistics/CreatorsSection.vue';
 import PeriodBar from '@/components/statistics/PeriodBar.vue';
 import PeriodCard from '@/components/statistics/PeriodCard.vue';
 import TasteSection from '@/components/statistics/TasteSection.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { statisticsParams, type StatisticsQuery } from '@/lib/statistics';
-import type { StatisticsActivity, StatisticsOrigins, StatisticsPage, StatisticsTaste } from '@/types/generated';
+import type { StatisticsActivity, StatisticsCreators, StatisticsOrigins, StatisticsPage, StatisticsTaste } from '@/types/generated';
 import { Deferred, Head, router } from '@inertiajs/vue3';
 import { ChartNoAxesColumn } from '@lucide/vue';
 import { trans } from 'laravel-vue-i18n';
@@ -29,6 +30,8 @@ const props = defineProps<{
     taste?: StatisticsTaste;
     /** Deferred, with `taste`. */
     origins?: StatisticsOrigins;
+    /** Deferred: absent until the follow-up request lands. */
+    creators?: StatisticsCreators;
 }>();
 
 function visit(query: StatisticsQuery): void {
@@ -80,6 +83,13 @@ const hasTitles = computed(() => props.page.titles.titles.total > 0);
                         <div class="border-line-subtle bg-surface mt-12 h-96 animate-pulse rounded-xl border" aria-hidden="true" />
                     </template>
                     <TasteSection v-if="taste && origins" :taste="taste" :origins="origins" :period="page.period" :type="page.type" />
+                </Deferred>
+
+                <Deferred data="creators">
+                    <template #fallback>
+                        <div class="border-line-subtle bg-surface mt-12 h-96 animate-pulse rounded-xl border" aria-hidden="true" />
+                    </template>
+                    <CreatorsSection v-if="creators" :creators="creators" :period="page.period" :type="page.type" />
                 </Deferred>
             </template>
 
