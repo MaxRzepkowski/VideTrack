@@ -6,6 +6,7 @@ import SettingsSaveBar from '@/components/settings/SettingsSaveBar.vue';
 import { Label } from '@/components/ui/label';
 import { ToggleSwitch } from '@/components/ui/toggle-switch';
 import { confirm } from '@/composables/useConfirm';
+import { useTestMessage } from '@/composables/useTestMessage';
 import { useUnsavedChanges } from '@/composables/useUnsavedChanges';
 import { channelModes, configError, savedConfig } from '@/lib/channels';
 import { SETTINGS_CARD_CLASS, SETTINGS_FIELD_CLASS } from '@/lib/ui';
@@ -13,7 +14,7 @@ import type { ChannelData, ChannelKindData } from '@/types/generated';
 import { router, useForm } from '@inertiajs/vue3';
 import { Check } from '@lucide/vue';
 import { trans } from 'laravel-vue-i18n';
-import { onUnmounted, ref } from 'vue';
+import { ref } from 'vue';
 import { toast } from 'vue-sonner';
 
 /**
@@ -23,9 +24,6 @@ import { toast } from 'vue-sonner';
  * changed, the rest can.
  */
 const props = defineProps<{ channel: ChannelData; kind: ChannelKindData | null; labelMax: number; digestHour: number }>();
-
-/** How long "Test message sent." stays beside the button. */
-const TEST_SENT_SHOWN_MS = 3000;
 
 const form = useForm({
     label: props.channel.label,
@@ -65,33 +63,12 @@ function toggle(enabled: boolean): void {
     router.patch(route('settings.channels.update', { channel: props.channel.id }), { enabled }, { preserveScroll: true });
 }
 
-const testing = ref(false);
-const testSent = ref(false);
-const testError = ref<string | undefined>();
-
-let testSentTimer: ReturnType<typeof setTimeout> | undefined;
-
-onUnmounted(() => clearTimeout(testSentTimer));
-
-function sendTest(): void {
-    testSent.value = false;
-    testError.value = undefined;
-    router.post(
-        route('settings.channels.test', { channel: props.channel.id }),
-        {},
-        {
-            preserveScroll: true,
-            onStart: () => (testing.value = true),
-            onFinish: () => (testing.value = false),
-            onError: (errors) => (testError.value = errors.test),
-            onSuccess: () => {
-                testSent.value = true;
-                clearTimeout(testSentTimer);
-                testSentTimer = setTimeout(() => (testSent.value = false), TEST_SENT_SHOWN_MS);
-            },
-        },
-    );
-}
+const {
+    testing,
+    sent: testSent,
+    error: testError,
+    send: sendTest,
+} = useTestMessage(() => route('settings.channels.test', { channel: props.channel.id }));
 
 async function remove(): Promise<void> {
     const confirmed = await confirm({
