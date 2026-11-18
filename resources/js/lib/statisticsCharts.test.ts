@@ -7,7 +7,10 @@ import {
     monthName,
     peakIndex,
     ratingColor,
+    ratingRows,
+    ratingShare,
     releaseColumns,
+    rowSpread,
     scaleColor,
     scaleLegend,
     scaleStep,
@@ -109,5 +112,41 @@ describe('the release-year chart', () => {
         expect(ratingColor(3)).toBe('var(--color-line-strong)');
         expect(ratingColor(6)).toBe('var(--color-scale-2)');
         expect(ratingColor(10)).toBe('var(--color-scale-4)');
+    });
+});
+
+describe("the comparison with everyone else's ratings", () => {
+    const points = [
+        { type: 'movie', rating: 8, community: 7.2, titles: 2 },
+        { type: 'tv', rating: 8, community: 8.6, titles: 1 },
+        { type: 'movie', rating: 6, community: 6, titles: 3 },
+        { type: 'game', rating: 5, community: 8.1, titles: 1 },
+    ];
+
+    it('places a rating along the scale, an average below its bottom at it', () => {
+        expect(ratingShare(1)).toBe(0);
+        expect(ratingShare(10)).toBe(1);
+        expect(ratingShare(5.5)).toBe(0.5);
+        expect(ratingShare(0.5)).toBe(0);
+    });
+
+    it("sums each rating up, highest first, everyone else's average weighted by titles", () => {
+        const rows = ratingRows(points);
+
+        expect(rows.map((row) => [row.rating, row.titles])).toEqual([
+            [8, 3],
+            [6, 3],
+            [5, 1],
+        ]);
+        expect(rows[0]?.community).toBeCloseTo(7.6667, 3);
+    });
+
+    it("spreads a row's dots evenly within half a step either way, the same on every draw", () => {
+        const spread = Array.from({ length: 50 }, (_, index) => rowSpread(index));
+
+        expect(spread.every((value) => value >= -0.5 && value < 0.5)).toBe(true);
+        expect(rowSpread(0)).toBe(-0.5);
+        expect(new Set(spread.map((value) => value.toFixed(6))).size).toBe(50);
+        expect(rowSpread(7)).toBe(spread[7]);
     });
 });

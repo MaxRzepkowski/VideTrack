@@ -454,3 +454,51 @@ test('creators count the period\'s titles per person in the cast, as the lead di
                 ->where('creators.crafts.2.people.0', ['name' => 'Joanne Rowling', 'provider' => null, 'ref' => null, 'profilePath' => null, 'titles' => 2])
                 ->where('creators.crafts.2.people.1.name', 'Owen King')));
 });
+
+test('ratings set the user\'s rating against everyone else\'s, the best rated by name on a tie and the widest gaps each way', function () {
+    $user = statisticsUser();
+    $films = [
+        'Cedar' => [9, 6.0],
+        'Aspen' => [9, 9.4],
+        'Birch' => [8, 8.0],
+        'Dune Sea' => [5, 7.5],
+        'Elm' => [5, 7.5],
+        'Fir' => [7, null],
+    ];
+    $made = [];
+
+    foreach ($films as $title => [$rating, $community]) {
+        $made[$title] = MediaItem::factory()->movie()->create(['title' => $title, 'community_rating' => $community]);
+        Play::factory()->for($user)->for($made[$title], 'mediaItem')->create(['watched_at' => '2025-04-01 20:00:00']);
+        Rating::factory()->for($user)->for($made[$title], 'mediaItem')->create(['rating' => $rating]);
+    }
+    // Rated, but outside the period.
+    $older = MediaItem::factory()->movie()->create(['community_rating' => 2.0]);
+    Play::factory()->for($user)->for($older, 'mediaItem')->create(['watched_at' => '2024-04-01 20:00:00']);
+    Rating::factory()->for($user)->for($older, 'mediaItem')->create(['rating' => 10]);
+    projectLibrary($user);
+
+    $this->actingAs($user)
+        ->get(route('statistics', ['period' => 2025]))
+        ->assertInertia(fn (Assert $page) => $page
+            ->missing('ratings')
+            ->loadDeferredProps(fn (Assert $reload) => $reload
+                ->has('ratings.points', 4)
+                ->where('ratings.ratedHigher', 1)
+                ->where('ratings.ratedLower', 3)
+                ->where('ratings.ratedSame', 1)
+                ->where('ratings.points', fn ($points) => collect($points)->contains(fn (array $point) => $point === ['type' => 'movie', 'rating' => 5, 'community' => 7.5, 'titles' => 2]))
+                ->where('ratings.best.0.media.title', 'Aspen')
+                ->where('ratings.best.1.media.title', 'Cedar')
+                ->where('ratings.best.1.rating', 9)
+                ->where('ratings.bestTied', 2)
+                ->has('ratings.best', count($films))
+                ->has('ratings.higher', 1)
+                ->where('ratings.higher.0.media.title', 'Cedar')
+                ->where('ratings.higher.0.rating', 9)
+                ->where('ratings.higher.0.community', 6)
+                ->has('ratings.lower', 3)
+                ->where('ratings.lower.0.media.title', 'Dune Sea')
+                ->where('ratings.lower.1.media.title', 'Elm')
+                ->where('ratings.lower.2.media.title', 'Aspen')));
+});

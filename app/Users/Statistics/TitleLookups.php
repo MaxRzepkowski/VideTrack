@@ -72,6 +72,26 @@ final readonly class TitleLookups
     }
 
     /**
+     * The user's ratings of a period's titles, with everyone else's average
+     * where the service gave one.
+     *
+     * @param  array<int, mixed>  $marks  the period's titles by root id (PeriodMarks::of)
+     */
+    public function periodRatings(User $user, array $marks): PeriodRatings
+    {
+        $ratings = $this->ratings($user, array_keys($marks));
+        $community = [];
+
+        foreach ($this->items(array_keys($ratings), ['community_rating']) as $title) {
+            if ($title->community_rating !== null) {
+                $community[$title->id] = $title->community_rating;
+            }
+        }
+
+        return new PeriodRatings($ratings, $community);
+    }
+
+    /**
      * How many of the given titles credit each person in a department, in
      * the given jobs only when `$roles` is not null, and which titles credit
      * anyone that way at all.

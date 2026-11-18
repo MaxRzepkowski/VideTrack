@@ -41,7 +41,8 @@ final readonly class BuildStatisticsPage
     {
         $marks = $this->marks->of($viewer, $scope);
         $reading = new ReadingTime($viewer->preferences);
-        $ratings = $this->lookups->ratings($viewer, array_keys($marks));
+        $rated = $this->lookups->periodRatings($viewer, $marks);
+        $ratings = $rated->ratings;
         $completions = $scope->completions;
 
         return new StatisticsPage(
@@ -58,7 +59,8 @@ final readonly class BuildStatisticsPage
                 ratings: count($ratings),
                 averageRating: $this->average($ratings),
                 ratingCounts: $this->ratingCounts($ratings),
-                communityDelta: $this->communityDelta($scope->type, $ratings),
+                // One type's view only, where the two scales measure the same kind of thing.
+                communityDelta: $scope->type === null ? null : $rated->averageGap(),
             ),
             tiles: $this->tiles($scope, $marks, $reading),
             titles: $this->titles($marks),
@@ -165,30 +167,6 @@ final readonly class BuildStatisticsPage
         }
 
         return $tiles;
-    }
-
-    /**
-     * How the user's ratings stand against everyone else's, on average over
-     * the rated titles the service gave a rating too; one type's view only,
-     * where the two scales measure the same kind of thing.
-     *
-     * @param  array<int, int>  $ratings
-     */
-    private function communityDelta(?string $type, array $ratings): ?float
-    {
-        if ($type === null) {
-            return null;
-        }
-
-        $deltas = [];
-
-        foreach ($this->lookups->items(array_keys($ratings), ['community_rating']) as $title) {
-            if ($title->community_rating !== null) {
-                $deltas[] = $ratings[$title->id] - $title->community_rating;
-            }
-        }
-
-        return $deltas === [] ? null : round(array_sum($deltas) / count($deltas), 2);
     }
 
     /**
