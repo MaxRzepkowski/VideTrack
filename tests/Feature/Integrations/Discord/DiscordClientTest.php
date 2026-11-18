@@ -1,6 +1,7 @@
 <?php
 
 use App\Integrations\Discord\DiscordClient;
+use App\Notifications\Channels\ChannelHttpClient;
 use App\Notifications\Channels\DeliveryAnswer;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
@@ -31,5 +32,5 @@ test('an answered refusal is asked once, an outage a few times', function () {
     Http::assertSentCount(1);
 
     app(DiscordClient::class)->send('https://discord.com/api/webhooks/2/b', ['content' => 'Hi']);
-    expect(Http::recorded(fn (Request $request): bool => str_contains($request->url(), '/2/')))->toHaveCount(2);
+    expect(Http::recorded(fn (Request $request): bool => str_contains($request->url(), '/2/')))->toHaveCount(ChannelHttpClient::TRIES);
 });

@@ -2,9 +2,9 @@
 
 use App\Actions\Media\SendMediaNotification;
 use App\Integrations\Apprise\AppriseChannel;
-use App\Integrations\Apprise\AppriseClient;
 use App\Models\NotificationChannel;
 use App\Models\User;
+use App\Notifications\Channels\ChannelHttpClient;
 use App\Notifications\Channels\ChannelMode;
 use App\Notifications\Channels\ChannelRegistry;
 use App\Notifications\Channels\DeliveryAnswer;
@@ -204,7 +204,7 @@ test('an answered refusal is asked once, an outage a couple of times', function 
 
     $status = 503;
     $this->post(route('settings.channels.test', $channel));
-    expect(Http::recorded(fn (Request $request): bool => str_ends_with($request->url(), '/notify')))->toHaveCount(1 + AppriseClient::RETRIES);
+    expect(Http::recorded(fn (Request $request): bool => str_ends_with($request->url(), '/notify')))->toHaveCount(1 + ChannelHttpClient::TRIES);
 });
 
 test('changing a channel shows its plain fields again and keeps a secret left empty', function () {

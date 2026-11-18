@@ -2,10 +2,12 @@
 
 namespace App\Integrations\Apprise;
 
+use App\Notifications\Channels\ChannelHttpClient;
 use App\Notifications\Channels\DeliveryAnswer;
-use App\Support\HttpRetry;
 use App\Support\Payload;
 use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Http\Client\PendingRequest;
+use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
 
 /**
@@ -18,15 +20,16 @@ final readonly class AppriseClient
 {
     private const TIMEOUT_SECONDS = 15;
 
-    public const RETRIES = 2;
-
-    private const RETRY_DELAY_MS = 500;
+    /** The URL is not one Apprise can use. */
+    private const GONE = [400];
 
     /**
      * The services are asked for while a settings page renders: a container
      * that hangs must not hold the page, so this gets a short wait and no retry.
      */
     private const DETAILS_TIMEOUT_SECONDS = 3;
+
+    public function __construct(private ChannelHttpClient $http) {}
 
     /**
      * What the container says about every service it delivers to: their
@@ -51,33 +54,15 @@ final readonly class AppriseClient
 
     public function send(string $urls, string $title, string $body): DeliveryAnswer
     {
-        try {
-            $status = Http::timeout(self::TIMEOUT_SECONDS)
-                ->retry(self::RETRIES, self::RETRY_DELAY_MS, HttpRetry::isTransient(...), throw: false)
-                ->withUserAgent(config()->string('tracker.http.user_agent'))
-                ->asJson()
-                ->post($this->url('/notify'), [
-                    'urls' => $urls,
-                    'title' => $title,
-                    'body' => $body,
-                    'type' => 'info',
-                    'format' => 'text',
-                ])
-                ->status();
-        } catch (ConnectionException) {
-            return DeliveryAnswer::Unavailable;
-        }
-
-        return match (true) {
-            $status >= 200 && $status < 300 => DeliveryAnswer::Delivered,
-            // The URL is not one Apprise can use.
-            $status === 400 => DeliveryAnswer::Gone,
-            $status === 429 => DeliveryAnswer::Throttled,
-            $status >= 500 => DeliveryAnswer::Unavailable,
-            // 424: the service behind the URL did not take it; whatever went
-            // through would arrive twice if asked again.
-            default => DeliveryAnswer::Refused,
-        };
+        // A 424 (the service behind the URL did not take it) stays a refusal:
+        // whatever went through would arrive twice if asked again.
+        return $this->http->deliver(self::TIMEOUT_SECONDS, self::GONE, fn (PendingRequest $request): Response => $request->asJson()->post($this->url('/notify'), [
+            'urls' => $urls,
+            'title' => $title,
+            'body' => $body,
+            'type' => 'info',
+            'format' => 'text',
+        ]));
     }
 
     private function url(string $path): string
