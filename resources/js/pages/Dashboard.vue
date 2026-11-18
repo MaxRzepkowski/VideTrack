@@ -87,6 +87,7 @@ const statKinds = computed(() => inRegistryOrder(Object.keys(props.stats)));
                     compact-on-mobile
                 >
                     <template #icon><ChartNoAxesColumnIncreasing class="xs:size-6 size-5" /></template>
+                    <SectionMoreLink :href="route('statistics')" :label="trans('statistics.title')" placement="heading" />
                 </SectionHeading>
 
                 <!-- Optional tiles follow configured modules, including for a
@@ -109,6 +110,7 @@ const statKinds = computed(() => inRegistryOrder(Object.keys(props.stats)));
                         class="shrink-0 grow basis-[calc(100%-3.5rem)] snap-start sm:basis-[calc((100%-1rem)/2)] lg:basis-[calc((100%-2rem)/3)]"
                     />
                 </ScrollRow>
+                <SectionMoreLink :href="route('statistics')" :label="trans('statistics.title')" placement="below" />
             </PageSection>
 
             <PageSection tone="subtle">
