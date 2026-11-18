@@ -4,6 +4,7 @@ import SettingsSaveBar from '@/components/settings/SettingsSaveBar.vue';
 import WebhookFields from '@/components/settings/webhooks/WebhookFields.vue';
 import { ToggleSwitch } from '@/components/ui/toggle-switch';
 import { confirm } from '@/composables/useConfirm';
+import { useTestMessage } from '@/composables/useTestMessage';
 import { useUnsavedChanges } from '@/composables/useUnsavedChanges';
 import { SETTINGS_CARD_CLASS } from '@/lib/ui';
 import { changedWebhook, type WebhookFormValues } from '@/lib/webhooks';
@@ -11,7 +12,7 @@ import type { OutgoingWebhookData, WebhookGroupOption } from '@/types/generated'
 import { router, useForm } from '@inertiajs/vue3';
 import { Webhook } from '@lucide/vue';
 import { trans } from 'laravel-vue-i18n';
-import { computed, onUnmounted, ref } from 'vue';
+import { computed } from 'vue';
 import { toast } from 'vue-sonner';
 
 /**
@@ -20,9 +21,6 @@ import { toast } from 'vue-sonner';
  * act at once.
  */
 const props = defineProps<{ webhook: OutgoingWebhookData; groups: WebhookGroupOption[]; labelMax: number; urlMax: number }>();
-
-/** How long "Test message sent." stays beside the button. */
-const TEST_SENT_SHOWN_MS = 3000;
 
 const saved = (): WebhookFormValues => ({ label: props.webhook.label, url: '', secret: '', events: [...props.webhook.events] });
 
@@ -57,33 +55,12 @@ function toggle(enabled: boolean): void {
     router.patch(route('settings.webhooks.update', { webhook: props.webhook.id }), { enabled }, { preserveScroll: true });
 }
 
-const testing = ref(false);
-const testSent = ref(false);
-const testError = ref<string | undefined>();
-
-let testSentTimer: ReturnType<typeof setTimeout> | undefined;
-
-onUnmounted(() => clearTimeout(testSentTimer));
-
-function sendTest(): void {
-    testSent.value = false;
-    testError.value = undefined;
-    router.post(
-        route('settings.webhooks.test', { webhook: props.webhook.id }),
-        {},
-        {
-            preserveScroll: true,
-            onStart: () => (testing.value = true),
-            onFinish: () => (testing.value = false),
-            onError: (errors) => (testError.value = errors.test),
-            onSuccess: () => {
-                testSent.value = true;
-                clearTimeout(testSentTimer);
-                testSentTimer = setTimeout(() => (testSent.value = false), TEST_SENT_SHOWN_MS);
-            },
-        },
-    );
-}
+const {
+    testing,
+    sent: testSent,
+    error: testError,
+    send: sendTest,
+} = useTestMessage(() => route('settings.webhooks.test', { webhook: props.webhook.id }));
 
 async function remove(): Promise<void> {
     const confirmed = await confirm({ message: trans('settings.remove_this_webhook'), confirmLabel: trans('settings.remove') });

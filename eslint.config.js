@@ -31,11 +31,17 @@ export default defineConfigWithVueTs(
     {
         // A visit fired from a layout or a composable repaints every page under
         // an open <select>. Background work talks to a 204 endpoint through
-        // jsonFetch() instead. Two composables visit only once the user has
+        // jsonFetch() instead. Three composables visit only once the user has
         // acted: useListActions after a create or delete they clicked,
-        // useUnsavedChanges after they chose to leave.
+        // useUnsavedChanges after they chose to leave, useTestMessage after a
+        // click on "Send a test message".
         files: ['resources/js/layouts/**/*.vue', 'resources/js/composables/**/*.ts'],
-        ignores: ['resources/js/composables/useListActions.ts', 'resources/js/composables/useUnsavedChanges.ts', 'resources/js/composables/**/*.test.ts'],
+        ignores: [
+            'resources/js/composables/useListActions.ts',
+            'resources/js/composables/useUnsavedChanges.ts',
+            'resources/js/composables/useTestMessage.ts',
+            'resources/js/composables/**/*.test.ts',
+        ],
         rules: {
             'no-restricted-imports': [
                 'error',
