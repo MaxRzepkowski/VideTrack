@@ -11,7 +11,7 @@ use App\Http\Requests\Settings\ChannelRequest;
 use App\Models\NotificationChannel;
 use App\Models\User;
 use App\Notifications\Channels\ChannelRegistry;
-use App\Notifications\Channels\DeliveryAnswer;
+use App\Support\Delivery\DeliveryAnswer;
 use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;

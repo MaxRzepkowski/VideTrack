@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Notifications\Channels;
+namespace App\Support\Delivery;
 
-/** How the service behind a channel took a message. */
+/** How the receiver of a message took it. */
 enum DeliveryAnswer: string
 {
     case Delivered = 'delivered';
@@ -29,5 +29,22 @@ enum DeliveryAnswer: string
     public function failure(): ?self
     {
         return $this === self::Delivered ? null : $this;
+    }
+
+    /** How a message failed, in the reader's language; null for one that arrived. */
+    public function failureWording(): ?string
+    {
+        $answer = $this;
+
+        if ($answer === self::Delivered) {
+            return null;
+        }
+
+        return __(match ($answer) {
+            self::Gone => 'settings.delivery_failure_gone',
+            self::Refused => 'settings.delivery_failure_refused',
+            self::Throttled => 'settings.delivery_failure_throttled',
+            self::Unavailable => 'settings.delivery_failure_unavailable',
+        });
     }
 }

@@ -10,7 +10,6 @@ use App\Notifications\Channels\ChannelRegistry;
 use App\Notifications\Channels\DailyDigests;
 use App\Notifications\Channels\Data\ChannelData;
 use App\Notifications\Channels\Data\ChannelKindData;
-use App\Notifications\Channels\DeliveryAnswer;
 use App\Support\Payload;
 
 /**
@@ -62,7 +61,7 @@ final readonly class BuildChannelsPage
             mode: $channel->mode,
             enabled: $channel->enabled,
             values: $this->plainValues($channel, $kind),
-            lastFailure: $this->failure($channel->last_failure),
+            lastFailure: $channel->last_failure?->failureWording(),
         );
     }
 
@@ -82,20 +81,5 @@ final readonly class BuildChannelsPage
         }
 
         return $values;
-    }
-
-    /** How the last message failed, in the reader's language; null when it arrived. */
-    private function failure(?DeliveryAnswer $answer): ?string
-    {
-        if ($answer === null || $answer === DeliveryAnswer::Delivered) {
-            return null;
-        }
-
-        return __(match ($answer) {
-            DeliveryAnswer::Gone => 'settings.channel_failure_gone',
-            DeliveryAnswer::Refused => 'settings.channel_failure_refused',
-            DeliveryAnswer::Throttled => 'settings.channel_failure_throttled',
-            DeliveryAnswer::Unavailable => 'settings.channel_failure_unavailable',
-        });
     }
 }

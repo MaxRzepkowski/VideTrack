@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use App\Notifications\Channels\ChannelMode;
-use App\Notifications\Channels\DeliveryAnswer;
+use App\Support\Delivery\DeliveryAnswer;
 use Database\Factories\NotificationChannelFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;

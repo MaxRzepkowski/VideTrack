@@ -5,7 +5,7 @@ use App\Models\NotificationChannel;
 use App\Models\User;
 use App\Notifications\Channels\ChannelMode;
 use App\Notifications\Channels\DailyDigests;
-use App\Notifications\Channels\DeliveryAnswer;
+use App\Support\Delivery\DeliveryAnswer;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
@@ -29,7 +29,7 @@ test('the page lists the channels, never their addresses, and the kinds to add',
         ->where('page.channels.0.mode', 'digest')
         ->where('page.labelMax', NotificationChannel::LABEL_MAX)
         ->where('page.digestHour', DailyDigests::HOUR)
-        ->where('page.channels.0.lastFailure', __('settings.channel_failure_gone'))
+        ->where('page.channels.0.lastFailure', __('settings.delivery_failure_gone'))
         ->missing('page.channels.0.config')
         ->where('page.kinds.0.code', DiscordChannel::CODE)
         ->where('page.kinds.0.fields.0.key', DiscordChannel::WEBHOOK));
