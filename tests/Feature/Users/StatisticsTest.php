@@ -1,5 +1,6 @@
 <?php
 
+use App\Actions\Users\BuildStatisticsRecords;
 use App\Catalog\Department;
 use App\Catalog\ProgressUnit;
 use App\Enums\MediaUserStatus;
@@ -11,6 +12,7 @@ use App\Models\Person;
 use App\Models\Play;
 use App\Models\Rating;
 use App\Models\User;
+use Carbon\CarbonImmutable;
 use Inertia\Testing\AssertableInertia as Assert;
 
 function statisticsUser(): User
@@ -501,4 +503,131 @@ test('ratings set the user\'s rating against everyone else\'s, the best rated by
                 ->where('ratings.lower.0.media.title', 'Dune Sea')
                 ->where('ratings.lower.1.media.title', 'Elm')
                 ->where('ratings.lower.2.media.title', 'Aspen')));
+});
+
+test('records name the longest run of days and the busiest day with its week, the earlier one on a tie', function () {
+    $user = User::factory()->create(['preferences' => ['timezone' => 'Europe/Warsaw', 'week_start' => 'monday']]);
+
+    // Monday 3 March twice, then the 4th and 5th: three days in a row. The 10th stands alone,
+    // and the 20th, as busy as the 3rd, comes later.
+    foreach (['2025-03-03 10:00', '2025-03-03 20:00', '2025-03-04 20:00', '2025-03-05 20:00', '2025-03-10 20:00', '2025-03-20 10:00', '2025-03-20 20:00'] as $at) {
+        Play::factory()->for($user)->for(MediaItem::factory()->movie(), 'mediaItem')->create(['watched_at' => $at]);
+    }
+    projectLibrary($user);
+
+    $this->actingAs($user)
+        ->get(route('statistics', ['period' => 2025]))
+        ->assertInertia(fn (Assert $page) => $page
+            ->missing('records')
+            ->loadDeferredProps(fn (Assert $reload) => $reload
+                ->where('records.streak', [
+                    'from' => '2025-03-03',
+                    'to' => '2025-03-05',
+                    'days' => 3,
+                    'shownFrom' => CarbonImmutable::parse('2025-03-03')->subDays(BuildStatisticsRecords::STREAK_MARGIN_DAYS)->toDateString(),
+                    'shownTo' => CarbonImmutable::parse('2025-03-05')->addDays(BuildStatisticsRecords::STREAK_MARGIN_DAYS)->toDateString(),
+                    'otherDays' => ['2025-03-10'],
+                ])
+                ->where('records.busiestDay.day', ['day' => '2025-03-03', 'count' => 2])
+                ->where('records.busiestDay.week', array_map(
+                    fn (int $offset, int $count): array => ['day' => sprintf('2025-03-%02d', 3 + $offset), 'count' => $count],
+                    range(0, 6),
+                    [2, 1, 1, 0, 0, 0, 0],
+                ))
+                ->where('records.firstWeekday', 1)
+                ->where('records.marathon', null)));
+});
+
+test('a single day is no streak and a title finished whole is no marathon', function () {
+    $user = statisticsUser();
+    Play::factory()->for($user)->for(MediaItem::factory()->movie(), 'mediaItem')->create(['watched_at' => '2025-03-03 12:00:00']);
+    Play::factory()->for($user)->for(MediaItem::factory()->movie(), 'mediaItem')->create(['watched_at' => '2025-03-03 14:00:00']);
+    projectLibrary($user);
+
+    $this->actingAs($user)
+        ->get(route('statistics', ['period' => 2025]))
+        ->assertInertia(fn (Assert $page) => $page
+            ->loadDeferredProps(fn (Assert $reload) => $reload
+                ->where('records.streak', null)
+                ->where('records.busiestDay.day.count', 2)
+                ->where('records.marathon', null)));
+});
+
+test('a marathon is the most parts of one title in a day, from the lowest to the highest', function () {
+    $user = statisticsUser();
+    $show = MediaItem::factory()->show()->create(['title' => 'Harbour Lights']);
+    $first = MediaItem::factory()->season($show, 1)->create();
+    $second = MediaItem::factory()->season($show, 2)->create();
+    $pilot = MediaItem::factory()->episode($first, 1)->create(['runtime' => 30]);
+
+    Play::factory()->for($user)->for($pilot, 'mediaItem')->create(['watched_at' => '2025-04-01 18:00:00']);
+
+    foreach ([[$second, 1], [$first, 3], [$first, 2]] as $hour => [$season, $number]) {
+        Play::factory()->for($user)->for(MediaItem::factory()->episode($season, $number)->create(['runtime' => 30]), 'mediaItem')
+            ->create(['watched_at' => sprintf('2025-04-05 %02d:00:00', 12 + $hour)]);
+    }
+    projectLibrary($user);
+
+    $this->actingAs($user)
+        ->get(route('statistics', ['period' => 2025]))
+        ->assertInertia(fn (Assert $page) => $page
+            ->loadDeferredProps(fn (Assert $reload) => $reload
+                ->where('records.marathon.media.title', 'Harbour Lights')
+                ->where('records.marathon.day', '2025-04-05')
+                ->where('records.marathon.parts', 3)
+                ->where('records.marathon.first', ['season' => 1, 'number' => 2])
+                ->where('records.marathon.last', ['season' => 2, 'number' => 1])
+                ->where('records.marathon.minutes', 90)));
+});
+
+test('the days around a streak stop at the period\'s first day and at today, and the busiest week reaches past the period', function () {
+    $user = User::factory()->create(['preferences' => ['timezone' => 'Europe/Warsaw', 'week_start' => 'monday']]);
+
+    // Monday 3 March falls before the range; Wednesday the 5th and Thursday the 6th open it.
+    foreach (['2025-03-03 12:00', '2025-03-05 10:00', '2025-03-05 12:00', '2025-03-06 12:00'] as $at) {
+        Play::factory()->for($user)->for(MediaItem::factory()->movie(), 'mediaItem')->create(['watched_at' => $at]);
+    }
+    // Two days ending today (the frozen clock's 10 October 2026).
+    foreach (['2026-10-09 12:00', '2026-10-10 08:00'] as $at) {
+        Play::factory()->for($user)->for(MediaItem::factory()->movie(), 'mediaItem')->create(['watched_at' => $at]);
+    }
+    projectLibrary($user);
+
+    $this->actingAs($user)
+        ->get(route('statistics', ['from' => '2025-03-05', 'to' => '2025-03-31']))
+        ->assertInertia(fn (Assert $page) => $page
+            ->loadDeferredProps(fn (Assert $reload) => $reload
+                ->where('records.streak.from', '2025-03-05')
+                ->where('records.streak.shownFrom', '2025-03-05')
+                ->where('records.streak.otherDays', [])
+                ->where('records.busiestDay.day', ['day' => '2025-03-05', 'count' => 2])
+                ->where('records.busiestDay.week.0', ['day' => '2025-03-03', 'count' => 1])));
+
+    $this->actingAs($user)
+        ->get(route('statistics', ['period' => 2026]))
+        ->assertInertia(fn (Assert $page) => $page
+            ->loadDeferredProps(fn (Assert $reload) => $reload
+                ->where('records.streak.to', '2026-10-10')
+                ->where('records.streak.shownTo', '2026-10-10')));
+});
+
+test('a marathon tied on parts goes to the longer day, then to the earlier one', function () {
+    $user = statisticsUser();
+
+    foreach ([['Aspen', 30, '2025-04-01'], ['Birch', 45, '2025-04-02'], ['Cedar', 45, '2025-04-03']] as [$title, $runtime, $day]) {
+        $season = MediaItem::factory()->season(MediaItem::factory()->show()->create(['title' => $title]), 1)->create();
+
+        foreach ([1, 2] as $number) {
+            Play::factory()->for($user)->for(MediaItem::factory()->episode($season, $number)->create(['runtime' => $runtime]), 'mediaItem')
+                ->create(['watched_at' => "{$day} 1{$number}:00:00"]);
+        }
+    }
+    projectLibrary($user);
+
+    $this->actingAs($user)
+        ->get(route('statistics', ['period' => 2025]))
+        ->assertInertia(fn (Assert $page) => $page
+            ->loadDeferredProps(fn (Assert $reload) => $reload
+                ->where('records.marathon.media.title', 'Birch')
+                ->where('records.marathon.minutes', 90)));
 });

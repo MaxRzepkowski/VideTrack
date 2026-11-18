@@ -8,6 +8,9 @@ import { Link } from '@inertiajs/vue3';
 /**
  * A row of the period's titles as posters, each with its type and year and,
  * under them, what the row is about. Scrolls sideways where it does not fit.
+ * Columns are poster-sized and as many as fit, so one or two titles keep
+ * that size instead of stretching across the card; titles beyond them add
+ * columns of the same size.
  */
 defineProps<{
     titles: T[];
@@ -20,7 +23,9 @@ defineSlots<{
 </script>
 
 <template>
-    <ol class="m-0 grid list-none auto-cols-[minmax(8.5rem,1fr)] grid-flow-col gap-4 overflow-x-auto p-0 pb-1">
+    <ol
+        class="m-0 grid list-none auto-cols-[minmax(8.5rem,1fr)] grid-flow-col grid-cols-[repeat(auto-fill,minmax(8.5rem,1fr))] gap-4 overflow-x-auto p-0 pb-1"
+    >
         <li v-for="title in titles" :key="`${title.media.type}-${title.media.ref}`" class="min-w-0">
             <Link
                 :href="mediaUrl(title.media)"

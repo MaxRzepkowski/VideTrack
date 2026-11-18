@@ -1,8 +1,8 @@
 import { addDays, parseDay } from '@/lib/calendar';
-import { formatNumber } from '@/lib/format';
+import { episodeCode, formatNumber } from '@/lib/format';
 import { mediaTypeMeta } from '@/lib/mediaTypes';
 import { pageLocale, viewerTimeZone } from '@/lib/pageContext';
-import type { PeriodKind, PeriodSpan, PeriodTitles, TypeTally, YearCount } from '@/types/generated';
+import type { PartNumber, PeriodKind, PeriodSpan, PeriodTitles, TypeTally, YearCount } from '@/types/generated';
 import { trans, transChoice } from 'laravel-vue-i18n';
 
 /**
@@ -89,9 +89,9 @@ export function periodTitle(period: PeriodSpan): string {
     return trans('statistics.whole_history');
 }
 
-/** Two days, short: "12 Mar 2024 – 5 Jan 2025". */
-export function rangeLabel(from: string, to: string): string {
-    return new Intl.DateTimeFormat(pageLocale(), { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' }).formatRange(
+/** Two days: "12 Mar 2024 – 5 Jan 2025", or with the months spelled out. */
+export function rangeLabel(from: string, to: string, month: 'short' | 'long' = 'short'): string {
+    return new Intl.DateTimeFormat(pageLocale(), { day: 'numeric', month, year: 'numeric', timeZone: 'UTC' }).formatRange(
         parseDay(from),
         parseDay(to),
     );
@@ -309,4 +309,21 @@ export function rankGenres<T extends { titles: number; amount: number; averageRa
         .map((genre) => ({ genre, value: value(genre) }))
         .filter((entry): entry is { genre: T; value: number } => entry.value !== null)
         .sort((a, b) => b.value - a.value);
+}
+
+/** One part as its title numbers it: "S02E11" for an episode, the bare number without a season. */
+export function partLabel(part: PartNumber): string | null {
+    if (part.number === null) {
+        return null;
+    }
+
+    return part.season === null ? formatNumber(part.number) : episodeCode(part.season, part.number);
+}
+
+/** The first and the last of a run of parts: "S02E11–S04E03"; null when they cannot be named. */
+export function partRange(first: PartNumber, last: PartNumber): string | null {
+    const from = partLabel(first);
+    const to = partLabel(last);
+
+    return from === null || to === null ? null : `${from}–${to}`;
 }
