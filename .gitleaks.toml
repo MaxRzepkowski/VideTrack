@@ -1,0 +1,11 @@
+# Secret scanning: gitleaks' own rules, plus one exception. The webhook
+# signature is tested against the vector the Standard Webhooks libraries test
+# themselves against (tests/Unit/Integrations/OutgoingWebhooks/WebhookSignatureTest.php):
+# public test values, nobody's secret, and they stay in that test's history.
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "The public Standard Webhooks test vector"
+regexes = ['''MfKQ9r8GKYqrTwjUPD8ILPZIo2LaLaSw''', '''msg_p5jXN8AQM9LWM0D4loKWxJek''']

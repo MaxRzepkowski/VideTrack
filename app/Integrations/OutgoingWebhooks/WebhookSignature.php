@@ -12,7 +12,7 @@ use InvalidArgumentException;
  */
 final class WebhookSignature
 {
-    private const PREFIX = 'whsec_';
+    public const PREFIX = 'whsec_';
 
     /** How many random bytes a new secret holds; the standard takes 24 to 64. */
     private const SECRET_BYTES = 32;

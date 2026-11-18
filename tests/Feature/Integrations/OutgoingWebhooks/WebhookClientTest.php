@@ -13,6 +13,14 @@ use Illuminate\Support\Sleep;
 
 const WEBHOOK_URL = OutgoingWebhookFactory::URL;
 
+/** One secret for the whole file: a test signs with it and checks against it. */
+function clientSecret(): string
+{
+    static $secret = null;
+
+    return $secret ??= WebhookSignature::newSecret();
+}
+
 function testMessage(): WebhookMessage
 {
     return new WebhookMessage('msg-1', WebhookEventType::Test, '2026-10-10T12:00:00+00:00', ['message' => 'Hi']);
@@ -21,11 +29,11 @@ function testMessage(): WebhookMessage
 test('a message goes signed under its own id and the time of the try, as JSON', function () {
     Http::fake([WEBHOOK_URL => Http::response(null, 204)]);
 
-    app(WebhookClient::class)->send(WEBHOOK_URL, WEBHOOK_SECRET, testMessage());
+    app(WebhookClient::class)->send(WEBHOOK_URL, clientSecret(), testMessage());
 
     Http::assertSent(fn (Request $request): bool => $request->header('webhook-id')[0] === 'msg-1'
         && (int) $request->header('webhook-timestamp')[0] === now()->getTimestamp()
-        && $request->header('webhook-signature')[0] === WebhookSignature::sign(WEBHOOK_SECRET, 'msg-1', now()->getTimestamp(), $request->body())
+        && $request->header('webhook-signature')[0] === WebhookSignature::sign(clientSecret(), 'msg-1', now()->getTimestamp(), $request->body())
         && $request->header('Content-Type')[0] === 'application/json'
         && $request->body() === testMessage()->body()
         && $request->header('User-Agent')[0] === config('tracker.http.user_agent'));
@@ -35,7 +43,7 @@ test("the receiver's answers read as delivered, gone, throttled, refused or unav
     Sleep::fake();
     Http::fake([WEBHOOK_URL => Http::response(null, $status)]);
 
-    expect(app(WebhookClient::class)->send(WEBHOOK_URL, WEBHOOK_SECRET, testMessage()))->toBe($answer);
+    expect(app(WebhookClient::class)->send(WEBHOOK_URL, clientSecret(), testMessage()))->toBe($answer);
 })->with([
     'ok' => [200, DeliveryAnswer::Delivered],
     'accepted' => [202, DeliveryAnswer::Delivered],
@@ -54,9 +62,9 @@ test('an answered refusal is asked once, an outage a few times', function () {
     $message = testMessage();
     Http::fake(['n8n.example.com/refused' => Http::response(null, 400), 'n8n.example.com/down' => Http::response(null, 503)]);
 
-    app(WebhookClient::class)->send('http://n8n.example.com/refused', WEBHOOK_SECRET, $message);
+    app(WebhookClient::class)->send('http://n8n.example.com/refused', clientSecret(), $message);
     Http::assertSentCount(1);
 
-    app(WebhookClient::class)->send('http://n8n.example.com/down', WEBHOOK_SECRET, $message);
+    app(WebhookClient::class)->send('http://n8n.example.com/down', clientSecret(), $message);
     expect(Http::recorded(fn (Request $request): bool => str_ends_with($request->url(), '/down')))->toHaveCount(DeliveryHttpClient::TRIES);
 });

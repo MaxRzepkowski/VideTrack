@@ -161,8 +161,8 @@ export function outgoingWebhookData(overrides: Partial<OutgoingWebhookData> = {}
         events: ['ratings'],
         enabled: true,
         lastFailure: null,
-        // The public test vector of the Standard Webhooks libraries, no real secret.
-        newSecret: 'whsec_MfKQ9r8GKYqrTwjUPD8ILPZIo2LaLaSw', // gitleaks:allow
+        // The form only puts it in; what makes a secret is the server's to check.
+        newSecret: 'whsec_made-by-the-server',
         ...overrides,
     };
 }

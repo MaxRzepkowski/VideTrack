@@ -25,7 +25,7 @@ const HOME_ASSISTANT = 'http://192.168.1.20:8123/api/webhook/library';
  */
 function webhookForm(array $overrides = []): array
 {
-    return ['label' => '', 'url' => HOME_ASSISTANT, 'secret' => WEBHOOK_SECRET, 'events' => ['ratings', 'lists'], ...$overrides];
+    return ['label' => '', 'url' => HOME_ASSISTANT, 'secret' => WebhookSignature::newSecret(), 'events' => ['ratings', 'lists'], ...$overrides];
 }
 
 test('the page lists the webhooks by name and host, never their address or secret, and offers a fresh secret', function () {
@@ -50,12 +50,14 @@ test('a webhook is added encrypted, on the local network too, named after its ho
     Http::fake();
     $user = User::factory()->create();
 
-    $this->actingAs($user)->post(route('settings.webhooks.store'), webhookForm())->assertSessionHasNoErrors();
+    $form = webhookForm();
+
+    $this->actingAs($user)->post(route('settings.webhooks.store'), $form)->assertSessionHasNoErrors();
 
     $webhook = $user->outgoingWebhooks()->sole();
     expect($webhook->label)->toBe('192.168.1.20:8123')
         ->and($webhook->url)->toBe(HOME_ASSISTANT)
-        ->and($webhook->secret)->toBe(WEBHOOK_SECRET)
+        ->and($webhook->secret)->toBe($form['secret'])
         ->and($webhook->events->all())->toBe([WebhookEventGroup::Ratings, WebhookEventGroup::Lists])
         ->and($webhook->enabled)->toBeTrue()
         ->and((string) DB::table('outgoing_webhooks')->value('url'))->not->toContain('192.168')
@@ -89,13 +91,14 @@ test('an account keeps a limited number of webhooks', function () {
 
 test('a change keeps the saved address and secret when left out, a new address forgets its failure', function () {
     $webhook = OutgoingWebhook::factory()->create(['last_failure' => DeliveryAnswer::Gone]);
+    $saved = $webhook->secret;
     $this->actingAs($webhook->user);
 
     $this->patch(route('settings.webhooks.update', $webhook), ['label' => 'Home', 'events' => ['activity']])->assertSessionHasNoErrors();
     $webhook->refresh();
     expect($webhook->label)->toBe('Home')
         ->and($webhook->url)->toBe(OutgoingWebhookFactory::URL)
-        ->and($webhook->secret)->toBe(WEBHOOK_SECRET)
+        ->and($webhook->secret)->toBe($saved)
         ->and($webhook->events->all())->toBe([WebhookEventGroup::Activity])
         ->and($webhook->last_failure)->toBe(DeliveryAnswer::Gone);
 
@@ -128,7 +131,7 @@ test('the test button sends a signed test now and says when it did not arrive', 
     $this->post(route('settings.webhooks.test', $webhook))->assertSessionHasNoErrors();
     Http::assertSent(fn (Request $request): bool => $request['type'] === 'webhook.test'
         && $request['data']['url'] === url(route('settings.webhooks.index', absolute: false))
-        && signedByWebhook($request));
+        && signedByWebhook($request, $webhook->secret));
     expect($webhook->refresh()->last_failure)->toBeNull();
 
     $this->post(route('settings.webhooks.test', $webhook))->assertSessionHasErrors('test');
