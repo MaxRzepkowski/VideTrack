@@ -3,7 +3,7 @@
 namespace App\Http\Resources\Api\V1;
 
 use App\Catalog\Data\MediaSummary;
-use App\Catalog\ImageUrls;
+use App\Catalog\PublicShapes;
 use App\Models\ListItem;
 use Illuminate\Http\Request;
 
@@ -33,21 +33,8 @@ class ListItemResource extends ApiResource
             'position' => $this->position,
             'addedAt' => $this->created_at?->toIso8601String(),
             'media' => $this->card === null ? null : new MediaSummaryResource($this->card),
-            'person' => $this->person === null ? null : [
-                'provider' => $this->person->provider,
-                'ref' => $this->person->provider_ref,
-                'name' => $this->person->name,
-                'profilePath' => $this->person->profile_path,
-                'profileUrl' => ImageUrls::of($this->person->profile_path, ImageUrls::POSTER),
-            ],
-            'company' => $this->company === null ? null : [
-                'provider' => $this->company->provider,
-                'ref' => $this->company->provider_ref,
-                'kind' => $this->company->kind,
-                'name' => $this->company->name,
-                'logoPath' => $this->company->logo_path,
-                'logoUrl' => ImageUrls::of($this->company->logo_path, ImageUrls::BACKDROP),
-            ],
+            'person' => $this->person === null ? null : PublicShapes::person($this->person),
+            'company' => $this->company === null ? null : PublicShapes::company($this->company),
         ];
     }
 }
