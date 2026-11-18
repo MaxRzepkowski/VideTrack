@@ -1,5 +1,6 @@
 <?php
 
+use App\Catalog\Creators\CreatorKind;
 use App\Catalog\Data\CertificationData;
 use App\Catalog\Data\KeywordData;
 use App\Catalog\Data\MediaDetails;
@@ -202,4 +203,26 @@ test('a film leaves cinemas on its earliest digital or disc release, wherever it
 
     expect($metadata->homeReleaseDate())->toBe('1999-08-15')
         ->and(ItemMetadata::fromStored(null)->homeReleaseDate())->toBeNull();
+});
+
+test('a show comes from its countries of origin, a film from the countries that produced it', function () {
+    $show = ItemMetadata::fromStored(['originCountry' => ['JP'], 'productionCountries' => ['US', 'JP']]);
+    $film = ItemMetadata::fromStored(['productionCountries' => ['GB', 'US']]);
+
+    expect($show->originCountries())->toBe(['JP'])
+        ->and($film->originCountries())->toBe(['GB', 'US'])
+        ->and(ItemMetadata::fromStored(null)->originCountries())->toBe([]);
+});
+
+test('a show\'s networks read back as network links, a nameless one skipped', function () {
+    $metadata = ItemMetadata::fromStored(['networks' => [
+        ['name' => 'Showcase', 'ref' => '49', 'provider' => 'tmdb', 'logoPath' => '/logo.png'],
+        ['ref' => '50'],
+    ]]);
+
+    expect($metadata->networks())->toHaveCount(1)
+        ->and($metadata->networks()[0]->name)->toBe('Showcase')
+        ->and($metadata->networks()[0]->kind)->toBe(CreatorKind::Network)
+        ->and($metadata->networks()[0]->logoPath)->toBe('/logo.png')
+        ->and($metadata->studios())->toBe([]);
 });

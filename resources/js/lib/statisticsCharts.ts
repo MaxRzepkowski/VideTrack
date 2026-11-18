@@ -11,9 +11,19 @@ import { RATING_MAX, RATING_MIN } from '@/lib/ratings';
 /** The scale's steps beneath "nothing": `--color-scale-1` … `--color-scale-4`. */
 export const SCALE_STEPS = 4;
 
+/**
+ * Where a scale is laid: the colour of "nothing" and the scale step its first
+ * step is drawn in. On a card's own ground nothing is `surface-raised` and
+ * step 1 is `scale-1`; a drawing on a raised ground of its own (the map's sea)
+ * lifts both.
+ */
+export type ScaleGround = { none: string; first: number };
+
+export const CARD_GROUND: ScaleGround = { none: 'var(--color-surface-raised)', first: 1 };
+
 /** `var(--color-…)` of a step on the scale; 0 is nothing at all. */
-export function scaleColor(step: number): string {
-    return step <= 0 ? 'var(--color-surface-raised)' : `var(--color-scale-${Math.min(step, SCALE_STEPS)})`;
+export function scaleColor(step: number, ground: ScaleGround = CARD_GROUND): string {
+    return step <= 0 ? ground.none : `var(--color-scale-${Math.min(step + ground.first - 1, SCALE_STEPS)})`;
 }
 
 /**

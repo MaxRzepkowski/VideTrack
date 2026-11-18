@@ -153,4 +153,8 @@ return [
     'this_address_could_not_be_found' => 'This address could not be found.',
     'this_address_is_in_a_private_network' => 'This address is in a private network. Ask the administrator to add it to INTEGRATION_PRIVATE_HOSTS, or to set it up from an administrator account.',
     'estimate_sign' => '≈',
+    'zoom_in' => 'Zoom in',
+    'zoom_in_hint' => 'Zoom in (Ctrl + mouse wheel works too)',
+    'zoom_out' => 'Zoom out',
+    'zoom_reset' => 'Show the whole',
 ];

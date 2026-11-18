@@ -20,6 +20,7 @@ import {
     formatWatchTime,
     formatYearSpan,
     getInitials,
+    languageName,
     localDateKey,
     localDateTimeInput,
     relativeTime,
@@ -49,6 +50,13 @@ describe('codes and the locale', () => {
         setPageProps({ locale: 'pl' });
         expect(countryName('PL')).toBe('Polska');
         expect(countryName('not-a-code')).toBe('not-a-code');
+    });
+
+    it('names a language in the UI language and falls back to the tag', () => {
+        expect(languageName('ja')).toBe('Japanese');
+        setPageProps({ locale: 'pl' });
+        expect(languageName('ja')).toBe('japoński');
+        expect(languageName('not a tag')).toBe('not a tag');
     });
 });
 

@@ -336,3 +336,78 @@ test('taste ranks titles by time, lays their release years out and sums up their
                 ->where('taste.lengths.0.total', 270)
                 ->where('taste.lengths.0.longestRuntime', 180)));
 });
+
+test('origins count the period\'s titles per country and language, and the networks they ran on before any studio', function () {
+    $user = statisticsUser();
+    $network = ['name' => 'Showcase', 'ref' => '49', 'provider' => 'tmdb'];
+    $film = MediaItem::factory()->movie()->create(['metadata' => [
+        'originalLanguage' => 'en',
+        'productionCountries' => ['US', 'GB'],
+        'studios' => [['name' => 'Northwind Pictures', 'ref' => '7', 'provider' => 'tmdb']],
+    ]]);
+    $show = MediaItem::factory()->show()->create(['metadata' => [
+        'originalLanguage' => 'ja',
+        'originCountry' => ['JP'],
+        'productionCountries' => ['US'],
+        'networks' => [$network, $network],
+    ]]);
+    $episode = MediaItem::factory()->episode(MediaItem::factory()->season($show, 1)->create(), 1)->create();
+    $game = MediaItem::factory()->game()->create();
+
+    foreach ([$film, $episode, $game] as $title) {
+        Play::factory()->for($user)->for($title, 'mediaItem')->create(['watched_at' => '2025-03-01 20:00:00']);
+    }
+    projectLibrary($user);
+
+    $this->actingAs($user)
+        ->get(route('statistics', ['period' => 2025]))
+        ->assertInertia(fn (Assert $page) => $page
+            ->missing('origins')
+            ->loadDeferredProps(fn (Assert $reload) => $reload
+                ->where('origins.countries', [['code' => 'GB', 'titles' => 1], ['code' => 'JP', 'titles' => 1], ['code' => 'US', 'titles' => 1]])
+                ->where('origins.countryTypes', ['show', 'movie'])
+                ->where('origins.languages', [['code' => 'en', 'titles' => 1], ['code' => 'ja', 'titles' => 1]])
+                ->where('origins.makerKind', 'network')
+                ->has('origins.makers', 1)
+                ->where('origins.makers.0.creator.name', 'Showcase')
+                ->where('origins.makers.0.titles', 1)
+                ->where('origins.makers.0.best', [0])
+                ->where('origins.titles.0.media.title', $show->title)));
+
+    $this->actingAs($user)
+        ->get(route('statistics', ['period' => 2025, 'type' => 'movie']))
+        ->assertInertia(fn (Assert $page) => $page
+            ->loadDeferredProps(fn (Assert $reload) => $reload
+                ->where('origins.makerKind', 'company')
+                ->where('origins.makers.0.creator.name', 'Northwind Pictures')
+                ->where('origins.languageTypes', ['movie'])));
+});
+
+test('a maker\'s best titles go by the user\'s rating, or everyone else\'s where the user gave none', function () {
+    $user = statisticsUser();
+    $studio = ['studios' => [['name' => 'Northwind Pictures', 'ref' => '7', 'provider' => 'tmdb']]];
+    $liked = MediaItem::factory()->movie()->create(['community_rating' => 5.0, 'metadata' => $studio]);
+    $praised = MediaItem::factory()->movie()->create(['community_rating' => 9.0, 'metadata' => $studio]);
+    $disliked = MediaItem::factory()->movie()->create(['community_rating' => 9.5, 'metadata' => $studio]);
+    $unrated = MediaItem::factory()->movie()->create(['community_rating' => 6.0, 'metadata' => $studio]);
+
+    foreach ([$liked, $praised, $disliked, $unrated] as $film) {
+        Play::factory()->for($user)->for($film, 'mediaItem')->create(['watched_at' => '2025-03-01 20:00:00']);
+    }
+    Rating::factory()->for($user)->for($liked, 'mediaItem')->create(['rating' => 9]);
+    Rating::factory()->for($user)->for($disliked, 'mediaItem')->create(['rating' => 3]);
+    projectLibrary($user);
+
+    $this->actingAs($user)
+        ->get(route('statistics', ['period' => 2025, 'type' => 'movie']))
+        ->assertInertia(fn (Assert $page) => $page
+            ->loadDeferredProps(fn (Assert $reload) => $reload
+                ->where('origins.makers.0.titles', 4)
+                ->where('origins.makers.0.best', [0, 1, 2, 3])
+                ->where('origins.titles.0.media.title', $liked->title)
+                ->where('origins.titles.0.rating', 9)
+                ->where('origins.titles.1.media.title', $praised->title)
+                ->where('origins.titles.1.rating', null)
+                ->where('origins.titles.1.media.communityRating', 9)
+                ->where('origins.titles.3.media.title', $disliked->title)));
+});

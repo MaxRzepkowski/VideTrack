@@ -22,6 +22,15 @@ export function countryName(code: string): string {
     }
 }
 
+/** A language tag as the language's name in the UI language; the tag itself where Intl does not know it. */
+export function languageName(tag: string): string {
+    try {
+        return new Intl.DisplayNames([pageLocale()], { type: 'language' }).of(tag) ?? tag;
+    } catch {
+        return tag;
+    }
+}
+
 /**
  * Hour-cycle override from the user's "Time format" preference: 24 → 24-hour,
  * 12 → 12-hour, anything else (auto) → let the UI locale decide. Combines

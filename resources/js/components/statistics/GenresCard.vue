@@ -1,14 +1,13 @@
 <script setup lang="ts">
 import ShowMoreToggle from '@/components/ShowMoreToggle.vue';
 import ChartCard from '@/components/statistics/ChartCard.vue';
-import { formatNumber, formatRuntime, formatWatchTime } from '@/lib/format';
+import { formatRuntime, formatWatchTime } from '@/lib/format';
 import { RATING_MAX } from '@/lib/ratings';
-import { mediaTypeMeta } from '@/lib/mediaTypes';
 import { formatUnitAmount, type ReadUnit } from '@/lib/progress';
-import { formatRating, GENRE_RATINGS_MIN, rankGenres, type GenreMeasure } from '@/lib/statistics';
+import { countTitles, formatRating, GENRE_RATINGS_MIN, rankGenres, type GenreMeasure } from '@/lib/statistics';
 import { SELECT_CLASS_ON_CARD } from '@/lib/ui';
 import type { GenreStat } from '@/types/generated';
-import { trans, transChoice } from 'laravel-vue-i18n';
+import { trans } from 'laravel-vue-i18n';
 import { computed, ref } from 'vue';
 
 /**
@@ -54,8 +53,7 @@ const options = computed(() => [
     { value: 'rating', label: trans('statistics.measure_rating') },
 ]);
 
-const titles = (count: number): string =>
-    props.type === null ? transChoice('common.count_title', count, { count: formatNumber(count) }) : mediaTypeMeta(props.type).count(count);
+const titles = (count: number): string => countTitles(props.type, count);
 
 const amount = (genre: GenreStat): string =>
     props.readIn === null ? (formatRuntime(genre.amount) ?? formatWatchTime(0)) : formatUnitAmount(props.readIn, genre.amount);

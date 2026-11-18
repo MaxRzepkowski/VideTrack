@@ -5,7 +5,7 @@ import TasteSection from '@/components/statistics/TasteSection.vue';
 import { vTooltip } from '@/directives/tooltip';
 import { mediaSummary, useMediaTypes } from '@/test/factories';
 import { setPageProps } from '@/test/page';
-import type { GenreStat, PeriodSpan, StatisticsTaste } from '@/types/generated';
+import type { GenreStat, PeriodSpan, StatisticsOrigins, StatisticsTaste } from '@/types/generated';
 import { mount } from '@vue/test-utils';
 import { beforeEach, describe, expect, it } from 'vitest';
 
@@ -52,10 +52,15 @@ const taste = (overrides: Partial<StatisticsTaste> = {}): StatisticsTaste => ({
     ...overrides,
 });
 
-const mountSection = (props: { taste: StatisticsTaste; type?: string | null }) =>
+const noOrigins: StatisticsOrigins = { countries: [], countryTypes: [], languages: [], languageTypes: [], makers: [], makerKind: null, titles: [] };
+
+const mountSection = (props: { taste: StatisticsTaste; origins?: StatisticsOrigins; type?: string | null }) =>
     mount(TasteSection, {
-        props: { period: year, type: null, ...props },
-        global: { directives: { tooltip: vTooltip }, stubs: { Link: { props: ['href'], template: '<a :href="href"><slot /></a>' } } },
+        props: { period: year, type: null, origins: noOrigins, ...props },
+        global: {
+            directives: { tooltip: vTooltip },
+            stubs: { Link: { props: ['href'], template: '<a :href="href"><slot /></a>' }, WorldMap: true },
+        },
     });
 
 describe('TasteSection', () => {
@@ -110,5 +115,47 @@ describe('TasteSection', () => {
 
         expect(text).toMatch(/300\s*pages/);
         expect(text).toContain('≈ 5h');
+    });
+
+    it('says where the titles come from and which networks they ran on, and hides both without such data', () => {
+        const origins: StatisticsOrigins = {
+            countries: [
+                { code: 'JP', titles: 3 },
+                { code: 'US', titles: 1 },
+            ],
+            countryTypes: ['show', 'movie'],
+            languages: [{ code: 'ja', titles: 3 }],
+            languageTypes: ['show'],
+            makers: [{ creator: { name: 'Showcase', kind: 'network', ref: '49', provider: 'tmdb', logoPath: null }, titles: 2, best: [0] }],
+            makerKind: 'network',
+            titles: [{ media: mediaSummary({ type: 'show', title: 'Harbour Lights', year: 2019, communityRating: 8.25 }), rating: null }],
+        };
+        const text = mountSection({ taste: taste(), origins }).text();
+
+        expect(text).toContain('Where titles come from');
+        expect(text).toContain('Japan');
+        expect(text).toContain('Japanese');
+        expect(text).toContain('3 titles');
+        expect(text).toContain('Which networks and services titles ran on');
+        expect(text).toContain('Showcase');
+        expect(text).toContain('Best rated: Showcase');
+        expect(text).toContain('Harbour Lights');
+        expect(text).toContain('8.3');
+
+        const films = mountSection({
+            taste: taste(),
+            type: 'movie',
+            origins: { ...origins, countries: [], countryTypes: [], languages: [{ code: 'en', titles: 2 }], languageTypes: ['movie'] },
+        }).text();
+
+        expect(films).toContain('Where movies come from');
+        expect(films).toContain('English');
+        expect(films).toContain('2 movies');
+        expect(films).not.toContain('Titles from a country');
+
+        const bare = mountSection({ taste: taste() }).text();
+
+        expect(bare).not.toContain('Where titles come from');
+        expect(bare).not.toContain('Which networks');
     });
 });
