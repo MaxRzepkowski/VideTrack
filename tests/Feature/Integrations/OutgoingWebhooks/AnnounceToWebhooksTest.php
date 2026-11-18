@@ -69,7 +69,7 @@ test('a rating reaches a webhook that ticked ratings, signed, with the card the 
     app(RateItem::class)->execute($webhook->user, $movie, 8);
 
     Http::assertSentCount(1);
-    Http::assertSent(fn (Request $request): bool => signedByWebhook($request)
+    Http::assertSent(fn (Request $request): bool => signedByWebhook($request, $webhook->secret)
         && $request['type'] === 'rating.changed'
         && $request['source'] === 'ui'
         && $request['data']['media']['title'] === 'Dune'
@@ -118,7 +118,7 @@ test('a notification reaches a webhook under the id the API gives it, as the API
     app(SendMediaNotification::class)->execute($webhook->user, premiereEvent());
 
     $stored = $webhook->user->notifications()->sole();
-    Http::assertSent(fn (Request $request): bool => signedByWebhook($request)
+    Http::assertSent(fn (Request $request): bool => signedByWebhook($request, $webhook->secret)
         && $request->header('webhook-id')[0] === $stored->id
         && $request['type'] === 'notification.created'
         && ! array_key_exists('source', $request->data())
@@ -150,7 +150,7 @@ test('every webhook that ticked the group gets the same message, and other accou
 
     Queue::assertPushed(DeliverOutgoingWebhook::class, 2);
     // The address and the secret stay out of the queue.
-    expect(serialize(Queue::pushed(DeliverOutgoingWebhook::class)->first()))->not->toContain(OutgoingWebhookFactory::URL)->not->toContain(WEBHOOK_SECRET);
+    expect(serialize(Queue::pushed(DeliverOutgoingWebhook::class)->first()))->not->toContain(OutgoingWebhookFactory::URL)->not->toContain($user->outgoingWebhooks()->firstOrFail()->secret);
 });
 
 test('an import tells no webhook, a scrobble does and says so', function () {

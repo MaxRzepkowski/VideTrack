@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Integrations\OutgoingWebhooks\WebhookEventGroup;
+use App\Integrations\OutgoingWebhooks\WebhookSignature;
 use App\Models\OutgoingWebhook;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -12,9 +13,6 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class OutgoingWebhookFactory extends Factory
 {
-    /** The secret of the vector the Standard Webhooks libraries test themselves against: public, no real secret. */
-    public const SECRET = 'whsec_MfKQ9r8GKYqrTwjUPD8ILPZIo2LaLaSw'; // gitleaks:allow
-
     public const URL = 'http://n8n.example.com/webhook/abc';
 
     /**
@@ -26,7 +24,7 @@ class OutgoingWebhookFactory extends Factory
             'user_id' => User::factory(),
             'label' => 'n8n',
             'url' => self::URL,
-            'secret' => self::SECRET,
+            'secret' => WebhookSignature::newSecret(),
             'events' => WebhookEventGroup::cases(),
         ];
     }
