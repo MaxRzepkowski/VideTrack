@@ -67,8 +67,8 @@ const activeDiscoverType = computed(() => {
     return match?.[1] ? decodeURIComponent(match[1]) : null;
 });
 
-// The primary nav collapses into a drawer below md; navigating closes it.
-const mobileNavOpen = ref(false);
+// Navigating from the drawer closes it.
+const navDrawerOpen = ref(false);
 
 // Header bell: unread counter + latest notifications (null for guests). Kept
 // current while the tab stays open — the shared prop alone would age until the
@@ -123,12 +123,14 @@ async function openNotification(item: NotificationEntry, event: MouseEvent): Pro
 <template>
     <header class="bg-surface-base/90 sticky top-0 z-40 h-14 border-b backdrop-blur-md md:h-18">
         <div class="max-w-content mx-auto flex h-full w-full items-center justify-between gap-3 px-3 md:gap-8 md:px-10">
-            <div class="flex min-w-0 items-center gap-2 md:gap-10">
-                <!-- Hamburger opens the mobile nav drawer (md and below) -->
-                <DialogRoot v-model:open="mobileNavOpen">
+            <div class="flex min-w-0 items-center gap-2 xl:gap-10">
+                <!-- Hamburger opens the nav drawer below `xl`: the full row of menu
+                     entries beside the logo and the header's buttons needs about
+                     1050px, more than `lg` gives, so a tablet gets the drawer too. -->
+                <DialogRoot v-model:open="navDrawerOpen">
                     <DialogTrigger
                         :aria-label="trans('app.open_menu')"
-                        class="text-ink hover:bg-surface flex size-11 shrink-0 items-center justify-center rounded-xl transition-colors duration-150 md:hidden"
+                        class="text-ink hover:bg-surface flex size-11 shrink-0 items-center justify-center rounded-xl transition-colors duration-150 xl:hidden"
                     >
                         <Menu class="size-5.5" />
                     </DialogTrigger>
@@ -144,7 +146,7 @@ async function openNotification(item: NotificationEntry, event: MouseEvent): Pro
                             </VisuallyHidden>
 
                             <div class="mb-2 flex items-center justify-between pl-2">
-                                <Link :href="route('dashboard')" class="shrink-0" @click="mobileNavOpen = false">
+                                <Link :href="route('dashboard')" class="shrink-0" @click="navDrawerOpen = false">
                                     <AppLogo />
                                 </Link>
                                 <DialogClose
@@ -160,7 +162,7 @@ async function openNotification(item: NotificationEntry, event: MouseEvent): Pro
                                     :href="item.href"
                                     class="flex items-center gap-3 rounded-xl px-3 py-3 text-base font-semibold transition-colors duration-150"
                                     :class="isActive(item) ? 'bg-brand/80 text-on-accent' : 'text-ink-muted hover:bg-surface hover:text-ink'"
-                                    @click="mobileNavOpen = false"
+                                    @click="navDrawerOpen = false"
                                 >
                                     <component :is="item.icon" class="size-5" />
                                     <span>{{ item.title }}</span>
@@ -178,7 +180,7 @@ async function openNotification(item: NotificationEntry, event: MouseEvent): Pro
                                         class="group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-semibold transition-colors duration-150"
                                         :class="activeDiscoverType === entry.code ? TINT.activeRow : `text-ink-muted ${TINT.row}`"
                                         :style="{ '--tint': entry.color }"
-                                        @click="mobileNavOpen = false"
+                                        @click="navDrawerOpen = false"
                                     >
                                         <component
                                             :is="entry.icon"
@@ -196,7 +198,7 @@ async function openNotification(item: NotificationEntry, event: MouseEvent): Pro
                 <Link :href="route('dashboard')" class="shrink-0">
                     <AppLogo />
                 </Link>
-                <nav class="hidden items-center gap-1 md:flex">
+                <nav class="hidden items-center gap-1 xl:flex">
                     <template v-for="item in mainNavItems" :key="item.href">
                         <!-- Discover doubles as a mega-menu: the trigger still navigates to /discover,
                              hovering reveals a panel of every discoverable type. -->
