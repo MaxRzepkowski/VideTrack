@@ -3,11 +3,8 @@
 namespace App\Suggestions;
 
 use App\Catalog\CardSnapshot;
-use App\Catalog\Contracts\SupportsCrewRoles;
 use App\Catalog\Data\MediaSummary;
-use App\Catalog\Department;
 use App\Catalog\MediaKind;
-use App\Catalog\ProviderRegistry;
 use App\Catalog\Sets\SetStore;
 use App\Models\CatalogSetTitle;
 use App\Models\LibraryEntry;
@@ -32,27 +29,7 @@ final readonly class PeopleWork
         private SetStore $sets,
         private SuggestionFilter $filter,
         private PersonTitles $personTitles,
-        private ProviderRegistry $providers,
     ) {}
-
-    /**
-     * The job names that single out a department's lead, as the providers
-     * of this instance write them.
-     *
-     * @return list<string>
-     */
-    public function leadJobs(Department $department): array
-    {
-        $jobs = [];
-
-        foreach ($this->providers->allSupporting(SupportsCrewRoles::class) as $provider) {
-            if ($provider instanceof SupportsCrewRoles) {
-                array_push($jobs, ...$provider->leadJobs($department));
-            }
-        }
-
-        return array_values(array_unique($jobs));
-    }
 
     /**
      * Everyone credited in the craft on a film the user has finished, with
