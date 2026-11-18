@@ -3,6 +3,7 @@
 namespace App\Suggestions\Sources;
 
 use App\Catalog\Department;
+use App\Catalog\LeadJobs;
 use App\Models\User;
 use App\Suggestions\Contracts\SuggestionSource;
 use App\Suggestions\Data\Craft;
@@ -19,14 +20,17 @@ use App\Suggestions\PeopleWork;
  */
 abstract readonly class MissingFromCrew implements SuggestionSource
 {
-    public function __construct(private PeopleWork $people) {}
+    public function __construct(
+        private PeopleWork $people,
+        private LeadJobs $leadJobs,
+    ) {}
 
     /** The department whose lead the shelf is about. */
     abstract protected function department(): Department;
 
     private function craft(): Craft
     {
-        return new Craft($this->department(), $this->people->leadJobs($this->department()));
+        return new Craft($this->department(), $this->leadJobs->in($this->department()));
     }
 
     /** The `tracker.suggestions` entry holding this shelf's bars. */
