@@ -5,7 +5,7 @@ import PageMasthead from '@/components/PageMasthead.vue';
 import PageToolbar from '@/components/PageToolbar.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { pageLocale } from '@/lib/pageContext';
-import { SELECT_CLASS } from '@/lib/ui';
+import { ICON_BUTTON_CLASS, SELECT_CLASS } from '@/lib/ui';
 import { webcalUrl } from '@/lib/urls';
 import type { CalendarMonth } from '@/types/media';
 import { Head, Link, router } from '@inertiajs/vue3';
@@ -81,19 +81,10 @@ onBeforeUnmount(() => clearTimeout(jumpTimer));
                             <CalendarPlus class="size-4" />
                             {{ trans('common.subscribe') }}
                         </a>
-                        <a
-                            v-tooltip="trans('common.download_ics')"
-                            :href="feedUrl"
-                            class="border-line bg-surface text-ink-secondary hover:border-line-strong flex size-10 items-center justify-center rounded-lg border transition-colors duration-150"
-                        >
+                        <a v-tooltip="trans('common.download_ics')" :href="feedUrl" :class="ICON_BUTTON_CLASS">
                             <Download class="size-4" />
                         </a>
-                        <a
-                            v-tooltip="trans('common.rss_feed')"
-                            :aria-label="trans('common.rss_feed')"
-                            :href="rssUrl"
-                            class="border-line bg-surface text-ink-secondary hover:border-line-strong flex size-10 items-center justify-center rounded-lg border transition-colors duration-150"
-                        >
+                        <a v-tooltip="trans('common.rss_feed')" :aria-label="trans('common.rss_feed')" :href="rssUrl" :class="ICON_BUTTON_CLASS">
                             <Rss class="size-4" />
                         </a>
                     </div>
@@ -123,7 +114,7 @@ onBeforeUnmount(() => clearTimeout(jumpTimer));
                         v-tooltip="trans('calendar.previous_month')"
                         data-toolbar-control
                         :href="route('calendar', { date: prev })"
-                        class="border-line bg-surface text-ink-secondary hover:border-line-strong flex size-10 items-center justify-center rounded-lg border transition-colors duration-150"
+                        :class="ICON_BUTTON_CLASS"
                     >
                         <ChevronLeft class="size-4" />
                     </Link>
@@ -138,7 +129,7 @@ onBeforeUnmount(() => clearTimeout(jumpTimer));
                         v-tooltip="trans('calendar.next_month')"
                         data-toolbar-control
                         :href="route('calendar', { date: next })"
-                        class="border-line bg-surface text-ink-secondary hover:border-line-strong flex size-10 items-center justify-center rounded-lg border transition-colors duration-150"
+                        :class="ICON_BUTTON_CLASS"
                     >
                         <ChevronRight class="size-4" />
                     </Link>
