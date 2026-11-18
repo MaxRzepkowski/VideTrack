@@ -31,8 +31,8 @@ tells you when the next episode or release is out, and keeps all of it on your o
 - 📅 Follow upcoming releases in a calendar and countdowns, or subscribe to them in your own calendar app or feed reader.
 - 🔔 Ring the bell on a title, a person or a studio to hear about new releases, in the app, on Discord or through Apprise (Telegram, ntfy, e-mail…).
 - ⭐ Rate, favorite and collect titles in a backlog and in your own lists.
-- 📊 Keep a full history with rewatches and see how much time went into it.
-- 📈 See your statistics for any year or range of days: time spent, activity, genres, where titles come from, who made them and how your ratings compare with everyone else's.
+- 📜 Keep a full history with rewatches and see how much time went into it.
+- 📊 See your statistics for any year or range of days: time spent, activity, genres, where titles come from, who made them and how your ratings compare with everyone else's.
 - ✨ Get suggestions based on what you finished. They wait on their own page and never nag.
 - 📥 Import from Trakt, Letterboxd, TV Time, Simkl, IMDb, Goodreads, StoryGraph, MyAnimeList, AniList, Kitsu, Steam and more.
 - 📡 Log what you watch automatically from Plex, Jellyfin, Emby or Tautulli.
