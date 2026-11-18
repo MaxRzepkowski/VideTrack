@@ -2,8 +2,8 @@
 
 namespace App\Integrations\Apprise;
 
-use App\Notifications\Channels\ChannelHttpClient;
-use App\Notifications\Channels\DeliveryAnswer;
+use App\Support\Delivery\DeliveryAnswer;
+use App\Support\Delivery\DeliveryHttpClient;
 use App\Support\Payload;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\PendingRequest;
@@ -29,7 +29,7 @@ final readonly class AppriseClient
      */
     private const DETAILS_TIMEOUT_SECONDS = 3;
 
-    public function __construct(private ChannelHttpClient $http) {}
+    public function __construct(private DeliveryHttpClient $http) {}
 
     /**
      * What the container says about every service it delivers to: their

@@ -5,7 +5,7 @@ namespace App\Jobs;
 use App\Models\NotificationChannel;
 use App\Notifications\Channels\ChannelRegistry;
 use App\Notifications\Channels\Data\ChannelMessage;
-use App\Notifications\Channels\DeliveryAnswer;
+use App\Support\Delivery\DeliveryAnswer;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Foundation\Queue\Queueable;

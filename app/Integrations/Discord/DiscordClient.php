@@ -2,8 +2,8 @@
 
 namespace App\Integrations\Discord;
 
-use App\Notifications\Channels\ChannelHttpClient;
-use App\Notifications\Channels\DeliveryAnswer;
+use App\Support\Delivery\DeliveryAnswer;
+use App\Support\Delivery\DeliveryHttpClient;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\Response;
 
@@ -20,7 +20,7 @@ final readonly class DiscordClient
     /** Deleted in Discord, or the address mistyped. */
     private const GONE = [401, 404];
 
-    public function __construct(private ChannelHttpClient $http) {}
+    public function __construct(private DeliveryHttpClient $http) {}
 
     /**
      * @param  array<string, mixed>  $message  a Discord webhook payload (content, embeds)

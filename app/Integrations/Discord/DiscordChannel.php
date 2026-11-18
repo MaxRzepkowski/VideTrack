@@ -7,7 +7,7 @@ use App\Notifications\Channels\Contracts\ChannelDriver;
 use App\Notifications\Channels\Data\ChannelDigest;
 use App\Notifications\Channels\Data\ChannelKind;
 use App\Notifications\Channels\Data\ChannelMessage;
-use App\Notifications\Channels\DeliveryAnswer;
+use App\Support\Delivery\DeliveryAnswer;
 use App\Support\Forms\CredentialField;
 use App\Support\Forms\CredentialFieldType;
 use App\Support\Payload;

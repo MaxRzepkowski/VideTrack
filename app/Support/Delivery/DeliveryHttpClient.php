@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Notifications\Channels;
+namespace App\Support\Delivery;
 
 use App\Support\HttpRetry;
 use Closure;
@@ -10,13 +10,13 @@ use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
 
 /**
- * How every channel's client posts and reads the answer: a bounded wait, a
- * quick second try only for a transient failure (never an answered 4xx), the
- * instance's User-Agent, and the status read as a DeliveryAnswer. Never
- * throws, so a dead channel fails no job. Which statuses say the address is
- * gone is the service's own.
+ * How every client that delivers a message posts and reads the answer: a
+ * bounded wait, a quick second try only for a transient failure (never an
+ * answered 4xx), the instance's User-Agent, and the status read as a
+ * DeliveryAnswer. Never throws, so a dead receiver fails no job. Which
+ * statuses say the address is gone is the receiver's own.
  */
-final readonly class ChannelHttpClient
+final readonly class DeliveryHttpClient
 {
     /** Tries of one message within one delivery; the queue spaces out any later ones. */
     public const TRIES = 2;

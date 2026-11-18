@@ -6,8 +6,8 @@ use App\Models\User;
 use App\Notifications\Channels\Data\ChannelDigest;
 use App\Notifications\Channels\Data\ChannelKind;
 use App\Notifications\Channels\Data\ChannelMessage;
-use App\Notifications\Channels\DeliveryAnswer;
 use App\Notifications\Channels\UnusableChannelSettings;
+use App\Support\Delivery\DeliveryAnswer;
 
 /**
  * A way notifications leave the instance, for one service or many (its

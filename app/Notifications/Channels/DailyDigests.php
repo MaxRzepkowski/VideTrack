@@ -6,6 +6,7 @@ use App\Models\NotificationChannel;
 use App\Models\User;
 use App\Notifications\Channels\Data\ChannelDigest;
 use App\Notifications\MediaEvent;
+use App\Support\Delivery\DeliveryAnswer;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\HasMany;

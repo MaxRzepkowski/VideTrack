@@ -5,7 +5,7 @@ namespace App\Actions\Users;
 use App\Models\NotificationChannel;
 use App\Notifications\Channels\ChannelMessages;
 use App\Notifications\Channels\ChannelRegistry;
-use App\Notifications\Channels\DeliveryAnswer;
+use App\Support\Delivery\DeliveryAnswer;
 
 /**
  * "Send a test": one message to the channel now, outside the queue, so the

@@ -9,7 +9,7 @@ use App\Notifications\Channels\ChannelMessages;
 use App\Notifications\Channels\ChannelMode;
 use App\Notifications\Channels\ChannelRegistry;
 use App\Notifications\Channels\DailyDigests;
-use App\Notifications\Channels\DeliveryAnswer;
+use App\Support\Delivery\DeliveryAnswer;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
