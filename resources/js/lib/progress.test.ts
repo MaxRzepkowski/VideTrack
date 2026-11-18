@@ -1,5 +1,6 @@
 import {
     activityProgress,
+    amountTerms,
     counterView,
     episodeProgressRows,
     formatProgress,
@@ -14,6 +15,7 @@ import {
     progressInputStep,
     progressRemaining,
     progressToInput,
+    statCounts,
 } from '@/lib/progress';
 import { mediaSummary, useMediaTypes } from '@/test/factories';
 import type { ActivityEntry } from '@/types/media';
@@ -181,5 +183,25 @@ describe('episodeProgressRows', () => {
     it('has no hint before anything aired', () => {
         expect(episodeProgressRows({ airedEpisodes: 0 })).toBeNull();
         expect(episodeProgressRows({})).toBeNull();
+    });
+});
+
+describe('amountTerms', () => {
+    it('spells out time for what is watched or played, the unit for what is read', () => {
+        expect(amountTerms('movie', 135)).toEqual([
+            { value: '2', unit: 'hours' },
+            { value: '15', unit: 'minutes' },
+        ]);
+        expect(amountTerms('book', 1234)).toEqual([{ value: '1,234', unit: 'pages' }]);
+    });
+});
+
+describe('statCounts', () => {
+    it("names what a type's totals are made of, a read type with what was read", () => {
+        useMediaTypes();
+
+        expect(statCounts('movie', { minutes: 250, watched: 2, plays: 2, titles: 2, estimatedMinutes: null })).toEqual(['2 movies']);
+        expect(statCounts('show', { minutes: 420, watched: 10, plays: 10, titles: 1, estimatedMinutes: null })).toEqual(['1 show', '10 episodes']);
+        expect(statCounts('book', { minutes: 1355, watched: 8, plays: 8, titles: 8, estimatedMinutes: 1626 })).toEqual(['8 books', '1,355 pages']);
     });
 });

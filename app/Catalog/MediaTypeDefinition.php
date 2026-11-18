@@ -60,6 +60,16 @@ final readonly class MediaTypeDefinition
     }
 
     /**
+     * Whether every attempt at a title of this type counts towards its
+     * titles (a game, a book: dropped ones too), not only a finished one (a
+     * film, an episode — a dropped film is not a watched film).
+     */
+    public function countsEveryAttempt(): bool
+    {
+        return $this->progressUnit !== null;
+    }
+
+    /**
      * A title released whole, once (a film): watched in one go, with no parts
      * and no counter. It opens in cinemas and comes home later — the two
      * moments a calendar and a creator's bell follow apart.

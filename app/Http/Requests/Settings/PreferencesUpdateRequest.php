@@ -7,6 +7,7 @@ use App\Accounts\Preferences\EpisodeImage;
 use App\Accounts\Preferences\PersonFollowScope;
 use App\Accounts\Preferences\TimeFormat;
 use App\Accounts\Preferences\UpNextTarget;
+use App\Accounts\Preferences\UserPreferences;
 use App\Accounts\Preferences\WeekStart;
 use App\Enums\ReleaseDateMode;
 use App\Enums\UpNextSort;
@@ -82,12 +83,16 @@ class PreferencesUpdateRequest extends FormRequest
             'up_next_keep_finished' => ['sometimes', 'boolean'],
             // How the dashboard's in-progress sections are ordered.
             'up_next_sort' => ['sometimes', 'string', Rule::enum(UpNextSort::class)],
+            // How many of each unit the user reads in an hour, for the estimated reading time.
+            'reading_pace_pages' => ['sometimes', 'integer', 'min:1', 'max:'.UserPreferences::READING_PACE_MAX],
+            'reading_pace_chapters' => ['sometimes', 'integer', 'min:1', 'max:'.UserPreferences::READING_PACE_MAX],
+            'reading_pace_issues' => ['sometimes', 'integer', 'min:1', 'max:'.UserPreferences::READING_PACE_MAX],
         ];
     }
 
     /**
      * The settings the page sent, as the preferences store them: flags as
-     * booleans, a country in capitals.
+     * booleans, numbers as integers, a country in capitals.
      *
      * @return array<string, mixed>
      */
@@ -99,6 +104,10 @@ class PreferencesUpdateRequest extends FormRequest
         foreach (array_keys($preferences) as $key) {
             if (is_array($rules[$key] ?? null) && in_array('boolean', $rules[$key], true)) {
                 $preferences[$key] = $this->boolean($key);
+            }
+
+            if (is_array($rules[$key] ?? null) && in_array('integer', $rules[$key], true)) {
+                $preferences[$key] = $this->integer($key);
             }
         }
 

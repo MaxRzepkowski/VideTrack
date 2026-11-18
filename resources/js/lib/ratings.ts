@@ -1,5 +1,9 @@
 import { trans } from 'laravel-vue-i18n';
 
+/** The scale a user's rating is given on, as the server keeps it (RatingScale). */
+export const RATING_MIN = 1;
+export const RATING_MAX = 10;
+
 /** Community rating (0–10) as the percentage badge used across the app. */
 export function ratingPercent(rating: number | null): string | null {
     return rating === null ? null : `${Math.round(rating * 10)}%`;

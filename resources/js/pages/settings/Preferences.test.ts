@@ -1,5 +1,5 @@
 import Preferences from '@/pages/settings/Preferences.vue';
-import { userPreferences } from '@/test/factories';
+import { useMediaTypes, userPreferences } from '@/test/factories';
 import { setPageProps } from '@/test/page';
 import { mount } from '@vue/test-utils';
 import { describe, expect, it, vi } from 'vitest';
@@ -51,5 +51,15 @@ describe('Preferences', () => {
         expect(values('time_format')).toEqual(['auto', '24', '12']);
         expect(values('week_start')).toEqual(['auto', 'monday', 'sunday']);
         expect(values('up-next-sort')).toEqual(['activity', 'remaining', 'released', 'title']);
+    });
+
+    it('asks the reading pace of each type that is read, starting from the saved one', () => {
+        useMediaTypes();
+        const wrapper = page(null);
+
+        expect((wrapper.find('input#reading_pace_pages').element as HTMLInputElement).value).toBe('50');
+        expect(wrapper.find('input#reading_pace_chapters').exists()).toBe(true);
+        expect(wrapper.find('input#reading_pace_issues').exists()).toBe(true);
+        expect(wrapper.text()).toContain('pages per hour');
     });
 });

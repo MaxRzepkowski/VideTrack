@@ -3,7 +3,6 @@
 return [
     'activity_date' => 'Data aktywności',
     'all_kinds' => 'Wszystkie rodzaje',
-    'count_title' => ':count tytuł|:count tytuły|:count tytułów',
     'grid' => 'Siatka',
     'grouped_by_day' => 'Grupuj po dniach',
     'hide_listed' => 'Ukryj z list',

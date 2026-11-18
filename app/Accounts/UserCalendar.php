@@ -21,6 +21,12 @@ final readonly class UserCalendar
         return new self($user->preferences->effectiveTimezone());
     }
 
+    /** A moment as the user's clock showed it: their hour, their weekday. */
+    public function moment(DateTimeInterface $moment): CarbonImmutable
+    {
+        return CarbonImmutable::instance($moment)->setTimezone($this->timezone);
+    }
+
     /**
      * The calendar day (Y-m-d) a moment fell on for the user; null for no moment.
      *
@@ -28,7 +34,7 @@ final readonly class UserCalendar
      */
     public function day(?DateTimeInterface $moment): ?string
     {
-        return $moment === null ? null : CarbonImmutable::instance($moment)->setTimezone($this->timezone)->toDateString();
+        return $moment === null ? null : $this->moment($moment)->toDateString();
     }
 
     /**

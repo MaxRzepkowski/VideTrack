@@ -8,8 +8,9 @@ import { usePreferences } from '@/composables/usePreferences';
 import { useUnsavedChanges } from '@/composables/useUnsavedChanges';
 import AppLayout from '@/layouts/AppLayout.vue';
 import SettingsLayout from '@/layouts/settings/Layout.vue';
+import { mediaTypeMeta, typeCountingIn } from '@/lib/mediaTypes';
 import { SETTINGS_CARD_CLASS, SETTINGS_FIELD_CLASS } from '@/lib/ui';
-import type { TimeFormat, UpNextSort, UpNextTarget, WeekStart } from '@/types/generated';
+import type { ProgressUnit, TimeFormat, UpNextSort, UpNextTarget, WeekStart } from '@/types/generated';
 import { Head, useForm } from '@inertiajs/vue3';
 import { trans } from 'laravel-vue-i18n';
 import { toast } from 'vue-sonner';
@@ -31,6 +32,9 @@ const form = useForm({
     up_next_target: preferences.up_next_target,
     up_next_keep_finished: preferences.up_next_keep_finished,
     up_next_sort: preferences.up_next_sort,
+    reading_pace_pages: preferences.reading_pace_pages,
+    reading_pace_chapters: preferences.reading_pace_chapters,
+    reading_pace_issues: preferences.reading_pace_issues,
 });
 
 const defaultRegionLabel = props.regions[props.defaultRegion] ?? props.defaultRegion;
@@ -79,6 +83,23 @@ const UP_NEXT_TARGETS: Choice<UpNextTarget>[] = [
     { value: 'season', label: () => trans('settings.the_season') },
     { value: 'show', label: () => trans('settings.the_show') },
 ];
+
+/** A field per unit something is read in, each under the type read in it; a type switched off has none. */
+const READING_PACES: {
+    unit: Exclude<ProgressUnit, 'minutes'>;
+    field: 'reading_pace_pages' | 'reading_pace_chapters' | 'reading_pace_issues';
+    perHour: () => string;
+}[] = [
+    { unit: 'pages', field: 'reading_pace_pages', perHour: () => trans('settings.pages_per_hour') },
+    { unit: 'chapters', field: 'reading_pace_chapters', perHour: () => trans('settings.chapters_per_hour') },
+    { unit: 'issues', field: 'reading_pace_issues', perHour: () => trans('settings.issues_per_hour') },
+];
+
+const readingPaces = READING_PACES.flatMap((pace) => {
+    const type = typeCountingIn(pace.unit);
+
+    return type === null ? [] : [{ ...pace, type }];
+});
 
 const UP_NEXT_SORTS: Choice<UpNextSort>[] = [
     { value: 'activity', label: () => trans('common.last_activity') },
@@ -184,6 +205,39 @@ const UP_NEXT_SORTS: Choice<UpNextSort>[] = [
                             <option v-for="(name, code) in regions" :key="code" :value="code">{{ name }}</option>
                         </select>
                         <InputError class="mt-2" :message="form.errors.region" />
+                    </div>
+
+                    <div v-if="readingPaces.length > 0" :class="SETTINGS_CARD_CLASS">
+                        <div class="text-ink text-base font-semibold">{{ trans('settings.reading_pace') }}</div>
+                        <p class="text-ink-muted mt-0.5 mb-3 text-sm">{{ trans('settings.reading_pace_description') }}</p>
+                        <ul class="divide-line-subtle m-0 list-none divide-y p-0">
+                            <li v-for="pace in readingPaces" :key="pace.unit" class="py-3.5 first:pt-1 last:pb-1">
+                                <div class="flex flex-wrap items-center justify-between gap-x-6 gap-y-2">
+                                    <Label :for="pace.field" class="text-ink flex items-center gap-2.5 text-base font-semibold">
+                                        <component
+                                            :is="mediaTypeMeta(pace.type).icon"
+                                            class="size-5 shrink-0"
+                                            :style="{ color: mediaTypeMeta(pace.type).color }"
+                                            aria-hidden="true"
+                                        />
+                                        {{ mediaTypeMeta(pace.type).plural() }}
+                                    </Label>
+                                    <div class="flex items-center gap-3">
+                                        <input
+                                            :id="pace.field"
+                                            v-model.number="form[pace.field]"
+                                            type="number"
+                                            inputmode="numeric"
+                                            min="1"
+                                            step="1"
+                                            :class="[SETTINGS_FIELD_CLASS, 'w-28 text-right tabular-nums']"
+                                        />
+                                        <span class="text-ink-muted w-44 text-sm">{{ pace.perHour() }}</span>
+                                    </div>
+                                </div>
+                                <InputError class="mt-2" :message="form.errors[pace.field]" />
+                            </li>
+                        </ul>
                     </div>
                 </fieldset>
                 <SettingsSaveBar :dirty="form.isDirty" :processing="form.processing" @save="submit" @discard="discard" />

@@ -179,4 +179,9 @@ return [
     'saved_settings' => 'Saved',
     'edit_settings' => 'Edit settings',
     'saved_leave_empty_to_keep' => 'Saved. Leave empty to keep it.',
+    'reading_pace' => 'Reading pace',
+    'reading_pace_description' => 'How much you read in an hour. Statistics turn what you read into an estimated time with it.',
+    'pages_per_hour' => 'pages per hour',
+    'chapters_per_hour' => 'chapters per hour',
+    'issues_per_hour' => 'issues per hour',
 ];

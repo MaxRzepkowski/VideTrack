@@ -31,7 +31,7 @@ useReloadAfterWrites(['favorites', 'favoritesCount', 'stats']);
 // one profile to the next, and setup does not run again.
 const favoritesHref = computed(() => route('users.favorites', { user: props.profile.username }));
 
-const favoritesLabel = computed(() => transChoice('users.count_title', props.favoritesCount, { count: String(props.favoritesCount) }));
+const favoritesLabel = computed(() => transChoice('common.count_title', props.favoritesCount, { count: String(props.favoritesCount) }));
 
 // The dashboard's tile set, counted for whoever this profile belongs to:
 // the two core types always, the optional modules only where this instance

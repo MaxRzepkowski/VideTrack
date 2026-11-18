@@ -83,6 +83,17 @@ final class MediaTypeRegistry
     }
 
     /**
+     * Types a title is searched for and kept under as a whole (a film, a
+     * show, a game): the types a statistic or a tile is counted per.
+     *
+     * @return list<string>
+     */
+    public function titleCodes(): array
+    {
+        return array_keys(array_filter($this->definitions, fn (MediaTypeDefinition $d): bool => $d->isRoot() && $d->searchable));
+    }
+
+    /**
      * @return list<string>
      */
     public function searchableCodes(): array

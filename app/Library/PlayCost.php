@@ -5,6 +5,10 @@ namespace App\Library;
 use App\Catalog\MediaTypeDefinition;
 use App\Catalog\MediaTypeRegistry;
 use App\Enums\PlayOutcome;
+use Illuminate\Contracts\Database\Query\Expression;
+use Illuminate\Database\Query\Builder;
+use Illuminate\Database\Query\JoinClause;
+use Illuminate\Support\Facades\DB;
 
 /**
  * What one history entry cost, in its type's unit: the minutes a viewing
@@ -69,6 +73,30 @@ final readonly class PlayCost
             ." else {$viewing} end";
 
         return [$sql, [...$counting, ...$progress, PlayOutcome::Completed->value]];
+    }
+
+    /**
+     * Joins a play (`plays` joined with its item as `media_items`) to the
+     * title the library projection files it under, as `roots` — the title
+     * sql() prices an entry against when the entry has no runtime of its own.
+     */
+    public function joinTitles(Builder $query): Builder
+    {
+        return $query
+            ->leftJoin('library_entries', fn (JoinClause $join) => $join
+                ->on('library_entries.media_item_id', '=', 'plays.media_item_id')
+                ->on('library_entries.user_id', '=', 'plays.user_id'))
+            ->leftJoin('media_items as roots', 'roots.id', '=', 'library_entries.root_id');
+    }
+
+    /**
+     * The same title's runtime as a column of a scan that cannot take the
+     * join (a feed shared with other sources), as `title_runtime`.
+     */
+    public function titleRuntimeColumn(): Expression
+    {
+        return DB::raw('(select roots.runtime from library_entries join media_items as roots on roots.id = library_entries.root_id'
+            .' where library_entries.user_id = plays.user_id and library_entries.media_item_id = plays.media_item_id) as title_runtime');
     }
 
     /**

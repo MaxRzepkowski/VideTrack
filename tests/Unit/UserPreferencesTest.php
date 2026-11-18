@@ -4,6 +4,7 @@ use App\Accounts\Preferences\CompanyFollowScope;
 use App\Accounts\Preferences\NotificationEvent;
 use App\Accounts\Preferences\PersonFollowScope;
 use App\Accounts\Preferences\UserPreferences;
+use App\Catalog\ProgressUnit;
 use App\Enums\ReleaseDateMode;
 use App\Enums\UpNextSort;
 use App\Http\Requests\Settings\PreferencesUpdateRequest;
@@ -71,6 +72,22 @@ test('a choice that no longer means anything reads as the default', function () 
         ->and($preferences->region())->toBeNull()
         ->and($preferences->resolved()['region'])->toBeNull()
         ->and(UserPreferences::fromStored(['region' => 'pl'])->resolved()['region'])->toBe('PL');
+});
+
+test('a reading pace is a whole number above nothing, and time has none', function () {
+    $preferences = UserPreferences::fromStored(['reading_pace_pages' => 40, 'reading_pace_chapters' => 0, 'reading_pace_issues' => '9']);
+
+    expect($preferences->readingPace(ProgressUnit::Pages))->toBe(40)
+        ->and($preferences->readingPace(ProgressUnit::Chapters))->toBe(jsonFixture('preferences/defaults')['reading_pace_chapters'])
+        ->and($preferences->readingPace(ProgressUnit::Issues))->toBe(jsonFixture('preferences/defaults')['reading_pace_issues'])
+        ->and($preferences->readingPace(ProgressUnit::Minutes))->toBeNull();
+});
+
+test('a week opens on the day chosen, else on the day the language opens it', function () {
+    expect(UserPreferences::fromStored(['week_start' => 'sunday'])->firstWeekday('pl'))->toBe(7)
+        ->and(UserPreferences::fromStored(['week_start' => 'monday'])->firstWeekday('en_US'))->toBe(1)
+        ->and(UserPreferences::fromStored([])->firstWeekday('pl'))->toBe(1)
+        ->and(UserPreferences::fromStored([])->firstWeekday('en_US'))->toBe(7);
 });
 
 test('a country reads in capitals', function () {

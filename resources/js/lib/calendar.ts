@@ -39,8 +39,13 @@ export function groupCalendarEntries(entries: CalendarEntry[]): CalendarEntryGro
 // moves one onto the square next door.
 
 /** The day `n` days after (or before) a Y-m-d date. */
+/** A calendar date (YYYY-MM-DD) as the instant of its midnight in UTC, for arithmetic and for formatting in UTC. */
+export function parseDay(date: string): Date {
+    return new Date(`${date}T00:00:00Z`);
+}
+
 export function addDays(date: string, n: number): string {
-    const day = new Date(`${date}T00:00:00Z`);
+    const day = parseDay(date);
     day.setUTCDate(day.getUTCDate() + n);
 
     return day.toISOString().slice(0, 10);

@@ -2,6 +2,7 @@
 
 use App\Catalog\MediaTypeDefinition;
 use App\Catalog\MediaTypeRegistry;
+use App\Catalog\ProgressUnit;
 
 test('returns registered definitions', function () {
     $registry = new MediaTypeRegistry;
@@ -58,4 +59,19 @@ test('a provider\'s companies make the first searchable root type it serves', fu
     expect($registry->rootServedBy('tmdb'))->toBe('movie')
         ->and($registry->rootServedBy('igdb'))->toBe('game')
         ->and($registry->rootServedBy('comicvine'))->toBeNull();
+});
+
+test('title types are the roots that are searched for: a show and a film, not a season', function () {
+    $registry = new MediaTypeRegistry;
+    $registry->register(new MediaTypeDefinition(code: 'show', provider: 'tmdb', searchable: true, childType: 'season'));
+    $registry->register(new MediaTypeDefinition(code: 'season', provider: 'tmdb', parentType: 'show', searchable: true));
+    $registry->register(new MediaTypeDefinition(code: 'movie', provider: 'tmdb', playable: true, searchable: true));
+    $registry->register(new MediaTypeDefinition(code: 'list', provider: 'x'));
+
+    expect($registry->titleCodes())->toBe(['show', 'movie']);
+});
+
+test('every attempt counts for a type with a progress counter, only a finished one otherwise', function () {
+    expect((new MediaTypeDefinition(code: 'game', provider: 'igdb', progressUnit: ProgressUnit::Minutes))->countsEveryAttempt())->toBeTrue()
+        ->and((new MediaTypeDefinition(code: 'movie', provider: 'tmdb', playable: true))->countsEveryAttempt())->toBeFalse();
 });

@@ -16,6 +16,7 @@ return [
     'keywords_discover' => 'discover, browse',
     'keywords_lists' => 'lists, watchlist, backlog',
     'keywords_calendar' => 'calendar, releases, premieres',
+    'keywords_statistics' => 'statistics, stats, year in review, charts',
     'keywords_countdowns' => 'countdowns, timer',
     'keywords_suggestions' => 'suggestions, catch up, missing, recommendations',
     'keywords_search' => 'search, find',

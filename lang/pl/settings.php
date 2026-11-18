@@ -179,4 +179,9 @@ return [
     'saved_settings' => 'Zapisane',
     'edit_settings' => 'Edytuj ustawienia',
     'saved_leave_empty_to_keep' => 'Zapisane. Zostaw puste, żeby nie zmieniać.',
+    'reading_pace' => 'Tempo czytania',
+    'reading_pace_description' => 'Ile czytasz w ciągu godziny. Statystyki przeliczają według niego przeczytane strony, rozdziały i zeszyty na szacowany czas.',
+    'pages_per_hour' => 'stron na godzinę',
+    'chapters_per_hour' => 'rozdziałów na godzinę',
+    'issues_per_hour' => 'zeszytów na godzinę',
 ];
