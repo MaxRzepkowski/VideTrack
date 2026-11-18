@@ -10,7 +10,7 @@ import PeriodCard from '@/components/statistics/PeriodCard.vue';
 import TasteSection from '@/components/statistics/TasteSection.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { statisticsParams, type StatisticsQuery } from '@/lib/statistics';
-import type { StatisticsActivity, StatisticsPage, StatisticsTaste } from '@/types/generated';
+import type { StatisticsActivity, StatisticsOrigins, StatisticsPage, StatisticsTaste } from '@/types/generated';
 import { Deferred, Head, router } from '@inertiajs/vue3';
 import { ChartNoAxesColumn } from '@lucide/vue';
 import { trans } from 'laravel-vue-i18n';
@@ -27,6 +27,8 @@ const props = defineProps<{
     activity?: StatisticsActivity;
     /** Deferred: absent until the follow-up request lands. */
     taste?: StatisticsTaste;
+    /** Deferred, with `taste`. */
+    origins?: StatisticsOrigins;
 }>();
 
 function visit(query: StatisticsQuery): void {
@@ -73,11 +75,11 @@ const hasTitles = computed(() => props.page.titles.titles.total > 0);
                     <ActivitySection v-if="activity" :activity="activity" :period="page.period" :type="page.type" />
                 </Deferred>
 
-                <Deferred data="taste">
+                <Deferred :data="['taste', 'origins']">
                     <template #fallback>
                         <div class="border-line-subtle bg-surface mt-12 h-96 animate-pulse rounded-xl border" aria-hidden="true" />
                     </template>
-                    <TasteSection v-if="taste" :taste="taste" :period="page.period" :type="page.type" />
+                    <TasteSection v-if="taste && origins" :taste="taste" :origins="origins" :period="page.period" :type="page.type" />
                 </Deferred>
             </template>
 

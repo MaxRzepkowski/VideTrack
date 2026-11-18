@@ -491,6 +491,11 @@ export type ListUnitTotal = {
     readonly itemsCounted: number;
     readonly itemsTotal: number;
 };
+export type MakerTally = {
+    readonly creator: CreatorLink;
+    readonly titles: number;
+    readonly best: number[];
+};
 export type MangaAuthorRole = 'story' | 'art';
 export type MangaFormat = 'manga' | 'manhwa' | 'manhua' | 'one_shot' | 'doujinshi' | 'oel';
 export type ManifestCategory = {
@@ -661,6 +666,10 @@ export type OpenedSubject = {
     readonly caption: string | null;
     readonly href: string | null;
 };
+export type OriginTally = {
+    readonly code: string;
+    readonly titles: number;
+};
 export type PageInfo = {
     readonly currentPage: number;
     readonly totalPages: number;
@@ -766,6 +775,10 @@ export type RankingPosition = {
     readonly kind: RankingKind;
     readonly position: number;
 };
+export type RatedTitle = {
+    readonly media: MediaSummary;
+    readonly rating: number | null;
+};
 export type ReleaseDateMode = 'both' | 'cinema' | 'digital';
 export type ReleaseDot = {
     readonly year: number;
@@ -826,6 +839,15 @@ export type StatisticsActivity = {
     readonly hours: number[];
     readonly busiestDay: DayCount | null;
     readonly firstWeekday: number;
+};
+export type StatisticsOrigins = {
+    readonly countries: OriginTally[];
+    readonly countryTypes: string[];
+    readonly languages: OriginTally[];
+    readonly languageTypes: string[];
+    readonly makers: MakerTally[];
+    readonly makerKind: CreatorKind | null;
+    readonly titles: RatedTitle[];
 };
 export type StatisticsPage = {
     readonly period: PeriodSpan;

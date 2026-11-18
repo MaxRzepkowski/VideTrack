@@ -1,4 +1,4 @@
-import { formatNumber } from '@/lib/format';
+import { formatNumber, languageName } from '@/lib/format';
 import { pageLocale } from '@/lib/pageContext';
 import { ratingPercent } from '@/lib/ratings';
 import type { LanguageSupport, MultiplayerMode, MultiplayerSupport, ProviderRating } from '@/types/generated';
@@ -6,14 +6,6 @@ import { trans, transChoice } from 'laravel-vue-i18n';
 
 // Chinese is told apart by script, not by country: "Traditional", not "Taiwan".
 const SCRIPT_OF: Record<string, string> = { 'zh-CN': 'zh-Hans', 'zh-TW': 'zh-Hant', 'zh-HK': 'zh-Hant' };
-
-function displayName(tag: string): string {
-    try {
-        return new Intl.DisplayNames([pageLocale()], { type: 'language' }).of(tag) ?? tag;
-    } catch {
-        return tag;
-    }
-}
 
 /** One row of a game's language table: the language named for the reader, and how the game speaks it. */
 export type LanguageRow = { locale: string; name: string; audio: boolean; subtitles: boolean; interface: boolean };
@@ -35,7 +27,7 @@ export function languageRows(languages: LanguageSupport[]): LanguageRow[] {
         .map((language): LanguageRow => {
             const tag = SCRIPT_OF[language.locale] ?? (twice.has(base(language.locale)) ? language.locale : base(language.locale));
 
-            return { ...language, name: displayName(tag) };
+            return { ...language, name: languageName(tag) };
         })
         .sort((a, b) => Number(isReader(b)) - Number(isReader(a)) || a.name.localeCompare(b.name, pageLocale()));
 }

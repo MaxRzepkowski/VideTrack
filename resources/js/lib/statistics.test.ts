@@ -2,6 +2,7 @@ import {
     activeEvery,
     commonestRating,
     communityComparison,
+    countTitles,
     currentQuery,
     daysBetween,
     formatPercent,
@@ -14,6 +15,7 @@ import {
     statisticsParams,
     timeRows,
     titleMarks,
+    typeNoun,
     weekdayDate,
     yearWindow,
 } from '@/lib/statistics';
@@ -130,6 +132,13 @@ describe('rangeShortcuts', () => {
 });
 
 describe('numbers and words', () => {
+    it('names the titles of a view across every type or by the one type', () => {
+        expect(countTitles(null, 3)).toBe('3 titles');
+        expect(countTitles('movie', 1)).toBe('1 movie');
+        expect(typeNoun(null)).toBe('titles');
+        expect(typeNoun('movie')).toBe('movies');
+    });
+
     it("writes shares, ratings and lists the locale's way", () => {
         expect(formatPercent(202, 232)).toBe('87%');
         expect(formatPercent(1, 0)).toBe('0%');

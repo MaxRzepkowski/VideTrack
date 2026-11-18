@@ -4,9 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Accounts\UserCalendar;
 use App\Actions\Users\BuildStatisticsActivity;
+use App\Actions\Users\BuildStatisticsOrigins;
 use App\Actions\Users\BuildStatisticsPage;
 use App\Actions\Users\BuildStatisticsTaste;
 use App\Http\Data\StatisticsActivity;
+use App\Http\Data\StatisticsOrigins;
 use App\Http\Data\StatisticsPage;
 use App\Http\Data\StatisticsTaste;
 use App\Http\Requests\StatisticsRequest;
@@ -30,6 +32,7 @@ class StatisticsController extends Controller
         BuildStatisticsPage $page,
         BuildStatisticsActivity $activity,
         BuildStatisticsTaste $taste,
+        BuildStatisticsOrigins $origins,
     ): Response {
         $scope = $history->scope($viewer, $request->period(UserCalendar::of($viewer)->today()->year), $request->type());
 
@@ -38,6 +41,7 @@ class StatisticsController extends Controller
             'page' => fn (): StatisticsPage => $page->execute($viewer, $scope),
             'activity' => Inertia::defer(fn (): StatisticsActivity => $activity->execute($viewer, $scope)),
             'taste' => Inertia::defer(fn (): StatisticsTaste => $taste->execute($viewer, $scope)),
+            'origins' => Inertia::defer(fn (): StatisticsOrigins => $origins->execute($viewer, $scope)),
         ]);
     }
 }

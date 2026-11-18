@@ -275,29 +275,32 @@ final readonly class ItemMetadata
     /** @return list<CreatorLink> the production companies, each with its page where the provider has one */
     public function studios(): array
     {
-        $studios = [];
+        return $this->creatorLinks('studios', CreatorKind::Company);
+    }
 
-        foreach (Payload::list($this->extra['studios'] ?? null) as $row) {
-            $name = Payload::string($row, 'name');
-
-            if ($name !== null) {
-                $studios[] = new CreatorLink(
-                    name: $name,
-                    kind: Payload::enum($row, 'kind', CreatorKind::class) ?? CreatorKind::Company,
-                    ref: Payload::string($row, 'ref'),
-                    provider: Payload::string($row, 'provider'),
-                    logoPath: Payload::string($row, 'logoPath'),
-                );
-            }
-        }
-
-        return $studios;
+    /** @return list<CreatorLink> the networks and services a show ran on, each with its page where the provider has one */
+    public function networks(): array
+    {
+        return $this->creatorLinks('networks', CreatorKind::Network);
     }
 
     /** @return list<string> the countries that produced the title, as ISO 3166-1 codes */
     public function productionCountries(): array
     {
         return Payload::strings($this->extra['productionCountries'] ?? null);
+    }
+
+    /**
+     * Where the title comes from, as ISO 3166-1 codes: a show's countries of
+     * origin, otherwise the countries that produced it (films carry only those).
+     *
+     * @return list<string>
+     */
+    public function originCountries(): array
+    {
+        $origin = Payload::strings($this->extra['originCountry'] ?? null);
+
+        return $origin !== [] ? $origin : $this->productionCountries();
     }
 
     /** The same, less every release row still ahead of `$day` (Y-m-d). */
@@ -338,5 +341,27 @@ final readonly class ItemMetadata
             wikidataId: $this->wikidataId,
             collection: $this->collection,
         );
+    }
+
+    /** @return list<CreatorLink> the links stored under `$key`, of `$kind` where a row does not say */
+    private function creatorLinks(string $key, CreatorKind $kind): array
+    {
+        $links = [];
+
+        foreach (Payload::list($this->extra[$key] ?? null) as $row) {
+            $name = Payload::string($row, 'name');
+
+            if ($name !== null) {
+                $links[] = new CreatorLink(
+                    name: $name,
+                    kind: Payload::enum($row, 'kind', CreatorKind::class) ?? $kind,
+                    ref: Payload::string($row, 'ref'),
+                    provider: Payload::string($row, 'provider'),
+                    logoPath: Payload::string($row, 'logoPath'),
+                );
+            }
+        }
+
+        return $links;
     }
 }

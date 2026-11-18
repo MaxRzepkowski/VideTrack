@@ -1,5 +1,6 @@
 import { addDays, parseDay } from '@/lib/calendar';
 import { formatNumber } from '@/lib/format';
+import { mediaTypeMeta } from '@/lib/mediaTypes';
 import { pageLocale, viewerTimeZone } from '@/lib/pageContext';
 import type { PeriodKind, PeriodSpan, PeriodTitles, TypeTally, YearCount } from '@/types/generated';
 import { trans, transChoice } from 'laravel-vue-i18n';
@@ -10,6 +11,16 @@ import { trans, transChoice } from 'laravel-vue-i18n';
  * already put on the user's clock, so they are formatted in UTC and never
  * shifted again.
  */
+
+/** How many titles, named for the view: "12 titles" across every type, "12 movies" for one. */
+export function countTitles(type: string | null, count: number): string {
+    return type === null ? transChoice('common.count_title', count, { count: formatNumber(count) }) : mediaTypeMeta(type).count(count);
+}
+
+/** What the view's titles are called inside a sentence: "titles" across every type, "movies" for one. */
+export function typeNoun(type: string | null): string {
+    return type === null ? trans('statistics.titles_word') : mediaTypeMeta(type).plural().toLocaleLowerCase();
+}
 
 /** What the page is asked for: a year, the whole history, or two days; and a type. */
 export interface StatisticsQuery {

@@ -1,11 +1,10 @@
 <script setup lang="ts">
-import { formatNumber } from '@/lib/format';
 import { inRegistryOrder, mediaTypeMeta } from '@/lib/mediaTypes';
-import { formatRating } from '@/lib/statistics';
+import { countTitles, formatRating } from '@/lib/statistics';
 import { middleOut, RATING_LEGEND, ratingColor, releaseColumns } from '@/lib/statisticsCharts';
 import type { ReleaseDot } from '@/types/generated';
 import { useElementSize } from '@vueuse/core';
-import { trans, transChoice } from 'laravel-vue-i18n';
+import { trans } from 'laravel-vue-i18n';
 import { computed, useTemplateRef } from 'vue';
 
 /**
@@ -39,8 +38,7 @@ const radius = computed(() => Math.max(0.5, Math.min(LARGEST_DOT, pitchX.value *
 
 const color = (dot: ReleaseDot): string => (byRating.value ? ratingColor(dot.rating) : mediaTypeMeta(dot.type).color);
 
-const count = (titles: number): string =>
-    props.type === null ? transChoice('common.count_title', titles, { count: formatNumber(titles) }) : mediaTypeMeta(props.type).count(titles);
+const count = (titles: number): string => countTitles(props.type, titles);
 
 const yearName = (year: number | null): string => (year === null ? trans('statistics.earlier') : String(year));
 
