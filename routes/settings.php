@@ -10,6 +10,7 @@ use App\Http\Controllers\Settings\ExportController;
 use App\Http\Controllers\Settings\IdentitiesController;
 use App\Http\Controllers\Settings\ImportController;
 use App\Http\Controllers\Settings\IntegrationsController;
+use App\Http\Controllers\Settings\OutgoingWebhooksController;
 use App\Http\Controllers\Settings\PasswordController;
 use App\Http\Controllers\Settings\PreferencesController;
 use App\Http\Controllers\Settings\ProfileController;
@@ -92,6 +93,14 @@ Route::middleware(['auth', 'throttle:web'])->name('settings.')->group(function (
     Route::get('settings/api', [ApiTokenController::class, 'index'])->name('api-tokens.index');
     Route::post('settings/api/tokens', [ApiTokenController::class, 'store'])->name('api-tokens.store');
     Route::delete('settings/api/tokens/{token}', [ApiTokenController::class, 'destroy'])->whereNumber('token')->name('api-tokens.destroy');
+
+    Route::get('settings/webhooks', [OutgoingWebhooksController::class, 'index'])->name('webhooks.index');
+    Route::post('settings/webhooks', [OutgoingWebhooksController::class, 'store'])->name('webhooks.store');
+    Route::patch('settings/webhooks/{webhook}', [OutgoingWebhooksController::class, 'update'])->name('webhooks.update');
+    Route::delete('settings/webhooks/{webhook}', [OutgoingWebhooksController::class, 'destroy'])->name('webhooks.destroy');
+    Route::post('settings/webhooks/{webhook}/test', [OutgoingWebhooksController::class, 'test'])
+        ->middleware('throttle:webhook-test')
+        ->name('webhooks.test');
 
     Route::get('settings/tasks', [TasksController::class, 'index'])->name('tasks.index');
     Route::get('settings/tasks/runs', [TasksController::class, 'runs'])->name('tasks.runs');

@@ -42,4 +42,5 @@ return [
     'keywords_settings_danger' => 'danger zone, delete, settings',
     'keywords_log_out' => 'log out, logout, sign out',
     'keywords_settings_channels' => 'notifications, channels, discord, apprise, digest, webhook',
+    'keywords_settings_webhooks' => 'webhook, webhooks, n8n, home assistant, automation, settings',
 ];

@@ -17,7 +17,10 @@ use Throwable;
  */
 final class HttpRetry
 {
-    public static function isTransient(Throwable $exception): bool
+    /**
+     * @param  Throwable|null  $exception  null for an answer that is no failure to the client (an unfollowed redirect)
+     */
+    public static function isTransient(?Throwable $exception): bool
     {
         if ($exception instanceof ConnectionException) {
             return true;
@@ -40,7 +43,7 @@ final class HttpRetry
      * Transient, or a 429: for a service whose rules ask to be waited out
      * when it says "too many", with the caller's own backoff.
      */
-    public static function isTransientOrThrottled(Throwable $exception): bool
+    public static function isTransientOrThrottled(?Throwable $exception): bool
     {
         return self::isTransient($exception)
             || ($exception instanceof RequestException && $exception->response->status() === 429);

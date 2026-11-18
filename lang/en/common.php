@@ -157,4 +157,5 @@ return [
     'zoom_in_hint' => 'Zoom in (Ctrl + mouse wheel works too)',
     'zoom_out' => 'Zoom out',
     'zoom_reset' => 'Show the whole',
+    'webhooks' => 'Webhooks',
 ];
