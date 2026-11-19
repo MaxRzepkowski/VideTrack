@@ -10,6 +10,8 @@ use LogicException;
 
 class UpdateListRequest extends FormRequest
 {
+    public const MAX_DESCRIPTION_LENGTH = 1000;
+
     /** Before the rules: they depend on what list it is, which a stranger must not learn. */
     public function authorize(): Response
     {
@@ -24,8 +26,8 @@ class UpdateListRequest extends FormRequest
         return [
             // The watchlist has no title to send: it is named in the
             // reader's language, and only its visibility changes.
-            'title' => [$this->list()->isSystem() ? 'nullable' : 'required', 'string', 'max:100'],
-            'description' => ['nullable', 'string', 'max:1000'],
+            'title' => [$this->list()->isSystem() ? 'nullable' : 'required', 'string', 'max:'.StoreListRequest::MAX_TITLE_LENGTH],
+            'description' => ['nullable', 'string', 'max:'.self::MAX_DESCRIPTION_LENGTH],
             'is_public' => ['required', 'boolean'],
         ];
     }

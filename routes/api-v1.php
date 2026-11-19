@@ -1,5 +1,6 @@
 <?php
 
+use App\Accounts\TokenAbility;
 use App\Catalog\MediaRef;
 use App\Http\Controllers\Api\V1\CalendarController;
 use App\Http\Controllers\Api\V1\CreatorFollowController;
@@ -43,7 +44,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('abilities:read')->group(function () {
+Route::middleware('abilities:'.TokenAbility::Read->value)->group(function () {
     Route::get('me', MeController::class)->name('me');
     // The two reads that fan out to a provider share the pages' provider budget.
     Route::get('search', SearchController::class)->middleware('throttle:providers')->name('search');
@@ -70,7 +71,7 @@ Route::middleware('abilities:read')->group(function () {
     });
 });
 
-Route::middleware('abilities:write')->group(function () {
+Route::middleware('abilities:'.TokenAbility::Write->value)->group(function () {
     Route::where(['ref' => MediaRef::PATTERN])->group(function () {
         Route::post('media/{type}/{ref}/plays', [PlayController::class, 'store'])->name('media.plays.store');
         Route::delete('media/{type}/{ref}/plays', [PlayController::class, 'destroy'])->name('media.plays.destroy');

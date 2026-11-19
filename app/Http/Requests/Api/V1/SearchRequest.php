@@ -6,13 +6,15 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class SearchRequest extends FormRequest
 {
+    public const MAX_QUERY_LENGTH = 200;
+
     /**
      * @return array<string, mixed>
      */
     public function rules(): array
     {
         return [
-            'q' => ['required', 'string', 'max:200'],
+            'q' => ['required', 'string', 'max:'.self::MAX_QUERY_LENGTH],
             'scope' => ['sometimes', 'string', 'max:50'],
         ];
     }

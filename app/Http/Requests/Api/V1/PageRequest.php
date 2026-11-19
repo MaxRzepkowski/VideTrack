@@ -10,13 +10,15 @@ class PageRequest extends FormRequest
     /** A page of a v1 list when the client asks for no size. */
     public const DEFAULT_PER_PAGE = 25;
 
+    public const MAX_PER_PAGE = 100;
+
     /**
      * @return array<string, mixed>
      */
     public function rules(): array
     {
         return [
-            'per_page' => ['sometimes', 'integer', 'min:1', 'max:100'],
+            'per_page' => ['sometimes', 'integer', 'min:1', 'max:'.self::MAX_PER_PAGE],
         ];
     }
 
