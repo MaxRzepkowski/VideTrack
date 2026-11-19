@@ -361,6 +361,27 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Web push (notifications in the browser and the installed app)
+    |--------------------------------------------------------------------------
+    |
+    | The instance signs every push with a key pair (VAPID). Without one given
+    | here, the first start makes a pair and keeps it in `keys_path`; back that
+    | file up with the database, since a new pair leaves every browser to be
+    | switched on again. The subject is how a push service reaches the
+    | operator: an https: address or a mailto:. Left empty, it is APP_URL when
+    | that is https, else the source address.
+    |
+    */
+
+    'webpush' => [
+        'public_key' => env('VAPID_PUBLIC_KEY'),
+        'private_key' => env('VAPID_PRIVATE_KEY'),
+        'subject' => env('VAPID_SUBJECT'),
+        'keys_path' => env('VAPID_KEYS_PATH', storage_path('app/private/vapid.json')),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | ComicVine metadata provider (comics)
     |--------------------------------------------------------------------------
     |

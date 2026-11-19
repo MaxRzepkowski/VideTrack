@@ -2,12 +2,13 @@
 
 namespace App\Http\Data;
 
+use App\Integrations\WebPush\Data\PushDevicesData;
 use App\Notifications\Channels\ChannelMode;
 use App\Notifications\Channels\Data\ChannelData;
 use App\Notifications\Channels\Data\ChannelKindData;
 use Spatie\TypeScriptTransformer\Attributes\TypeScript;
 
-/** The notification channels page: the user's channels and the kinds they can add. */
+/** The notification channels page: the user's channels, the kinds they can add and the browsers push reaches. */
 #[TypeScript]
 final readonly class ChannelsPage
 {
@@ -22,5 +23,7 @@ final readonly class ChannelsPage
         public ChannelMode $defaultMode,
         /** The local hour a digest goes out at. */
         public int $digestHour,
+        /** Null on an instance without push. */
+        public ?PushDevicesData $push,
     ) {}
 }

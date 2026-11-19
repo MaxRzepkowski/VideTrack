@@ -93,6 +93,12 @@ check "$image"
 curl -fsS -o /dev/null "$base/sw.js"
 curl -fsS -o /dev/null "$base/manifest.webmanifest"
 
+# The first start makes the web push keys next to the database.
+if ! docker exec "$name" test -s /data/vapid.json; then
+    echo "smoke: the first start made no web push keys" >&2
+    exit 1
+fi
+
 # Stored tokens are encrypted with it: a new key would lock them all away.
 if [ -n "$previous" ] && [ "$(key)" != "$kept" ]; then
     echo "smoke: the app key changed across the upgrade" >&2

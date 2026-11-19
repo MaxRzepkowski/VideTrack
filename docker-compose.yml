@@ -47,7 +47,8 @@ services:
   scheduler:
     <<: *app
     # exec: the shell is PID 1 and would swallow SIGTERM, so every stop would end in a kill.
-    command: sh -c "php artisan tasks:catch-up; exec php artisan schedule:work"
+    # The web push keys first, as a production start makes them.
+    command: sh -c "php artisan vide:webpush:keys; php artisan tasks:catch-up; exec php artisan schedule:work"
 
   vite:
     <<: *app

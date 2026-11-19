@@ -14,6 +14,7 @@ import {
     Hash,
     Mail,
     MessageSquareText,
+    MonitorSmartphone,
     RadioTower,
     SquareTerminal,
     Tv,
@@ -38,7 +39,7 @@ const LOGOS: Record<string, LogoEntry> = manifest;
 
 /**
  * E-mail, a data format sent to your own address, a protocol, a program
- * without a logo: a plain icon, not a drawing passed off as a logo.
+ * without a logo, the browser itself: a plain icon, not a drawing passed off as a logo.
  */
 const PLAIN: Record<string, LucideIcon> = {
     mail: Mail,
@@ -52,6 +53,7 @@ const PLAIN: Record<string, LucideIcon> = {
     gorushs: BellRing,
     enigma2s: Tv,
     aprs: RadioTower,
+    webpush: MonitorSmartphone,
 };
 
 /** A kind's logo file and its proportions; null for a kind without one. */

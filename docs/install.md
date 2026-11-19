@@ -18,7 +18,8 @@ docker compose logs -f      # what the container says
 docker compose ps           # "healthy" once the app answers
 ```
 
-The `videtrack-data` volume holds the database, its pre-upgrade backups and the generated app key;
+The `videtrack-data` volume holds the database, its pre-upgrade backups and the generated app key and
+web push keys;
 `videtrack-storage` holds avatars, exports and caches.
 
 ## On the network
@@ -76,7 +77,8 @@ Change the port mapping to `"8080:80"` and open `http://<server-address>:8080`. 
 plain HTTP would not work.
 
 Installing VideTrack as an app on a phone or computer also needs HTTPS: browsers offer it only over
-HTTPS or on `localhost`. Over plain HTTP the site works as usual in the browser.
+HTTPS or on `localhost`, and the same goes for [notifications in the browser](#notifications-in-the-browser).
+Over plain HTTP the site works as usual in the browser.
 
 ## Accounts
 
@@ -134,6 +136,8 @@ Everything is optional except `TMDB_API_KEY`. A media type exists only when its 
 | `COMICVINE_API_KEY` | | [ComicVine](https://comicvine.gamespot.com/api) key: **comics** |
 | `SIMKL_CLIENT_ID` | | client id of a Simkl **AUTH V2** app of type *TV, devices & command line* ([developer settings](https://simkl.com/settings/developer/)); users connect with a code, no callback address. Without it the Simkl import is not offered |
 | `STEAM_API_KEY` | | [Steam Web API key](https://steamcommunity.com/dev/apikey); with IGDB, users can import a public Steam library |
+| `VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY` | generated | the key pair browser notifications are signed with; generated on first start into `/data/vapid.json`. Set them only to bring your own pair ([below](#notifications-in-the-browser)) |
+| `VAPID_SUBJECT` | `APP_URL` if it is `https://`, else `SOURCE_URL` | how a push service may reach you about this instance's pushes: an `https://` address or `mailto:` |
 | `APPRISE_API_URL` | `http://apprise:8000` in `compose.yaml` | address of the apprise-api container; empty, its services are not offered as notification channels ([below](#notifications-through-apprise)) |
 | `REGISTRATION_ENABLED` | open until the first account | `true` keeps sign-up open, `false` closed |
 | `ADMIN_EMAIL` / `ADMIN_PASSWORD` | | an administrator created on start |
@@ -180,6 +184,20 @@ again when it sends.
 
 Without the container, delete the `apprise` service and the `APPRISE_API_URL` line from
 `compose.yaml`: its services disappear from the settings, and Discord and e-mail stay.
+
+## Notifications in the browser
+
+Notifications also show up in the browser and in the installed app, on a phone or a computer. Each
+user turns them on per device under Settings → Notifications; the browser then asks for permission.
+On iPhone and iPad this works only in the app added to the Home Screen (iOS 16.4 and later).
+
+It needs HTTPS (or `localhost`), and nothing else: the first start makes the key pair the instance
+signs every message with and keeps it in `/data/vapid.json`. Back it up with the database
+([Backup](administration.md#backup)): with a new pair, the browsers subscribed with the old one hear
+nothing until they are turned on again. An open app does that by itself where the browser allows it
+without a click; elsewhere the device shows up on the list as needing to be turned on again. The
+messages travel through the push service of each browser (Google's, Mozilla's, Apple's),
+encrypted so that only the browser can read them.
 
 ## Building the image yourself
 

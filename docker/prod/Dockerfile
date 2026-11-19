@@ -59,6 +59,7 @@ ENV SERVER_NAME=:80 \
     APP_VERSION=${APP_VERSION} \
     DB_CONNECTION=sqlite \
     DB_DATABASE=/data/database.sqlite \
+    VAPID_KEYS_PATH=/data/vapid.json \
     SESSION_DRIVER=file \
     SESSION_LIFETIME=43200 \
     CACHE_STORE=file \

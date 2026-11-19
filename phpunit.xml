@@ -60,6 +60,10 @@
              it as a process variable, which a plain <env> would not replace. -->
         <env name="APPRISE_API_URL" value="" force="true"/>
         <server name="APPRISE_API_URL" value="" force="true"/>
+        <!-- No key pair unless a test gives one: the development instance keeps its own in storage. -->
+        <env name="VAPID_PUBLIC_KEY" value="" force="true"/>
+        <env name="VAPID_PRIVATE_KEY" value="" force="true"/>
+        <env name="VAPID_KEYS_PATH" value="/nonexistent/vapid.json" force="true"/>
         <env name="OIDC_CLIENT_ID" value=""/>
         <env name="GOOGLE_CLIENT_ID" value=""/>
         <env name="GITHUB_CLIENT_ID" value=""/>

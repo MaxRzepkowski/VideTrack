@@ -58,6 +58,7 @@ require_once __DIR__.'/Support/library.php';
 require_once __DIR__.'/Support/notifications.php';
 require_once __DIR__.'/Support/pages.php';
 require_once __DIR__.'/Support/webhooks.php';
+require_once __DIR__.'/Support/webpush.php';
 require_once __DIR__.'/Support/integrations.php';
 require_once __DIR__.'/Support/providers.php';
 require_once __DIR__.'/Support/tasks.php';

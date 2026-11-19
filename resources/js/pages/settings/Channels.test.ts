@@ -10,7 +10,7 @@ const channel = channelData({ id: 1, label: 'Friends' });
 
 function mountPage(channels: ChannelData[]) {
     return mount(Channels, {
-        props: { page: { channels, kinds, labelMax: 60, digestHour: 8, defaultMode: 'digest' } },
+        props: { page: { channels, kinds, labelMax: 60, digestHour: 8, defaultMode: 'digest', push: null } },
         global: {
             stubs: {
                 AppLayout: { template: '<div><slot /></div>' },

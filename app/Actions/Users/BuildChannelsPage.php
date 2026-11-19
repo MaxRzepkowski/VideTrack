@@ -3,6 +3,7 @@
 namespace App\Actions\Users;
 
 use App\Http\Data\ChannelsPage;
+use App\Integrations\WebPush\PushDevices;
 use App\Models\NotificationChannel;
 use App\Models\User;
 use App\Notifications\Channels\ChannelMode;
@@ -18,20 +19,28 @@ use App\Support\Payload;
  */
 final readonly class BuildChannelsPage
 {
-    public function __construct(private ChannelRegistry $drivers) {}
+    public function __construct(
+        private ChannelRegistry $drivers,
+        private PushDevices $pushDevices,
+    ) {}
 
     public function execute(User $viewer): ChannelsPage
     {
         $kinds = [];
+        $offered = [];
 
         foreach ($this->drivers->codes() as $driver) {
             foreach ($this->drivers->get($driver)->kinds() as $kind) {
-                $kinds[] = ChannelKindData::of($driver, $kind);
+                $kinds[] = $data = ChannelKindData::of($driver, $kind);
+
+                if (! $kind->fromDevices) {
+                    $offered[] = $data;
+                }
             }
         }
 
         // One alphabet across drivers: the picker lists services, not how they are reached.
-        usort($kinds, fn (ChannelKindData $a, ChannelKindData $b): int => strnatcasecmp($a->label, $b->label));
+        usort($offered, fn (ChannelKindData $a, ChannelKindData $b): int => strnatcasecmp($a->label, $b->label));
 
         $channels = [];
 
@@ -42,11 +51,18 @@ final readonly class BuildChannelsPage
             }
         }
 
-        return new ChannelsPage($channels, $kinds, NotificationChannel::LABEL_MAX, ChannelMode::default(), DailyDigests::HOUR);
+        return new ChannelsPage(
+            channels: $channels,
+            kinds: $offered,
+            labelMax: NotificationChannel::LABEL_MAX,
+            defaultMode: ChannelMode::default(),
+            digestHour: DailyDigests::HOUR,
+            push: $this->pushDevices->of($viewer),
+        );
     }
 
     /**
-     * @param  list<ChannelKindData>  $kinds
+     * @param  list<ChannelKindData>  $kinds  every kind, the ones devices make included
      */
     private function row(NotificationChannel $channel, array $kinds): ChannelData
     {
