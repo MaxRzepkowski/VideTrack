@@ -13,6 +13,8 @@ use App\Users\CompletionsFeed;
 use App\Users\Data\ActivityEntry;
 use App\Users\Data\ActivityFilters;
 use App\Users\HistoryDayTotals;
+use App\Users\OwnerRatings;
+use App\Users\PanelReader;
 use Illuminate\Database\Eloquent\Collection;
 
 /**
@@ -28,15 +30,18 @@ final readonly class BuildHistoryEntries
         private CompletionsFeed $completions,
         private HistoryDayTotals $totals,
         private MediaItemSummaries $cards,
+        private OwnerRatings $ownerRatings,
     ) {}
 
     /**
      * @return array{entries: list<ActivityEntry>, pagination: PageInfo, dayTotals: array<string, array<string, int>>}
      */
-    public function execute(User $user, ActivityFilters $filters, int $page, UserCalendar $calendar): array
+    public function execute(User $user, User $viewer, ActivityFilters $filters, int $page, UserCalendar $calendar): array
     {
+        $reader = PanelReader::of($viewer, $user);
+
         if ($filters->byCompletions()) {
-            $result = $this->completions->page($user, $filters, $page, $calendar);
+            $result = $this->completions->page($user, $viewer, $filters, $page, $calendar);
 
             return [
                 'entries' => array_map(fn (array $row): ActivityEntry => new ActivityEntry(
@@ -55,7 +60,8 @@ final readonly class BuildHistoryEntries
         $rollUp = $this->feed->rollUpType($filters);
 
         if ($rollUp !== null) {
-            $result = $this->feed->groupedPage(ActivitySource::Plays, $user, $filters, $page, $calendar, $rollUp);
+            $result = $this->feed->groupedPage(ActivitySource::Plays, $user, $viewer, $filters, $page, $calendar, $rollUp);
+            $ratings = $this->ownerRatings->shownUnder($user, $reader, $filters, array_column($result['groups'], 'item'));
 
             return [
                 'entries' => array_map(fn (array $group): ActivityEntry => new ActivityEntry(
@@ -63,6 +69,7 @@ final readonly class BuildHistoryEntries
                     at: $group['at'],
                     media: $this->cards->inContext($group['item']),
                     day: $group['day'],
+                    rating: $ratings[$group['item']->id] ?? null,
                 ), $result['groups']),
                 'pagination' => $result['pagination'],
                 'dayTotals' => [],
@@ -70,10 +77,11 @@ final readonly class BuildHistoryEntries
         }
 
         // The day scan needs what a play cost, on top of its date.
-        $result = $this->feed->page(ActivitySource::Plays, $user, $filters, $page, $calendar, $this->totals->columns());
+        $result = $this->feed->page(ActivitySource::Plays, $user, $viewer, $filters, $page, $calendar, $this->totals->columns());
 
         /** @var Collection<int, Play> $plays */
         $plays = $result['models'];
+        $ratings = $this->ownerRatings->shownUnder($user, $reader, $filters, $plays->map(fn (Play $play) => $play->mediaItem));
 
         return [
             'entries' => array_values(array_map(fn (Play $play): ActivityEntry => new ActivityEntry(
@@ -81,6 +89,7 @@ final readonly class BuildHistoryEntries
                 at: $play->watched_at->toIso8601String(),
                 media: $this->cards->inContext($play->mediaItem),
                 day: $result['dayOf'][$play->id] ?? null,
+                rating: $ratings[$play->media_item_id] ?? null,
                 outcome: $play->outcome,
             ), $plays->all())),
             'pagination' => $result['pagination'],

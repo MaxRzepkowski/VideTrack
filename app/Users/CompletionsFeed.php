@@ -45,7 +45,7 @@ final readonly class CompletionsFeed
      *
      * @return array{entries: list<array{entry: LibraryEntry, at: CarbonImmutable|null}>, pagination: PageInfo}
      */
-    public function page(User $user, ActivityFilters $filters, int $page, UserCalendar $calendar): array
+    public function page(User $user, User $viewer, ActivityFilters $filters, int $page, UserCalendar $calendar): array
     {
         $playable = $filters->type === null || $this->types->get($filters->type)->playable;
 
@@ -83,7 +83,8 @@ final readonly class CompletionsFeed
             });
         }
 
-        $this->titles->apply($query, $user, $filters, 'media_items.id', []);
+        // What the viewer already rated or listed hides, on anyone's panel.
+        $this->titles->apply($query, $viewer, $filters, 'media_items.id', []);
 
         $paginator = $query
             ->orderBy('library_entries.completed_cycles', $filters->dir->value)

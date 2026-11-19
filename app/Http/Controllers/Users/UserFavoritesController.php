@@ -13,6 +13,8 @@ use App\Models\User;
 use App\Users\ActivityFeed;
 use App\Users\ActivitySource;
 use App\Users\Data\ActivityEntry;
+use App\Users\OwnerRatings;
+use App\Users\PanelReader;
 use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Gate;
@@ -35,20 +37,24 @@ class UserFavoritesController extends Controller
         ActivityFeed $feed,
         BuildActivityPanel $panel,
         MediaItemSummaries $cards,
+        OwnerRatings $ownerRatings,
     ): Response {
         Gate::authorize('view', $user);
 
-        $filters = $request->activityFilters(ActivitySource::Favorites);
-        $page = $feed->page(ActivitySource::Favorites, $user, $filters, $request->page(), UserCalendar::of($viewer));
+        $reader = PanelReader::of($viewer, $user);
+        $filters = $request->activityFilters(ActivitySource::Favorites, $reader);
+        $page = $feed->page(ActivitySource::Favorites, $user, $viewer, $filters, $request->page(), UserCalendar::of($viewer));
 
         /** @var Collection<int, Favorite> $favorites */
         $favorites = $page['models'];
+        $ratings = $ownerRatings->shownUnder($user, $reader, $filters, $favorites->map(fn (Favorite $favorite) => $favorite->mediaItem));
         $entries = $favorites
             ->map(fn (Favorite $favorite): ActivityEntry => new ActivityEntry(
                 id: $favorite->id,
                 at: $favorite->created_at?->toIso8601String(),
                 media: $cards->inContext($favorite->mediaItem),
                 day: $page['dayOf'][$favorite->id] ?? null,
+                rating: $ratings[$favorite->media_item_id] ?? null,
             ))
             ->values()
             ->all();
@@ -56,7 +62,7 @@ class UserFavoritesController extends Controller
         return Inertia::render('users/UserActivity', [
             'panel' => 'favorites',
             ...$this->profileHeader($viewer, $user),
-            ...$panel->execute($viewer, $user, $entries, $page['pagination'], $filters),
+            ...$panel->execute($viewer, $user, ActivitySource::Favorites, $entries, $page['pagination'], $filters),
         ]);
     }
 }

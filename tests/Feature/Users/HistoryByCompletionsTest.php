@@ -10,6 +10,7 @@ use App\Models\Play;
 use App\Models\User;
 use App\Users\ActivityFeed;
 use App\Users\ActivitySource;
+use App\Users\PanelReader;
 use Carbon\CarbonImmutable;
 use Inertia\Testing\AssertableInertia as Assert;
 
@@ -272,9 +273,9 @@ test('a panel with nothing to finish falls back to its own sort', function () {
 
     $this->actingAs($user)
         ->get(route('users.ratings', $asked))
-        ->assertInertia(fn (Assert $page) => $page->where('filters.sort', ActivitySource::Ratings->defaultSort()->value));
+        ->assertInertia(fn (Assert $page) => $page->where('filters.sort', ActivitySource::Ratings->defaultSort(PanelReader::Owner)->value));
 
     $this->actingAs($user)
         ->get(route('users.favorites', $asked))
-        ->assertInertia(fn (Assert $page) => $page->where('filters.sort', ActivitySource::Favorites->defaultSort()->value));
+        ->assertInertia(fn (Assert $page) => $page->where('filters.sort', ActivitySource::Favorites->defaultSort(PanelReader::Owner)->value));
 });

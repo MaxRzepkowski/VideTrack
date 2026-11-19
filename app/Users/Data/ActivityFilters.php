@@ -35,13 +35,31 @@ final readonly class ActivityFilters implements JsonSerializable
     ) {}
 
     /**
+     * Whether the chosen axis orders the panel: grouped by day it stays
+     * chronological, whatever the axis.
+     */
+    private function sortsBy(ActivitySort $sort): bool
+    {
+        return $this->sort === $sort && $this->group === ActivityGrouping::Grid;
+    }
+
+    /**
+     * Whether a rating orders the panel — either one: the owner's rating is
+     * what a visitor compares theirs against.
+     */
+    public function byRating(): bool
+    {
+        return $this->sort->isRating() && $this->group === ActivityGrouping::Grid;
+    }
+
+    /**
      * Whether the panel lists titles by how many times they were finished
      * instead of entries. Grouped by day the panel stays chronological, as it
      * does under every other sort.
      */
     public function byCompletions(): bool
     {
-        return $this->sort === ActivitySort::Completions && $this->group === ActivityGrouping::Grid;
+        return $this->sortsBy(ActivitySort::Completions);
     }
 
     /**
@@ -76,7 +94,7 @@ final readonly class ActivityFilters implements JsonSerializable
             'to' => $this->to,
             'hideRated' => $this->hideRated,
             'hideListed' => $this->hideListed,
-            // Derived, for the page to show the controls that apply.
+            // Derived, for the page to show the controls and the card captions that apply.
             'byCompletions' => $this->byCompletions(),
         ];
     }

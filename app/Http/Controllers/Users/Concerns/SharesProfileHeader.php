@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Users\Concerns;
 
 use App\Models\User;
 use App\Users\Data\ProfileData;
+use App\Users\PanelReader;
 
 /**
  * Every page of a user (profile, history, ratings, favorites, in progress,
@@ -20,7 +21,7 @@ trait SharesProfileHeader
     {
         return [
             'profile' => ProfileData::of($user),
-            'isOwner' => $viewer->id === $user->id,
+            'isOwner' => PanelReader::of($viewer, $user) === PanelReader::Owner,
         ];
     }
 }

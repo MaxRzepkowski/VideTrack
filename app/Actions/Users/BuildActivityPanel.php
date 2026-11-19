@@ -4,12 +4,16 @@ namespace App\Actions\Users;
 
 use App\Catalog\Data\MediaSummary;
 use App\Catalog\MediaTypeRegistry;
+use App\Enums\ActivitySort;
 use App\Library\LibraryStates;
 use App\Models\User;
 use App\Support\PageInfo;
+use App\Users\ActivitySource;
 use App\Users\Data\ActivityEntry;
 use App\Users\Data\ActivityFilters;
 use App\Users\GenreOptions;
+use App\Users\OwnerRatings;
+use App\Users\PanelReader;
 
 /**
  * The props every activity panel (history, ratings, favorites) sends beside
@@ -23,18 +27,27 @@ final readonly class BuildActivityPanel
         private GenreOptions $genres,
         private MediaTypeRegistry $types,
         private LibraryStates $states,
+        private OwnerRatings $ownerRatings,
     ) {}
 
     /**
      * @param  array<int, ActivityEntry>  $entries
      * @return array<string, mixed>
      */
-    public function execute(User $viewer, User $user, array $entries, PageInfo $pagination, ActivityFilters $filters): array
+    public function execute(User $viewer, User $user, ActivitySource $source, array $entries, PageInfo $pagination, ActivityFilters $filters): array
     {
+        $reader = PanelReader::of($viewer, $user);
+
         return [
             'entries' => array_values($entries),
             'pagination' => $pagination,
             'filters' => $filters,
+            // The axes this panel offers its reader, in the order the control lists them.
+            'sortOptions' => array_values(array_map(
+                fn (ActivitySort $sort): string => $sort->value,
+                array_filter(ActivitySort::cases(), fn (ActivitySort $sort): bool => $source->offers($sort, $reader)),
+            )),
+            'ownerRatingsShown' => $this->ownerRatings->shown($reader, $filters),
             'genreOptions' => $this->genres->execute($user),
             'typeOptions' => array_keys($this->types->all()),
             'userStates' => $this->states->resolve($viewer, array_map(fn (ActivityEntry $entry): MediaSummary => $entry->media, $entries)),

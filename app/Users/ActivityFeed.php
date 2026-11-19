@@ -93,11 +93,11 @@ final readonly class ActivityFeed
      *     pageDays: array<string, list<int>>,
      * }
      */
-    public function page(ActivitySource $source, User $user, ActivityFilters $filters, int $page, UserCalendar $calendar, array $dayColumns = []): array
+    public function page(ActivitySource $source, User $user, User $viewer, ActivityFilters $filters, int $page, UserCalendar $calendar, array $dayColumns = []): array
     {
         $query = $source->entriesOf($user);
 
-        $this->applyFilters($query, $user, $source, $filters, $calendar);
+        $this->applyFilters($query, $viewer, $source, $filters, $calendar);
 
         if ($filters->group === ActivityGrouping::Day) {
             // Day groups are chronological by nature; the sort mechanism
@@ -107,7 +107,7 @@ final readonly class ActivityFeed
             return $this->pageOfDays($query, $source, $page, $calendar, $dayColumns);
         }
 
-        $this->applySort($query, $user, $source, $filters);
+        $this->applySort($query, $user, $viewer, $source, $filters);
 
         $paginator = $query->paginate(self::PER_PAGE, page: $page);
 
@@ -140,13 +140,13 @@ final readonly class ActivityFeed
      *     pagination: PageInfo,
      * }
      */
-    public function groupedPage(ActivitySource $source, User $user, ActivityFilters $filters, int $page, UserCalendar $calendar, string $rollUpType): array
+    public function groupedPage(ActivitySource $source, User $user, User $viewer, ActivityFilters $filters, int $page, UserCalendar $calendar, string $rollUpType): array
     {
         $query = $source->entriesOf($user);
         $table = $source->value;
         $atColumn = $source->dateColumn();
 
-        $this->applyFilters($query, $user, $source, $filters, $calendar, $rollUpType);
+        $this->applyFilters($query, $viewer, $source, $filters, $calendar, $rollUpType);
 
         $expression = self::ANCESTOR_ID;
         $bindings = array_fill(0, 3, $rollUpType);
@@ -167,9 +167,9 @@ final readonly class ActivityFeed
             ->get()
             ->keyBy('id');
 
-        $ratings = $filters->sort === ActivitySort::MyRating
-            ? Numbers::intMap($user->ratings()->whereIn('media_item_id', $items->keys()->all())->pluck('rating', 'media_item_id'))
-            : [];
+        $ratings = ! $filters->sort->isRating()
+            ? []
+            : Numbers::intMap(self::rater($filters->sort, $viewer, $user)->ratings()->whereIn('media_item_id', $items->keys()->all())->pluck('rating', 'media_item_id'));
 
         $sorted = $rows
             ->filter(fn (array $row): bool => $items->has($row['groupId']))
@@ -185,6 +185,11 @@ final readonly class ActivityFeed
                 SORT_REGULAR,
                 $filters->dir === SortDirection::Desc,
             );
+
+            // The unrated go last whichever way a rating runs: one more stable pass.
+            if ($filters->sort->isRating()) {
+                $sorted = $sorted->sortBy(fn (array $row): int => isset($ratings[$row['groupId']]) ? 0 : 1);
+            }
         }
 
         $sorted = $sorted->values();
@@ -312,7 +317,7 @@ final readonly class ActivityFeed
 
         return match ($sort) {
             ActivitySort::Added => $row['added'],
-            ActivitySort::MyRating => $ratings[$item->id] ?? null,
+            ActivitySort::MyRating, ActivitySort::OwnerRating => $ratings[$item->id] ?? null,
             ActivitySort::Community => $item->community_rating,
             ActivitySort::Title => mb_strtolower($item->title),
             ActivitySort::Release => $item->release_date?->toDateString(),
@@ -388,7 +393,7 @@ final readonly class ActivityFeed
      *
      * @param  Builder<covariant Model>  $query
      */
-    private function applyFilters(Builder $query, User $user, ActivitySource $source, ActivityFilters $filters, UserCalendar $calendar, ?string $rollUp = null): void
+    private function applyFilters(Builder $query, User $viewer, ActivitySource $source, ActivityFilters $filters, UserCalendar $calendar, ?string $rollUp = null): void
     {
         $table = $source->value;
         $atColumn = $source->dateColumn();
@@ -416,13 +421,14 @@ final readonly class ActivityFeed
             $this->titles->joinAncestors($query);
         }
 
-        $this->titles->apply($query, $user, $filters, $subject, $subjectBindings);
+        // What the viewer already rated or listed hides, on anyone's panel.
+        $this->titles->apply($query, $viewer, $filters, $subject, $subjectBindings);
     }
 
     /**
      * @param  Builder<covariant Model>  $query
      */
-    private function applySort(Builder $query, User $user, ActivitySource $source, ActivityFilters $filters): void
+    private function applySort(Builder $query, User $user, User $viewer, ActivitySource $source, ActivityFilters $filters): void
     {
         $table = $source->value;
         $atColumn = $source->dateColumn();
@@ -431,16 +437,11 @@ final readonly class ActivityFeed
         match ($filters->sort) {
             ActivitySort::Activity => $query->orderBy("{$table}.{$atColumn}", $dir),
             ActivitySort::Added => $query->orderBy("{$table}.created_at", $dir),
-            // The ratings panel sorts on its own column; everywhere else the
-            // viewer's rating has to be joined in.
-            ActivitySort::MyRating => $source === ActivitySource::Ratings
-                ? $query->orderBy('ratings.rating', $dir)
-                : $query
-                    ->leftJoin('ratings as my_ratings', function (JoinClause $join) use ($user) {
-                        $join->on('my_ratings.media_item_id', '=', 'media_items.id')
-                            ->where('my_ratings.user_id', $user->id);
-                    })
-                    ->orderBy('my_ratings.rating', $dir),
+            ActivitySort::MyRating, ActivitySort::OwnerRating => $this->orderByRating(
+                $query,
+                $this->ratingOf($query, $source, self::rater($filters->sort, $viewer, $user), $user),
+                $filters->dir,
+            ),
             ActivitySort::Community => $query->orderBy('media_items.community_rating', $dir),
             ActivitySort::Title => $query->orderByRaw("media_items.title collate nocase {$dir}"),
             ActivitySort::Release => $query->orderBy('media_items.release_date', $dir),
@@ -449,6 +450,51 @@ final readonly class ActivityFeed
         };
 
         $query->orderByDesc("{$table}.{$atColumn}")->orderByDesc("{$table}.id");
+    }
+
+    /**
+     * Whose rating a rating axis reads. On their own panel the owner is the
+     * viewer, so both axes read the same.
+     */
+    private static function rater(ActivitySort $sort, User $viewer, User $owner): User
+    {
+        return match ($sort) {
+            ActivitySort::MyRating => $viewer,
+            ActivitySort::OwnerRating => $owner,
+            default => throw new LogicException("Sorting by {$sort->value} reads no rating."),
+        };
+    }
+
+    /**
+     * The column holding `$rater`'s rating of each entry's item: the ratings
+     * panel's own column when it is the owner's, a join otherwise.
+     *
+     * @param  Builder<covariant Model>  $query
+     * @return literal-string
+     */
+    private function ratingOf(Builder $query, ActivitySource $source, User $rater, User $owner): string
+    {
+        if ($source === ActivitySource::Ratings && $rater->is($owner)) {
+            return 'ratings.rating';
+        }
+
+        $query->leftJoin('ratings as rater_ratings', function (JoinClause $join) use ($rater) {
+            $join->on('rater_ratings.media_item_id', '=', 'media_items.id')
+                ->where('rater_ratings.user_id', $rater->id);
+        });
+
+        return 'rater_ratings.rating';
+    }
+
+    /**
+     * The unrated go last whichever way the rating runs.
+     *
+     * @param  Builder<covariant Model>  $query
+     * @param  literal-string  $column
+     */
+    private function orderByRating(Builder $query, string $column, SortDirection $dir): void
+    {
+        $query->orderByRaw("{$column} is null")->orderBy($column, $dir->value);
     }
 
     /** Sorted by times finished a panel lists titles, not entries: {@see CompletionsFeed}. */

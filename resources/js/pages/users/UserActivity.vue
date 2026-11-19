@@ -6,6 +6,7 @@ import { confirm } from '@/composables/useConfirm';
 import { useMediaActions } from '@/composables/useMediaActions';
 import { useReloadAfterWrites } from '@/composables/useReloadAfterWrites';
 import AppLayout from '@/layouts/AppLayout.vue';
+import type { ActivitySort } from '@/types/generated';
 import type { ActivityEntry, ActivityFilters, ProfileData } from '@/types/media';
 import type { PageInfo } from '@/types/pagination';
 import { Head } from '@inertiajs/vue3';
@@ -29,6 +30,8 @@ const props = defineProps<{
     filters: ActivityFilters;
     genreOptions: string[];
     typeOptions: string[];
+    sortOptions: ActivitySort[];
+    ownerRatingsShown: boolean;
 }>();
 
 const { deletePlay, rate, setFavorite } = useMediaActions();
@@ -41,7 +44,6 @@ const PANELS = {
         sortLabel: () => trans('users.mark_date'),
         withStatus: true,
         withHideRated: true,
-        withCompletions: true,
         showPaginationSummary: false,
         removeLabel: () => trans('common.remove_this_play'),
         removeConfirm: () => trans('media.remove_play_confirm'),
@@ -56,8 +58,8 @@ const PANELS = {
         routeName: 'users.ratings',
         sortLabel: () => trans('users.activity_date'),
         withStatus: false,
-        withHideRated: false,
-        withCompletions: false,
+        // Everything here is rated by the owner; a visitor hides what they rated themselves.
+        withHideRated: !props.isOwner,
         showPaginationSummary: false,
         removeLabel: () => trans('common.remove_rating'),
         removeConfirm: () => trans('users.remove_rating_confirm'),
@@ -73,7 +75,6 @@ const PANELS = {
         sortLabel: () => null,
         withStatus: false,
         withHideRated: true,
-        withCompletions: false,
         showPaginationSummary: true,
         removeLabel: () => trans('common.remove_from_favorites'),
         removeConfirm: () => trans('users.remove_favorite_confirm'),
@@ -111,6 +112,7 @@ async function remove(entry: ActivityEntry): Promise<void> {
         <ActivityPanel
             :route-name="config.routeName"
             :username="profile.username"
+            :owner-name="profile.name"
             :is-owner="isOwner"
             :entries="entries"
             :pagination="pagination"
@@ -121,7 +123,8 @@ async function remove(entry: ActivityEntry): Promise<void> {
             :sort-label="config.sortLabel()"
             :with-status="config.withStatus"
             :with-hide-rated="config.withHideRated"
-            :with-completions="config.withCompletions"
+            :sort-options="sortOptions"
+            :owner-ratings-shown="ownerRatingsShown"
             :show-pagination-summary="config.showPaginationSummary"
             :remove-label="config.removeLabel()"
             @remove="remove"

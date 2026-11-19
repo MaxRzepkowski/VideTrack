@@ -12,13 +12,22 @@ enum ActivitySort: string
     case Activity = 'activity';
     /** When the entry was first made — the one date a favorite has. */
     case Added = 'added';
+    /** The viewer's own rating — on their own panel, the owner's. */
     case MyRating = 'my_rating';
+    /** The panel owner's rating, for a visitor: on their own panel it is MyRating. */
+    case OwnerRating = 'owner_rating';
     case Community = 'community';
     case Title = 'title';
     case Release = 'release';
     case Runtime = 'runtime';
     /** How many times a position was finished — a film's or an episode's completions, a show's or a season's full runs. */
     case Completions = 'completions';
+
+    /** A rating axis leaves the unrated last whichever way it runs. */
+    public function isRating(): bool
+    {
+        return $this === self::MyRating || $this === self::OwnerRating;
+    }
 
     /** Each axis reads in its natural direction: A→Z, everything else biggest first. */
     public function naturalDirection(): SortDirection
