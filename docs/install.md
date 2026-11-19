@@ -75,6 +75,9 @@ Change the port mapping to `"8080:80"` and open `http://<server-address>:8080`. 
 `http://`: with `https://` the session cookie would only travel over HTTPS and signing in over
 plain HTTP would not work.
 
+Installing VideTrack as an app on a phone or computer also needs HTTPS: browsers offer it only over
+HTTPS or on `localhost`. Over plain HTTP the site works as usual in the browser.
+
 ## Accounts
 
 The first account registered becomes the administrator and sign-up closes after it. To keep

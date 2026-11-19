@@ -48,4 +48,6 @@ return [
     'where_to_watch_data_is_provided' => 'Dane o dostępności do oglądania dostarcza JustWatch.',
     'leave_page' => 'Opuść',
     'you_have_unsaved_changes_leave_this' => 'Masz niezapisane zmiany. Opuścić tę stronę?',
+    'new_version_ready' => 'Dostępna jest nowa wersja.',
+    'reload_new_version' => 'Odśwież',
 ];

@@ -48,4 +48,6 @@ return [
     'where_to_watch_data_is_provided' => 'Where to watch data is provided by JustWatch.',
     'leave_page' => 'Leave',
     'you_have_unsaved_changes_leave_this' => 'You have unsaved changes. Leave this page?',
+    'new_version_ready' => 'A new version is available.',
+    'reload_new_version' => 'Reload',
 ];

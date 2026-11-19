@@ -33,6 +33,7 @@ tells you when the next episode or release is out, and keeps all of it on your o
 - 📥 Import from Trakt, Letterboxd, TV Time, Simkl, IMDb, Goodreads, StoryGraph, MyAnimeList, AniList, Kitsu, Steam and more.
 - 📡 Log what you watch automatically from Plex, Jellyfin, Emby or Tautulli.
 - 📤 Export everything as a backup, as CSV, or as files for IMDb, Letterboxd, Goodreads and MyAnimeList.
+- 📱 Install it as an app on your phone or computer.
 - 👥 Give everyone at home their own account.
 - 🔑 Log in with a password or through your own OpenID Connect server, Google, GitHub or GitLab.
 - 🐳 Run it as one Docker container with one SQLite file, plus an optional one for notifications.

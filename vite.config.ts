@@ -4,6 +4,7 @@ import laravel from 'laravel-vite-plugin';
 import i18n from 'laravel-vue-i18n/vite';
 import path from 'path';
 import { defineConfig, loadEnv } from 'vite';
+import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig(({ mode }) => {
     const env = loadEnv(mode, process.cwd(), '');
@@ -35,6 +36,24 @@ export default defineConfig(({ mode }) => {
                         base: null,
                         includeAbsolute: false,
                     },
+                },
+            }),
+            // The service worker is written to the web root, not public/build: a worker only controls the pages
+            // under its own path. The manifest is a static file in public/, and pwa.ts registers the worker in a
+            // production build.
+            VitePWA({
+                strategies: 'injectManifest',
+                srcDir: 'resources/js',
+                filename: 'sw.ts',
+                outDir: 'public',
+                injectRegister: false,
+                manifest: false,
+                injectManifest: {
+                    globDirectory: 'public',
+                    globPatterns: ['build/assets/*.{js,css,woff2}', 'offline.html', 'logo.svg'],
+                    // Hashed names already change with the content.
+                    dontCacheBustURLsMatching: /^build\/assets\//,
+                    rollupFormat: 'iife',
                 },
             }),
         ],

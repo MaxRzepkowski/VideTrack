@@ -81,6 +81,8 @@ class SecurityHeaders
             'connect-src' => ["'self'", $vite, $viteSocket],
             'frame-src' => ['https://www.youtube-nocookie.com'],
             'media-src' => ["'self'"],
+            'manifest-src' => ["'self'"],
+            'worker-src' => ["'self'"],
             'object-src' => ["'none'"],
             'base-uri' => ["'self'"],
             'form-action' => ["'self'"],
