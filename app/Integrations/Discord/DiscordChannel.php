@@ -2,6 +2,7 @@
 
 namespace App\Integrations\Discord;
 
+use App\Models\NotificationChannel;
 use App\Models\User;
 use App\Notifications\Channels\Contracts\ChannelDriver;
 use App\Notifications\Channels\Data\ChannelDigest;
@@ -51,7 +52,7 @@ final readonly class DiscordChannel implements ChannelDriver
         return [self::WEBHOOK => Payload::text($values, self::WEBHOOK)];
     }
 
-    public function deliver(ChannelMessage $message, array $config): DeliveryAnswer
+    public function deliver(ChannelMessage $message, NotificationChannel $channel): DeliveryAnswer
     {
         $embed = [
             'title' => $message->title,
@@ -68,15 +69,15 @@ final readonly class DiscordChannel implements ChannelDriver
             $embed['thumbnail'] = ['url' => $message->imageUrl];
         }
 
-        return $this->discord->send(Payload::text($config, self::WEBHOOK), ['embeds' => [$embed]]);
+        return $this->discord->send(Payload::text($channel->config, self::WEBHOOK), ['embeds' => [$embed]]);
     }
 
-    public function deliverDigest(ChannelDigest $digest, array $config): array
+    public function deliverDigest(ChannelDigest $digest, NotificationChannel $channel): array
     {
         $answers = [];
 
         foreach ($this->composer->messages($digest) as $content) {
-            $answers[] = $answer = $this->discord->send(Payload::text($config, self::WEBHOOK), ['content' => $content]);
+            $answers[] = $answer = $this->discord->send(Payload::text($channel->config, self::WEBHOOK), ['content' => $content]);
 
             if ($answer !== DeliveryAnswer::Delivered) {
                 break;

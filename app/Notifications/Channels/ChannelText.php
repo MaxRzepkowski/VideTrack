@@ -32,10 +32,10 @@ final readonly class ChannelText
         return implode("\n\n", $blocks);
     }
 
-    /** "• subject: label: meta", the link on the line under it. */
-    private function line(DigestLine $line): string
+    /** "subject: label: meta", a digest line without its link, for a channel that shows no links. */
+    public function digestLine(DigestLine $line): string
     {
-        $text = '• '.$line->subject;
+        $text = $line->subject;
 
         if ($line->label !== '') {
             $text .= ': '.$line->label;
@@ -45,6 +45,12 @@ final readonly class ChannelText
             $text .= ': '.$line->meta;
         }
 
-        return $text."\n  ".$line->url;
+        return $text;
+    }
+
+    /** "• subject: label: meta", the link on the line under it. */
+    private function line(DigestLine $line): string
+    {
+        return '• '.$this->digestLine($line)."\n  ".$line->url;
     }
 }

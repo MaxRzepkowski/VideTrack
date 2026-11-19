@@ -36,3 +36,10 @@ test('a digest is its sections, each line with its link under it, and the closin
         'Enjoy your media!',
     ]));
 });
+
+test('a digest line without its link names the title, what happened and when', function () {
+    $text = new ChannelText;
+
+    expect($text->digestLine(new DigestLine('Severance', 'https://tracker.example.com/show/1', 'New episode', 'S02E03')))->toBe('Severance: New episode: S02E03')
+        ->and($text->digestLine(new DigestLine('2 titles are gone', 'https://tracker.example.com/archived', '', null)))->toBe('2 titles are gone');
+});

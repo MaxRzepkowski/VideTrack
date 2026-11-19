@@ -2,6 +2,7 @@
 
 namespace App\Notifications\Channels\Contracts;
 
+use App\Models\NotificationChannel;
 use App\Models\User;
 use App\Notifications\Channels\Data\ChannelDigest;
 use App\Notifications\Channels\Data\ChannelKind;
@@ -47,16 +48,16 @@ interface ChannelDriver
     public function configure(string $kind, array $values, User $owner): array;
 
     /**
-     * @param  array<string, mixed>  $config  what configure() returned
+     * @param  NotificationChannel  $channel  its config is what configure() returned
      */
-    public function deliver(ChannelMessage $message, array $config): DeliveryAnswer;
+    public function deliver(ChannelMessage $message, NotificationChannel $channel): DeliveryAnswer;
 
     /**
      * Sends a day's digest — as several messages when the service caps their
      * length — and stops at the first one not delivered.
      *
-     * @param  array<string, mixed>  $config  what configure() returned
+     * @param  NotificationChannel  $channel  its config is what configure() returned
      * @return non-empty-list<DeliveryAnswer> one per message sent
      */
-    public function deliverDigest(ChannelDigest $digest, array $config): array;
+    public function deliverDigest(ChannelDigest $digest, NotificationChannel $channel): array;
 }

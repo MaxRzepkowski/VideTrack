@@ -6,6 +6,7 @@ use App\Integrations\Apprise\Data\AppriseService;
 use App\Integrations\Apprise\Data\AppriseToken;
 use App\Integrations\Connections\UnusableAddress;
 use App\Integrations\Connections\UserAddresses;
+use App\Models\NotificationChannel;
 use App\Models\User;
 use App\Notifications\Channels\ChannelText;
 use App\Notifications\Channels\Contracts\ChannelDriver;
@@ -100,14 +101,14 @@ final readonly class AppriseChannel implements ChannelDriver
         ];
     }
 
-    public function deliver(ChannelMessage $message, array $config): DeliveryAnswer
+    public function deliver(ChannelMessage $message, NotificationChannel $channel): DeliveryAnswer
     {
-        return $this->apprise->send(Payload::text($config, self::URLS), $message->title, $this->text->message($message));
+        return $this->apprise->send(Payload::text($channel->config, self::URLS), $message->title, $this->text->message($message));
     }
 
-    public function deliverDigest(ChannelDigest $digest, array $config): array
+    public function deliverDigest(ChannelDigest $digest, NotificationChannel $channel): array
     {
-        return [$this->apprise->send(Payload::text($config, self::URLS), $digest->heading, $this->text->digest($digest))];
+        return [$this->apprise->send(Payload::text($channel->config, self::URLS), $digest->heading, $this->text->digest($digest))];
     }
 
     /**
