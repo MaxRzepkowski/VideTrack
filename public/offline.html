@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noindex">
+        <meta name="theme-color" content="#0a0a0d">
+
+        <title>VideTrack</title>
+
+        <!--
+          Shown by the service worker when a page is opened without a network. It looks like the error pages
+          (resources/views/layouts/standalone.blade.php) and keeps their colours, the design tokens from
+          resources/css/app.css. It cannot reach the app's translations, so it carries both languages: English unless
+          the browser prefers Polish. The logo is kept by the service worker with this page.
+        -->
+        <style>
+            *, *::before, *::after { box-sizing: border-box; }
+
+            body {
+                margin: 0;
+                min-height: 100vh;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 1.5rem;
+                background: #0a0a0d;
+                color: #f2f1f5;
+                font-family: ui-sans-serif, system-ui, sans-serif;
+                -webkit-font-smoothing: antialiased;
+            }
+
+            .card {
+                width: 100%;
+                max-width: 28rem;
+                padding: 1.75rem;
+                border: 1px solid #202027;
+                border-radius: 0.75rem;
+                background: #141418;
+            }
+
+            .logo { display: block; height: 1.5rem; width: auto; }
+
+            h1 { margin: 1.5rem 0 0; font-size: 1.125rem; font-weight: 700; }
+
+            p { margin: 0.5rem 0 0; color: #9a9aa5; font-size: 0.875rem; line-height: 1.5; }
+
+            a { color: #b794ff; text-decoration: none; }
+
+            a:hover { color: #f2f1f5; }
+
+            .actions { margin-top: 1.5rem; font-size: 0.875rem; }
+        </style>
+    </head>
+    <body>
+        <main class="card">
+            <img src="/logo.svg" alt="VideTrack" width="162" height="27" loading="lazy" class="logo">
+
+            <h1 data-text="title">You’re offline</h1>
+            <p data-text="body">VideTrack needs a connection to show your library. Check the network and try again.</p>
+
+            <!-- An empty href reloads the address the user opened, with or without the script below. -->
+            <div class="actions"><a href="" data-text="retry">Try again</a></div>
+        </main>
+        <script>
+            const polish = {
+                title: 'Jesteś offline',
+                body: 'VideTrack potrzebuje połączenia, żeby pokazać bibliotekę. Sprawdź sieć i spróbuj ponownie.',
+                retry: 'Spróbuj ponownie',
+            };
+
+            if (navigator.language.toLowerCase().startsWith('pl')) {
+                document.documentElement.lang = 'pl';
+
+                for (const element of document.querySelectorAll('[data-text]')) {
+                    element.textContent = polish[element.dataset.text];
+                }
+            }
+        </script>
+    </body>
+</html>

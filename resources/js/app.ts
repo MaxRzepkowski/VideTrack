@@ -3,6 +3,7 @@ import '../css/app.css';
 
 import { vTooltip } from '@/directives/tooltip';
 import { registerMediaTypes } from '@/lib/mediaTypes';
+import { registerServiceWorker, removeServiceWorker } from '@/lib/pwa';
 import { followPage } from '@/stores/library';
 import { createInertiaApp, router } from '@inertiajs/vue3';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
@@ -50,6 +51,14 @@ createInertiaApp({
         color: getComputedStyle(document.documentElement).getPropertyValue('--color-brand').trim() || 'currentColor',
     },
 });
+
+// Installable app and cached covers in a production build only: the development server's hot reload must not
+// sit behind a service worker.
+if (import.meta.env.PROD) {
+    registerServiceWorker();
+} else {
+    removeServiceWorker();
+}
 
 // A modal radix overlay (dropdown, dialog) parks `pointer-events: none` on
 // <body> and takes it back when it closes. An Inertia visit started from

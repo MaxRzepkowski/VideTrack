@@ -41,6 +41,7 @@ const POLISH_ALLOWED = [
     /^app\/Integrations\/Playnite\/PlayniteCsvSource\.php$/, // the column names Playnite writes in Polish ("Nazwa")
     /^app\/Integrations\/Netflix\/NetflixTitle\.php$/, // the season words Netflix writes in Polish ("Sezon")
     /^resources\/js\/lib\/commands\.ts$/, // folding Polish diacritics for search
+    /^public\/offline\.html$/, // the page the service worker shows offline, out of reach of the translations
     /^scripts\/publish-guard\.mjs$/, // this file: the letters it looks for
 ];
 

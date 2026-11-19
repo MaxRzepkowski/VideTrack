@@ -22,14 +22,22 @@ export default defineConfig({
         coverage: {
             provider: 'v8',
             include: ['resources/js/**/*.{ts,vue}'],
-            exclude: ['resources/js/**/*.test.ts', 'resources/js/test/**', 'resources/js/**/*.d.ts', 'resources/js/components/ui/**'],
+            // sw.ts is the worker's wiring and runs in a service worker scope, which happy-dom does not have; its
+            // rules live in lib/serviceWorker.ts, which is measured.
+            exclude: [
+                'resources/js/**/*.test.ts',
+                'resources/js/test/**',
+                'resources/js/**/*.d.ts',
+                'resources/js/components/ui/**',
+                'resources/js/sw.ts',
+            ],
             reporter: ['text-summary'],
             // The floor only rises: raise it when the suite passes it. Every test
             // reads one frozen instant (test/setup.ts), so the count does not
             // wobble between runs. Measured by Vitest 5, which maps
             // V8 coverage onto the source's syntax tree: a Vue file counts its
             // script, not its compiled render function.
-            thresholds: { lines: 71.8, statements: 71.0, branches: 62.5, functions: 63.2 },
+            thresholds: { lines: 71.9, statements: 71.1, branches: 62.6, functions: 63.5 },
         },
     },
 });

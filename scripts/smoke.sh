@@ -88,6 +88,11 @@ fi
 start "$image"
 check "$image"
 
+# The service worker is written to the web root, beside the build rather than in it,
+# so the image has to copy it on its own.
+curl -fsS -o /dev/null "$base/sw.js"
+curl -fsS -o /dev/null "$base/manifest.webmanifest"
+
 # Stored tokens are encrypted with it: a new key would lock them all away.
 if [ -n "$previous" ] && [ "$(key)" != "$kept" ]; then
     echo "smoke: the app key changed across the upgrade" >&2

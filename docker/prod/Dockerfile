@@ -71,6 +71,7 @@ WORKDIR /app
 
 COPY --from=vendor /app /app
 COPY --from=frontend /app/public/build /app/public/build
+COPY --from=frontend /app/public/sw.js /app/public/sw.js
 COPY docker/prod/supervisord.conf /etc/supervisor/conf.d/app.conf
 COPY docker/prod/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh

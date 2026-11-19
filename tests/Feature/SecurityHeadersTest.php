@@ -14,6 +14,12 @@ test('a page allows only its own scripts, the inline ones by this request\'s non
         ->and($response->getContent())->toContain('nonce="'.$nonce[1].'"');
 });
 
+test('a page may load its own service worker and manifest', function () {
+    $policy = (string) $this->get('/login')->headers->get('Content-Security-Policy');
+
+    expect($policy)->toContain("worker-src 'self'", "manifest-src 'self'");
+});
+
 test('responses outside the web pages carry the headers too', function () {
     $this->getJson('/api/v1/me')
         ->assertHeader('X-Content-Type-Options', 'nosniff')
