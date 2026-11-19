@@ -48,6 +48,8 @@ function page(panel: 'history' | 'ratings' | 'favorites') {
             filters,
             genreOptions: [],
             typeOptions: [],
+            sortOptions: ['activity'],
+            ownerRatingsShown: false,
         },
         global: { stubs: { AppLayout: { template: '<div><slot /></div>' } } },
     });
@@ -98,8 +100,6 @@ describe('UserActivity', () => {
 
         expect(history.props('routeName')).toBe('users.history');
         expect(history.props('withStatus')).toBe(true);
-        expect(history.props('withCompletions')).toBe(true);
-        expect(favorites.props('withCompletions')).toBe(false);
         expect(favorites.props('sortLabel')).toBeNull();
         expect(favorites.props('removeLabel')).toBe('Remove from favorites');
     });

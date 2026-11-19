@@ -9,6 +9,7 @@ use App\Enums\PlayOutcome;
 use App\Enums\SortDirection;
 use App\Users\ActivitySource;
 use App\Users\Data\ActivityFilters;
+use App\Users\PanelReader;
 use Carbon\Exceptions\InvalidFormatException;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Carbon;
@@ -36,11 +37,11 @@ class ActivityPanelRequest extends FormRequest
         ];
     }
 
-    /** The panel's filters, falling back to the defaults of what it lists. */
-    public function activityFilters(ActivitySource $source): ActivityFilters
+    /** The panel's filters, falling back to the defaults of what it lists and who reads it. */
+    public function activityFilters(ActivitySource $source, PanelReader $reader): ActivityFilters
     {
         $sort = ActivitySort::tryFrom((string) $this->string('sort'));
-        $sort = $sort !== null && $source->offers($sort) ? $sort : $source->defaultSort();
+        $sort = $sort !== null && $source->offers($sort, $reader) ? $sort : $source->defaultSort($reader);
         $type = (string) $this->string('type');
         $q = trim((string) $this->string('q'));
         $genre = trim((string) $this->string('genre'));

@@ -13,6 +13,7 @@ use App\Models\User;
 use App\Users\ActivityFeed;
 use App\Users\ActivitySource;
 use App\Users\Data\ActivityEntry;
+use App\Users\PanelReader;
 use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Gate;
@@ -41,8 +42,8 @@ class UserRatingsController extends Controller
     ): Response {
         Gate::authorize('view', $user);
 
-        $filters = $request->activityFilters(ActivitySource::Ratings);
-        $page = $feed->page(ActivitySource::Ratings, $user, $filters, $request->page(), UserCalendar::of($viewer));
+        $filters = $request->activityFilters(ActivitySource::Ratings, PanelReader::of($viewer, $user));
+        $page = $feed->page(ActivitySource::Ratings, $user, $viewer, $filters, $request->page(), UserCalendar::of($viewer));
 
         /** @var Collection<int, Rating> $ratings */
         $ratings = $page['models'];
@@ -60,7 +61,7 @@ class UserRatingsController extends Controller
         return Inertia::render('users/UserActivity', [
             'panel' => 'ratings',
             ...$this->profileHeader($viewer, $user),
-            ...$panel->execute($viewer, $user, $entries, $page['pagination'], $filters),
+            ...$panel->execute($viewer, $user, ActivitySource::Ratings, $entries, $page['pagination'], $filters),
         ]);
     }
 }

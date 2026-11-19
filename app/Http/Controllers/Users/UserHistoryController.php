@@ -10,6 +10,7 @@ use App\Http\Controllers\Users\Concerns\SharesProfileHeader;
 use App\Http\Requests\Users\ActivityPanelRequest;
 use App\Models\User;
 use App\Users\ActivitySource;
+use App\Users\PanelReader;
 use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
@@ -33,13 +34,13 @@ class UserHistoryController extends Controller
     ): Response {
         Gate::authorize('view', $user);
 
-        $filters = $request->activityFilters(ActivitySource::Plays);
-        $page = $history->execute($user, $filters, $request->page(), UserCalendar::of($viewer));
+        $filters = $request->activityFilters(ActivitySource::Plays, PanelReader::of($viewer, $user));
+        $page = $history->execute($user, $viewer, $filters, $request->page(), UserCalendar::of($viewer));
 
         return Inertia::render('users/UserActivity', [
             'panel' => 'history',
             ...$this->profileHeader($viewer, $user),
-            ...$panel->execute($viewer, $user, $page['entries'], $page['pagination'], $filters),
+            ...$panel->execute($viewer, $user, ActivitySource::Plays, $page['entries'], $page['pagination'], $filters),
             // What each day on the page cost, per unit — for the day headings.
             'dayTotals' => $page['dayTotals'],
         ]);

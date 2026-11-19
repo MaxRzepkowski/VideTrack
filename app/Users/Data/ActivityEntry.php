@@ -18,7 +18,7 @@ final readonly class ActivityEntry
         public MediaSummary $media,
         /** Day key (YYYY-MM-DD) the server paginated by, in "grouped by day" mode. */
         public ?string $day = null,
-        /** The ratings panel: the score the entry gave. */
+        /** The owner's rating: always on the ratings panel, elsewhere while a rating orders a visitor's page. */
         public ?int $rating = null,
         /** The history panel: how the attempt closed. */
         public ?PlayOutcome $outcome = null,

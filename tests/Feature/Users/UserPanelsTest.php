@@ -414,7 +414,8 @@ test('a rolled-up grid sorts by the viewer\'s rating and by when the plays were 
     )->pluck('media.title')->all();
 
     expect($titles(['sort' => 'my_rating', 'dir' => 'desc']))->toBe(['Killing Eve', 'Riverdale', 'Andor'])
-        ->and($titles(['sort' => 'my_rating', 'dir' => 'asc']))->toBe(['Andor', 'Riverdale', 'Killing Eve'])
+        // The unrated go last whichever way the rating runs.
+        ->and($titles(['sort' => 'my_rating', 'dir' => 'asc']))->toBe(['Riverdale', 'Killing Eve', 'Andor'])
         ->and($titles(['sort' => 'added', 'dir' => 'asc']))->toBe(['Killing Eve', 'Riverdale', 'Andor'])
         ->and($titles(['sort' => 'added', 'dir' => 'desc']))->toBe(['Andor', 'Riverdale', 'Killing Eve']);
 });

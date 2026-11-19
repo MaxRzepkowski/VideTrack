@@ -23,7 +23,7 @@ export type ActivityFilters = {
     readonly byCompletions: boolean;
 };
 export type ActivityGrouping = 'grid' | 'day';
-export type ActivitySort = 'activity' | 'added' | 'my_rating' | 'community' | 'title' | 'release' | 'runtime' | 'completions';
+export type ActivitySort = 'activity' | 'added' | 'my_rating' | 'owner_rating' | 'community' | 'title' | 'release' | 'runtime' | 'completions';
 export type AgeRatingData = {
     readonly board: string;
     readonly rating: string;

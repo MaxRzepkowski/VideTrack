@@ -27,20 +27,30 @@ enum ActivitySource: string
         return $this === self::Plays ? ActivityGrouping::Day : ActivityGrouping::Grid;
     }
 
-    /** The axis the panel opens on: favorites carry only the one date, ratings their score. */
-    public function defaultSort(): ActivitySort
+    /** The axis the panel opens on: favorites carry only the one date, ratings the owner's score. */
+    public function defaultSort(PanelReader $reader): ActivitySort
     {
         return match ($this) {
             self::Plays => ActivitySort::Activity,
-            self::Ratings => ActivitySort::MyRating,
+            self::Ratings => $reader === PanelReader::Owner ? ActivitySort::MyRating : ActivitySort::OwnerRating,
             self::Favorites => ActivitySort::Added,
         };
     }
 
-    /** Times finished counts plays; a rating or a favorite is never finished. */
-    public function offers(ActivitySort $sort): bool
+    /**
+     * Times finished counts plays: a rating or a favorite is never finished.
+     * A favorite carries no date beyond when it was added, so its activity
+     * would repeat that axis. The owner's rating is an axis apart only for a
+     * visitor — for the owner it is their own.
+     */
+    public function offers(ActivitySort $sort, PanelReader $reader): bool
     {
-        return $sort !== ActivitySort::Completions || $this === self::Plays;
+        return match ($sort) {
+            ActivitySort::Activity => $this !== self::Favorites,
+            ActivitySort::Completions => $this === self::Plays,
+            ActivitySort::OwnerRating => $reader === PanelReader::Visitor,
+            default => true,
+        };
     }
 
     /** Only a play has an outcome (completed, dropped…) to filter by. */

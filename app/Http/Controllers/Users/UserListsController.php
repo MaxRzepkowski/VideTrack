@@ -6,6 +6,7 @@ use App\Actions\Media\BuildListSummaries;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Users\Concerns\SharesProfileHeader;
 use App\Models\User;
+use App\Users\PanelReader;
 use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
@@ -19,7 +20,7 @@ class UserListsController extends Controller
     {
         Gate::authorize('view', $user);
 
-        $isOwner = $viewer->id === $user->id;
+        $isOwner = PanelReader::of($viewer, $user) === PanelReader::Owner;
 
         return Inertia::render('lists/ListIndex', [
             'lists' => $summaries->execute($user, includePrivate: $isOwner),

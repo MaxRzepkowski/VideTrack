@@ -3,19 +3,21 @@ import EmptyState from '@/components/EmptyState.vue';
 import MediaCard from '@/components/media/MediaCard.vue';
 import MediaGrid from '@/components/media/MediaGrid.vue';
 import PageToolbar from '@/components/PageToolbar.vue';
+import ActivityCaption from '@/components/users/ActivityCaption.vue';
 import Pagination from '@/components/Pagination.vue';
 import SearchInput from '@/components/SearchInput.vue';
 import SortControl from '@/components/SortControl.vue';
 import TypeFilter from '@/components/TypeFilter.vue';
 import { leafCode, showTitleOf } from '@/lib/badges';
-import { formatDateTime, formatDayKey, formatNumber, formatRuntime } from '@/lib/format';
+import { formatDayKey, formatNumber, formatRuntime } from '@/lib/format';
 import { unitGlyph } from '@/lib/progress';
 import { SELECT_CLASS } from '@/lib/ui';
+import type { ActivitySort } from '@/types/generated';
 import type { ActivityEntry, ActivityFilters } from '@/types/media';
 import type { PageInfo } from '@/types/pagination';
 import { router } from '@inertiajs/vue3';
 import { trans, transChoice } from 'laravel-vue-i18n';
-import { CalendarDays, Clock, LayoutGrid, Trash2, type LucideIcon } from '@lucide/vue';
+import { CalendarDays, Clock, LayoutGrid, type LucideIcon } from '@lucide/vue';
 import { computed } from 'vue';
 
 // What a day of a log panel cost, by unit. Time and reading counters never add
@@ -32,6 +34,8 @@ const props = withDefaults(
         /** Route of the panel this is — every control change is a visit to it. */
         routeName: string;
         username: string;
+        /** The profile's display name: the owner's rating axis and caption name them. */
+        ownerName: string;
         isOwner: boolean;
         entries: ActivityEntry[];
         pagination: PageInfo | null;
@@ -41,7 +45,7 @@ const props = withDefaults(
         /**
          * Label of the "activity" sort — each panel dates its entries its own
          * way. `null` where the panel has no date of its own beyond when the
-         * row was added (favourites), so the axis would duplicate "Date added".
+         * row was added (favourites); the server offers no such axis there.
          */
         sortLabel?: string | null;
         /** What each day cost, per unit, keyed by day (YYYY-MM-DD). */
@@ -49,8 +53,10 @@ const props = withDefaults(
         /** Panels with an outcome (history) offer the completed / dropped filter. */
         withStatus?: boolean;
         withHideRated?: boolean;
-        /** The history offers listing its titles by how many times they were finished. */
-        withCompletions?: boolean;
+        /** The axes the server offers this reader, in order. */
+        sortOptions: ActivitySort[];
+        /** The cards carry the owner's rating underneath instead of a date. */
+        ownerRatingsShown: boolean;
         /** Whether to repeat the current/total page count below the numbered pagination. */
         showPaginationSummary?: boolean;
         /** Owner-only removal; null when the panel has nothing to remove. */
@@ -61,7 +67,6 @@ const props = withDefaults(
         dayTotals: () => ({}),
         withStatus: false,
         withHideRated: true,
-        withCompletions: false,
         showPaginationSummary: true,
         removeLabel: null,
     },
@@ -106,16 +111,19 @@ function visit(overrides: Record<string, unknown> = {}): void {
 // the visit it fires.
 const searchQuery = computed<string | null>({ get: () => props.filters.q, set: (q) => visit({ q: q ?? undefined }) });
 
-const sortOptions = computed(() => [
-    ...(props.sortLabel === null ? [] : [{ value: 'activity', label: props.sortLabel }]),
-    { value: 'added', label: trans('common.date_added') },
-    { value: 'my_rating', label: trans('common.my_rating') },
-    { value: 'community', label: trans('common.community_rating') },
-    { value: 'title', label: trans('common.title') },
-    { value: 'release', label: trans('common.release_date') },
-    { value: 'runtime', label: trans('common.runtime') },
-    ...(props.withCompletions ? [{ value: 'completions', label: trans('users.sort_times_finished') }] : []),
-]);
+const SORT_LABELS: Record<ActivitySort, () => string> = {
+    activity: () => props.sortLabel ?? trans('common.date_added'),
+    added: () => trans('common.date_added'),
+    my_rating: () => trans('common.my_rating'),
+    owner_rating: () => trans('users.rating_of', { name: props.ownerName }),
+    community: () => trans('common.community_rating'),
+    title: () => trans('common.title'),
+    release: () => trans('common.release_date'),
+    runtime: () => trans('common.runtime'),
+    completions: () => trans('users.sort_times_finished'),
+};
+
+const sortOptions = computed(() => props.sortOptions.map((value) => ({ value, label: SORT_LABELS[value]() })));
 
 // Positions counted over every attempt, not attempts: only completions are
 // counted, so the completed / dropped filter has nothing to say here.
@@ -278,7 +286,7 @@ function subtitle(entry: ActivityEntry): string | null {
                         :checked="filters.hideRated"
                         @change="visit({ hide_rated: filters.hideRated ? undefined : 1 })"
                     />
-                    {{ trans('common.hide_rated') }}
+                    {{ isOwner ? trans('common.hide_rated') : trans('users.hide_rated_by_me') }}
                 </label>
                 <label class="text-ink-secondary flex cursor-pointer items-center gap-2 text-base font-semibold">
                     <input
@@ -287,7 +295,7 @@ function subtitle(entry: ActivityEntry): string | null {
                         :checked="filters.hideListed"
                         @change="visit({ hide_listed: filters.hideListed ? undefined : 1 })"
                     />
-                    {{ trans('users.hide_listed') }}
+                    {{ isOwner ? trans('users.hide_listed') : trans('users.hide_on_my_lists') }}
                 </label>
             </div>
         </template>
@@ -352,31 +360,14 @@ function subtitle(entry: ActivityEntry): string | null {
                 <MediaGrid>
                     <div v-for="entry in group.entries" :key="entry.id ?? `${entry.media.type}-${entry.media.ref}`" class="flex flex-col">
                         <MediaCard :media="entry.media" :subtitle="subtitle(entry)" :corner-badge="leafCode(entry.media)" />
-                        <div class="text-ink-faint mt-2 flex items-center justify-center gap-2 text-sm font-semibold">
-                            <template v-if="entry.completions !== null">
-                                <span v-tooltip="transChoice('users.times_finished', entry.completions, { count: formatNumber(entry.completions) })">
-                                    <span aria-hidden="true">{{
-                                        trans('users.times_finished_short', { count: formatNumber(entry.completions) })
-                                    }}</span>
-                                    <span class="sr-only">{{
-                                        transChoice('users.times_finished', entry.completions, { count: formatNumber(entry.completions) })
-                                    }}</span>
-                                </span>
-                                <span class="bg-line h-2 w-px shrink-0" aria-hidden="true"></span>
-                            </template>
-                            <span>{{ formatDateTime(entry.at) }}</span>
-                            <!-- The page asks before the entry goes. -->
-                            <button
-                                v-if="isOwner && removeLabel !== null && entry.id !== null"
-                                v-tooltip="removeLabel"
-                                :aria-label="removeLabel"
-                                type="button"
-                                class="text-ink-faint hover:text-danger flex items-center gap-1 rounded-md px-1.5 py-0.5 transition-colors duration-150"
-                                @click="emit('remove', entry)"
-                            >
-                                <Trash2 class="size-3.5" />
-                            </button>
-                        </div>
+                        <ActivityCaption
+                            :entry="entry"
+                            :owner-name="ownerName"
+                            :is-owner="isOwner"
+                            :owner-rating-shown="ownerRatingsShown"
+                            :remove-label="removeLabel"
+                            @remove="emit('remove', entry)"
+                        />
                     </div>
                 </MediaGrid>
             </div>
