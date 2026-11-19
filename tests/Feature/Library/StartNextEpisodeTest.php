@@ -90,3 +90,32 @@ test('a show with every aired episode watched has nothing to carry on with', fun
 
     expect(Play::count())->toBe(1);
 });
+
+test('two clicks in a row on "watch next" log two episodes, never the same one twice', function () {
+    $user = User::factory()->create();
+    $show = makeShowTree([1 => ['2020-01-01', '2020-01-08', '2020-01-15']]);
+    $episodes = $show->children()->first()->children()->orderBy('number')->get();
+
+    app(MarkWatched::class)->execute($user, $episodes[0], WatchedAt::at(CarbonImmutable::now()));
+
+    // The second request was sent before the first one's answer moved the
+    // panel on: it still names the show, not the episode on screen.
+    startNextEpisode($user, $show)->assertCreated();
+    startNextEpisode($user, $show)->assertCreated();
+
+    expect(Play::query()->orderBy('id')->pluck('media_item_id')->all())
+        ->toBe([$episodes[0]->id, $episodes[1]->id, $episodes[2]->id]);
+});
+
+test('two clicks in a row on a season\'s "watch next" stay inside the season', function () {
+    $user = User::factory()->create();
+    $show = makeShowTree([1 => ['2020-01-01'], 2 => ['2020-02-01', '2020-02-08']]);
+    $season = $show->children()->where('number', 2)->first();
+    $episodes = $season->children()->orderBy('number')->get();
+
+    startNextEpisode($user, $season)->assertCreated();
+    startNextEpisode($user, $season)->assertCreated();
+
+    expect(Play::query()->orderBy('id')->pluck('media_item_id')->all())
+        ->toBe([$episodes[0]->id, $episodes[1]->id]);
+});
