@@ -3,6 +3,7 @@
 namespace App\Integrations\VideTrack\Backup;
 
 use App\Enums\FollowMode;
+use App\Library\MutationSource;
 use App\Models\Favorite;
 use App\Models\Follow;
 use App\Models\MediaList;
@@ -62,6 +63,7 @@ final readonly class BackupEntries
                 $play->outcome,
                 $play->amount === null ? null : (int) $play->amount,
                 $play->cycleNumber(),
+                MutationSource::tryFromValue($play->source),
             );
         }
     }

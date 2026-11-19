@@ -3,6 +3,7 @@
 namespace App\Integrations\Import\Data;
 
 use App\Enums\PlayOutcome;
+use App\Library\MutationSource;
 use App\Library\PlayDating;
 use Carbon\CarbonImmutable;
 
@@ -35,5 +36,7 @@ final readonly class ImportPlay
         public bool $scrobbled = false,
         public PlayDating $dating = PlayDating::Viewing,
         public ?int $playedSeconds = null,
+        /** Where the entry first came in, for a history that kept it (a backup); null for the import itself. */
+        public ?MutationSource $source = null,
     ) {}
 }

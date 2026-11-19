@@ -10,6 +10,7 @@ use App\Library\BackfillRules;
 use App\Library\Events\PlayAmountChanged;
 use App\Library\Events\PlayRecorded;
 use App\Library\MutationContext;
+use App\Library\MutationSource;
 use App\Library\PlayDating;
 use App\Library\WatchedAt;
 use App\Models\MediaItem;
@@ -57,6 +58,7 @@ final readonly class BackfillPlay
      * @param  CarbonImmutable|null  $at  null when the source gives no date
      * @param  int|null  $cycle  the run's number as the source gives it; null places the entry by its date
      * @param  PlayDating  $dating  whether $at tells this entry from another
+     * @param  MutationSource|null  $source  where the entry first came in, when the history being restored still knows (a backup); null stamps the traffic writing it now
      * @return bool whether a new entry was written
      */
     public function execute(
@@ -67,6 +69,7 @@ final readonly class BackfillPlay
         ?int $amount = null,
         ?int $cycle = null,
         PlayDating $dating = PlayDating::Viewing,
+        ?MutationSource $source = null,
     ): bool {
         $undated = ($at === null && $item->release_date === null) || $dating === PlayDating::Activity;
         $at ??= WatchedAt::releaseDateOrNow()->of($item);
@@ -110,6 +113,7 @@ final readonly class BackfillPlay
             'watch_cycle_id' => $cycleId,
             'watched_at' => $at,
             'outcome' => $outcome,
+            'source' => ($source ?? $this->mutations->current())->value(),
             'amount' => $kept,
         ];
 

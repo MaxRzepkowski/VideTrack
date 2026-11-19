@@ -42,6 +42,9 @@ and list management.
 - A title carries what you have done with it as its `state`.
 - A write that changes a title also returns `states`: every state the write touched, keyed
   `type:ref`. Marking an episode watched returns the episode, its season and its show.
+- A play carries `source`, where it came in from: `ui`, `api`, `import:<service>` or
+  `scrobble:<server>`. Plays recorded before VideTrack kept it have `null`. A restored backup keeps
+  each play's source; a play the backup has none for comes back as `import:videtrack`.
 - Errors are always JSON: `{"message": …}`, plus `{"errors": {…}}` for a 422. A token without the
   needed ability gets a 403. A media type this instance does not serve (its keys are not
   configured) gets a 404.

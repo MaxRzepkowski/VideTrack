@@ -22,6 +22,8 @@ final readonly class PlayEntry implements JsonSerializable
         /** In the type's progress unit; null where none was kept. */
         public ?int $amount,
         public int $cycle,
+        /** Where the entry came in from (`ui`, `api`, `import:<service>`, `scrobble:<server>`); null when that was never kept. */
+        public ?string $source,
     ) {}
 
     public static function of(Play $play): self
@@ -32,6 +34,7 @@ final readonly class PlayEntry implements JsonSerializable
             outcome: $play->outcome,
             amount: $play->amount,
             cycle: $play->cycleNumber(),
+            source: $play->source,
         );
     }
 
@@ -41,7 +44,8 @@ final readonly class PlayEntry implements JsonSerializable
      *     watchedAt: string,
      *     outcome: value-of<PlayOutcome>,
      *     amount: int|null,
-     *     cycle: int
+     *     cycle: int,
+     *     source: string|null
      * }
      */
     public function jsonSerialize(): array
@@ -52,6 +56,7 @@ final readonly class PlayEntry implements JsonSerializable
             'outcome' => $this->outcome->value,
             'amount' => $this->amount,
             'cycle' => $this->cycle,
+            'source' => $this->source,
         ];
     }
 }

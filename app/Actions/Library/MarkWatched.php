@@ -84,6 +84,9 @@ final readonly class MarkWatched
                 // sessions merge unless an explicit total is given.
                 $latest->update([
                     'outcome' => PlayOutcome::Completed,
+                    // The completion is what this traffic reports; the drop it
+                    // replaces came from wherever it came.
+                    'source' => $this->mutations->current()->value(),
                     'watched_at' => $at,
                     'amount' => $definition->progressUnit === null
                         ? null
@@ -100,6 +103,7 @@ final readonly class MarkWatched
                     'watch_cycle_id' => $cycleId,
                     'watched_at' => $at,
                     'outcome' => PlayOutcome::Completed,
+                    'source' => $this->mutations->current()->value(),
                     'amount' => $definition->progressUnit === null
                         ? null
                         : ($amount ?? $this->accumulatedProgress($user, $item)),
@@ -135,6 +139,7 @@ final readonly class MarkWatched
                 'watch_cycle_id' => $cycleId,
                 'watched_at' => $watchedAt->of($leaf),
                 'outcome' => PlayOutcome::Completed,
+                'source' => $this->mutations->current()->value(),
             ]))
             ->values();
 

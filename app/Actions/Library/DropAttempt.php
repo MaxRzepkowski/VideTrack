@@ -74,6 +74,7 @@ final readonly class DropAttempt
                 'watch_cycle_id' => $cycleId,
                 'watched_at' => $droppedAt->of($item),
                 'outcome' => PlayOutcome::Dropped,
+                'source' => $this->mutations->current()->value(),
                 'amount' => $this->types->get($item->type)->progressUnit === null
                     ? null
                     : ($amount ?? $state?->progress),

@@ -200,4 +200,7 @@ test('a write announces what it changed', function (string $action) {
     $write($user, $prepared);
 
     Event::assertDispatched($event, fn (object $announced): bool => $announced->userId === $user->id);
+
+    // And every history entry it wrote says where it came in from.
+    expect(Play::query()->where('user_id', $user->id)->whereNull('source')->exists())->toBeFalse();
 })->with(fn (): array => array_keys(libraryWrites()));

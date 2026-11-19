@@ -83,6 +83,9 @@ test('a play logged through the api is announced as coming from the api', functi
     $this->postJson('/api/v1/media/movie/603/plays', ['watched_at' => 'now'])->assertCreated();
 
     Event::assertDispatched(PlayRecorded::class, fn (PlayRecorded $e): bool => $e->source->value() === 'api');
+
+    // The entry keeps it, and lists it.
+    $this->getJson('/api/v1/media/movie/603/plays')->assertJsonPath('data.0.source', 'api');
 });
 
 test('the full plays cycle: create, list, delete one, unmark', function () {

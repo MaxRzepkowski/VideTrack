@@ -190,7 +190,7 @@ final class VideTrackSource implements ReadsFile
 
     private function play(BackupPlay $play): MediaRow
     {
-        return new MediaRow($play->position->subject(), plays: [new ImportPlay($play->watchedAt, $play->outcome, $play->amount, $play->cycle)]);
+        return new MediaRow($play->position->subject(), plays: [new ImportPlay($play->watchedAt, $play->outcome, $play->amount, $play->cycle, source: $play->source)]);
     }
 
     private function rating(BackupRating $rating): MediaRow

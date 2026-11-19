@@ -35,3 +35,10 @@ test('is() matches the kind and optionally the code', function () {
         ->and($source->is('import'))->toBeFalse()
         ->and(MutationSource::ui()->is('ui', 'trakt'))->toBeFalse();
 });
+
+test('a stored value this version cannot read is no source, rather than an error', function () {
+    expect(MutationSource::tryFromValue('scrobble:jellyfin')?->value())->toBe('scrobble:jellyfin')
+        ->and(MutationSource::tryFromValue(null))->toBeNull()
+        ->and(MutationSource::tryFromValue('carrier-pigeon'))->toBeNull()
+        ->and(MutationSource::tryFromValue('import:Not Valid'))->toBeNull();
+});
