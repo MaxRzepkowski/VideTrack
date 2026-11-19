@@ -39,11 +39,21 @@
                             "type": "string",
                             "format": "date"
                         }
+                    },
+                    {
+                        "name": "days",
+                        "in": "query",
+                        "description": "The window as a count of days, the first one included (\"this\n week\" is 7), for a client that does not keep the user's today.",
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 367
+                        }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "",
+                        "description": "Array of `CalendarDayResource`",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -51,7 +61,9 @@
                                     "properties": {
                                         "data": {
                                             "type": "array",
-                                            "items": {}
+                                            "items": {
+                                                "$ref": "#/components/schemas/CalendarDayResource"
+                                            }
                                         },
                                         "meta": {
                                             "type": "object",
@@ -1511,6 +1523,16 @@
                         }
                     },
                     {
+                        "name": "min_rating",
+                        "in": "query",
+                        "description": "Only what the user rated at least this: \"my tens\" is min_rating=10.",
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 10
+                        }
+                    },
+                    {
                         "name": "per_page",
                         "in": "query",
                         "schema": {
@@ -2121,6 +2143,72 @@
                     },
                     "401": {
                         "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/lookup": {
+            "post": {
+                "operationId": "v1.lookup",
+                "tags": [
+                    "Lookup"
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/LookupTitlesRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Array of `TitleLookupResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/TitleLookupResource"
+                                            }
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Too many requests",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "description": "Error overview."
+                                        }
+                                    },
+                                    "required": [
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
                     }
                 }
             }
@@ -3629,6 +3717,403 @@
                 }
             }
         },
+        "/suggestions": {
+            "get": {
+                "operationId": "v1.suggestions.index",
+                "summary": "The kinds that have something for the user, with how much waits behind each",
+                "tags": [
+                    "Suggestion"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Array of `SuggestionShelfResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/SuggestionShelfResource"
+                                            }
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Too many requests",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "description": "Error overview."
+                                        }
+                                    },
+                                    "required": [
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/suggestions/{shelf}": {
+            "get": {
+                "operationId": "v1.suggestions.show",
+                "summary": "One kind's titles, by subject",
+                "tags": [
+                    "Suggestion"
+                ],
+                "parameters": [
+                    {
+                        "name": "shelf",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Array of `SuggestionGroupResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/SuggestionGroupResource"
+                                            }
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Too many requests",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "description": "Error overview."
+                                        }
+                                    },
+                                    "required": [
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/media/{type}/{ref}/lists/{list}": {
+            "put": {
+                "operationId": "v1.media.lists.attach",
+                "tags": [
+                    "TitleList"
+                ],
+                "parameters": [
+                    {
+                        "name": "type",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "ref",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "list",
+                        "in": "path",
+                        "required": true,
+                        "description": "The list ID",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/MediaRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "anyOf": [
+                                                {
+                                                    "$ref": "#/components/schemas/MediaSummaryResource"
+                                                },
+                                                {}
+                                            ]
+                                        },
+                                        "states": {
+                                            "anyOf": [
+                                                {
+                                                    "type": "object",
+                                                    "additionalProperties": {
+                                                        "$ref": "#/components/schemas/UserMediaState"
+                                                    }
+                                                },
+                                                {}
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "states"
+                                    ],
+                                    "additionalProperties": {}
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Too many requests",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "description": "Error overview."
+                                        }
+                                    },
+                                    "required": [
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                }
+            },
+            "delete": {
+                "operationId": "v1.media.lists.detach",
+                "tags": [
+                    "TitleList"
+                ],
+                "parameters": [
+                    {
+                        "name": "type",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "ref",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "list",
+                        "in": "path",
+                        "required": true,
+                        "description": "The list ID",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "ref",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 100
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "anyOf": [
+                                                {
+                                                    "$ref": "#/components/schemas/MediaSummaryResource"
+                                                },
+                                                {}
+                                            ]
+                                        },
+                                        "states": {
+                                            "anyOf": [
+                                                {
+                                                    "type": "object",
+                                                    "additionalProperties": {
+                                                        "$ref": "#/components/schemas/UserMediaState"
+                                                    }
+                                                },
+                                                {}
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "states"
+                                    ],
+                                    "additionalProperties": {}
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Too many requests",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "description": "Error overview."
+                                        }
+                                    },
+                                    "required": [
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                }
+            }
+        },
+        "/up-next": {
+            "get": {
+                "operationId": "v1.up-next",
+                "tags": [
+                    "UpNext"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Array of `UpNextResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/UpNextResource"
+                                            }
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Too many requests",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "description": "Error overview."
+                                        }
+                                    },
+                                    "required": [
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
         "/media/{type}/{ref}/cycles": {
             "get": {
                 "operationId": "v1.media.cycles.index",
@@ -3922,6 +4407,28 @@
             }
         },
         "schemas": {
+            "CalendarDayResource": {
+                "type": "object",
+                "properties": {
+                    "date": {
+                        "type": "string"
+                    },
+                    "entries": {
+                        "type": "array",
+                        "items": {}
+                    },
+                    "events": {
+                        "type": "array",
+                        "items": {}
+                    }
+                },
+                "required": [
+                    "date",
+                    "entries",
+                    "events"
+                ],
+                "title": "CalendarDayResource"
+            },
             "EpisodePointer": {
                 "type": "object",
                 "properties": {
@@ -4142,6 +4649,69 @@
                     "createdAt"
                 ],
                 "title": "ListResource"
+            },
+            "LookupTitlesRequest": {
+                "type": "object",
+                "description": "Titles by name, each with its media type and what else is known of it.",
+                "properties": {
+                    "titles": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "title": {
+                                    "type": "string",
+                                    "maxLength": 200
+                                },
+                                "type": {
+                                    "type": "string",
+                                    "enum": [
+                                        "show",
+                                        "movie",
+                                        "game",
+                                        "book",
+                                        "manga",
+                                        "comic"
+                                    ]
+                                },
+                                "year": {
+                                    "type": [
+                                        "integer",
+                                        "null"
+                                    ]
+                                },
+                                "creator": {
+                                    "type": [
+                                        "string",
+                                        "null"
+                                    ],
+                                    "maxLength": 200
+                                }
+                            },
+                            "required": [
+                                "title",
+                                "type"
+                            ]
+                        },
+                        "minItems": 1,
+                        "maxItems": 25
+                    }
+                },
+                "required": [
+                    "titles"
+                ],
+                "title": "LookupTitlesRequest"
+            },
+            "MediaRequest": {
+                "type": "object",
+                "description": "A call addressed to one position: `media/{type}/{ref}`. The route holds the\nref's shape; this adds its length and turns a type the instance does not\nserve (unknown, or a module whose keys are not configured) into a resource\nthat does not exist \u2014 404, not an error on a field the client never sent.\n\nUsed as is where the target is all there is (reading, unmarking, clearing a\nrating); the writes that take fields extend it. Timestamp fields share the\n'now' | 'release' | explicit-date convention of logging a play.",
+                "properties": {
+                    "ref": {
+                        "type": "string",
+                        "maxLength": 100
+                    }
+                },
+                "title": "MediaRequest"
             },
             "MediaSummaryResource": {
                 "type": "object",
@@ -4454,6 +5024,146 @@
                     "watched_at"
                 ],
                 "title": "StorePlaysRequest"
+            },
+            "SuggestionGroupResource": {
+                "type": "object",
+                "properties": {
+                    "subject": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "caption": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "finished": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "total": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "suggestions": {
+                        "type": "array",
+                        "items": {}
+                    }
+                },
+                "required": [
+                    "subject",
+                    "caption",
+                    "finished",
+                    "total",
+                    "suggestions"
+                ],
+                "title": "SuggestionGroupResource"
+            },
+            "SuggestionShelfResource": {
+                "type": "object",
+                "properties": {
+                    "key": {
+                        "type": "string"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "total": {
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "key",
+                    "title",
+                    "description",
+                    "total"
+                ],
+                "title": "SuggestionShelfResource"
+            },
+            "TitleLookupResource": {
+                "type": "object",
+                "properties": {
+                    "title": {
+                        "type": "string"
+                    },
+                    "type": {
+                        "type": "string",
+                        "enum": [
+                            "movie",
+                            "show",
+                            "season",
+                            "episode",
+                            "game",
+                            "book",
+                            "manga",
+                            "comic"
+                        ]
+                    },
+                    "year": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "media": {
+                        "type": [
+                            "array",
+                            "null"
+                        ],
+                        "items": {}
+                    },
+                    "unavailable": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "title",
+                    "type",
+                    "year",
+                    "media",
+                    "unavailable"
+                ],
+                "title": "TitleLookupResource"
+            },
+            "UpNextResource": {
+                "type": "object",
+                "properties": {
+                    "show": {
+                        "type": "array",
+                        "items": {}
+                    },
+                    "episode": {
+                        "type": "array",
+                        "items": {}
+                    },
+                    "watchedEpisodes": {
+                        "type": "integer"
+                    },
+                    "airedEpisodes": {
+                        "type": "integer"
+                    },
+                    "remainingEpisodes": {
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "show",
+                    "episode",
+                    "watchedEpisodes",
+                    "airedEpisodes",
+                    "remainingEpisodes"
+                ],
+                "title": "UpNextResource"
             },
             "UpdateFavoriteRequest": {
                 "type": "object",
@@ -5024,8 +5734,8 @@
                     }
                 }
             },
-            "AuthorizationException": {
-                "description": "Authorization error",
+            "ModelNotFoundException": {
+                "description": "Not found",
                 "content": {
                     "application/json": {
                         "schema": {
@@ -5043,8 +5753,8 @@
                     }
                 }
             },
-            "ModelNotFoundException": {
-                "description": "Not found",
+            "AuthorizationException": {
+                "description": "Authorization error",
                 "content": {
                     "application/json": {
                         "schema": {

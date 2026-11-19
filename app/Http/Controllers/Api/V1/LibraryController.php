@@ -27,7 +27,7 @@ class LibraryController extends Controller
      */
     public function __invoke(#[CurrentUser] User $viewer, LibraryRequest $request, LibraryStates $states, MediaItemSummaries $cards, LibraryTabQuery $tabs): AnonymousResourceCollection
     {
-        $page = $tabs->of($viewer, $request->tab(), $request->mediaType())
+        $page = $tabs->of($viewer, $request->tab(), $request->mediaType(), $request->minRating())
             ->paginate($request->perPage())
             ->withQueryString();
 

@@ -36,6 +36,8 @@ class ApiTokenController extends Controller
             // Shown once, right after creation: the database keeps only its hash.
             'createdToken' => session('created_token'),
             'docsUrl' => config('tracker.api_docs_url'),
+            // Where an AI assistant connects with the same token; nowhere when the operator closed it.
+            'mcpUrl' => config('tracker.mcp_enabled') === true ? route('api.mcp') : null,
         ]);
     }
 

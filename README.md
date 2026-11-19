@@ -34,6 +34,7 @@ tells you when the next episode or release is out, and keeps all of it on your o
 - 📡 Log what you watch automatically from Plex, Jellyfin, Emby or Tautulli.
 - 📤 Export everything as a backup, as CSV, or as files for IMDb, Letterboxd, Goodreads and MyAnimeList.
 - 📱 Install it as an app on your phone or computer.
+- 🤖 Ask an AI assistant what to watch next or what comes out this week, and let it tick off what you watched ([MCP](docs/api.md#mcp-server-for-ai-assistants)).
 - 👥 Give everyone at home their own account.
 - 🔑 Log in with a password or through your own OpenID Connect server, Google, GitHub or GitLab.
 - 🐳 Run it as one Docker container with one SQLite file, plus an optional one for notifications.
@@ -98,7 +99,7 @@ way, in [Signing in with an identity provider](docs/install.md#signing-in-with-a
 
 - [Installing](docs/install.md) and [upgrading](docs/upgrading.md)
 - [Administration](docs/administration.md): user accounts, backup and restore
-- [API and webhooks](docs/api.md) for your own scripts
+- [API, MCP server and webhooks](docs/api.md) for your own scripts and AI assistants
 - [Changelog](CHANGELOG.md)
 
 ## AI disclosure

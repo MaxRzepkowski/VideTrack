@@ -23,3 +23,10 @@ test('people, collections and companies are entity scopes, a provider is not', f
         ->and(SearchScopes::isEntity('tmdb'))->toBeFalse()
         ->and(SearchScopes::isEntity(null))->toBeFalse();
 });
+
+test('a type is searched in the scope that serves it', function () use ($scopes) {
+    expect($scopes->scopeFor('movie'))->toBe('tmdb')
+        ->and($scopes->scopeFor('game'))->toBe('igdb')
+        ->and($scopes->scopeFor('person'))->toBe('person')
+        ->and($scopes->scopeFor('podcast'))->toBeNull();
+});

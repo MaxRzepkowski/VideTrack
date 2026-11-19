@@ -14,7 +14,17 @@ test('the api settings page renders with an empty list', function () {
             ->where('tokens', [])
             ->where('createdToken', null)
             ->where('docsUrl', config('tracker.api_docs_url'))
+            ->where('mcpUrl', route('api.mcp'))
         );
+});
+
+test('the api settings page does not offer a closed mcp server', function () {
+    config(['tracker.mcp_enabled' => false]);
+
+    $this->actingAs(User::factory()->create())
+        ->get(route('settings.api-tokens.index'))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page->where('mcpUrl', null));
 });
 
 test('creating a token shows its plaintext exactly once', function () {

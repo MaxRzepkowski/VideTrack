@@ -28,10 +28,14 @@ curl -X PUT -H "Authorization: Bearer <token>" -H "Content-Type: application/jso
 
 ## What it covers
 
-Reading: your profile, search, one title's details and history, your library (`history`,
-`ratings`, `favorites`, `progress`), your lists, the release calendar and notifications.
+Reading: your profile, search, many titles by name at once with your state for each (`lookup`), one
+title's details and history, your library (`history`, `ratings`, `favorites`, `progress`, each also
+only what you rated at least so high), the next
+episode of every show you watch (`up-next`), your lists, the release calendar (from a day, to a day or
+for a number of `days`), suggestions and notifications.
 
-With `write`: plays, ratings, status, progress, favorites, list membership, rewatch cycles, the
+With `write`: plays, ratings, status, progress, favorites, list membership (all of a title's lists
+at once, or one list at a time), rewatch cycles, the
 release bell (titles, people, companies, networks, collections), people and companies on lists,
 and list management.
 
@@ -49,6 +53,69 @@ and list management.
   needed ability gets a 403. A media type this instance does not serve (its keys are not
   configured) gets a 404.
 - The rate limit is 240 requests per minute per token.
+
+## MCP server for AI assistants
+
+The same token connects an AI assistant (Claude, or any client of the
+[Model Context Protocol](https://modelcontextprotocol.io)) to your library at `/api/mcp`. Settings → API
+shows the full address. The assistant can then do almost anything you do in VideTrack: say what you
+watch next or what comes out this week, check which of twenty films you have seen, tick off an
+episode, rate a film, drop a show, or build a list for you.
+
+Each tool calls the API above, so it follows the same rules and records what it writes with the source
+`api`. Its answers are compact: no pictures, and a field that is false or empty is left out. A token
+without `write` sees only the reading tools.
+
+| Reading | |
+|---|---|
+| `search` | titles, people, companies or collections by name |
+| `check_titles` | up to 25 titles by name and year at once, each with your state |
+| `get_title`, `get_history` | one title in full; every time you watched it |
+| `get_library` | your history, ratings, favorites or titles in progress, a page at a time, also only what you rated at least so high |
+| `get_up_next`, `get_calendar` | the next episode of each show; releases day by day (a week by default) |
+| `get_lists`, `get_list` | your lists (the Backlog among them) and what is on one |
+| `get_suggestions`, `get_notifications` | your suggestions; your notifications |
+
+| Writing (`write`) | |
+|---|---|
+| `mark_watched`, `unmark_watched`, `delete_history_entry` | log a viewing (or the next episode of a show); take it back |
+| `rate`, `remove_rating`, `set_favorite`, `set_status`, `log_progress` | rating, favorite, dropped or on hold, pages or hours |
+| `follow_releases`, `follow_creator` | the release bell on a title, a person, a company or a collection |
+| `start_rewatch`, `cancel_rewatch` | watch a show again from the start |
+| `create_list`, `update_list`, `delete_list`, `add_to_list`, `remove_from_list` | your lists |
+| `mark_notifications_read` | one notification, or all |
+
+A tool counts against the API's rate limit as the calls it makes (most make one; `update_list` makes
+two). `search` and `get_title` also count against the 120 catalogue lookups a minute your account
+has; `check_titles` has 120 titles a minute of its own.
+
+Claude Code:
+
+```sh
+claude mcp add --transport http videtrack https://your-host/api/mcp \
+  --header "Authorization: Bearer <token>"
+```
+
+A client that can only start local servers (Claude Desktop's config file, for one) reaches it through
+[`mcp-remote`](https://www.npmjs.com/package/mcp-remote):
+
+```json
+{
+  "mcpServers": {
+    "videtrack": {
+      "command": "npx",
+      "args": ["mcp-remote", "https://your-host/api/mcp", "--header", "Authorization:${AUTH_HEADER}"],
+      "env": { "AUTH_HEADER": "Bearer <token>" }
+    }
+  }
+}
+```
+
+For an instance on the same computer, write `http://127.0.0.1:8080/api/mcp`, not `localhost`: Docker
+publishes the port on IPv4, and some clients try `localhost` over IPv6 first and fail to connect. Over
+plain `http://` to any other address, `mcp-remote` also needs `--allow-http`.
+
+An operator who does not want it sets `MCP_ENABLED=false`; the API stays open.
 
 ## Full reference
 

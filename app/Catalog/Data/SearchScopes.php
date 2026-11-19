@@ -39,6 +39,18 @@ final readonly class SearchScopes
         return $this->scopes[$scope] ?? [];
     }
 
+    /** The scope that serves a type (a media type or an entity scope); null for one nobody serves. */
+    public function scopeFor(string $type): ?string
+    {
+        foreach ($this->scopes as $scope => $types) {
+            if (in_array($type, $types, true)) {
+                return $scope;
+            }
+        }
+
+        return null;
+    }
+
     public static function isEntity(?string $scope): bool
     {
         return $scope !== null && EntitySearchScope::tryFrom($scope) !== null;

@@ -15,6 +15,7 @@ const props = defineProps<{
     tokens: ApiTokenItem[];
     createdToken: string | null;
     docsUrl: string;
+    mcpUrl: string | null;
 }>();
 
 const form = useForm({
@@ -51,6 +52,16 @@ async function copyToken(): Promise<void> {
     }
 
     await copy(props.createdToken);
+}
+
+const { copied: mcpUrlCopied, copy: copyText } = useCopyToClipboard(trans('common.could_not_copy_the_link'));
+
+async function copyMcpUrl(): Promise<void> {
+    if (props.mcpUrl === null) {
+        return;
+    }
+
+    await copyText(props.mcpUrl);
 }
 
 function abilityLabel(abilities: TokenAbility[]): string {
@@ -176,6 +187,38 @@ function abilityLabel(abilities: TokenAbility[]): string {
                             </button>
                         </li>
                     </ul>
+                </div>
+
+                <div v-if="props.mcpUrl" class="border-line-subtle bg-surface rounded-xl border px-5 py-4">
+                    <div class="text-ink text-base font-semibold">{{ trans('integrations.ai_assistant_mcp') }}</div>
+                    <p class="text-ink-muted mt-0.5 mb-3 text-sm">
+                        {{ trans('integrations.connect_an_ai_assistant_with_one') }}
+                    </p>
+                    <div class="flex gap-2">
+                        <label for="mcp-url" class="sr-only">{{ trans('integrations.mcp_server_address') }}</label>
+                        <input
+                            id="mcp-url"
+                            readonly
+                            :value="props.mcpUrl"
+                            class="border-line-subtle bg-surface-base text-ink-secondary focus:border-brand min-w-0 flex-1 rounded-md border px-3 py-2 font-mono text-sm focus:outline-none"
+                            @focus="($event.target as HTMLInputElement).select()"
+                        />
+                        <button
+                            type="button"
+                            class="border-line-subtle bg-surface-base text-ink hover:border-brand shrink-0 rounded-md border px-4 py-2 text-sm font-medium"
+                            @click="copyMcpUrl"
+                        >
+                            {{ mcpUrlCopied ? trans('common.copied') : trans('common.copy') }}
+                        </button>
+                    </div>
+                    <a
+                        :href="`${props.docsUrl}#mcp-server-for-ai-assistants`"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="text-brand-soft mt-3 inline-block text-sm font-medium hover:underline"
+                    >
+                        {{ trans('integrations.how_to_connect_an_assistant') }}
+                    </a>
                 </div>
 
                 <p class="text-ink-muted text-sm">

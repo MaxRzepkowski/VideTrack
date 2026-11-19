@@ -133,4 +133,10 @@ class MediaList extends Model
     {
         return $this->hasMany(ListItem::class, 'list_id')->orderBy('position');
     }
+
+    /** Where a title stands on this list; null when it is not on it. */
+    public function entryOf(MediaItem $item): ?ListItem
+    {
+        return $this->items()->where('media_item_id', $item->id)->first();
+    }
 }

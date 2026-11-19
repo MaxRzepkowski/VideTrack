@@ -92,6 +92,11 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('api', fn (Request $request): Limit => Limit::perMinute(self::limit('api'))
             ->by((string) (Auth::id() ?? $request->ip())));
 
+        // The MCP server's own calls (the handshake, the list of tools), on a
+        // count apart: what its tools ask of API v1 counts under 'api'.
+        RateLimiter::for('mcp', fn (Request $request): Limit => Limit::perMinute(self::limit('api'))
+            ->by((string) (Auth::id() ?? $request->ip())));
+
         // Two ceilings, because the two abuses differ: one endpoint's token
         // leaking (per token) and somebody spraying the instance (per IP).
         RateLimiter::for('webhooks', fn (Request $request): array => [

@@ -7,11 +7,13 @@ use App\Catalog\ProviderException;
 use App\Catalog\ProviderRejected;
 use App\Exceptions\LibraryRefusal;
 use App\Http\Controllers\HealthController;
+use App\Http\Middleware\EnsureMcpIsEnabled;
 use App\Http\Middleware\EnsureUserIsNotBlocked;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\RequireTokenAbility;
 use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\SetUserLocale;
+use Illuminate\Contracts\Auth\Middleware\AuthenticatesRequests;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -70,6 +72,11 @@ return Application::configure(basePath: dirname(__DIR__))
             HandleInertiaRequests::class,
             AddLinkHeadersForPreloadedAssets::class,
         ]);
+
+        // A closed MCP server answers 404 before the token is read: without
+        // this the framework moves authentication ahead of it, and the 401
+        // would tell a stranger the server exists.
+        $middleware->prependToPriorityList(before: AuthenticatesRequests::class, prepend: EnsureMcpIsEnabled::class);
 
         // Token abilities (read / write) gate whole route groups of API v1
         // (routes/api-v1.php); the browser session passes them as the account.

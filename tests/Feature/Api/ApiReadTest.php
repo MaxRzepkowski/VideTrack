@@ -3,8 +3,12 @@
 use App\Actions\Library\MarkWatched;
 use App\Actions\Library\RateItem;
 use App\Actions\Library\SetFavorite;
+use App\Http\Requests\Api\V1\CalendarRequest;
+use App\Http\Requests\Api\V1\LookupTitlesRequest;
+use App\Library\RatingScale;
 use App\Library\WatchedAt;
 use App\Models\CatalogEvent;
+use App\Models\Follow;
 use App\Models\MediaItem;
 use App\Models\User;
 use App\Notifications\MediaEvent;
@@ -302,4 +306,110 @@ test('the API rate limit is the configured one', function () {
     $this->getJson('/api/v1/me')->assertOk();
     $this->getJson('/api/v1/me')->assertOk();
     $this->getJson('/api/v1/me')->assertStatus(429);
+});
+
+test('up next answers the first unwatched episode of every show being watched', function () {
+    $user = apiUser(['read']);
+    $show = makeShowTree([1 => ['2020-01-01', '2020-01-08']]);
+    app(MarkWatched::class)->execute($user, episodeOf($show, 1, 1), WatchedAt::now());
+
+    $this->getJson(route('api.v1.up-next'))
+        ->assertOk()
+        ->assertJsonPath('data.0.show.ref', $show->provider_ref)
+        ->assertJsonPath('data.0.episode.number', 2)
+        ->assertJsonPath('data.0.airedEpisodes', 2)
+        ->assertJsonPath('data.0.remainingEpisodes', 1);
+});
+
+test('suggestions list the kinds that have something, and each kind its titles', function () {
+    $user = apiUser(['read']);
+    $movie = MediaItem::factory()->movie()->create(['title' => 'Out now', 'release_date' => '2026-09-01']);
+    Follow::factory()->create(['user_id' => $user->id, 'media_item_id' => $movie->id, 'created_at' => '2026-03-14 10:00:00']);
+
+    $this->getJson(route('api.v1.suggestions.index'))
+        ->assertOk()
+        ->assertJsonPath('data.0.key', 'released-since-added')
+        ->assertJsonPath('data.0.total', 1);
+
+    $this->getJson(route('api.v1.suggestions.show', ['shelf' => 'released-since-added']))
+        ->assertOk()
+        ->assertJsonPath('data.0.suggestions.0.media.title', 'Out now')
+        ->assertJsonStructure(['data' => [['suggestions' => [['media', 'reason']]]]]);
+
+    $this->getJson(route('api.v1.suggestions.show', ['shelf' => 'no-such-kind']))->assertNotFound();
+});
+
+test('many titles are looked up by name at once, each with the caller state', function () {
+    Http::fake(['*/search/multi*' => Http::response(jsonFixture('tmdb/search'))]);
+    $user = apiUser(['read']);
+    app(RateItem::class)->execute($user, MediaItem::factory()->movie()->create(['provider_ref' => '603']), 8);
+
+    $this->postJson(route('api.v1.lookup'), ['titles' => [
+        ['title' => 'The Matrix', 'type' => 'movie', 'year' => 1999],
+        ['title' => 'Nothing Like It', 'type' => 'movie'],
+    ]])
+        ->assertOk()
+        ->assertJsonPath('data.0.media.ref', '603')
+        ->assertJsonPath('data.0.media.state.rating', 8)
+        ->assertJsonPath('data.1.media', null)
+        ->assertJsonPath('data.1.unavailable', false);
+});
+
+test('a lookup whose catalogue cannot answer says so for its titles', function () {
+    Http::fake(['*/search/multi*' => Http::response([], 503)]);
+    apiUser(['read']);
+
+    $this->postJson(route('api.v1.lookup'), ['titles' => [['title' => 'The Matrix', 'type' => 'movie']]])
+        ->assertOk()
+        ->assertJsonPath('data.0.unavailable', true);
+});
+
+test('a lookup names a type for every title', function () {
+    apiUser(['read']);
+
+    $this->postJson(route('api.v1.lookup'), ['titles' => [['title' => 'The Matrix']]])
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors('titles.0.type');
+});
+
+test('the calendar takes its window as a count of days', function () {
+    apiUser(['read']);
+
+    $this->getJson(route('api.v1.calendar', ['from' => '2026-10-10', 'days' => 7]))
+        ->assertOk()
+        ->assertJsonPath('meta.to', '2026-10-16');
+
+    $this->getJson(route('api.v1.calendar', ['from' => '2026-10-10', 'days' => 7, 'to' => '2026-10-20']))
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors('days');
+
+    // The widest window counted in days takes its first day too.
+    $this->getJson(route('api.v1.calendar', ['from' => '2026-10-10', 'days' => CalendarRequest::MAX_DAYS + 2]))->assertUnprocessable();
+    $this->getJson(route('api.v1.calendar', ['from' => '2026-10-10', 'days' => CalendarRequest::MAX_DAYS + 1]))->assertOk();
+});
+
+test('a lookup is charged per title against the catalogue budget', function () {
+    Http::fake(['*/search/multi*' => Http::response(jsonFixture('tmdb/search'))]);
+    apiUser(['read']);
+    $titles = array_fill(0, LookupTitlesRequest::MAX_TITLES, ['title' => 'The Matrix', 'type' => 'movie']);
+    $allowed = intdiv(config()->integer('tracker.rate_limits.provider_pages'), LookupTitlesRequest::MAX_TITLES);
+
+    foreach (range(1, $allowed) as $call) {
+        $this->postJson(route('api.v1.lookup'), ['titles' => $titles])->assertOk();
+    }
+
+    $this->postJson(route('api.v1.lookup'), ['titles' => $titles])->assertTooManyRequests();
+});
+
+test('the library keeps only what the user rated at least so high', function () {
+    $user = apiUser(['read']);
+    app(RateItem::class)->execute($user, MediaItem::factory()->movie()->create(['title' => 'Ten']), RatingScale::MAX);
+    app(RateItem::class)->execute($user, MediaItem::factory()->movie()->create(['title' => 'Seven']), 7);
+
+    $this->getJson(route('api.v1.library', ['tab' => 'ratings', 'min_rating' => RatingScale::MAX]))
+        ->assertOk()
+        ->assertJsonPath('meta.total', 1)
+        ->assertJsonPath('data.0.title', 'Ten');
+
+    $this->getJson(route('api.v1.library', ['min_rating' => RatingScale::MAX + 1]))->assertUnprocessable();
 });
