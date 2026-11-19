@@ -117,6 +117,207 @@
                 }
             }
         },
+        "/countdowns": {
+            "get": {
+                "operationId": "v1.countdowns",
+                "tags": [
+                    "Countdown"
+                ],
+                "parameters": [
+                    {
+                        "name": "type",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "show",
+                                "movie",
+                                "game",
+                                "book",
+                                "manga",
+                                "comic",
+                                "event"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "q",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 100
+                        }
+                    },
+                    {
+                        "name": "sort",
+                        "in": "query",
+                        "schema": {
+                            "$ref": "#/components/schemas/CountdownSort"
+                        }
+                    },
+                    {
+                        "name": "dir",
+                        "in": "query",
+                        "schema": {
+                            "$ref": "#/components/schemas/SortDirection"
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 100
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Paginated set of `CountdownResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/CountdownResource"
+                                            }
+                                        },
+                                        "meta": {
+                                            "type": "object",
+                                            "properties": {
+                                                "currentPage": {
+                                                    "type": "integer",
+                                                    "minimum": 1
+                                                },
+                                                "lastPage": {
+                                                    "type": "integer",
+                                                    "minimum": 1
+                                                },
+                                                "perPage": {
+                                                    "type": "integer",
+                                                    "description": "Number of items shown per page.",
+                                                    "minimum": 0
+                                                },
+                                                "total": {
+                                                    "type": "integer",
+                                                    "description": "Total number of items being paginated.",
+                                                    "minimum": 0
+                                                },
+                                                "from": {
+                                                    "type": [
+                                                        "integer",
+                                                        "null"
+                                                    ],
+                                                    "minimum": 1
+                                                },
+                                                "to": {
+                                                    "type": [
+                                                        "integer",
+                                                        "null"
+                                                    ],
+                                                    "description": "Number of the last item in the slice.",
+                                                    "minimum": 1
+                                                },
+                                                "types": {
+                                                    "type": "array",
+                                                    "items": {}
+                                                }
+                                            },
+                                            "required": [
+                                                "currentPage",
+                                                "lastPage",
+                                                "perPage",
+                                                "total",
+                                                "from",
+                                                "to",
+                                                "types"
+                                            ]
+                                        },
+                                        "links": {
+                                            "type": "object",
+                                            "properties": {
+                                                "first": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "last": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "prev": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "next": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                }
+                                            },
+                                            "required": [
+                                                "first",
+                                                "last",
+                                                "prev",
+                                                "next"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "meta",
+                                        "links"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Too many requests",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "description": "Error overview."
+                                        }
+                                    },
+                                    "required": [
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                }
+            }
+        },
         "/people/{provider}/{ref}/follow": {
             "put": {
                 "operationId": "v1.people.follow.update",
@@ -4429,6 +4630,50 @@
                 ],
                 "title": "CalendarDayResource"
             },
+            "CountdownResource": {
+                "anyOf": [
+                    {
+                        "type": "object",
+                        "properties": {
+                            "showTitle": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "media": {
+                                "type": "object",
+                                "additionalProperties": {}
+                            }
+                        },
+                        "required": [
+                            "showTitle",
+                            "media"
+                        ]
+                    },
+                    {
+                        "type": "object",
+                        "properties": {
+                            "event": {
+                                "$ref": "#/components/schemas/EventEntry"
+                            }
+                        },
+                        "required": [
+                            "event"
+                        ]
+                    }
+                ],
+                "title": "CountdownResource"
+            },
+            "CountdownSort": {
+                "type": "string",
+                "description": "The sort axes of the countdowns page; the type is what its filter is for.\n| |\n|---|\n| `premiere` <br/> Soonest first \u2014 the order the list is built in. |\n| `title` <br/>  |",
+                "enum": [
+                    "premiere",
+                    "title"
+                ],
+                "title": "CountdownSort"
+            },
             "EpisodePointer": {
                 "type": "object",
                 "properties": {
@@ -4462,6 +4707,50 @@
                     "seasonNumber"
                 ],
                 "title": "EpisodePointer"
+            },
+            "EventEntry": {
+                "type": "object",
+                "properties": {
+                    "provider": {
+                        "type": "string"
+                    },
+                    "ref": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "startsAt": {
+                        "type": "string",
+                        "description": "ISO 8601 instant"
+                    },
+                    "endsAt": {
+                        "type": "string",
+                        "description": "ISO 8601 instant: the provider's end, or the start plus the usual length of a show where it names none"
+                    },
+                    "liveStreamUrl": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "logoPath": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    }
+                },
+                "required": [
+                    "provider",
+                    "ref",
+                    "name",
+                    "startsAt",
+                    "endsAt",
+                    "liveStreamUrl",
+                    "logoPath"
+                ],
+                "title": "EventEntry"
             },
             "FollowMode": {
                 "type": "string",
@@ -4972,6 +5261,15 @@
                     "list_ids"
                 ],
                 "title": "ReorderListsRequest"
+            },
+            "SortDirection": {
+                "type": "string",
+                "description": "Which way a listing reads along its sort axis.\n",
+                "enum": [
+                    "asc",
+                    "desc"
+                ],
+                "title": "SortDirection"
             },
             "StoreListRequest": {
                 "type": "object",

@@ -191,6 +191,24 @@ test('the calendar answers each day as the api does, compact', function () {
         ->and($event)->not->toHaveKey('logoPath');
 });
 
+test('the countdowns come soonest first, searched by name', function () {
+    $user = assistant(['read']);
+
+    foreach (['Dune' => '2026-10-12', 'Far Away' => '2030-05-01'] as $title => $date) {
+        $movie = MediaItem::factory()->movie()->create(['title' => $title, 'release_date' => $date]);
+        $user->watchlist()->items()->create(['media_item_id' => $movie->id, 'position' => 1]);
+    }
+
+    mcpTool('get_countdowns')
+        ->assertJsonPath('result.structuredContent.data.0.media.title', 'Dune')
+        ->assertJsonPath('result.structuredContent.data.1.media.releaseDate', '2030-05-01')
+        ->assertJsonPath('result.structuredContent.meta.types.0', ['type' => 'movie', 'count' => 2]);
+
+    mcpTool('get_countdowns', ['query' => 'far', 'type' => 'movie'])
+        ->assertJsonPath('result.structuredContent.meta.total', 1)
+        ->assertJsonPath('result.structuredContent.data.0.media.title', 'Far Away');
+});
+
 test('the history lists each viewing with the id that deletes it', function () {
     $user = assistant();
     $movie = MediaItem::factory()->movie()->create();
