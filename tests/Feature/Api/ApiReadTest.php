@@ -236,6 +236,50 @@ test('the calendar names each event of a day as the event itself', function () {
         ->assertJsonStructure(['data' => [['events' => [['provider', 'ref', 'name', 'startsAt', 'endsAt', 'liveStreamUrl', 'logoPath']]]]]);
 });
 
+test('the countdowns run soonest first, years ahead, with every kind counted', function () {
+    enableGamesModule();
+    $user = apiUser(['read']);
+
+    foreach (['Dune' => '2026-10-12', 'Far Away' => '2030-05-01'] as $title => $date) {
+        $movie = MediaItem::factory()->movie()->create(['title' => $title, 'release_date' => $date]);
+        $user->watchlist()->items()->create(['media_item_id' => $movie->id, 'position' => 1]);
+    }
+
+    CatalogEvent::factory()->create(['name' => 'Showcase', 'starts_at' => CarbonImmutable::parse('2026-10-14 18:00', 'UTC'), 'ends_at' => null]);
+
+    $this->getJson('/api/v1/countdowns')
+        ->assertOk()
+        ->assertJsonPath('data.0.media.title', 'Dune')
+        ->assertJsonPath('data.1.event.name', 'Showcase')
+        // Past the calendar's year.
+        ->assertJsonPath('data.2.media.title', 'Far Away')
+        ->assertJsonPath('meta.total', 3)
+        ->assertJsonPath('meta.types', [['type' => 'movie', 'count' => 2], ['type' => 'event', 'count' => 1]]);
+
+    $this->getJson('/api/v1/countdowns?type=movie&q=far')
+        ->assertOk()
+        ->assertJsonCount(1, 'data')
+        ->assertJsonPath('data.0.media.title', 'Far Away')
+        // The kinds still describe the whole set.
+        ->assertJsonPath('meta.types.1.type', 'event');
+
+    $this->getJson('/api/v1/countdowns?sort=title&dir=desc&per_page=1&page=2')
+        ->assertOk()
+        // Showcase, Far Away, Dune.
+        ->assertJsonPath('data.0.media.title', 'Far Away')
+        ->assertJsonPath('meta.lastPage', 3);
+});
+
+test('a kind with nothing counting down answers none, not everything', function () {
+    $user = apiUser(['read']);
+    $movie = MediaItem::factory()->movie()->create(['release_date' => '2026-10-12']);
+    $user->watchlist()->items()->create(['media_item_id' => $movie->id, 'position' => 1]);
+
+    $this->getJson('/api/v1/countdowns?type=show')->assertOk()->assertJsonPath('data', [])->assertJsonPath('meta.total', 0);
+    $this->getJson('/api/v1/countdowns?type=episode')->assertUnprocessable()->assertJsonValidationErrors('type');
+    $this->getJson('/api/v1/countdowns?sort=rating')->assertUnprocessable()->assertJsonValidationErrors('sort');
+});
+
 test('notifications page newest first', function () {
     $user = apiUser();
 

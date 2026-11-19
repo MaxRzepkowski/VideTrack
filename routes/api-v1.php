@@ -3,6 +3,7 @@
 use App\Accounts\TokenAbility;
 use App\Catalog\MediaRef;
 use App\Http\Controllers\Api\V1\CalendarController;
+use App\Http\Controllers\Api\V1\CountdownController;
 use App\Http\Controllers\Api\V1\CreatorFollowController;
 use App\Http\Controllers\Api\V1\CreatorListsController;
 use App\Http\Controllers\Api\V1\EventVisibilityController;
@@ -59,6 +60,7 @@ Route::middleware('abilities:'.TokenAbility::Read->value)->group(function () {
     Route::post('lookup', LookupController::class)->middleware(ThrottleTitleLookups::class)->name('lookup');
     Route::get('library', LibraryController::class)->name('library');
     Route::get('calendar', CalendarController::class)->name('calendar');
+    Route::get('countdowns', CountdownController::class)->name('countdowns');
     Route::get('up-next', UpNextController::class)->name('up-next');
     Route::get('suggestions', [SuggestionController::class, 'index'])->name('suggestions.index');
     Route::get('suggestions/{shelf}', [SuggestionController::class, 'show'])->where('shelf', '[a-z0-9-]+')->name('suggestions.show');

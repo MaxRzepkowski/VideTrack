@@ -12,6 +12,7 @@ use App\Http\Mcp\Tools\DeleteList;
 use App\Http\Mcp\Tools\FollowCreator;
 use App\Http\Mcp\Tools\FollowReleases;
 use App\Http\Mcp\Tools\GetCalendar;
+use App\Http\Mcp\Tools\GetCountdowns;
 use App\Http\Mcp\Tools\GetHistory;
 use App\Http\Mcp\Tools\GetLibrary;
 use App\Http\Mcp\Tools\GetList;
@@ -57,6 +58,7 @@ final class LibraryServer extends Server
         GetLibrary::class,
         GetUpNext::class,
         GetCalendar::class,
+        GetCountdowns::class,
         GetLists::class,
         GetList::class,
         GetSuggestions::class,
