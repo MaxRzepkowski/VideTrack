@@ -64,6 +64,26 @@ final readonly class Discovery
         return [...$codes, ...$this->people()];
     }
 
+    /**
+     * The types with browse sections (trending, popular, upcoming): their
+     * provider lists trending titles, or popular and upcoming ones of the
+     * type. Unlike browsableCodes() this asks each provider about the type
+     * itself, so it is for a caller that answers sections, not for every page.
+     *
+     * @return list<string>
+     */
+    public function sectionCodes(): array
+    {
+        return array_values(array_filter(
+            $this->types->searchableCodes(),
+            function (string $code): bool {
+                $provider = $this->providers->forType($this->types->get($code));
+
+                return $provider instanceof SupportsTrending || self::supports($provider, $code);
+            },
+        ));
+    }
+
     /** Whether a title's genres can link to the discover page's genre listing of its type. */
     public function browsesGenresOf(string $type): bool
     {

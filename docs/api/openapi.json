@@ -1540,6 +1540,85 @@
                 }
             }
         },
+        "/discover/{type}": {
+            "get": {
+                "operationId": "v1.discover",
+                "tags": [
+                    "Discover"
+                ],
+                "parameters": [
+                    {
+                        "name": "type",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "`DiscoverSectionsResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/DiscoverSectionsResource"
+                                        },
+                                        "meta": {
+                                            "type": "object",
+                                            "properties": {
+                                                "type": {
+                                                    "type": "string"
+                                                },
+                                                "failed": {
+                                                    "type": "boolean"
+                                                }
+                                            },
+                                            "required": [
+                                                "type",
+                                                "failed"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "meta"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Too many requests",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "description": "Error overview."
+                                        }
+                                    },
+                                    "required": [
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
         "/events/{provider}/{ref}/hidden": {
             "put": {
                 "operationId": "v1.events.hidden.update",
@@ -4959,6 +5038,29 @@
                     "title"
                 ],
                 "title": "CountdownSort"
+            },
+            "DiscoverSectionsResource": {
+                "type": "object",
+                "properties": {
+                    "trending": {
+                        "type": "array",
+                        "items": {}
+                    },
+                    "popular": {
+                        "type": "array",
+                        "items": {}
+                    },
+                    "upcoming": {
+                        "type": "array",
+                        "items": {}
+                    }
+                },
+                "required": [
+                    "trending",
+                    "popular",
+                    "upcoming"
+                ],
+                "title": "DiscoverSectionsResource"
             },
             "EpisodePointer": {
                 "type": "object",

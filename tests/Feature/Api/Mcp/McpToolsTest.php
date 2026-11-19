@@ -225,6 +225,26 @@ test('statistics come for a year, and a section on its own', function () {
     expect(mcpRefusal(mcpTool('get_statistics', ['from' => '2025-01-01'])))->not->toBeEmpty();
 });
 
+test('trending titles come in their three sections, compact', function () {
+    Http::fake([
+        '*/trending/movie/week*' => Http::response(['results' => []]),
+        '*/trending/tv/week*' => Http::response(['results' => [['id' => 1399, 'name' => 'Game of Thrones', 'poster_path' => '/g.jpg', 'first_air_date' => '2011-04-17']]]),
+        '*/tv/popular*' => Http::response(['results' => []]),
+        '*/tv/on_the_air*' => Http::response(['results' => []]),
+        ...providerDictionaryFakes(),
+    ]);
+    assistant(['read']);
+
+    $response = mcpTool('get_trending', ['type' => 'show'])
+        ->assertJsonPath('result.structuredContent.data.trending.0.title', 'Game of Thrones')
+        ->assertJsonPath('result.structuredContent.meta.type', 'show');
+
+    expect($response->json('result.structuredContent.data.trending.0'))->not->toHaveKey('posterPath')
+        // An empty section is left out, like every empty field.
+        ->and($response->json('result.structuredContent.data'))->not->toHaveKey('popular')
+        ->and($response->json('result.structuredContent.meta'))->not->toHaveKey('failed');
+});
+
 test('the history lists each viewing with the id that deletes it', function () {
     $user = assistant();
     $movie = MediaItem::factory()->movie()->create();
