@@ -7,7 +7,7 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import SettingsLayout from '@/layouts/settings/Layout.vue';
 import { formatDateTime, relativeTime } from '@/lib/format';
 import { SETTINGS_FIELD_CLASS } from '@/lib/ui';
-import type { ApiTokenItem } from '@/types/generated';
+import type { ApiTokenItem, TokenAbility } from '@/types/generated';
 import { Head, router, useForm } from '@inertiajs/vue3';
 import { trans } from 'laravel-vue-i18n';
 
@@ -53,7 +53,7 @@ async function copyToken(): Promise<void> {
     await copy(props.createdToken);
 }
 
-function abilityLabel(abilities: string[]): string {
+function abilityLabel(abilities: TokenAbility[]): string {
     return abilities.includes('write') ? trans('integrations.read_and_write') : trans('integrations.read_only');
 }
 </script>

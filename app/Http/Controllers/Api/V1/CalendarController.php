@@ -4,12 +4,9 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\CalendarRequest;
-use App\Http\Resources\Api\V1\MediaSummaryResource;
+use App\Http\Resources\Api\V1\ApiCollection;
+use App\Http\Resources\Api\V1\CalendarDayResource;
 use App\Models\User;
-use App\Tracking\Data\CalendarDay;
-use App\Tracking\Data\CalendarEvent;
-use App\Tracking\Data\EventEntry;
-use App\Tracking\Releases\ReleaseEntry;
 use App\Tracking\Surfaces\CalendarDays;
 use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\JsonResponse;
@@ -25,17 +22,10 @@ class CalendarController extends Controller
         $from = $request->from()->toDateString();
         $to = $request->to()->toDateString();
 
-        return response()->json([
-            'data' => array_map(fn (CalendarDay $day): array => [
-                'date' => $day->date,
-                'entries' => array_map(fn (ReleaseEntry $entry): array => [
-                    'showTitle' => $entry->showTitle,
-                    'media' => (new MediaSummaryResource($entry->media))->resolve($request),
-                ], $day->entries),
-                // Showcases starting that day in the viewer's zone, as instants.
-                'events' => array_map(fn (CalendarEvent $event): EventEntry => $event->event, $day->events),
-            ], $calendar->range($viewer, $from, $to)),
-            'meta' => ['from' => $from, 'to' => $to],
-        ]);
+        // Spelled out rather than CalendarDayResource::collection(): the API
+        // reference reads the day's shape and the window's meta from here.
+        return (new ApiCollection($calendar->range($viewer, $from, $to), CalendarDayResource::class))
+            ->additional(['meta' => ['from' => $from, 'to' => $to]])
+            ->response($request);
     }
 }

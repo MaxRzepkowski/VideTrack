@@ -33,7 +33,7 @@ export type AgeRatingData = {
 export type ApiTokenItem = {
     readonly id: number;
     readonly name: string;
-    readonly abilities: string[];
+    readonly abilities: TokenAbility[];
     readonly lastUsedAt: string | null;
     readonly createdAt: string | null;
     readonly expiresAt: string | null;
@@ -1054,6 +1054,7 @@ export type TitleTie = {
     readonly label: string | null;
     readonly media: MediaSummary;
 };
+export type TokenAbility = 'read' | 'write';
 export type TrackingSource = 'on_hold' | 'dropped' | 'backlog' | 'activity' | 'followed' | 'creator';
 export type TypeCount = {
     readonly type: string;

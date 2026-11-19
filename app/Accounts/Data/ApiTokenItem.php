@@ -2,6 +2,7 @@
 
 namespace App\Accounts\Data;
 
+use App\Accounts\TokenAbility;
 use App\Support\Payload;
 use Laravel\Sanctum\PersonalAccessToken;
 use Spatie\TypeScriptTransformer\Attributes\TypeScript;
@@ -14,7 +15,7 @@ use Spatie\TypeScriptTransformer\Attributes\TypeScript;
 final readonly class ApiTokenItem
 {
     /**
-     * @param  list<string>  $abilities
+     * @param  list<TokenAbility>  $abilities
      */
     public function __construct(
         public int $id,
@@ -30,7 +31,7 @@ final readonly class ApiTokenItem
         return new self(
             id: $token->id,
             name: $token->name,
-            abilities: Payload::strings($token->abilities),
+            abilities: array_values(array_filter(array_map(TokenAbility::tryFrom(...), Payload::strings($token->abilities)))),
             lastUsedAt: $token->last_used_at?->toIso8601String(),
             createdAt: $token->created_at?->toIso8601String(),
             expiresAt: $token->expires_at?->toIso8601String(),

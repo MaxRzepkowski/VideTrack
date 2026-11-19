@@ -23,7 +23,7 @@ use Closure;
  */
 final class TitleMatcher
 {
-    /** @var array<string, ResolvedMedia|null> per run: one search per distinct query */
+    /** @var array<string, MediaSummary|null> per run: one search per distinct query */
     private array $memo = [];
 
     /** @var array<string, list<MediaSummary>> per run: a show's episodes, asked for once */
@@ -56,6 +56,18 @@ final class TitleMatcher
             return $episode !== null ? $this->hierarchy->episode($show, $season, $episode) : $this->episodeNamed($show, $season, (string) $episodeTitle, $locale);
         }
 
+        $found = $this->find($kind, $query, $locale);
+
+        return $found === null ? null : new ResolvedMedia($found->type, $found->ref);
+    }
+
+    /**
+     * The catalogue's card of a title by name (not an episode, which has no
+     * search of its own): the same rule as match(), with what the search said
+     * of it.
+     */
+    public function find(MediaKind $kind, TitleQuery $query, string $locale): ?MediaSummary
+    {
         $type = $kind->value;
         $title = trim($query->title);
 
@@ -128,11 +140,11 @@ final class TitleMatcher
      * @param  list<MediaSummary>  $results
      * @param  Closure(MediaSummary): bool  $names
      */
-    private function first(array $results, string $type, TitleQuery $query, Closure $names): ?ResolvedMedia
+    private function first(array $results, string $type, TitleQuery $query, Closure $names): ?MediaSummary
     {
         foreach ($results as $summary) {
             if ($summary->type === $type && $names($summary) && $this->agrees($summary, $query)) {
-                return new ResolvedMedia($type, $summary->ref);
+                return $summary;
             }
         }
 

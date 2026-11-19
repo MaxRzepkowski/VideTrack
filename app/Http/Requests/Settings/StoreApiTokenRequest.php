@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Settings;
 
+use App\Accounts\TokenAbility;
 use App\Accounts\UserCalendar;
 use App\Models\User;
 use App\Support\StoredTime;
@@ -38,7 +39,9 @@ class StoreApiTokenRequest extends FormRequest
     /** @return list<string> */
     public function abilities(): array
     {
-        return $this->boolean('write') ? ['read', 'write'] : ['read'];
+        $abilities = $this->boolean('write') ? [TokenAbility::Read, TokenAbility::Write] : [TokenAbility::Read];
+
+        return array_map(fn (TokenAbility $ability): string => $ability->value, $abilities);
     }
 
     /**
