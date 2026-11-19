@@ -10,6 +10,7 @@ use App\Library\WatchedAt;
 use App\Models\CatalogEvent;
 use App\Models\Follow;
 use App\Models\MediaItem;
+use App\Models\Play;
 use App\Models\User;
 use App\Notifications\MediaEvent;
 use Carbon\CarbonImmutable;
@@ -278,6 +279,45 @@ test('a kind with nothing counting down answers none, not everything', function 
     $this->getJson('/api/v1/countdowns?type=show')->assertOk()->assertJsonPath('data', [])->assertJsonPath('meta.total', 0);
     $this->getJson('/api/v1/countdowns?type=episode')->assertUnprocessable()->assertJsonValidationErrors('type');
     $this->getJson('/api/v1/countdowns?sort=rating')->assertUnprocessable()->assertJsonValidationErrors('sort');
+});
+
+test('statistics count a year, a range or the whole history, a part at a time', function () {
+    $user = apiUser(['read']);
+    $movie = MediaItem::factory()->movie()->create(['runtime' => 100]);
+    $other = MediaItem::factory()->movie()->create(['runtime' => 90]);
+    Play::factory()->for($user)->for($movie, 'mediaItem')->create(['watched_at' => '2025-03-01 20:00:00']);
+    Play::factory()->for($user)->for($other, 'mediaItem')->create(['watched_at' => '2026-06-01 20:00:00']);
+    projectLibrary($user);
+
+    // The caller's current year by default.
+    $this->getJson('/api/v1/statistics')
+        ->assertOk()
+        ->assertJsonPath('meta.period', ['kind' => 'year', 'from' => '2026-01-01', 'to' => '2026-12-31'])
+        ->assertJsonPath('data.tiles.movie.minutes', 90)
+        ->assertJsonPath('data.years', [2025, 2026]);
+
+    $this->getJson('/api/v1/statistics?period=2025&type=movie')
+        ->assertOk()
+        ->assertJsonPath('meta.type', 'movie')
+        ->assertJsonPath('data.summary.time.total', 100);
+
+    $this->getJson('/api/v1/statistics?period=all')->assertOk()->assertJsonPath('data.titles.completed.total', 2);
+    $this->getJson('/api/v1/statistics?from=2025-01-01&to=2025-06-30')->assertOk()->assertJsonPath('data.titles.completed.total', 1);
+
+    $this->getJson('/api/v1/statistics/records?period=2025')
+        ->assertOk()
+        ->assertJsonStructure(['data' => ['streak', 'busiestDay', 'marathon'], 'meta' => ['period']]);
+});
+
+test('statistics refuse a period they cannot read and a section that is not there', function () {
+    apiUser(['read']);
+
+    $this->getJson('/api/v1/statistics?period=last-year')->assertUnprocessable()->assertJsonValidationErrors('period');
+    $this->getJson('/api/v1/statistics?period=2025&from=2025-01-01&to=2025-02-01')->assertUnprocessable()->assertJsonValidationErrors('period');
+    $this->getJson('/api/v1/statistics?from=2025-01-01')->assertUnprocessable()->assertJsonValidationErrors('to');
+    $this->getJson('/api/v1/statistics?from=2025-02-01&to=2025-01-01')->assertUnprocessable()->assertJsonValidationErrors('to');
+    $this->getJson('/api/v1/statistics?type=episode')->assertUnprocessable()->assertJsonValidationErrors('type');
+    $this->getJson('/api/v1/statistics/gossip')->assertNotFound();
 });
 
 test('notifications page newest first', function () {

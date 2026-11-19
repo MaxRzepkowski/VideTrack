@@ -209,6 +209,22 @@ test('the countdowns come soonest first, searched by name', function () {
         ->assertJsonPath('result.structuredContent.data.0.media.title', 'Far Away');
 });
 
+test('statistics come for a year, and a section on its own', function () {
+    $user = assistant(['read']);
+    $movie = MediaItem::factory()->movie()->create(['runtime' => 100]);
+    Play::factory()->for($user)->for($movie, 'mediaItem')->create(['watched_at' => '2025-03-01 20:00:00']);
+    projectLibrary($user);
+
+    mcpTool('get_statistics', ['period' => '2025'])
+        ->assertJsonPath('result.structuredContent.meta.period.from', '2025-01-01')
+        ->assertJsonPath('result.structuredContent.data.summary.time.total', 100);
+
+    mcpTool('get_statistics', ['period' => 'all', 'section' => 'taste'])
+        ->assertJsonPath('result.structuredContent.data.top.0.amount', 100);
+
+    expect(mcpRefusal(mcpTool('get_statistics', ['from' => '2025-01-01'])))->not->toBeEmpty();
+});
+
 test('the history lists each viewing with the id that deletes it', function () {
     $user = assistant();
     $movie = MediaItem::factory()->movie()->create();

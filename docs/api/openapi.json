@@ -3918,6 +3918,292 @@
                 }
             }
         },
+        "/statistics": {
+            "get": {
+                "operationId": "v1.statistics.index",
+                "summary": "The top of the statistics page: the time the period took, its counts\nper type, how its titles were rated and what became of them, its first\nand last finished title",
+                "tags": [
+                    "Statistics"
+                ],
+                "parameters": [
+                    {
+                        "name": "period",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "pattern": "^(\\d{4}|all)$"
+                        }
+                    },
+                    {
+                        "name": "from",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "to",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "type",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "show",
+                                "movie",
+                                "game",
+                                "book",
+                                "manga",
+                                "comic"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "additionalProperties": {}
+                                        },
+                                        "meta": {
+                                            "type": "object",
+                                            "properties": {
+                                                "period": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "kind": {
+                                                            "$ref": "#/components/schemas/PeriodKind"
+                                                        },
+                                                        "from": {
+                                                            "type": [
+                                                                "string",
+                                                                "null"
+                                                            ]
+                                                        },
+                                                        "to": {
+                                                            "type": [
+                                                                "string",
+                                                                "null"
+                                                            ]
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "kind",
+                                                        "from",
+                                                        "to"
+                                                    ]
+                                                },
+                                                "type": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                }
+                                            },
+                                            "required": [
+                                                "period",
+                                                "type"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "meta"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Too many requests",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "description": "Error overview."
+                                        }
+                                    },
+                                    "required": [
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                }
+            }
+        },
+        "/statistics/{section}": {
+            "get": {
+                "operationId": "v1.statistics.show",
+                "summary": "One section of the statistics page: `activity` (when things were\nfinished), `taste` (where the time went, release years, genres,\nlengths), `origins` (countries, languages, networks or studios),\n`creators` (cast, directors, writers, authors), `ratings` (against\neveryone else's) or `records` (streak, busiest day, marathon); `summary`\nis the top, the same as the statistics without a section",
+                "tags": [
+                    "Statistics"
+                ],
+                "parameters": [
+                    {
+                        "name": "section",
+                        "in": "path",
+                        "required": true,
+                        "description": "The section ID",
+                        "schema": {
+                            "$ref": "#/components/schemas/StatisticsSection"
+                        }
+                    },
+                    {
+                        "name": "period",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "pattern": "^(\\d{4}|all)$"
+                        }
+                    },
+                    {
+                        "name": "from",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "to",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "type",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "show",
+                                "movie",
+                                "game",
+                                "book",
+                                "manga",
+                                "comic"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "additionalProperties": {}
+                                        },
+                                        "meta": {
+                                            "type": "object",
+                                            "properties": {
+                                                "period": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "kind": {
+                                                            "$ref": "#/components/schemas/PeriodKind"
+                                                        },
+                                                        "from": {
+                                                            "type": [
+                                                                "string",
+                                                                "null"
+                                                            ]
+                                                        },
+                                                        "to": {
+                                                            "type": [
+                                                                "string",
+                                                                "null"
+                                                            ]
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "kind",
+                                                        "from",
+                                                        "to"
+                                                    ]
+                                                },
+                                                "type": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                }
+                                            },
+                                            "required": [
+                                                "period",
+                                                "type"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "meta"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Too many requests",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "description": "Error overview."
+                                        }
+                                    },
+                                    "required": [
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                }
+            }
+        },
         "/suggestions": {
             "get": {
                 "operationId": "v1.suggestions.index",
@@ -5188,6 +5474,16 @@
                 ],
                 "title": "NotificationResource"
             },
+            "PeriodKind": {
+                "type": "string",
+                "description": "What stretch of the history the statistics page reads.\n| |\n|---|\n| `year` <br/> One calendar year in the user's timezone. |\n| `all` <br/> The whole history, from what was first finished to today. |\n| `range` <br/> Two days the user picked, both included. |",
+                "enum": [
+                    "year",
+                    "all",
+                    "range"
+                ],
+                "title": "PeriodKind"
+            },
             "PlayResource": {
                 "type": "object",
                 "properties": {
@@ -5270,6 +5566,20 @@
                     "desc"
                 ],
                 "title": "SortDirection"
+            },
+            "StatisticsSection": {
+                "type": "string",
+                "description": "A part of the statistics page, worked out and kept on its own: the top (the period's card, tiles and titles) and the sections below it.\n",
+                "enum": [
+                    "summary",
+                    "activity",
+                    "taste",
+                    "origins",
+                    "creators",
+                    "ratings",
+                    "records"
+                ],
+                "title": "StatisticsSection"
             },
             "StoreListRequest": {
                 "type": "object",
