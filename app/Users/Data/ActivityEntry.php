@@ -11,7 +11,7 @@ use Spatie\TypeScriptTransformer\Attributes\TypeScript;
 final readonly class ActivityEntry
 {
     public function __construct(
-        /** The entry behind the card; null when the card stands for several (a show rolled up from its episodes). */
+        /** The entry behind the card; null when the card stands for several (a show rolled up from its episodes, a title counted over all its plays). */
         public ?int $id,
         /** When the entry happened, as the panel dates it. */
         public ?string $at,
@@ -22,5 +22,7 @@ final readonly class ActivityEntry
         public ?int $rating = null,
         /** The history panel: how the attempt closed. */
         public ?PlayOutcome $outcome = null,
+        /** The history by times finished: how many times the position was finished. */
+        public ?int $completions = null,
     ) {}
 }

@@ -17,6 +17,8 @@ enum ActivitySort: string
     case Title = 'title';
     case Release = 'release';
     case Runtime = 'runtime';
+    /** How many times a position was finished — a film's or an episode's completions, a show's or a season's full runs. */
+    case Completions = 'completions';
 
     /** Each axis reads in its natural direction: A→Z, everything else biggest first. */
     public function naturalDirection(): SortDirection

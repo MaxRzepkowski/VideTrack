@@ -50,6 +50,16 @@ test('a container root is a root with children: the show, not its season, not a 
     expect($registry->containerRootCodes())->toBe(['show']);
 });
 
+test('playable types are the ones a play is logged on: a film and an episode, not a show or a season', function () {
+    $registry = new MediaTypeRegistry;
+    $registry->register(new MediaTypeDefinition(code: 'show', provider: 'tmdb', childType: 'season'));
+    $registry->register(new MediaTypeDefinition(code: 'season', provider: 'tmdb', parentType: 'show', childType: 'episode'));
+    $registry->register(new MediaTypeDefinition(code: 'episode', provider: 'tmdb', parentType: 'season', playable: true));
+    $registry->register(new MediaTypeDefinition(code: 'movie', provider: 'tmdb', playable: true));
+
+    expect($registry->playableCodes())->toBe(['episode', 'movie']);
+});
+
 test('a provider\'s companies make the first searchable root type it serves', function () {
     $registry = new MediaTypeRegistry;
     $registry->register(new MediaTypeDefinition(code: 'movie', provider: 'tmdb', searchable: true));

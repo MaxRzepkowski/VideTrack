@@ -20,6 +20,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Collection as Support;
+use LogicException;
 use stdClass;
 
 /**
@@ -35,7 +36,7 @@ use stdClass;
 final readonly class ActivityFeed
 {
     // Multiple of the 5 grid columns, so full pages never leave a gap.
-    private const PER_PAGE = 50;
+    public const PER_PAGE = 50;
 
     private const DAYS_PER_PAGE = 10;
 
@@ -317,6 +318,7 @@ final readonly class ActivityFeed
             ActivitySort::Release => $item->release_date?->toDateString(),
             ActivitySort::Runtime => $item->runtime,
             ActivitySort::Activity => $row['at'],
+            ActivitySort::Completions => throw self::listedElsewhere(),
         };
     }
 
@@ -443,8 +445,15 @@ final readonly class ActivityFeed
             ActivitySort::Title => $query->orderByRaw("media_items.title collate nocase {$dir}"),
             ActivitySort::Release => $query->orderBy('media_items.release_date', $dir),
             ActivitySort::Runtime => $query->orderBy('media_items.runtime', $dir),
+            ActivitySort::Completions => throw self::listedElsewhere(),
         };
 
         $query->orderByDesc("{$table}.{$atColumn}")->orderByDesc("{$table}.id");
+    }
+
+    /** Sorted by times finished a panel lists titles, not entries: {@see CompletionsFeed}. */
+    private static function listedElsewhere(): LogicException
+    {
+        return new LogicException('Times finished is listed by CompletionsFeed.');
     }
 }

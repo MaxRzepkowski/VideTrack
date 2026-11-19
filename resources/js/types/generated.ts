@@ -6,6 +6,7 @@ export type ActivityEntry = {
     readonly day: string | null;
     readonly rating: number | null;
     readonly outcome: PlayOutcome | null;
+    readonly completions: number | null;
 };
 export type ActivityFilters = {
     readonly sort: ActivitySort;
@@ -19,9 +20,10 @@ export type ActivityFilters = {
     readonly to: string | null;
     readonly hideRated: boolean;
     readonly hideListed: boolean;
+    readonly byCompletions: boolean;
 };
 export type ActivityGrouping = 'grid' | 'day';
-export type ActivitySort = 'activity' | 'added' | 'my_rating' | 'community' | 'title' | 'release' | 'runtime';
+export type ActivitySort = 'activity' | 'added' | 'my_rating' | 'community' | 'title' | 'release' | 'runtime' | 'completions';
 export type AgeRatingData = {
     readonly board: string;
     readonly rating: string;

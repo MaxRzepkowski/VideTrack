@@ -37,6 +37,12 @@ enum ActivitySource: string
         };
     }
 
+    /** Times finished counts plays; a rating or a favorite is never finished. */
+    public function offers(ActivitySort $sort): bool
+    {
+        return $sort !== ActivitySort::Completions || $this === self::Plays;
+    }
+
     /** Only a play has an outcome (completed, dropped…) to filter by. */
     public function hasOutcome(): bool
     {

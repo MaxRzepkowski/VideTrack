@@ -35,6 +35,16 @@ final readonly class ActivityFilters implements JsonSerializable
     ) {}
 
     /**
+     * Whether the panel lists titles by how many times they were finished
+     * instead of entries. Grouped by day the panel stays chronological, as it
+     * does under every other sort.
+     */
+    public function byCompletions(): bool
+    {
+        return $this->sort === ActivitySort::Completions && $this->group === ActivityGrouping::Grid;
+    }
+
+    /**
      * The controls' state as the page reads it back.
      *
      * @return array{
@@ -48,7 +58,8 @@ final readonly class ActivityFilters implements JsonSerializable
      *     from: string|null,
      *     to: string|null,
      *     hideRated: bool,
-     *     hideListed: bool
+     *     hideListed: bool,
+     *     byCompletions: bool
      * }
      */
     public function jsonSerialize(): array
@@ -65,6 +76,8 @@ final readonly class ActivityFilters implements JsonSerializable
             'to' => $this->to,
             'hideRated' => $this->hideRated,
             'hideListed' => $this->hideListed,
+            // Derived, for the page to show the controls that apply.
+            'byCompletions' => $this->byCompletions(),
         ];
     }
 }
