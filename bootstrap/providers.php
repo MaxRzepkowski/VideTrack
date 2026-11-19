@@ -39,6 +39,7 @@ use App\Integrations\Tracearr\TracearrServiceProvider;
 use App\Integrations\Trakt\TraktServiceProvider;
 use App\Integrations\TvTime\TvTimeServiceProvider;
 use App\Integrations\VideTrack\VideTrackServiceProvider;
+use App\Integrations\WebPush\WebPushServiceProvider;
 use App\Integrations\Yamtrack\YamtrackServiceProvider;
 use App\Providers\AppServiceProvider;
 use App\Providers\RegistryServiceProvider;
@@ -93,6 +94,7 @@ return [
     DiscordServiceProvider::class,
     MailServiceProvider::class,
     AppriseServiceProvider::class,
+    WebPushServiceProvider::class,
 
     // Where the library's changes go: addresses of the user's own.
     OutgoingWebhooksServiceProvider::class,

@@ -25,7 +25,7 @@ tells you when the next episode or release is out, and keeps all of it on your o
 - 🎬 Track movies, TV shows, games, books, manga and comics in one place.
 - ⏭️ See the next episode of every show you watch, and the games and books you are in the middle of.
 - 📅 Follow upcoming releases in a calendar and countdowns, or subscribe to them in your own calendar app or feed reader.
-- 🔔 Ring the bell on a title, a person or a studio to hear about new releases, in the app, on Discord or through Apprise (Telegram, ntfy, e-mail…).
+- 🔔 Ring the bell on a title, a person or a studio to hear about new releases, in the app, as browser notifications on your phone or computer, on Discord or through Apprise (Telegram, ntfy, e-mail…).
 - ⭐ Rate, favorite and collect titles in a backlog and in your own lists.
 - 📜 Keep a full history with rewatches and see how much time went into it.
 - 📊 See your statistics for any year or range of days: time spent, activity, genres, where titles come from, who made them and how your ratings compare with everyone else's.
@@ -82,8 +82,9 @@ You need [Docker](https://docs.docker.com/get-docker/) and a free
 
 Then open `http://localhost:8080` and register. The first account becomes the administrator.
 
-Notifications reach Discord, and through the bundled [Apprise](https://github.com/caronc/apprise)
-container Telegram, ntfy, e-mail, Slack and [many more](https://github.com/caronc/apprise/wiki).
+Notifications reach the browser and the installed app (over HTTPS), Discord, and through the bundled
+[Apprise](https://github.com/caronc/apprise) container Telegram, ntfy, e-mail, Slack and
+[many more](https://github.com/caronc/apprise/wiki).
 Each user adds their own on Settings → Notifications, as messages the moment something comes out
 or as one digest a day. The second container is optional; see
 [Notifications through Apprise](docs/install.md#notifications-through-apprise).

@@ -23,8 +23,9 @@ under **Settings → Tasks**. Administrators also see system jobs and the schedu
 ## Backup
 
 The database is a single SQLite file on the `videtrack-data` volume, next to the app key
-(`/data/app.key`). Keep the two together: stored tokens and the addresses of notification
-channels cannot be read without the key.
+(`/data/app.key`) and the web push keys (`/data/vapid.json`). Keep the three together: stored tokens
+and the addresses of notification channels cannot be read without the app key, and browsers
+subscribed to notifications hear nothing under a new web push pair.
 
 The queue and the scheduler write to the database all the time, so a plain `cp` may capture a
 half-finished write. Use `.backup`, which takes a consistent snapshot:
@@ -34,9 +35,10 @@ half-finished write. Use `.backup`, which takes a consistent snapshot:
 docker compose exec videtrack \
   sqlite3 /data/database.sqlite ".backup '/data/backups/manual-$(date +%F).sqlite'"
 
-# Copy the snapshot and the app key from the volume to the host:
+# Copy the snapshot and the keys from the volume to the host:
 docker compose cp videtrack:/data/backups/manual-$(date +%F).sqlite ./backup.sqlite
 docker compose cp videtrack:/data/app.key ./app.key
+docker compose cp videtrack:/data/vapid.json ./vapid.json
 ```
 
 The container also takes a snapshot before every migration on startup and keeps the last five

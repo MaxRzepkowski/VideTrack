@@ -14,6 +14,7 @@ use App\Http\Controllers\Settings\OutgoingWebhooksController;
 use App\Http\Controllers\Settings\PasswordController;
 use App\Http\Controllers\Settings\PreferencesController;
 use App\Http\Controllers\Settings\ProfileController;
+use App\Http\Controllers\Settings\PushDeviceController;
 use App\Http\Controllers\Settings\TasksController;
 use App\Http\Controllers\Settings\TrackingController;
 use App\Http\Middleware\EnsurePasswordLoginIsEnabled;
@@ -43,6 +44,12 @@ Route::middleware(['auth', 'throttle:web'])->name('settings.')->group(function (
     Route::patch('settings/detected-timezone', DetectedTimezoneController::class)->name('timezone.detected');
 
     Route::get('settings/tracking', [TrackingController::class, 'edit'])->name('tracking.edit');
+
+    // The browsers push reaches; before the channel routes, whose {channel} would take "devices".
+    Route::post('settings/channels/devices', [PushDeviceController::class, 'store'])->name('channels.devices.store');
+    Route::get('settings/channels/devices/key', [PushDeviceController::class, 'key'])->name('channels.devices.key');
+    Route::post('settings/channels/devices/renew', [PushDeviceController::class, 'renew'])->name('channels.devices.renew');
+    Route::delete('settings/channels/devices/{device}', [PushDeviceController::class, 'destroy'])->name('channels.devices.destroy');
 
     Route::get('settings/channels', [ChannelsController::class, 'index'])->name('channels.index');
     Route::post('settings/channels', [ChannelsController::class, 'store'])->name('channels.store');

@@ -22,5 +22,7 @@ final readonly class ChannelKind
         public ?string $setupUrl = null,
         /** Offered first, before the rest in alphabetical order. */
         public bool $popular = false,
+        /** Made by the devices that subscribe to it, never by the form: the picker leaves it out. */
+        public bool $fromDevices = false,
     ) {}
 }

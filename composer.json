@@ -21,6 +21,7 @@
         "laravel/sanctum": "^4.0",
         "laravel/socialite": "^5.32",
         "laravel/tinker": "^3.1.0",
+        "minishlink/web-push": "^11.0",
         "spatie/icalendar-generator": "^3.3",
         "tightenco/ziggy": "^2.4"
     },

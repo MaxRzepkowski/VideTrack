@@ -105,6 +105,13 @@ class ChannelRequest extends FormRequest
             $kind = $this->kind();
             $adding = $this->channel() === null;
 
+            // Browsers make a channel of this kind as they subscribe; the form never does.
+            if ($adding && $kind?->fromDevices === true) {
+                $validator->errors()->add('kind', __('settings.this_service_is_not_offered'));
+
+                return;
+            }
+
             // A saved channel whose service cannot be listed just now keeps
             // its settings; its name, mode and switch can still change.
             if ($kind === null && ($adding || $this->has('config'))) {

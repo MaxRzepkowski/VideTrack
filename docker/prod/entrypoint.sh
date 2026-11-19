@@ -72,6 +72,11 @@ chown -R www-data:www-data storage bootstrap/cache
 as_app php artisan migrate --force
 as_app php artisan app:ensure-admin
 
+# Web push signs every message with a key pair: one the operator gives wins,
+# otherwise the first start makes one next to the database. A new pair would
+# leave every browser to be switched on again, so it is made only once.
+as_app php artisan vide:webpush:keys
+
 # The library projection is a shortcut of the play history, so working it out
 # again is always safe: it heals what a crash left between a write and its
 # projection, and brings back the titles of a module switched off and on

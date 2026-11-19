@@ -1,6 +1,7 @@
 /// <reference lib="webworker" />
 
 import { COVER_CACHE, imageCacheFor, isSkipWaiting, OWN_IMAGE_CACHE, type ImageCache } from '@/lib/serviceWorker';
+import { listenForPushes } from '@/sw/push';
 import { CacheableResponsePlugin } from 'workbox-cacheable-response';
 import { clientsClaim } from 'workbox-core';
 import { ExpirationPlugin } from 'workbox-expiration';
@@ -25,6 +26,9 @@ self.addEventListener('message', (event) => {
         void self.skipWaiting();
     }
 });
+
+// Notifications the instance pushes, shown even with no tab open.
+listenForPushes();
 
 // Pages always come from the network: a page carries the library's state, and an old copy of it would show
 // marks that are no longer true. Without a network the offline page stands in.

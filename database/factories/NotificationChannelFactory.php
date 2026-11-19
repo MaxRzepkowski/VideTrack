@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Integrations\Discord\DiscordChannel;
+use App\Integrations\WebPush\WebPushChannel;
 use App\Models\NotificationChannel;
 use App\Models\User;
 use App\Notifications\Channels\ChannelMode;
@@ -26,6 +27,17 @@ class NotificationChannelFactory extends Factory
             'config' => [DiscordChannel::WEBHOOK => 'https://discord.com/api/webhooks/123/abcd'],
             'mode' => ChannelMode::Digest,
         ];
+    }
+
+    /** A web push channel, as the first browser to subscribe makes it. */
+    public function webPush(): static
+    {
+        return $this->instant()->state([
+            'driver' => WebPushChannel::CODE,
+            'kind' => WebPushChannel::CODE,
+            'label' => 'Browser notifications',
+            'config' => [],
+        ]);
     }
 
     public function instant(): static

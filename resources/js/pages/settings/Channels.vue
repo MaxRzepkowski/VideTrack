@@ -2,6 +2,7 @@
 import HeadingSmall from '@/components/HeadingSmall.vue';
 import AddChannelForm from '@/components/settings/channels/AddChannelForm.vue';
 import ChannelPanel from '@/components/settings/channels/ChannelPanel.vue';
+import PushDevices from '@/components/settings/channels/PushDevices.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import SettingsLayout from '@/layouts/settings/Layout.vue';
 import type { ChannelsPage } from '@/types/generated';
@@ -43,6 +44,8 @@ const rows = computed(() =>
                     :label-max="props.page.labelMax"
                     :digest-hour="props.page.digestHour"
                 />
+
+                <PushDevices v-if="props.page.push" :push="props.page.push" />
 
                 <AddChannelForm
                     :kinds="props.page.kinds"

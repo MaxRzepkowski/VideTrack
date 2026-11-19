@@ -106,6 +106,7 @@ export type ChannelsPage = {
     readonly labelMax: number;
     readonly defaultMode: ChannelMode;
     readonly digestHour: number;
+    readonly push: PushDevicesData | null;
 };
 export type ClosesRun = 'series' | 'season';
 export type CollectionBannerData = {
@@ -826,6 +827,17 @@ export type ProviderRating = {
     readonly score: number;
     readonly count: number;
 };
+export type PushDeviceData = {
+    readonly id: number;
+    readonly userAgent: string | null;
+    readonly fingerprint: string;
+    readonly subscribedAt: string;
+    readonly stale: boolean;
+};
+export type PushDevicesData = {
+    readonly publicKey: string;
+    readonly devices: PushDeviceData[];
+};
 export type RankingKind = 'score' | 'popularity';
 export type RankingPosition = {
     readonly kind: RankingKind;
@@ -1148,6 +1160,13 @@ export type WatchStats = {
     readonly plays: number;
     readonly titles: number;
     readonly estimatedMinutes: number | null;
+};
+export type WebPushMessage = {
+    readonly title: string;
+    readonly body: string | null;
+    readonly url: string;
+    readonly icon: string;
+    readonly timestamp: number;
 };
 export type WebhookDeliveryStatus = 'received' | 'accepted' | 'ignored' | 'unmatched' | 'error' | 'test';
 export type WebhookEndpointData = {

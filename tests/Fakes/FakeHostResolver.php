@@ -13,6 +13,7 @@ class FakeHostResolver extends HostResolver
         'tracearr.lan' => ['192.168.1.20'],
         'tracearr.example.com' => ['93.184.215.14'],
         'rebound.example.com' => ['93.184.215.14', '10.0.0.5'],
+        'push.example.com' => ['93.184.215.14'],
     ];
 
     public function ipv4(string $host): array

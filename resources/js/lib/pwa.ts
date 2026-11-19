@@ -1,3 +1,4 @@
+import { renewPushSubscription } from '@/lib/push';
 import { trans } from 'laravel-vue-i18n';
 import { toast } from 'vue-sonner';
 import { Workbox } from 'workbox-window';
@@ -7,7 +8,8 @@ export const UPDATE_CHECK_INTERVAL_MS = 60 * 60 * 1000;
 
 /**
  * Installs the service worker and offers a waiting new version to the user: the switch reloads the tab, so it
- * happens when they say so, not under a half-filled form.
+ * happens when they say so, not under a half-filled form. Once installed, a push subscription to an older key pair
+ * is renewed.
  */
 export function registerServiceWorker(): void {
     if (!('serviceWorker' in navigator)) {
@@ -21,6 +23,7 @@ export function registerServiceWorker(): void {
     void workbox.register().then((registration) => {
         if (registration !== undefined) {
             setInterval(() => void registration.update(), UPDATE_CHECK_INTERVAL_MS);
+            void renewPushSubscription(registration);
         }
     });
 }
