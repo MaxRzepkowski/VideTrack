@@ -17,7 +17,8 @@ class CalendarRequest extends FormRequest
 {
     private const DEFAULT_DAYS = 30;
 
-    private const MAX_DAYS = 366;
+    /** The most days between a window's first and its last day. */
+    public const MAX_DAYS = 366;
 
     /**
      * @return array<string, mixed>
@@ -27,6 +28,9 @@ class CalendarRequest extends FormRequest
         return [
             'from' => ['sometimes', 'date_format:Y-m-d'],
             'to' => ['sometimes', 'date_format:Y-m-d'],
+            // The window as a count of days, the first one included ("this
+            // week" is 7), for a client that does not keep the user's today.
+            'days' => ['sometimes', 'integer', 'min:1', 'max:'.(self::MAX_DAYS + 1), 'prohibits:to'],
         ];
     }
 
@@ -59,6 +63,10 @@ class CalendarRequest extends FormRequest
 
     public function to(): CarbonImmutable
     {
+        if ($this->filled('days')) {
+            return $this->from()->addDays($this->integer('days') - 1);
+        }
+
         $to = $this->string('to')->toString();
 
         return $to === '' ? $this->from()->addDays(self::DEFAULT_DAYS) : CarbonImmutable::parse($to);

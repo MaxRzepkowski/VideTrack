@@ -1,7 +1,10 @@
 <?php
 
+use App\Actions\Library\AddToList;
+use App\Actions\Library\CreateList;
 use App\Enums\MediaUserStatus;
 use App\Enums\PlayOutcome;
+use App\Library\Data\ListTarget;
 use App\Library\Events\PlayRecorded;
 use App\Library\Events\RatingChanged;
 use App\Models\Favorite;
@@ -365,4 +368,51 @@ test('the api and the web endpoint leave the same state behind', function () {
 
     expect(Rating::where('user_id', $viaApi->id)->value('rating'))
         ->toBe(Rating::where('user_id', $viaWeb->id)->value('rating'));
+});
+
+test('a title goes onto one list and off it, its other lists untouched', function () {
+    $user = writer();
+    $movie = MediaItem::factory()->movie()->create();
+    $kept = app(CreateList::class)->execute($user, 'Kept');
+    $list = app(CreateList::class)->execute($user, 'Light');
+    app(AddToList::class)->execute($user, $kept, ListTarget::item($movie->id));
+    $at = ['type' => 'movie', 'ref' => $movie->provider_ref, 'list' => $list->id];
+
+    $this->putJson(route('api.v1.media.lists.attach', $at))
+        ->assertOk()
+        ->assertJsonPath('data.state.listIds', [$kept->id, $list->id]);
+
+    // Twice is once.
+    $this->putJson(route('api.v1.media.lists.attach', $at))->assertOk();
+    expect($list->items()->count())->toBe(1);
+
+    $this->deleteJson(route('api.v1.media.lists.detach', $at))
+        ->assertOk()
+        ->assertJsonPath('data.state.listIds', [$kept->id]);
+});
+
+test("someone else's list cannot be written to", function () {
+    writer();
+    $movie = MediaItem::factory()->movie()->create();
+    $theirs = app(CreateList::class)->execute(User::factory()->create(), 'Theirs', isPublic: false);
+    $at = ['type' => 'movie', 'ref' => $movie->provider_ref, 'list' => $theirs->id];
+
+    $this->putJson(route('api.v1.media.lists.attach', $at))->assertNotFound();
+    $this->deleteJson(route('api.v1.media.lists.detach', $at))->assertNotFound();
+    expect($theirs->items()->count())->toBe(0);
+});
+
+test('a title nobody stored is on no list to take it off', function () {
+    $list = app(CreateList::class)->execute(writer(), 'Light');
+
+    $this->deleteJson(route('api.v1.media.lists.detach', ['type' => 'movie', 'ref' => '999999', 'list' => $list->id]))->assertNotFound();
+});
+
+test('a read token cannot put a title on a list', function () {
+    $user = User::factory()->create();
+    Sanctum::actingAs($user, ['read']);
+    $list = app(CreateList::class)->execute($user, 'Light');
+    $movie = MediaItem::factory()->movie()->create();
+
+    $this->putJson(route('api.v1.media.lists.attach', ['type' => 'movie', 'ref' => $movie->provider_ref, 'list' => $list->id]))->assertForbidden();
 });

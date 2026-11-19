@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\V1\CreatorListsController;
 use App\Http\Controllers\Api\V1\EventVisibilityController;
 use App\Http\Controllers\Api\V1\LibraryController;
 use App\Http\Controllers\Api\V1\ListController;
+use App\Http\Controllers\Api\V1\LookupController;
 use App\Http\Controllers\Api\V1\MeController;
 use App\Http\Controllers\Api\V1\MediaController;
 use App\Http\Controllers\Api\V1\MediaFollowController;
@@ -15,7 +16,11 @@ use App\Http\Controllers\Api\V1\MediaStateController;
 use App\Http\Controllers\Api\V1\NotificationController;
 use App\Http\Controllers\Api\V1\PlayController;
 use App\Http\Controllers\Api\V1\SearchController;
+use App\Http\Controllers\Api\V1\SuggestionController;
+use App\Http\Controllers\Api\V1\TitleListController;
+use App\Http\Controllers\Api\V1\UpNextController;
 use App\Http\Controllers\Api\V1\WatchCycleController;
+use App\Http\Middleware\ThrottleTitleLookups;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -46,10 +51,17 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware('abilities:'.TokenAbility::Read->value)->group(function () {
     Route::get('me', MeController::class)->name('me');
-    // The two reads that fan out to a provider share the pages' provider budget.
+    // The reads that fan out to a provider share the pages' provider budget.
+    // A lookup searches once per title, so it has a budget of its own, as
+    // many searches a minute, charged per title.
     Route::get('search', SearchController::class)->middleware('throttle:providers')->name('search');
+    // A read with a body: the titles do not fit a query string.
+    Route::post('lookup', LookupController::class)->middleware(ThrottleTitleLookups::class)->name('lookup');
     Route::get('library', LibraryController::class)->name('library');
     Route::get('calendar', CalendarController::class)->name('calendar');
+    Route::get('up-next', UpNextController::class)->name('up-next');
+    Route::get('suggestions', [SuggestionController::class, 'index'])->name('suggestions.index');
+    Route::get('suggestions/{shelf}', [SuggestionController::class, 'show'])->where('shelf', '[a-z0-9-]+')->name('suggestions.show');
     Route::get('notifications', [NotificationController::class, 'index'])->name('notifications.index');
 
     Route::get('lists', [ListController::class, 'index'])->name('lists.index');
@@ -85,6 +97,8 @@ Route::middleware('abilities:'.TokenAbility::Write->value)->group(function () {
         Route::put('media/{type}/{ref}/progress', [MediaStateController::class, 'progress'])->name('media.progress.update');
         Route::put('media/{type}/{ref}/favorite', [MediaStateController::class, 'favorite'])->name('media.favorite.update');
         Route::put('media/{type}/{ref}/lists', [MediaStateController::class, 'lists'])->name('media.lists.update');
+        Route::put('media/{type}/{ref}/lists/{list}', [TitleListController::class, 'add'])->name('media.lists.attach');
+        Route::delete('media/{type}/{ref}/lists/{list}', [TitleListController::class, 'remove'])->name('media.lists.detach');
         Route::put('media/{type}/{ref}/follow', [MediaFollowController::class, 'update'])->name('media.follow.update');
     });
 

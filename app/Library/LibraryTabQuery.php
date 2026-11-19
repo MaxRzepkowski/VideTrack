@@ -20,9 +20,10 @@ use Illuminate\Database\Eloquent\Builder;
 final readonly class LibraryTabQuery
 {
     /**
+     * @param  int|null  $minRating  only positions the user rated at least this
      * @return Builder<MediaItem>
      */
-    public function of(User $viewer, LibraryTab $tab, ?string $type): Builder
+    public function of(User $viewer, LibraryTab $tab, ?string $type, ?int $minRating = null): Builder
     {
         $userId = $viewer->id;
 
@@ -32,6 +33,13 @@ final readonly class LibraryTabQuery
             ->when(
                 $type !== null,
                 fn (Builder $query) => $query->where('media_items.type', $type)
+            )
+            ->when(
+                $minRating !== null,
+                fn (Builder $query) => $query->whereIn('media_items.id', Rating::query()
+                    ->where('user_id', $userId)
+                    ->where('rating', '>=', $minRating)
+                    ->select('media_item_id')),
             );
 
         return match ($tab) {

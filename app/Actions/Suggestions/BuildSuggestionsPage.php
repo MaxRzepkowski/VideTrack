@@ -25,7 +25,7 @@ final readonly class BuildSuggestionsPage
     public function __construct(private SuggestionSources $sources) {}
 
     /**
-     * @return array<string, mixed>
+     * @return array{shelves: list<SuggestionShelf>}
      */
     public function execute(User $viewer, string $locale): array
     {

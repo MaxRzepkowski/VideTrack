@@ -41,6 +41,15 @@ return [
     'api_docs_url' => env('API_DOCS_URL', 'https://github.com/MaxRzepkowski/VideTrack/blob/main/docs/api.md'),
 
     /*
+    | The MCP server at /api/mcp: an AI assistant (any MCP client) reads and
+    | writes the library with an API token, under the token's abilities. It
+    | has no credentials of its own, so this switch is the only way to close
+    | it without revoking the tokens.
+    */
+
+    'mcp_enabled' => filter_var(env('MCP_ENABLED', true), FILTER_VALIDATE_BOOL),
+
+    /*
     |--------------------------------------------------------------------------
     | How the instance names itself to outside services
     |--------------------------------------------------------------------------

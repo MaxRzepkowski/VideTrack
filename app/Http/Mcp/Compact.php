@@ -1,0 +1,56 @@
+<?php
+
+namespace App\Http\Mcp;
+
+/**
+ * An API v1 answer cut down for a language model, whose context is the cost
+ * of every field: no pictures (an assistant cannot look at them), nothing a
+ * page only draws with, and nothing that is null, false, empty or at the
+ * value of an untouched position. The server's instructions say so, so an
+ * absent flag reads as false and an absent value as none.
+ */
+final class Compact
+{
+    /** The pictures of a card, a person, a company or an event: each as a path and as an address. */
+    private const PICTURES = [
+        'posterPath', 'posterUrl', 'backdropPath', 'backdropUrl', 'profilePath', 'profileUrl',
+        'logoPath', 'logoUrl', 'imagePath', 'imageUrl', 'photoPath', 'photoUrl', 'showPoster', 'showBackdrop',
+    ];
+
+    /** What a page draws a card's bar and badges from, and an assistant has no use for. */
+    private const DRAWING = [
+        'progression', 'followSource', 'statusInherited', 'position', 'remainingMinutes', 'watchedMinutes',
+    ];
+
+    /** A field at the value of a position nobody touched says nothing. */
+    private const UNTOUCHED = ['plays' => 0, 'cycle' => 1, 'completedCycles' => 0, 'skippedEpisodes' => 0];
+
+    public static function of(mixed $value): mixed
+    {
+        if (! is_array($value)) {
+            return $value;
+        }
+
+        $kept = [];
+
+        foreach ($value as $key => $entry) {
+            if (in_array($key, self::PICTURES, true) || in_array($key, self::DRAWING, true)) {
+                continue;
+            }
+
+            if (is_string($key) && array_key_exists($key, self::UNTOUCHED) && $entry === self::UNTOUCHED[$key]) {
+                continue;
+            }
+
+            $entry = self::of($entry);
+
+            if ($entry === null || $entry === false || $entry === []) {
+                continue;
+            }
+
+            $kept[$key] = $entry;
+        }
+
+        return array_is_list($value) ? array_values($kept) : $kept;
+    }
+}

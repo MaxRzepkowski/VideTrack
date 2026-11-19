@@ -162,7 +162,8 @@ Everything is optional except `TMDB_API_KEY`. A media type exists only when its 
 | `SCROBBLE_COMPLETION_THRESHOLD` | `85` | percent of a title a media server must report before a stop counts as watched |
 | `SCROBBLE_DEDUP_WINDOW_HOURS` | `6` | two servers reporting one viewing within this window log one play |
 | `SCROBBLE_DELIVERY_RETENTION_DAYS` | `30` | how long the delivery log of an integration is kept |
-| `API_RATE_LIMIT_PER_MINUTE` | `240` | requests a minute one API token (or address) may send |
+| `MCP_ENABLED` | `true` | `false` closes the MCP server for AI assistants at `/api/mcp` ([API](api.md#mcp-server-for-ai-assistants)); the API itself stays open |
+| `API_RATE_LIMIT_PER_MINUTE` | `240` | requests a minute one account may send to the API, and apart from them to the MCP server |
 | `WEBHOOK_RATE_LIMIT_PER_MINUTE` | `60` | reports a minute one integration's webhook address may receive |
 
 ## Notifications through Apprise
