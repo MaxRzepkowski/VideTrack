@@ -100,6 +100,18 @@ class LibraryEntry extends Model
     }
 
     /**
+     * Positions finished at least once, in any run — unlike
+     * {@see scopeFinishedTitlesOf()}, a show watched again counts while the
+     * new run is under way.
+     *
+     * @param  Builder<LibraryEntry>  $query
+     */
+    public function scopeEverFinished(Builder $query): void
+    {
+        $query->where('library_entries.completed_cycles', '>', 0);
+    }
+
+    /**
      * The titles a user has finished: their root entries marked watched.
      * Select `media_item_id` from it to name the titles.
      *

@@ -49,6 +49,8 @@ const props = withDefaults(
         /** Panels with an outcome (history) offer the completed / dropped filter. */
         withStatus?: boolean;
         withHideRated?: boolean;
+        /** The history offers listing its titles by how many times they were finished. */
+        withCompletions?: boolean;
         /** Whether to repeat the current/total page count below the numbered pagination. */
         showPaginationSummary?: boolean;
         /** Owner-only removal; null when the panel has nothing to remove. */
@@ -59,6 +61,7 @@ const props = withDefaults(
         dayTotals: () => ({}),
         withStatus: false,
         withHideRated: true,
+        withCompletions: false,
         showPaginationSummary: true,
         removeLabel: null,
     },
@@ -111,20 +114,30 @@ const sortOptions = computed(() => [
     { value: 'title', label: trans('common.title') },
     { value: 'release', label: trans('common.release_date') },
     { value: 'runtime', label: trans('common.runtime') },
+    ...(props.withCompletions ? [{ value: 'completions', label: trans('users.sort_times_finished') }] : []),
 ]);
+
+// Positions counted over every attempt, not attempts: only completions are
+// counted, so the completed / dropped filter has nothing to say here.
+const byCompletions = computed(() => props.filters.byCompletions);
 
 const typeFilterOptions = computed(() => props.typeOptions.map((type) => ({ type })));
 
 const typeFilter = computed<string | null>({ get: () => props.filters.type, set: (type) => visit({ type: type ?? undefined }) });
 
-const sortValue = computed<string>({ get: () => props.filters.sort, set: (sort) => visit({ sort }) });
+// A new axis starts in its natural direction (the server's default): the
+// most finished first, A→Z by title — not wherever the previous axis left it.
+const sortValue = computed<string>({ get: () => props.filters.sort, set: (sort) => visit({ sort, dir: undefined }) });
 
 const sortDir = computed<'asc' | 'desc'>({ get: () => props.filters.dir, set: (dir) => visit({ dir }) });
 
 const activeFilterCount = computed(() => {
     const f = props.filters;
 
-    return [f.genre, f.type, f.status, f.from, f.to].filter((value) => value !== null).length + [f.hideRated, f.hideListed].filter(Boolean).length;
+    return (
+        [f.genre, f.type, byCompletions.value ? null : f.status, f.from, f.to].filter((value) => value !== null).length +
+        [f.hideRated, f.hideListed].filter(Boolean).length
+    );
 });
 
 function clearFilters(): void {
@@ -222,7 +235,7 @@ function subtitle(entry: ActivityEntry): string | null {
             </label>
 
             <!-- Completed vs dropped attempts; in-progress is its own panel. -->
-            <label v-if="withStatus" class="flex flex-col gap-1.5">
+            <label v-if="withStatus && !byCompletions" class="flex flex-col gap-1.5">
                 <span class="text-ink-muted text-base font-bold">{{ trans('common.status') }}</span>
                 <select
                     data-toolbar-control
@@ -340,6 +353,17 @@ function subtitle(entry: ActivityEntry): string | null {
                     <div v-for="entry in group.entries" :key="entry.id ?? `${entry.media.type}-${entry.media.ref}`" class="flex flex-col">
                         <MediaCard :media="entry.media" :subtitle="subtitle(entry)" :corner-badge="leafCode(entry.media)" />
                         <div class="text-ink-faint mt-2 flex items-center justify-center gap-2 text-sm font-semibold">
+                            <template v-if="entry.completions !== null">
+                                <span v-tooltip="transChoice('users.times_finished', entry.completions, { count: formatNumber(entry.completions) })">
+                                    <span aria-hidden="true">{{
+                                        trans('users.times_finished_short', { count: formatNumber(entry.completions) })
+                                    }}</span>
+                                    <span class="sr-only">{{
+                                        transChoice('users.times_finished', entry.completions, { count: formatNumber(entry.completions) })
+                                    }}</span>
+                                </span>
+                                <span class="bg-line h-2 w-px shrink-0" aria-hidden="true"></span>
+                            </template>
                             <span>{{ formatDateTime(entry.at) }}</span>
                             <!-- The page asks before the entry goes. -->
                             <button

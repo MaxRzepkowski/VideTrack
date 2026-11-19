@@ -41,6 +41,7 @@ const PANELS = {
         sortLabel: () => trans('users.mark_date'),
         withStatus: true,
         withHideRated: true,
+        withCompletions: true,
         showPaginationSummary: false,
         removeLabel: () => trans('common.remove_this_play'),
         removeConfirm: () => trans('media.remove_play_confirm'),
@@ -56,6 +57,7 @@ const PANELS = {
         sortLabel: () => trans('users.activity_date'),
         withStatus: false,
         withHideRated: false,
+        withCompletions: false,
         showPaginationSummary: false,
         removeLabel: () => trans('common.remove_rating'),
         removeConfirm: () => trans('users.remove_rating_confirm'),
@@ -71,6 +73,7 @@ const PANELS = {
         sortLabel: () => null,
         withStatus: false,
         withHideRated: true,
+        withCompletions: false,
         showPaginationSummary: true,
         removeLabel: () => trans('common.remove_from_favorites'),
         removeConfirm: () => trans('users.remove_favorite_confirm'),
@@ -118,6 +121,7 @@ async function remove(entry: ActivityEntry): Promise<void> {
             :sort-label="config.sortLabel()"
             :with-status="config.withStatus"
             :with-hide-rated="config.withHideRated"
+            :with-completions="config.withCompletions"
             :show-pagination-summary="config.showPaginationSummary"
             :remove-label="config.removeLabel()"
             @remove="remove"

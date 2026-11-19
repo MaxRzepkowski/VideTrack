@@ -39,7 +39,8 @@ class ActivityPanelRequest extends FormRequest
     /** The panel's filters, falling back to the defaults of what it lists. */
     public function activityFilters(ActivitySource $source): ActivityFilters
     {
-        $sort = ActivitySort::tryFrom((string) $this->string('sort')) ?? $source->defaultSort();
+        $sort = ActivitySort::tryFrom((string) $this->string('sort'));
+        $sort = $sort !== null && $source->offers($sort) ? $sort : $source->defaultSort();
         $type = (string) $this->string('type');
         $q = trim((string) $this->string('q'));
         $genre = trim((string) $this->string('genre'));

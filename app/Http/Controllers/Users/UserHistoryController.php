@@ -17,8 +17,8 @@ use Inertia\Response;
 
 /**
  * The history panel of a user view: every CLOSED attempt at a position, the
- * completed ones and the dropped ones alike, or the shows and seasons they
- * roll up into ({@see BuildHistoryEntries}).
+ * completed ones and the dropped ones alike — or, sorted by times finished,
+ * the positions they finished ({@see BuildHistoryEntries}).
  */
 class UserHistoryController extends Controller
 {

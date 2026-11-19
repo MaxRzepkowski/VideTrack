@@ -94,6 +94,17 @@ final class MediaTypeRegistry
     }
 
     /**
+     * Types a play is logged on directly (a film, an episode, a game; not a
+     * show or a season, which their parts finish).
+     *
+     * @return list<string>
+     */
+    public function playableCodes(): array
+    {
+        return array_keys(array_filter($this->definitions, fn (MediaTypeDefinition $d): bool => $d->playable));
+    }
+
+    /**
      * @return list<string>
      */
     public function searchableCodes(): array
