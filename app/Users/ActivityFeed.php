@@ -12,10 +12,8 @@ use App\Models\User;
 use App\Support\Numbers;
 use App\Support\PageInfo;
 use App\Support\QueryRow;
-use App\Support\StoredTime;
 use App\Users\Data\ActivityFilters;
 use Carbon\CarbonImmutable;
-use Illuminate\Contracts\Database\Query\Builder as QueryBuilder;
 use Illuminate\Contracts\Database\Query\Expression;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -55,7 +53,11 @@ final readonly class ActivityFeed
         end
         SQL;
 
-    public function __construct(private MediaTypeRegistry $types) {}
+    public function __construct(
+        private MediaTypeRegistry $types,
+        private TitleFilters $titles,
+        private ViewerDays $days,
+    ) {}
 
     /**
      * The container type this panel has to roll its entries up to, null for
@@ -404,68 +406,15 @@ final readonly class ActivityFeed
             $query->where("{$table}.outcome", $filters->status->value);
         }
 
-        // The days are the viewer's, as the page groups them: "1 May" starts
-        // at midnight in their zone, whatever zone the entries are stored in.
-        if ($filters->from !== null) {
-            $query->where("{$table}.{$atColumn}", '>=', StoredTime::of($calendar->startOf($filters->from)));
+        $this->days->apply($query, "{$table}.{$atColumn}", $filters, $calendar);
+
+        // The roll-up reads the ancestors too (ANCESTOR_ID), whatever the
+        // title filters ask for.
+        if ($rollUp !== null) {
+            $this->titles->joinAncestors($query);
         }
 
-        if ($filters->to !== null) {
-            $query->where("{$table}.{$atColumn}", '<=', StoredTime::of($calendar->endOf($filters->to)));
-        }
-
-        // Genre and title search both climb the hierarchy (episode → season →
-        // show is at most three levels); join the ancestors once for either,
-        // and always when rolling up — the roll-up reads them too.
-        if ($filters->genre !== null || $filters->q !== null || $rollUp !== null) {
-            $query
-                ->leftJoin('media_items as parents', 'parents.id', '=', 'media_items.parent_id')
-                ->leftJoin('media_items as grandparents', 'grandparents.id', '=', 'parents.parent_id');
-        }
-
-        if ($filters->q !== null) {
-            // Wildcard-escape the term so a literal % / _ typed by the user
-            // stays literal; match the item or any ancestor's title.
-            $like = '%'.addcslashes($filters->q, '\\%_').'%';
-
-            $query->where(fn (Builder $sub) => $sub
-                ->whereRaw('media_items.title like ? escape ?', [$like, '\\'])
-                ->orWhereRaw('parents.title like ? escape ?', [$like, '\\'])
-                ->orWhereRaw('grandparents.title like ? escape ?', [$like, '\\']));
-        }
-
-        if ($filters->genre !== null) {
-            // Genres live in the ROOT item's metadata (episode → season →
-            // show). SQLite's json_each scans the persisted genre names directly.
-            $query
-                ->whereRaw(<<<'SQL'
-                    exists (
-                        select 1 from json_each(coalesce(
-                            case
-                                when grandparents.id is not null then grandparents.metadata
-                                when parents.id is not null then parents.metadata
-                                else media_items.metadata
-                            end, '{}'), '$.genres') as genre_entry
-                        where genre_entry.value = ?
-                    )
-                    SQL, [$filters->genre]);
-        }
-
-        if ($filters->hideRated) {
-            $query->whereNotExists(fn (QueryBuilder $sub) => $sub
-                ->from('ratings as hidden_ratings')
-                ->whereRaw("hidden_ratings.media_item_id = {$subject}", $subjectBindings)
-                ->where('hidden_ratings.user_id', $user->id));
-        }
-
-        if ($filters->hideListed) {
-            $query->whereNotExists(fn (QueryBuilder $sub) => $sub
-                ->from('list_items')
-                ->join('lists', 'lists.id', '=', 'list_items.list_id')
-                ->whereRaw("list_items.media_item_id = {$subject}", $subjectBindings)
-                ->where('lists.user_id', $user->id)
-                ->whereNull('lists.system_key'));
-        }
+        $this->titles->apply($query, $user, $filters, $subject, $subjectBindings);
     }
 
     /**

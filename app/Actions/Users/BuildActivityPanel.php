@@ -7,6 +7,7 @@ use App\Catalog\MediaTypeRegistry;
 use App\Library\LibraryStates;
 use App\Models\User;
 use App\Support\PageInfo;
+use App\Users\Data\ActivityEntry;
 use App\Users\Data\ActivityFilters;
 use App\Users\GenreOptions;
 
@@ -25,7 +26,7 @@ final readonly class BuildActivityPanel
     ) {}
 
     /**
-     * @param  array<int, array{media: MediaSummary}>  $entries
+     * @param  array<int, ActivityEntry>  $entries
      * @return array<string, mixed>
      */
     public function execute(User $viewer, User $user, array $entries, PageInfo $pagination, ActivityFilters $filters): array
@@ -36,7 +37,7 @@ final readonly class BuildActivityPanel
             'filters' => $filters,
             'genreOptions' => $this->genres->execute($user),
             'typeOptions' => array_keys($this->types->all()),
-            'userStates' => $this->states->resolve($viewer, array_map(fn (array $entry): MediaSummary => $entry['media'], $entries)),
+            'userStates' => $this->states->resolve($viewer, array_map(fn (ActivityEntry $entry): MediaSummary => $entry->media, $entries)),
         ];
     }
 }

@@ -1,9 +1,10 @@
 // The wire types the pages import, re-exported from types/generated.ts (one
 // PHP class each). Written here: what the front builds itself (`@view`), the
 // details generic over a type's own `extra` bag, and the few page shapes no
-// class describes (`ActivityEntry`, `DiscoverRange`), counted as debt by `sweep`.
+// class describes (`ProgressEntry`, `DiscoverRange`), counted as debt by `sweep`.
 import type { AgeRatingImage } from '@/lib/ageRatings';
 import type {
+    ActivityEntry,
     ActivityFilters,
     CalendarDay,
     CalendarEntry,
@@ -34,7 +35,6 @@ import type {
     PersonDetails,
     PlayEntry,
     PlayingEntry,
-    PlayOutcome,
     ProfileData,
     ProgressUnit,
     ReleaseEntry,
@@ -51,6 +51,7 @@ import type {
 } from '@/types/generated';
 
 export type {
+    ActivityEntry,
     ActivityFilters,
     CalendarDay,
     CalendarEntry,
@@ -126,31 +127,26 @@ export type DiscoverActiveFilters = Record<string, string | string[] | DiscoverR
 
 export type UserStatesMap = Record<string, UserMediaState>;
 
-/** One card of an activity tab (history / ratings / favorites / progress). */
-export interface ActivityEntry {
+/** One card of the progress tab: a title under way, with the counters its card captions. */
+export interface ProgressEntry {
     id: number | null;
     at: string | null;
-    /** Server-computed day key (YYYY-MM-DD) in "grouped by day" mode. */
-    day?: string | null;
     media: MediaSummary;
-    rating?: number;
     watchedEpisodes?: number | null;
     airedEpisodes?: number | null;
-    /** Progress tab: the same counters the dashboard cards caption. */
+    /** The same counters the dashboard cards caption. */
     remainingEpisodes?: number | null;
     position?: number | null;
-    /** Progress tab: what the bar's hover hint reads. */
+    /** What the bar's hover hint reads. */
     skippedEpisodes?: number | null;
     remainingMinutes?: number | null;
     watchedMinutes?: number | null;
-    /** Progress tab: a show in the middle rides on its Up Next card. */
+    /** A show in the middle rides on its Up Next card. */
     upNext?: UpNextEntry | null;
     nextEpisode?: UserMediaState['nextEpisode'];
-    /** Games on the In Progress tab: total session minutes. */
+    /** Games: total session minutes. */
     progress?: number | null;
-    /** History tab: how the attempt closed — dropped entries carry a chip. */
-    outcome?: PlayOutcome;
-    /** Progress tab: which shelf the card belongs to. */
+    /** Which shelf the card belongs to. */
     section?: MediaUserStatus;
 }
 

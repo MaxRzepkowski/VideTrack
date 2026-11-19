@@ -93,7 +93,7 @@ final readonly class BuildListPage
                 // The genre filter reads the same genres the log panels filter
                 // by: a season or an episode is browsed under its show's, so
                 // the root carries them (grandparent → parent → self, the
-                // order ActivityFeed's genre clause coalesces in).
+                // order TitleFilters' genre clause coalesces in).
                 genres: ItemMetadata::fromStored($this->hierarchy->loadedRootOf($media)->metadata)->genres,
                 mediaItemId: $media->id,
                 imdbId: ItemMetadata::fromStored($media->metadata)->imdbId(),

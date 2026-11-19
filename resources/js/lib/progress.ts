@@ -1,7 +1,7 @@
 import { durationTerms, formatNumber, formatWatchTime, type DurationTerm } from '@/lib/format';
 import { leafType, mediaTypeDefinition, mediaTypeMeta, readUnitOf, typeCountingIn } from '@/lib/mediaTypes';
 import type { TooltipRow } from '@/lib/tooltip';
-import type { ActivityEntry, MediaSummary, ProgressUnit, WatchStats } from '@/types/media';
+import type { MediaSummary, ProgressEntry, ProgressUnit, WatchStats } from '@/types/media';
 import type { LucideIcon } from '@lucide/vue';
 import { trans, transChoice } from 'laravel-vue-i18n';
 
@@ -191,7 +191,7 @@ export function counterView(media: MediaSummary, amount: number): ProgressView {
  * or, with nothing left between, what was watched; the remainder counts the
  * episodes neither watched nor skipped. A paused film has no strip.
  */
-export function activityProgress(entry: ActivityEntry): ProgressView | null {
+export function activityProgress(entry: ProgressEntry): ProgressView | null {
     if (hasProgress(entry.media)) {
         return counterView(entry.media, entry.progress ?? 0);
     }
