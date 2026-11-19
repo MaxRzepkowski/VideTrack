@@ -2,16 +2,14 @@
 
 namespace App\Actions\Media;
 
-use App\Catalog\Contracts\MetadataProvider;
 use App\Catalog\Contracts\SupportsFilteredDiscovery;
 use App\Catalog\Contracts\SupportsPeopleBrowsing;
-use App\Catalog\Contracts\SupportsTrending;
 use App\Catalog\Data\DiscoverFilter;
 use App\Catalog\Data\DiscoverFilterOption;
 use App\Catalog\Data\DiscoverQuery;
 use App\Catalog\Data\GenreOption;
-use App\Catalog\Data\MediaSummary;
 use App\Catalog\Data\Paginated;
+use App\Catalog\DiscoverSections;
 use App\Catalog\Discovery;
 use App\Catalog\FilteredDiscovery;
 use App\Catalog\GenreResolver;
@@ -45,9 +43,6 @@ use App\Support\Payload;
  */
 final readonly class BuildDiscoverPage
 {
-    /** Two full rows of the five-column browse grid. */
-    private const SECTION_SIZE = 10;
-
     public function __construct(
         private MediaTypeRegistry $types,
         private ProviderRegistry $providers,
@@ -56,6 +51,7 @@ final readonly class BuildDiscoverPage
         private GenreResolver $genreResolver,
         private CreatorStateQuery $creatorStates,
         private Discovery $discovery,
+        private DiscoverSections $sections,
     ) {}
 
     /**
@@ -145,9 +141,9 @@ final readonly class BuildDiscoverPage
         // A dedicated genre page and a filtered grid both replace the browse
         // sections rather than sitting under them — there is no mixed mode.
         if (! isset($props['genre']) && ($props['filterCount'] ?? 0) === 0) {
-            $sections = $this->sections($provider, $type, $locale, $calls);
-            $props = [...$props, ...$sections];
-            $cards = [...$cards, ...$sections['trending'], ...$sections['popular'], ...$sections['upcoming']];
+            $sections = $this->sections->of($type, $locale, $calls);
+            $props = [...$props, 'trending' => $sections->trending, 'popular' => $sections->popular, 'upcoming' => $sections->upcoming];
+            $cards = [...$cards, ...$sections->cards()];
         }
 
         $props = $this->props($type, $calls, $props);
@@ -220,32 +216,6 @@ final readonly class BuildDiscoverPage
             ...$filled,
             'failed' => $calls->failed(),
         ];
-    }
-
-    /**
-     * @return array{trending: list<MediaSummary>, popular: list<MediaSummary>, upcoming: list<MediaSummary>}
-     */
-    private function sections(MetadataProvider $provider, string $type, string $locale, ProviderCalls $calls): array
-    {
-        $sections = ['trending' => [], 'popular' => [], 'upcoming' => []];
-
-        if ($provider instanceof SupportsTrending) {
-            // A provider's trending can span types (TMDB mixes movies and
-            // shows) — keep only the one being browsed.
-            $items = $calls->attempt(fn (): array => $provider->trending($locale), []);
-            $sections['trending'] = array_slice(
-                array_values(array_filter($items, fn (MediaSummary $item): bool => $item->type === $type)),
-                0,
-                self::SECTION_SIZE,
-            );
-        }
-
-        if (Discovery::supports($provider, $type)) {
-            $sections['popular'] = array_slice($calls->attempt(fn (): array => $provider->popular($type, $locale), []), 0, self::SECTION_SIZE);
-            $sections['upcoming'] = array_slice($calls->attempt(fn (): array => $provider->upcoming($type, $locale), []), 0, self::SECTION_SIZE);
-        }
-
-        return $sections;
     }
 
     /**
