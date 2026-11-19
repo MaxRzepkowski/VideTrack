@@ -37,7 +37,7 @@ final readonly class StatisticsCache
      * @param  Closure(): (JsonSerializable|object)  $build  works the section out when it is not kept
      * @return array<string, mixed> the section as the page receives it
      */
-    public function remember(User $user, StatisticsPeriod $period, ?string $type, string $today, string $section, Closure $build): array
+    public function remember(User $user, StatisticsPeriod $period, ?string $type, string $today, StatisticsSection $section, Closure $build): array
     {
         $key = implode(':', [
             'statistics',
@@ -46,7 +46,7 @@ final readonly class StatisticsCache
             // The release (a new one may count or shape a section anew), the settings, the language and the view, in one fingerprint.
             hash('xxh128', json_encode([config()->string('tracker.version'), $user->preferences->resolved(), $user->preferences->effectiveTimezone(), App::getLocale(), $period, $type], JSON_THROW_ON_ERROR)),
             $today,
-            $section,
+            $section->value,
         ]);
 
         $kept = Cache::get($key);

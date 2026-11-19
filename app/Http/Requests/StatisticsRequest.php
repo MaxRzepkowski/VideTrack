@@ -3,7 +3,6 @@
 namespace App\Http\Requests;
 
 use App\Catalog\MediaTypeRegistry;
-use App\Users\Statistics\PeriodKind;
 use App\Users\Statistics\StatisticsPeriod;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -37,13 +36,7 @@ class StatisticsRequest extends FormRequest
             return StatisticsPeriod::between($from, $to);
         }
 
-        $period = (string) $this->string('period');
-
-        if ($period === PeriodKind::All->value) {
-            return StatisticsPeriod::whole();
-        }
-
-        return StatisticsPeriod::ofYear(preg_match('/^\d{4}$/', $period) === 1 ? (int) $period : $currentYear);
+        return StatisticsPeriod::fromCode((string) $this->string('period')) ?? StatisticsPeriod::ofYear($currentYear);
     }
 
     public function type(): ?string
