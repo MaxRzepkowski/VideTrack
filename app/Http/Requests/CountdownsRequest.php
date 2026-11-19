@@ -5,6 +5,7 @@ namespace App\Http\Requests;
 use App\Enums\CountdownSort;
 use App\Enums\SortDirection;
 use App\Tracking\Data\CountdownFilters;
+use App\Tracking\Surfaces\CountdownSet;
 use Illuminate\Foundation\Http\FormRequest;
 
 /**
@@ -13,9 +14,6 @@ use Illuminate\Foundation\Http\FormRequest;
  */
 class CountdownsRequest extends FormRequest
 {
-    /** A huge search term must not bloat the filtering. */
-    private const MAX_QUERY = 100;
-
     /**
      * @return array<string, mixed>
      */
@@ -36,7 +34,7 @@ class CountdownsRequest extends FormRequest
             sort: CountdownSort::tryFrom((string) $this->string('sort')) ?? CountdownSort::Premiere,
             dir: SortDirection::tryFrom((string) $this->string('dir')) ?? SortDirection::Asc,
             type: $type === '' ? null : $type,
-            q: $q === '' ? null : mb_substr($q, 0, self::MAX_QUERY),
+            q: $q === '' ? null : mb_substr($q, 0, CountdownSet::MAX_QUERY),
         );
     }
 
