@@ -31,3 +31,12 @@ test('the whole history holds every day', function () {
         ->and($whole->contains('2999-12-31'))->toBeTrue()
         ->and($whole->year())->toBeNull();
 });
+
+test('an address names a year or the whole history, and nothing else', function () {
+    expect(StatisticsPeriod::fromCode('2025'))->toEqual(StatisticsPeriod::ofYear(2025))
+        ->and(StatisticsPeriod::fromCode(PeriodKind::All->value))->toEqual(StatisticsPeriod::whole())
+        ->and(StatisticsPeriod::fromCode(''))->toBeNull()
+        ->and(StatisticsPeriod::fromCode('25'))->toBeNull()
+        ->and(StatisticsPeriod::fromCode('2025-01-01'))->toBeNull()
+        ->and(StatisticsPeriod::fromCode('everything'))->toBeNull();
+});

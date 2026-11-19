@@ -9,6 +9,9 @@ namespace App\Users\Statistics;
  */
 final readonly class StatisticsPeriod
 {
+    /** How an address names a period: a year (`2025`) or the whole history (`all`). A range of days travels as two days instead. */
+    public const CODE_PATTERN = '^(\\d{4}|'.PeriodKind::All->value.')$';
+
     private function __construct(
         public PeriodKind $kind,
         /** Y-m-d, or null for the whole history. */
@@ -25,6 +28,16 @@ final readonly class StatisticsPeriod
     public static function whole(): self
     {
         return new self(PeriodKind::All, null, null);
+    }
+
+    /** The period an address names (see CODE_PATTERN); null for anything else. */
+    public static function fromCode(string $code): ?self
+    {
+        return match (true) {
+            $code === PeriodKind::All->value => self::whole(),
+            preg_match('/'.self::CODE_PATTERN.'/', $code) === 1 => self::ofYear((int) $code),
+            default => null,
+        };
     }
 
     /** Two Y-m-d days in either order. */
