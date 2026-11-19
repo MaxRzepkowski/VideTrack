@@ -26,7 +26,14 @@ const filters: ActivityFilters = {
     hideListed: false,
 };
 
-const entry: ActivityEntry = { id: 7, at: '2026-10-01T20:00:00Z', media: mediaSummary({ title: 'Heat' }) };
+const entry: ActivityEntry = {
+    id: 7,
+    at: '2026-10-01T20:00:00Z',
+    media: mediaSummary({ title: 'Heat' }),
+    day: null,
+    rating: null,
+    outcome: null,
+};
 
 function page(panel: 'history' | 'ratings' | 'favorites') {
     return shallowMount(UserActivity, {

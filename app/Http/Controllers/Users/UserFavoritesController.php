@@ -12,6 +12,7 @@ use App\Models\Favorite;
 use App\Models\User;
 use App\Users\ActivityFeed;
 use App\Users\ActivitySource;
+use App\Users\Data\ActivityEntry;
 use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Gate;
@@ -43,12 +44,12 @@ class UserFavoritesController extends Controller
         /** @var Collection<int, Favorite> $favorites */
         $favorites = $page['models'];
         $entries = $favorites
-            ->map(fn (Favorite $favorite): array => [
-                'id' => $favorite->id,
-                'at' => $favorite->created_at?->toIso8601String(),
-                'day' => $page['dayOf'][$favorite->id] ?? null,
-                'media' => $cards->inContext($favorite->mediaItem),
-            ])
+            ->map(fn (Favorite $favorite): ActivityEntry => new ActivityEntry(
+                id: $favorite->id,
+                at: $favorite->created_at?->toIso8601String(),
+                media: $cards->inContext($favorite->mediaItem),
+                day: $page['dayOf'][$favorite->id] ?? null,
+            ))
             ->values()
             ->all();
 

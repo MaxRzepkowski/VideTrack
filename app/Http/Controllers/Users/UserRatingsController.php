@@ -12,6 +12,7 @@ use App\Models\Rating;
 use App\Models\User;
 use App\Users\ActivityFeed;
 use App\Users\ActivitySource;
+use App\Users\Data\ActivityEntry;
 use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Gate;
@@ -46,13 +47,13 @@ class UserRatingsController extends Controller
         /** @var Collection<int, Rating> $ratings */
         $ratings = $page['models'];
         $entries = $ratings
-            ->map(fn (Rating $rating): array => [
-                'id' => $rating->id,
-                'at' => $rating->updated_at?->toIso8601String(),
-                'day' => $page['dayOf'][$rating->id] ?? null,
-                'media' => $cards->inContext($rating->mediaItem),
-                'rating' => $rating->rating,
-            ])
+            ->map(fn (Rating $rating): ActivityEntry => new ActivityEntry(
+                id: $rating->id,
+                at: $rating->updated_at?->toIso8601String(),
+                media: $cards->inContext($rating->mediaItem),
+                day: $page['dayOf'][$rating->id] ?? null,
+                rating: $rating->rating,
+            ))
             ->values()
             ->all();
 

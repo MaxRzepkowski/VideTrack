@@ -1,4 +1,12 @@
 export type ActivityBucket = 'day' | 'week' | 'month' | 'year';
+export type ActivityEntry = {
+    readonly id: number | null;
+    readonly at: string | null;
+    readonly media: MediaSummary;
+    readonly day: string | null;
+    readonly rating: number | null;
+    readonly outcome: PlayOutcome | null;
+};
 export type ActivityFilters = {
     readonly sort: ActivitySort;
     readonly dir: SortDirection;

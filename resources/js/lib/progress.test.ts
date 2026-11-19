@@ -18,7 +18,7 @@ import {
     statCounts,
 } from '@/lib/progress';
 import { mediaSummary, useMediaTypes } from '@/test/factories';
-import type { ActivityEntry } from '@/types/media';
+import type { ProgressEntry } from '@/types/media';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 beforeEach(() => useMediaTypes());
@@ -27,7 +27,7 @@ const book = (pages: number | null = 300) => mediaSummary({ type: 'book', progre
 const game = () => mediaSummary({ type: 'game' });
 const show = () => mediaSummary({ type: 'show' });
 
-function entry(overrides: Partial<ActivityEntry>): ActivityEntry {
+function entry(overrides: Partial<ProgressEntry>): ProgressEntry {
     return { id: 1, at: null, media: show(), ...overrides };
 }
 

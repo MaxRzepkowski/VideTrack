@@ -11,6 +11,7 @@ use App\Models\MediaItem;
 use App\Models\Play;
 use App\Models\Rating;
 use App\Models\User;
+use App\Users\Data\ActivityEntry;
 use Carbon\CarbonImmutable;
 use Inertia\Testing\AssertableInertia as Assert;
 
@@ -303,12 +304,12 @@ test('filtering the history by a container type rolls the plays up into it', fun
         $this->actingAs($user)
             ->get(route('users.history', ['user' => $user->username, 'type' => 'season', 'group' => 'grid']))
             ->viewData('page')['props']['entries']
-    )->keyBy('media.ref');
+    )->keyBy(fn (ActivityEntry $entry): string => $entry->media->ref);
 
     expect($seasons)->toHaveCount(2)
         ->and($seasons)->toHaveKey("{$show->provider_ref}:2")
-        ->and($seasons["{$show->provider_ref}:1"]['media']['type'])->toBe('season')
-        ->and($seasons["{$show->provider_ref}:1"]['media']['extra']['showTitle'])->toBe($show->title);
+        ->and($seasons["{$show->provider_ref}:1"]->media->type)->toBe('season')
+        ->and($seasons["{$show->provider_ref}:1"]->media->extra['showTitle'])->toBe($show->title);
 
     // Leaf types keep listing plays one by one.
     $this->actingAs($user)

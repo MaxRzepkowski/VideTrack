@@ -17,7 +17,7 @@ import { episodeCode } from '@/lib/format';
 import { activityProgress } from '@/lib/progress';
 import { SELECT_CLASS } from '@/lib/ui';
 import type { MediaUserStatus, ProgressSort, SortDirection, TypeCount } from '@/types/generated';
-import type { ActivityEntry, ProfileData } from '@/types/media';
+import type { ProgressEntry, ProfileData } from '@/types/media';
 import { Head, router } from '@inertiajs/vue3';
 import { trans, transChoice } from 'laravel-vue-i18n';
 import { computed } from 'vue';
@@ -25,7 +25,7 @@ import { computed } from 'vue';
 const props = defineProps<{
     profile: ProfileData;
     isOwner: boolean;
-    entries: ActivityEntry[];
+    entries: ProgressEntry[];
     types: TypeCount[];
     filters: { type: string | null; status: MediaUserStatus | null; q: string | null; sort: ProgressSort; dir: SortDirection };
 }>();
@@ -98,7 +98,7 @@ const shelves = computed(() => {
     ].filter((shelf) => shelf.cards.length > 0);
 });
 
-function nextEpisodeLabel(entry: ActivityEntry): string[] {
+function nextEpisodeLabel(entry: ProgressEntry): string[] {
     const next = entry.nextEpisode;
 
     return next ? [episodeCode(next.seasonNumber ?? 0, next.number ?? 0), next.title] : [];
