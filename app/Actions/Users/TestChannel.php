@@ -20,7 +20,7 @@ final readonly class TestChannel
 
     public function execute(NotificationChannel $channel): DeliveryAnswer
     {
-        $answer = $this->drivers->get($channel->driver)->deliver($this->messages->test($channel->user), $channel->config);
+        $answer = $this->drivers->get($channel->driver)->deliver($this->messages->test($channel->user), $channel);
 
         $channel->update(['last_failure' => $answer->failure()]);
 

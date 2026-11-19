@@ -37,7 +37,7 @@ class DeliverChannelMessage implements ShouldQueue
             return;
         }
 
-        $answer = $driver->deliver($this->message, $this->channel->config);
+        $answer = $driver->deliver($this->message, $this->channel);
 
         $retryAfter = DeliveryRetry::after($answer, $this->attempts());
 

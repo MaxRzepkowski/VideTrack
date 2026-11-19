@@ -119,7 +119,7 @@ final readonly class DailyDigests
                 continue;
             }
 
-            $answers = $driver->deliverDigest($digest, $channel->config);
+            $answers = $driver->deliverDigest($digest, $channel);
             $last = end($answers);
 
             // The service down or busy before anything went out: the slot

@@ -2,6 +2,7 @@
 
 namespace App\Integrations\Mail;
 
+use App\Models\NotificationChannel;
 use App\Models\User;
 use App\Notifications\Channels\ChannelText;
 use App\Notifications\Channels\Contracts\ChannelDriver;
@@ -49,14 +50,14 @@ final readonly class MailChannel implements ChannelDriver
         return [self::ADDRESS => Payload::text($values, self::ADDRESS)];
     }
 
-    public function deliver(ChannelMessage $message, array $config): DeliveryAnswer
+    public function deliver(ChannelMessage $message, NotificationChannel $channel): DeliveryAnswer
     {
-        return $this->send(Payload::text($config, self::ADDRESS), $message->title, $this->text->message($message));
+        return $this->send(Payload::text($channel->config, self::ADDRESS), $message->title, $this->text->message($message));
     }
 
-    public function deliverDigest(ChannelDigest $digest, array $config): array
+    public function deliverDigest(ChannelDigest $digest, NotificationChannel $channel): array
     {
-        return [$this->send(Payload::text($config, self::ADDRESS), $digest->heading, $this->text->digest($digest))];
+        return [$this->send(Payload::text($channel->config, self::ADDRESS), $digest->heading, $this->text->digest($digest))];
     }
 
     private function send(string $address, string $subject, string $body): DeliveryAnswer
