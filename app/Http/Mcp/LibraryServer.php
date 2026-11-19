@@ -21,6 +21,7 @@ use App\Http\Mcp\Tools\GetNotifications;
 use App\Http\Mcp\Tools\GetStatistics;
 use App\Http\Mcp\Tools\GetSuggestions;
 use App\Http\Mcp\Tools\GetTitle;
+use App\Http\Mcp\Tools\GetTrending;
 use App\Http\Mcp\Tools\GetUpNext;
 use App\Http\Mcp\Tools\LogProgress;
 use App\Http\Mcp\Tools\MarkNotificationsRead;
@@ -64,6 +65,7 @@ final class LibraryServer extends Server
         GetList::class,
         GetSuggestions::class,
         GetStatistics::class,
+        GetTrending::class,
         GetNotifications::class,
         MarkWatched::class,
         UnmarkWatched::class,

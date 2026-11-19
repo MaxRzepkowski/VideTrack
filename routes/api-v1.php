@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\V1\CalendarController;
 use App\Http\Controllers\Api\V1\CountdownController;
 use App\Http\Controllers\Api\V1\CreatorFollowController;
 use App\Http\Controllers\Api\V1\CreatorListsController;
+use App\Http\Controllers\Api\V1\DiscoverController;
 use App\Http\Controllers\Api\V1\EventVisibilityController;
 use App\Http\Controllers\Api\V1\LibraryController;
 use App\Http\Controllers\Api\V1\ListController;
@@ -59,6 +60,7 @@ Route::middleware('abilities:'.TokenAbility::Read->value)->group(function () {
     Route::get('search', SearchController::class)->middleware('throttle:providers')->name('search');
     // A read with a body: the titles do not fit a query string.
     Route::post('lookup', LookupController::class)->middleware(ThrottleTitleLookups::class)->name('lookup');
+    Route::get('discover/{type}', DiscoverController::class)->middleware('throttle:providers')->whereAlpha('type')->name('discover');
     Route::get('library', LibraryController::class)->name('library');
     Route::get('calendar', CalendarController::class)->name('calendar');
     Route::get('countdowns', CountdownController::class)->name('countdowns');

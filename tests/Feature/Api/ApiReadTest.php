@@ -320,6 +320,42 @@ test('statistics refuse a period they cannot read and a section that is not ther
     $this->getJson('/api/v1/statistics/gossip')->assertNotFound();
 });
 
+test('discover answers what is trending, popular and coming up, with the caller state', function () {
+    Http::fake([
+        '*/trending/movie/week*' => Http::response(['results' => [['id' => 603, 'title' => 'The Matrix', 'poster_path' => '/p.jpg', 'release_date' => '1999-03-30']]]),
+        '*/trending/tv/week*' => Http::response(['results' => [['id' => 1399, 'name' => 'Game of Thrones', 'poster_path' => '/p.jpg', 'first_air_date' => '2011-04-17']]]),
+        '*/movie/popular*' => Http::response(['results' => [['id' => 604, 'title' => 'The Matrix Reloaded', 'poster_path' => '/p.jpg', 'release_date' => '2003-05-15']]]),
+        '*/discover/movie*' => Http::response(['results' => [['id' => 605, 'title' => 'The Matrix Revolutions', 'poster_path' => '/p.jpg', 'release_date' => '2026-11-05']]]),
+        ...providerDictionaryFakes(),
+    ]);
+    $user = apiUser(['read']);
+    app(SetFavorite::class)->execute($user, MediaItem::factory()->movie()->create(['provider_ref' => '603']), true);
+
+    $this->getJson('/api/v1/discover/movie')
+        ->assertOk()
+        // Trending keeps the type asked for.
+        ->assertJsonCount(1, 'data.trending')
+        ->assertJsonPath('data.trending.0.ref', '603')
+        ->assertJsonPath('data.trending.0.state.favorite', true)
+        ->assertJsonPath('data.popular.0.title', 'The Matrix Reloaded')
+        ->assertJsonPath('data.upcoming.0.title', 'The Matrix Revolutions')
+        ->assertJsonPath('meta', ['type' => 'movie', 'failed' => false]);
+});
+
+test('discover says when the catalogue failed, and knows only the types it can browse', function () {
+    Http::fake(['*' => Http::response([], 500)]);
+    apiUser(['read']);
+
+    $this->getJson('/api/v1/discover/show')
+        ->assertOk()
+        ->assertJsonPath('data.trending', [])
+        ->assertJsonPath('meta.failed', true);
+
+    // Games are switched off in tests.
+    $this->getJson('/api/v1/discover/game')->assertNotFound();
+    $this->getJson('/api/v1/discover/episode')->assertNotFound();
+});
+
 test('notifications page newest first', function () {
     $user = apiUser();
 

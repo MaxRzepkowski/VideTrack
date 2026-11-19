@@ -33,8 +33,8 @@ title's details and history, your library (`history`, `ratings`, `favorites`, `p
 only what you rated at least so high), the next
 episode of every show you watch (`up-next`), your lists, the release calendar (from a day, to a day or
 for a number of `days`), every premiere you count down to, years ahead (`countdowns`), your statistics for a year, a range of
-days or the whole history (`statistics`, each section of the statistics page on its own), suggestions and
-notifications.
+days or the whole history (`statistics`, each section of the statistics page on its own), what is
+trending, popular and coming up in a type (`discover`), suggestions and notifications.
 
 With `write`: plays, ratings, status, progress, favorites, list membership (all of a title's lists
 at once, or one list at a time), rewatch cycles, the
@@ -77,6 +77,7 @@ without `write` sees only the reading tools.
 | `get_up_next`, `get_calendar` | the next episode of each show; releases day by day (a week by default) |
 | `get_countdowns` | every premiere you count down to, soonest first, years ahead |
 | `get_statistics` | your statistics for a year, a range or the whole history, a section at a time; two calls compare two periods |
+| `get_trending` | what is trending, popular and coming up in a type, with your state for each |
 | `get_lists`, `get_list` | your lists (the Backlog among them) and what is on one |
 | `get_suggestions`, `get_notifications` | your suggestions; your notifications |
 
@@ -90,8 +91,8 @@ without `write` sees only the reading tools.
 | `mark_notifications_read` | one notification, or all |
 
 A tool counts against the API's rate limit as the calls it makes (most make one; `update_list` makes
-two). `search` and `get_title` also count against the 120 catalogue lookups a minute your account
-has; `check_titles` has 120 titles a minute of its own.
+two). `search`, `get_title` and `get_trending` also count against the 120 catalogue lookups a minute your
+account has; `check_titles` has 120 titles a minute of its own.
 
 Claude Code:
 
