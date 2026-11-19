@@ -381,3 +381,29 @@ test('a creator on a list from a provider this instance lacks is skipped, not st
         ->and(Person::query()->count())->toBe(0)
         ->and(Company::query()->count())->toBe(0);
 });
+
+test('a restored entry keeps where it first came in; one from an older file is the backup\'s', function () {
+    $owner = User::factory()->create();
+    $scrobbled = MediaItem::factory()->movie()->create();
+    $unknown = MediaItem::factory()->movie()->create();
+
+    Play::factory()->create(['user_id' => $owner->id, 'media_item_id' => $scrobbled->id, 'watched_at' => '2026-02-01 21:00:00', 'source' => 'scrobble:jellyfin']);
+    Play::factory()->create(['user_id' => $owner->id, 'media_item_id' => $unknown->id, 'watched_at' => '2026-02-02 21:00:00']);
+    Play::factory()->dropped()->create(['user_id' => $owner->id, 'media_item_id' => MediaItem::factory()->movie()->create()->id, 'watched_at' => '2026-02-03 21:00:00', 'source' => 'api']);
+    projectLibrary($owner);
+
+    $export = backupOf($owner);
+
+    expect(collect($export['plays'])->pluck('source')->all())->toBe(['scrobble:jellyfin', null, 'api']);
+
+    // A source this version cannot read restores as the backup's own, too.
+    $export['plays'][0]['source'] = 'carrier-pigeon';
+    $target = User::factory()->create();
+    runVideTrackImport($target, $export);
+    expect($target->plays()->orderBy('watched_at')->pluck('source')->all())->toBe(['import:videtrack', 'import:videtrack', 'api']);
+
+    $kept = User::factory()->create();
+    runVideTrackImport($kept, backupOf($owner));
+    // A dropped entry keeps its own as well.
+    expect($kept->plays()->orderBy('watched_at')->pluck('source')->all())->toBe(['scrobble:jellyfin', 'import:videtrack', 'api']);
+});

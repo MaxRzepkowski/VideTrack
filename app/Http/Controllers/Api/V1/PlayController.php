@@ -45,7 +45,7 @@ class PlayController extends Controller
             : Play::query()
                 ->historyOf($viewer, $item)
                 ->with('watchCycle:id,number')
-                ->get(['id', 'watch_cycle_id', 'watched_at', 'outcome', 'amount']);
+                ->get(['id', 'watch_cycle_id', 'watched_at', 'outcome', 'amount', 'source']);
 
         return PlayResource::collection($plays);
     }

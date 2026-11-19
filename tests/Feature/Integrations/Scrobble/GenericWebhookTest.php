@@ -65,6 +65,7 @@ test('a film watched is a play, and the same post again is one delivery', functi
     postGeneric($endpoint, $payload)->assertStatus(Response::HTTP_ACCEPTED);
 
     expect(Play::where('user_id', $user->id)->count())->toBe(1)
+        ->and(Play::where('user_id', $user->id)->firstOrFail()->source)->toBe('scrobble:generic')
         ->and(lastGenericDelivery()->status)->toBe(WebhookDeliveryStatus::Accepted)
         ->and(lastGenericDelivery()->media_label)->toBe('The Matrix (1999)');
 

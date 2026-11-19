@@ -801,6 +801,7 @@ export type PlayEntry = {
     readonly outcome: PlayOutcome;
     readonly amount: number | null;
     readonly cycle: number;
+    readonly source: string | null;
 };
 export type PlayOutcome = 'completed' | 'dropped';
 export type PlayingEntry = {

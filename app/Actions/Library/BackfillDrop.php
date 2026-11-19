@@ -74,6 +74,7 @@ final readonly class BackfillDrop
                 'watch_cycle_id' => $cycleId,
                 'watched_at' => $at,
                 'outcome' => PlayOutcome::Dropped,
+                'source' => $this->mutations->current()->value(),
                 'amount' => $kept,
             ]);
 

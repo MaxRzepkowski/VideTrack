@@ -174,7 +174,7 @@ final readonly class ImportRunner
                 continue;
             }
 
-            $run->wrote('plays', $this->play->execute($user, $item, $play->at, $play->outcome, $play->amount, $play->cycle, $play->dating));
+            $run->wrote('plays', $this->play->execute($user, $item, $play->at, $play->outcome, $play->amount, $play->cycle, $play->dating, $play->source));
         }
 
         if ($row->rating !== null) {

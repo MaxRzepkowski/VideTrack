@@ -61,7 +61,8 @@ final readonly class MutationSource
     }
 
     /**
-     * Inverse of value(): rebuilds the source a queued job was handed.
+     * Inverse of value(): rebuilds the source a queued job was handed or a
+     * history entry was stamped with.
      */
     public static function fromValue(string $value): self
     {
@@ -74,6 +75,24 @@ final readonly class MutationSource
             $kind === self::SCROBBLE && $code !== null => self::scrobble($code),
             default => throw new InvalidArgumentException("Unknown mutation source [{$value}]."),
         };
+    }
+
+    /**
+     * The source a stored or restored value names; null for none, and for one
+     * this version cannot read (a newer kind, a hand-edited file) — a history
+     * entry outlives the code that stamped it, and is kept without it.
+     */
+    public static function tryFromValue(?string $value): ?self
+    {
+        if ($value === null) {
+            return null;
+        }
+
+        try {
+            return self::fromValue($value);
+        } catch (InvalidArgumentException) {
+            return null;
+        }
     }
 
     /**

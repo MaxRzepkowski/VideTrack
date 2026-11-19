@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\PlayOutcome;
+use App\Library\MutationSource;
 use Database\Factories\PlayFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -24,6 +25,7 @@ use Illuminate\Support\Carbon;
  * @property Carbon $watched_at moment the attempt closed
  * @property PlayOutcome $outcome
  * @property int|null $amount real cost of the attempt in the type's progress unit (games: minutes)
+ * @property string|null $source where the entry came in from ({@see MutationSource::value()}); null when that was never kept
  * @property-read MediaItem $mediaItem
  */
 class Play extends Model

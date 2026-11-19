@@ -3,6 +3,7 @@
 use App\Catalog\MediaKind;
 use App\Enums\TaskRunStatus;
 use App\Http\Requests\Settings\ImportRequest;
+use App\Integrations\Import\Data\ImportDrop;
 use App\Integrations\Import\Data\ImportInput;
 use App\Integrations\Import\Data\ImportListEntry;
 use App\Integrations\Import\Data\ImportListRef;
@@ -174,10 +175,22 @@ test('rows by foreign id resolve through the external id resolver', function () 
 
     expect($taskRun->status)->toBe(TaskRunStatus::Success)
         ->and($taskRun->summary)->toContain('Processed 1 entry.', 'plays: 1', 'ratings: 1', 'skipped entries: 0')
-        ->and($user->plays()->firstOrFail()->media_item_id)->toBe($movie->id);
+        ->and($user->plays()->firstOrFail()->media_item_id)->toBe($movie->id)
+        ->and($user->plays()->firstOrFail()->source)->toBe('import:fake');
 
     // Everything the run writes is announced as the import it is.
     Event::assertDispatched(PlayRecorded::class, fn (PlayRecorded $event) => $event->source->value() === 'import:fake');
+});
+
+test('a drop an import brings is stamped with the import too', function () {
+    $user = User::factory()->create();
+    MediaItem::factory()->movie()->create(['provider_ref' => '603']);
+
+    runFakeImport($user, [
+        new MediaRow(MediaSubject::external(MediaKind::Movie, ['tmdb' => '603'], 'The Matrix'), drop: new ImportDrop(new CarbonImmutable('2025-01-10 20:00:00'))),
+    ]);
+
+    expect($user->plays()->firstOrFail()->source)->toBe('import:fake');
 });
 
 test('a title nobody can place is skipped with the ids that were tried', function () {

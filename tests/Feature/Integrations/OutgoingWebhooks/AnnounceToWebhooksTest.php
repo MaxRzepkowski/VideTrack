@@ -93,6 +93,7 @@ test('an episode marked watched is one message with its plays, each with the car
         ->and($message['data']['plays'])->toHaveCount(1)
         ->and($message['data']['plays'][0]['outcome'])->toBe('completed')
         ->and($message['data']['plays'][0]['cycle'])->toBe(1)
+        ->and($message['data']['plays'][0]['source'])->toBe('ui')
         ->and($message['data']['plays'][0]['media']['ref'])->toBe($episode->provider_ref);
 });
 
