@@ -18,6 +18,7 @@ use App\Http\Mcp\Tools\GetLibrary;
 use App\Http\Mcp\Tools\GetList;
 use App\Http\Mcp\Tools\GetLists;
 use App\Http\Mcp\Tools\GetNotifications;
+use App\Http\Mcp\Tools\GetStatistics;
 use App\Http\Mcp\Tools\GetSuggestions;
 use App\Http\Mcp\Tools\GetTitle;
 use App\Http\Mcp\Tools\GetUpNext;
@@ -62,6 +63,7 @@ final class LibraryServer extends Server
         GetLists::class,
         GetList::class,
         GetSuggestions::class,
+        GetStatistics::class,
         GetNotifications::class,
         MarkWatched::class,
         UnmarkWatched::class,

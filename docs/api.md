@@ -32,7 +32,8 @@ Reading: your profile, search, many titles by name at once with your state for e
 title's details and history, your library (`history`, `ratings`, `favorites`, `progress`, each also
 only what you rated at least so high), the next
 episode of every show you watch (`up-next`), your lists, the release calendar (from a day, to a day or
-for a number of `days`), every premiere you count down to, years ahead (`countdowns`), suggestions and
+for a number of `days`), every premiere you count down to, years ahead (`countdowns`), your statistics for a year, a range of
+days or the whole history (`statistics`, each section of the statistics page on its own), suggestions and
 notifications.
 
 With `write`: plays, ratings, status, progress, favorites, list membership (all of a title's lists
@@ -75,6 +76,7 @@ without `write` sees only the reading tools.
 | `get_library` | your history, ratings, favorites or titles in progress, a page at a time, also only what you rated at least so high |
 | `get_up_next`, `get_calendar` | the next episode of each show; releases day by day (a week by default) |
 | `get_countdowns` | every premiere you count down to, soonest first, years ahead |
+| `get_statistics` | your statistics for a year, a range or the whole history, a section at a time; two calls compare two periods |
 | `get_lists`, `get_list` | your lists (the Backlog among them) and what is on one |
 | `get_suggestions`, `get_notifications` | your suggestions; your notifications |
 

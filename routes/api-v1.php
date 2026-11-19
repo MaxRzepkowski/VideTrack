@@ -17,6 +17,7 @@ use App\Http\Controllers\Api\V1\MediaStateController;
 use App\Http\Controllers\Api\V1\NotificationController;
 use App\Http\Controllers\Api\V1\PlayController;
 use App\Http\Controllers\Api\V1\SearchController;
+use App\Http\Controllers\Api\V1\StatisticsController;
 use App\Http\Controllers\Api\V1\SuggestionController;
 use App\Http\Controllers\Api\V1\TitleListController;
 use App\Http\Controllers\Api\V1\UpNextController;
@@ -65,6 +66,8 @@ Route::middleware('abilities:'.TokenAbility::Read->value)->group(function () {
     Route::get('suggestions', [SuggestionController::class, 'index'])->name('suggestions.index');
     Route::get('suggestions/{shelf}', [SuggestionController::class, 'show'])->where('shelf', '[a-z0-9-]+')->name('suggestions.show');
     Route::get('notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::get('statistics', [StatisticsController::class, 'index'])->name('statistics.index');
+    Route::get('statistics/{section}', [StatisticsController::class, 'show'])->name('statistics.show');
 
     Route::get('lists', [ListController::class, 'index'])->name('lists.index');
     Route::get('lists/{list}', [ListController::class, 'show'])->name('lists.show');

@@ -22,7 +22,7 @@ function mcpRequest(string $method, array $params = [], ?string $token = null): 
 }
 
 const MCP_READING_TOOLS = [
-    'search', 'check_titles', 'get_title', 'get_history', 'get_library', 'get_up_next', 'get_calendar', 'get_countdowns',
+    'search', 'check_titles', 'get_title', 'get_history', 'get_library', 'get_up_next', 'get_calendar', 'get_countdowns', 'get_statistics',
     'get_lists', 'get_list', 'get_suggestions', 'get_notifications',
 ];
 
