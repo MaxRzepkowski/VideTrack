@@ -5,7 +5,7 @@ import { router } from '@inertiajs/vue3';
 import { flushPromises, mount } from '@vue/test-utils';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-vi.mock('@/lib/channelLogos', () => ({ channelIcon: () => null, channelLogo: () => null }));
+vi.mock('@/lib/serviceLogos', () => ({ serviceIcon: () => null, serviceLogo: () => null }));
 
 vi.mock('@/composables/useConfirm', () => ({ confirm: vi.fn(() => Promise.resolve(true)) }));
 

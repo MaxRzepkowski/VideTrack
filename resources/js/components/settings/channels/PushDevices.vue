@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import ChannelLogo from '@/components/settings/channels/ChannelLogo.vue';
+import ServiceLogo from '@/components/ServiceLogo.vue';
 import { confirm } from '@/composables/useConfirm';
 import { usePushSubscription, type NewPushSubscription } from '@/composables/usePushSubscription';
 import { describeBrowser } from '@/lib/browsers';
@@ -9,6 +9,7 @@ import type { PushSupport } from '@/lib/push';
 import { SETTINGS_CARD_CLASS } from '@/lib/ui';
 import type { PushDeviceData, PushDevicesData } from '@/types/generated';
 import { router } from '@inertiajs/vue3';
+import { Bell } from '@lucide/vue';
 import { trans } from 'laravel-vue-i18n';
 import { computed, ref } from 'vue';
 import { toast } from 'vue-sonner';
@@ -117,7 +118,7 @@ async function remove(device: PushDeviceData, current: boolean): Promise<void> {
 <template>
     <div :class="[SETTINGS_CARD_CLASS, 'space-y-4']">
         <div class="flex items-center gap-3">
-            <ChannelLogo kind="webpush" class="h-10" />
+            <ServiceLogo code="webpush" :fallback="Bell" class="h-10" />
             <div class="min-w-0 flex-1">
                 <div class="text-ink text-base font-semibold">{{ trans('settings.browser_notifications') }}</div>
                 <div class="text-ink-muted text-sm">{{ trans('settings.push_on_each_device_separately') }}</div>

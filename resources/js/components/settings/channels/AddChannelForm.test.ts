@@ -4,7 +4,7 @@ import { router } from '@inertiajs/vue3';
 import { mount } from '@vue/test-utils';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-vi.mock('@/lib/channelLogos', () => ({ channelIcon: () => null, channelLogo: () => null }));
+vi.mock('@/lib/serviceLogos', () => ({ serviceIcon: () => null, serviceLogo: () => null }));
 
 const discord = channelKind({
     fields: [credentialField({ help: 'Channel settings → Integrations → Webhooks.', secret: true })],

@@ -4,9 +4,9 @@ import type { ChannelKindData } from '@/types/generated';
 import { flushPromises, mount } from '@vue/test-utils';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-vi.mock('@/lib/channelLogos', () => ({
-    channelIcon: () => null,
-    channelLogo: (kind: string) => (kind === 'tgram' ? { url: '/images/channels/tgram.svg', width: 40, height: 40 } : null),
+vi.mock('@/lib/serviceLogos', () => ({
+    serviceIcon: () => null,
+    serviceLogo: (code: string) => (code === 'tgram' ? { url: '/images/logos/tgram.svg', width: 40, height: 40 } : null),
 }));
 
 function kind(code: string, label: string, popular: boolean): ChannelKindData {
@@ -33,7 +33,7 @@ describe('ChannelKindDialog', () => {
         await flushPromises();
 
         expect(tileNames()).toEqual(['Telegram', 'ntfy']);
-        expect(document.querySelector('[role="dialog"] li img')?.getAttribute('src')).toBe('/images/channels/tgram.svg');
+        expect(document.querySelector('[role="dialog"] li img')?.getAttribute('src')).toBe('/images/logos/tgram.svg');
 
         dialog.unmount();
     });

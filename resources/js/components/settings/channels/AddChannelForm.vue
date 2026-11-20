@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import InputError from '@/components/InputError.vue';
 import ChannelKindDialog from '@/components/settings/channels/ChannelKindDialog.vue';
-import ChannelLogo from '@/components/settings/channels/ChannelLogo.vue';
+import ServiceLogo from '@/components/ServiceLogo.vue';
 import CredentialFields from '@/components/settings/CredentialFields.vue';
 import { Label } from '@/components/ui/label';
 import { useUnsavedChanges } from '@/composables/useUnsavedChanges';
@@ -9,7 +9,7 @@ import { blankConfig, channelModes, configError } from '@/lib/channels';
 import { SETTINGS_CARD_CLASS, SETTINGS_FIELD_CLASS } from '@/lib/ui';
 import type { ChannelKindData, ChannelMode } from '@/types/generated';
 import { useForm } from '@inertiajs/vue3';
-import { ChevronRight, Plus } from '@lucide/vue';
+import { ChevronRight, Plus, Bell } from '@lucide/vue';
 import { trans } from 'laravel-vue-i18n';
 import { ref } from 'vue';
 import { toast } from 'vue-sonner';
@@ -69,7 +69,7 @@ function add(): void {
             @click="choosing = true"
         >
             <template v-if="picked">
-                <ChannelLogo :kind="picked.code" class="h-10 max-w-32" />
+                <ServiceLogo :code="picked.code" :fallback="Bell" class="h-10 max-w-32" />
                 <span class="text-ink min-w-0 flex-1 truncate text-base font-semibold">{{ picked.label }}</span>
                 <span class="text-ink-muted shrink-0 text-sm">{{ trans('settings.change') }}</span>
             </template>

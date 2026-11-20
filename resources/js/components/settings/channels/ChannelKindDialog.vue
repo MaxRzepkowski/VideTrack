@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import ChannelLogo from '@/components/settings/channels/ChannelLogo.vue';
+import ServiceLogo from '@/components/ServiceLogo.vue';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { kindsMatching } from '@/lib/channels';
 import { SETTINGS_FIELD_CLASS } from '@/lib/ui';
 import type { ChannelKindData } from '@/types/generated';
+import { Bell } from '@lucide/vue';
 import { trans, transChoice } from 'laravel-vue-i18n';
 import { computed, ref, watch } from 'vue';
 
@@ -70,7 +71,7 @@ function pick(kind: ChannelKindData): void {
                         >
                             <!-- The name keeps two lines' room whatever its length, so every logo sits on one row. -->
                             <span class="flex w-full flex-1 items-center justify-center">
-                                <ChannelLogo :kind="kind.code" class="h-11 max-w-full" />
+                                <ServiceLogo :code="kind.code" :fallback="Bell" class="h-11 max-w-full" />
                             </span>
                             <span class="line-clamp-2 h-[2.5em] text-sm leading-tight font-medium">{{ kind.label }}</span>
                         </button>
