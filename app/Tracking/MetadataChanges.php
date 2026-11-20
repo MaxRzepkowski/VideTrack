@@ -3,7 +3,7 @@
 namespace App\Tracking;
 
 use App\Accounts\Preferences\NotificationEvent;
-use App\Accounts\Preferences\UserPreferences;
+use App\Accounts\Preferences\PreferenceKeys;
 use App\Catalog\DatePrecision;
 use App\Catalog\ItemMetadata;
 use App\Catalog\MediaTypeDefinition;
@@ -62,7 +62,7 @@ final readonly class MetadataChanges implements DeclaresTypeOptions
                 description: 'settings.a_tracked_show_gets_a_new',
                 phrase: 'settings.phrase_show_status',
                 surfaces: [Surface::Notifications],
-                preference: fn (): string => UserPreferences::notifiesKey(NotificationEvent::ShowStatus),
+                preference: fn (): string => PreferenceKeys::notifies(NotificationEvent::ShowStatus),
             );
         }
 
@@ -73,7 +73,7 @@ final readonly class MetadataChanges implements DeclaresTypeOptions
                 description: 'settings.announced_for_a_tracked_game',
                 phrase: 'settings.phrase_related_announced',
                 surfaces: [Surface::Notifications],
-                preference: fn (): string => UserPreferences::notifiesKey(NotificationEvent::RelatedAnnounced),
+                preference: fn (): string => PreferenceKeys::notifies(NotificationEvent::RelatedAnnounced),
             );
         }
 

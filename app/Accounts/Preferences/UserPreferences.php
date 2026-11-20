@@ -218,7 +218,7 @@ final readonly class UserPreferences
             TrackingSource::cases(),
             fn (TrackingSource $row): bool => $own !== null
                 ? in_array($row, $own, true)
-                : $this->flag(self::surfaceKey($surface).'_'.self::rowKey($row)),
+                : $this->flag(PreferenceKeys::matrix($surface, $row)),
         ));
     }
 
@@ -229,7 +229,7 @@ final readonly class UserPreferences
      */
     public function releaseMode(Surface $surface): ReleaseDateMode
     {
-        return $this->choice(self::releaseModeKey($surface), ReleaseDateMode::class);
+        return $this->choice(PreferenceKeys::releaseMode($surface), ReleaseDateMode::class);
     }
 
     /**
@@ -239,7 +239,7 @@ final readonly class UserPreferences
      */
     public function perPlatform(Surface $surface): bool
     {
-        return $surface->isView() && $this->flag(self::perPlatformKey($surface));
+        return $surface->isView() && $this->flag(PreferenceKeys::perPlatform($surface));
     }
 
     /**
@@ -248,7 +248,7 @@ final readonly class UserPreferences
      */
     public function showsEvents(Surface $surface): bool
     {
-        return $surface->isView() && $this->flag(self::eventsKey($surface));
+        return $surface->isView() && $this->flag(PreferenceKeys::events($surface));
     }
 
     /**
@@ -257,42 +257,12 @@ final readonly class UserPreferences
      */
     public function showsRelated(Surface $surface, RelatedReleaseKind $kind): bool
     {
-        return $this->flag(self::relatedKey($surface, $kind));
+        return $this->flag(PreferenceKeys::related($surface, $kind));
     }
 
     public function notifies(NotificationEvent $event): bool
     {
-        return $this->flag(self::notifiesKey($event));
-    }
-
-    /** The setting {@see releaseMode()} reads, for the settings page to name. */
-    public static function releaseModeKey(Surface $surface): string
-    {
-        return self::surfaceKey($surface).'_release_mode';
-    }
-
-    /** The setting {@see perPlatform()} reads, for the settings page to name. */
-    public static function perPlatformKey(Surface $surface): string
-    {
-        return self::surfaceKey($surface).'_game_platforms';
-    }
-
-    /** The setting {@see showsEvents()} reads, for the settings page to name. */
-    public static function eventsKey(Surface $surface): string
-    {
-        return self::surfaceKey($surface).'_events';
-    }
-
-    /** The setting {@see showsRelated()} reads, for the settings page to name. */
-    public static function relatedKey(Surface $surface, RelatedReleaseKind $kind): string
-    {
-        return self::surfaceKey($surface).'_game_'.$kind->value;
-    }
-
-    /** The setting {@see notifies()} reads, for the settings page to name. */
-    public static function notifiesKey(NotificationEvent $event): string
-    {
-        return 'notify_'.$event->value;
+        return $this->flag(PreferenceKeys::notifies($event));
     }
 
     public function personFollowScope(): PersonFollowScope
@@ -333,27 +303,6 @@ final readonly class UserPreferences
         $value = $this->value('reading_pace_'.$unit->value);
 
         return is_int($value) ? $value : null;
-    }
-
-    private static function surfaceKey(Surface $surface): string
-    {
-        return match ($surface) {
-            Surface::Calendar => 'calendar',
-            Surface::Countdowns => 'countdown',
-            Surface::Notifications => 'notifications',
-        };
-    }
-
-    private static function rowKey(TrackingSource $row): string
-    {
-        return match ($row) {
-            TrackingSource::OnHold => 'on_hold',
-            TrackingSource::Dropped => 'dropped',
-            TrackingSource::Backlog => 'watchlist',
-            TrackingSource::Activity => 'active',
-            TrackingSource::ManualFollow => 'followed',
-            TrackingSource::CreatorFollow => 'creators',
-        };
     }
 
     /** The user's choice if it still means something, else the default. */

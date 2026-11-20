@@ -3,7 +3,7 @@
 namespace App\Tracking\Releases;
 
 use App\Accounts\Preferences\NotificationEvent;
-use App\Accounts\Preferences\UserPreferences;
+use App\Accounts\Preferences\PreferenceKeys;
 use App\Catalog\Data\MediaSummary;
 use App\Catalog\ItemMetadata;
 use App\Catalog\MediaItemSummaries;
@@ -61,12 +61,12 @@ final readonly class FilmReleases implements ReleaseSource
                 description: 'settings.its_first_release_in_cinemas',
                 phrase: 'settings.phrase_cinema_premiere',
                 surfaces: Surface::cases(),
-                preference: UserPreferences::releaseModeKey(...),
+                preference: PreferenceKeys::releaseMode(...),
                 onWhen: $modes(fn (ReleaseDateMode $mode): bool => $mode->showsPremiere()),
                 choices: $choices,
                 // The premiere is the day's premiere ping, which has its own default switch.
                 requires: fn (Surface $surface): ?TypeOptionRequirement => $surface === Surface::Notifications
-                    ? new TypeOptionRequirement(UserPreferences::notifiesKey(NotificationEvent::Premieres), 'settings.premieres')
+                    ? new TypeOptionRequirement(PreferenceKeys::notifies(NotificationEvent::Premieres), 'settings.premieres')
                     : null,
             ),
             TypeOption::on(
@@ -75,7 +75,7 @@ final readonly class FilmReleases implements ReleaseSource
                 description: 'settings.digital_or_on_disc',
                 phrase: 'settings.phrase_home_release',
                 surfaces: Surface::cases(),
-                preference: UserPreferences::releaseModeKey(...),
+                preference: PreferenceKeys::releaseMode(...),
                 onWhen: $modes(fn (ReleaseDateMode $mode): bool => $mode->showsDigital()),
                 choices: $choices,
             ),
