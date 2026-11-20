@@ -109,6 +109,14 @@ test('a broad catch reports or rethrows — never a silent line in a summary', f
     expect($silent)->toBe([]);
 });
 
+test('a media event is built by the class of its kind, which keys it', function () {
+    expect(filesMatching('/new\\s+(?:\\\\?App\\\\Notifications\\\\)?MediaEventPayload\\(/', [
+        'app/Notifications/Events/',
+        // Reading a stored one back.
+        'app/Notifications/MediaEventPayload.php',
+    ]))->toBe([]);
+});
+
 test('errors are never silenced with @', function () {
     expect(filesMatching('/(?<![\w\'"])@(\$|[a-z_]+\()/'))->toBe([]);
 });

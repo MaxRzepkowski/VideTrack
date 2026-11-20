@@ -11,6 +11,7 @@ use App\Integrations\Export\ExportFormatRegistry;
 use App\Integrations\Import\ImportSourceRegistry;
 use App\Integrations\Scrobble\ScrobbleSourceRegistry;
 use App\Notifications\Channels\ChannelRegistry;
+use App\Notifications\Events\EventKinds;
 use Illuminate\Support\ServiceProvider;
 
 /**
@@ -33,5 +34,6 @@ class RegistryServiceProvider extends ServiceProvider
         $this->app->singleton(DataSources::class);
         $this->app->singleton(IdentityProviderRegistry::class);
         $this->app->singleton(ChannelRegistry::class);
+        $this->app->singleton(EventKinds::class);
     }
 }

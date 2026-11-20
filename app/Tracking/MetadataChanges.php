@@ -10,6 +10,10 @@ use App\Catalog\MediaTypeDefinition;
 use App\Catalog\MediaTypeRegistry;
 use App\Catalog\TitleStore;
 use App\Models\MediaItem;
+use App\Notifications\Events\DateChanged;
+use App\Notifications\Events\RelatedAnnounced;
+use App\Notifications\Events\SeasonAnnounced;
+use App\Notifications\Events\ShowStatus;
 use App\Notifications\MediaEventPayload;
 use App\Support\Numbers;
 use App\Tracking\Releases\RelatedReleases;
@@ -105,7 +109,7 @@ final readonly class MetadataChanges implements DeclaresTypeOptions
         $precision = $root->release_date_precision;
         // A vanished date is provider noise, not news.
         if ($date !== null && $this->isDateNews($date, $precision, $before['release_date'], $before['release_date_precision'])) {
-            $events[] = MediaEventPayload::dateChanged($root, $before['release_date'], $before['release_date_precision']);
+            $events[] = DateChanged::of($root, $before['release_date'], $before['release_date_precision']);
         }
 
         $maxSeason = $this->maxSeason($root);
@@ -118,11 +122,11 @@ final readonly class MetadataChanges implements DeclaresTypeOptions
         $cameBack = $newSeason && $root->status?->isRunning() === true;
 
         if ($status !== null && $before['status'] !== null && $status !== $before['status'] && ! $cameBack) {
-            $events[] = MediaEventPayload::statusChanged($root, $status, $before['status']);
+            $events[] = ShowStatus::of($root, $status, $before['status']);
         }
 
         if ($newSeason) {
-            $events[] = MediaEventPayload::seasonAnnounced($root, $maxSeason);
+            $events[] = SeasonAnnounced::of($root, $maxSeason);
         }
 
         return [...$events, ...$this->relatedEvents($root, $before['related'])];
@@ -150,9 +154,9 @@ final readonly class MetadataChanges implements DeclaresTypeOptions
             $was = $before[$release->ref] ?? null;
 
             if ($was === null && $release->precision->isStillAhead($release->date, today()->toDateString())) {
-                $events[] = MediaEventPayload::relatedAnnounced($root, $release);
+                $events[] = RelatedAnnounced::of($root, $release);
             } elseif ($was !== null && $this->isDateNews($release->date, $release->precision, $was['date'], $was['precision'])) {
-                $events[] = MediaEventPayload::relatedDateChanged($root, $release, $was['date'], $was['precision']);
+                $events[] = DateChanged::ofRelated($root, $release, $was['date'], $was['precision']);
             }
         }
 

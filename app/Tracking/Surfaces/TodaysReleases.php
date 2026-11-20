@@ -6,6 +6,9 @@ use App\Accounts\Preferences\NotificationEvent;
 use App\Actions\Media\SendMediaNotification;
 use App\Enums\ReleaseKind;
 use App\Models\User;
+use App\Notifications\Events\EpisodesReleased;
+use App\Notifications\Events\HomeRelease;
+use App\Notifications\Events\Released;
 use App\Notifications\MediaEventPayload;
 use App\Notifications\MediaEventType;
 use App\Tracking\Releases\ReleaseEntry;
@@ -82,10 +85,10 @@ final readonly class TodaysReleases
      */
     private function titleEvent(ReleaseEntry $entry, User $user, string $today): MediaEventPayload
     {
-        $event = MediaEventPayload::released($entry, $today);
+        $event = Released::of($entry, $today);
 
         return ! $event->wantedBy($user) && $entry->media->releaseKind === ReleaseKind::Both
-            ? MediaEventPayload::homeReleased($entry, $today)
+            ? HomeRelease::of($entry, $today)
             : $event;
     }
 
@@ -126,10 +129,10 @@ final readonly class TodaysReleases
         }
 
         if ($episodes->count() === 1) {
-            return MediaEventPayload::released($episodes->sole(), $today);
+            return Released::of($episodes->sole(), $today);
         }
 
-        return MediaEventPayload::episodesReleased(
+        return EpisodesReleased::several(
             array_values($episodes
                 ->sort(fn (ReleaseEntry $a, ReleaseEntry $b): int => [$a->media->seasonNumber, $a->media->number] <=> [$b->media->seasonNumber, $b->media->number])
                 ->all()),

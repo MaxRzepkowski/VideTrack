@@ -15,6 +15,10 @@ use App\Models\MediaItem;
 use App\Models\MediaList;
 use App\Models\TaskRun;
 use App\Models\User;
+use App\Notifications\Events\CollectionParts;
+use App\Notifications\Events\CreatorNewTitle;
+use App\Notifications\Events\DateChanged;
+use App\Notifications\Events\TitlesRemoved;
 use App\Notifications\MediaEvent;
 use App\Notifications\MediaEventPayload;
 use App\Notifications\MediaEventType;
@@ -324,9 +328,9 @@ test('a new title a creator and a followed collection both announce is one notif
     $saga = MediaList::factory()->collection('tmdb', '2344')->create(['title' => 'The Saga']);
     $send = app(SendMediaNotification::class);
 
-    $send->execute($user, MediaEventPayload::creatorTitle(MediaEventType::PersonNewTitle, $film, 'Denis'));
-    $send->execute($user, MediaEventPayload::creatorTitle(MediaEventType::CompanyNewTitle, $film, 'A24'));
-    $send->execute($user, MediaEventPayload::collectionParts($saga, [$film]));
+    $send->execute($user, CreatorNewTitle::of(MediaEventType::PersonNewTitle, $film, 'Denis'));
+    $send->execute($user, CreatorNewTitle::of(MediaEventType::CompanyNewTitle, $film, 'A24'));
+    $send->execute($user, CollectionParts::of($saga, [$film]));
 
     expect($user->notifications()->sole()->data)->toMatchArray(['event' => 'person_new_title', 'personName' => 'Denis']);
 });
@@ -466,7 +470,7 @@ test('a year announced for a game keys apart from that exact day', function () {
     enableGamesModule();
     $game = MediaItem::factory()->game()->create(['release_date' => '2028-12-31', 'release_date_precision' => DatePrecision::Year]);
 
-    $event = MediaEventPayload::dateChanged($game, null, DatePrecision::Day);
+    $event = DateChanged::of($game, null, DatePrecision::Day);
 
     expect($event->key)->toBe("date_changed:game:{$game->provider_ref}:2028-12-31:year")
         ->and($event->datePrecision())->toBe(DatePrecision::Year)
@@ -649,7 +653,7 @@ test('the bell, the notifications page and the API carry the copy, worded in the
 
 test('a notification that lists several titles opens on its own page', function () {
     $user = User::factory()->create();
-    app(SendMediaNotification::class)->execute($user, MediaEventPayload::titlesRemoved([MediaItem::factory()->movie()->create(), MediaItem::factory()->movie()->create()]));
+    app(SendMediaNotification::class)->execute($user, TitlesRemoved::of([MediaItem::factory()->movie()->create(), MediaItem::factory()->movie()->create()]));
     $id = $user->notifications()->firstOrFail()->id;
 
     $this->actingAs($user)

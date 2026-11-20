@@ -1,0 +1,1517 @@
+{
+    "unknown kind": {
+        "en": {
+            "title": "Dune",
+            "detail": [],
+            "plain": null,
+            "timed": null,
+            "digest": {
+                "subject": "Dune",
+                "label": "",
+                "meta": null
+            }
+        },
+        "pl": {
+            "title": "Dune",
+            "detail": [],
+            "plain": null,
+            "timed": null,
+            "digest": {
+                "subject": "Dune",
+                "label": "",
+                "meta": null
+            }
+        },
+        "href": "http://localhost/movie/603",
+        "url": "http://localhost/movie/603",
+        "image": [
+            "/dune.jpg",
+            "https://image.tmdb.org/t/p/w500/dune.jpg"
+        ],
+        "color": 3051770,
+        "stored": {
+            "key": "key-of-unknown kind",
+            "event": null,
+            "media": {
+                "type": "movie",
+                "ref": "603",
+                "title": "Dune",
+                "posterPath": "/dune.jpg",
+                "backdropPath": "/dune-wide.jpg",
+                "extra": []
+            },
+            "showTitle": null,
+            "date": null,
+            "oldDate": null,
+            "status": null,
+            "oldStatus": null,
+            "season": null
+        }
+    },
+    "an episode": {
+        "en": {
+            "title": "New episode of Severance",
+            "detail": [
+                "S02E05",
+                "Chapter 5"
+            ],
+            "plain": "S02E05 – Chapter 5",
+            "timed": "S02E05 – Chapter 5 (3:00 AM)",
+            "digest": {
+                "subject": "Severance",
+                "label": "New episode",
+                "meta": "S02E05 – Chapter 5 (3:00 AM)"
+            }
+        },
+        "pl": {
+            "title": "Nowy odcinek Severance",
+            "detail": [
+                "S02E05",
+                "Chapter 5"
+            ],
+            "plain": "S02E05 – Chapter 5",
+            "timed": "S02E05 – Chapter 5 (03:00)",
+            "digest": {
+                "subject": "Severance",
+                "label": "Nowy odcinek",
+                "meta": "S02E05 – Chapter 5 (03:00)"
+            }
+        },
+        "href": "http://localhost/show/1399/season/2/episode/5",
+        "url": "http://localhost/show/1399/season/2/episode/5",
+        "image": [
+            "/dune-wide.jpg",
+            "https://image.tmdb.org/t/p/w500/dune-wide.jpg"
+        ],
+        "color": 8468223,
+        "stored": {
+            "key": "key-of-an episode",
+            "event": "episode_aired",
+            "media": {
+                "type": "episode",
+                "ref": "1399:2:5",
+                "title": "Chapter 5",
+                "posterPath": null,
+                "backdropPath": "/dune-wide.jpg",
+                "extra": {
+                    "seasonNumber": 2,
+                    "showBackdrop": "/show.jpg"
+                },
+                "number": 5,
+                "releaseTime": "2026-10-10T01:00:00+00:00"
+            },
+            "showTitle": "Severance",
+            "date": "2026-10-10",
+            "oldDate": null,
+            "status": null,
+            "oldStatus": null,
+            "season": 2
+        }
+    },
+    "episodes, the finale among them": {
+        "en": {
+            "title": "2 new episodes of Severance",
+            "detail": [
+                "Season finale"
+            ],
+            "plain": "Season finale",
+            "timed": "Season finale (3:00 AM)",
+            "digest": {
+                "subject": "Severance",
+                "label": "2 new episodes",
+                "meta": "Season finale (3:00 AM)"
+            }
+        },
+        "pl": {
+            "title": "2 nowe odcinki Severance",
+            "detail": [
+                "Finał sezonu"
+            ],
+            "plain": "Finał sezonu",
+            "timed": "Finał sezonu (03:00)",
+            "digest": {
+                "subject": "Severance",
+                "label": "2 nowe odcinki",
+                "meta": "Finał sezonu (03:00)"
+            }
+        },
+        "href": "http://localhost/notifications/notification-1",
+        "url": "http://localhost/show/1399/season/2/episode/8",
+        "image": [
+            "/dune-wide.jpg",
+            "https://image.tmdb.org/t/p/w500/dune-wide.jpg"
+        ],
+        "color": 8468223,
+        "stored": {
+            "key": "key-of-episodes, the finale among them",
+            "event": "episode_aired",
+            "media": {
+                "type": "episode",
+                "ref": "1399:2:8",
+                "title": "Chapter 8",
+                "posterPath": null,
+                "backdropPath": "/dune-wide.jpg",
+                "extra": {
+                    "seasonNumber": 2,
+                    "showBackdrop": "/show.jpg"
+                },
+                "number": 8,
+                "releaseTime": "2026-10-10T01:00:00+00:00"
+            },
+            "items": [
+                {
+                    "type": "episode",
+                    "ref": "1399:2:8",
+                    "title": "Chapter 8",
+                    "posterPath": null,
+                    "backdropPath": "/dune-wide.jpg",
+                    "extra": {
+                        "seasonNumber": 2,
+                        "showBackdrop": "/show.jpg"
+                    },
+                    "number": 8,
+                    "releaseTime": "2026-10-10T01:00:00+00:00"
+                },
+                {
+                    "type": "episode",
+                    "ref": "1399:2:9",
+                    "title": "Chapter 9",
+                    "posterPath": null,
+                    "backdropPath": "/dune-wide.jpg",
+                    "extra": {
+                        "seasonNumber": 2,
+                        "showBackdrop": "/show.jpg",
+                        "episodeBadge": "season_finale"
+                    },
+                    "number": 9,
+                    "releaseTime": "2026-10-10T01:00:00+00:00"
+                }
+            ],
+            "showTitle": "Severance",
+            "date": null,
+            "oldDate": null,
+            "status": null,
+            "oldStatus": null,
+            "season": null
+        }
+    },
+    "a season opening with several": {
+        "en": {
+            "title": "Season premiere of Severance",
+            "detail": [
+                "3 episodes"
+            ],
+            "plain": "3 episodes",
+            "timed": "3 episodes (3:00 AM)",
+            "digest": {
+                "subject": "Severance",
+                "label": "Season premiere",
+                "meta": "3 episodes (3:00 AM)"
+            }
+        },
+        "pl": {
+            "title": "Premiera sezonu Severance",
+            "detail": [
+                "3 odcinki"
+            ],
+            "plain": "3 odcinki",
+            "timed": "3 odcinki (03:00)",
+            "digest": {
+                "subject": "Severance",
+                "label": "Premiera sezonu",
+                "meta": "3 odcinki (03:00)"
+            }
+        },
+        "href": "http://localhost/notifications/notification-1",
+        "url": "http://localhost/show/1399/season/2/episode/1",
+        "image": [
+            "/dune-wide.jpg",
+            "https://image.tmdb.org/t/p/w500/dune-wide.jpg"
+        ],
+        "color": 8468223,
+        "stored": {
+            "key": "key-of-a season opening with several",
+            "event": "season_premiere",
+            "media": {
+                "type": "episode",
+                "ref": "1399:2:1",
+                "title": "Chapter 1",
+                "posterPath": null,
+                "backdropPath": "/dune-wide.jpg",
+                "extra": {
+                    "seasonNumber": 2,
+                    "showBackdrop": "/show.jpg"
+                },
+                "number": 1,
+                "releaseTime": "2026-10-10T01:00:00+00:00"
+            },
+            "items": [
+                {
+                    "type": "episode",
+                    "ref": "1399:2:1",
+                    "title": "Chapter 1",
+                    "posterPath": null,
+                    "backdropPath": "/dune-wide.jpg",
+                    "extra": {
+                        "seasonNumber": 2,
+                        "showBackdrop": "/show.jpg"
+                    },
+                    "number": 1,
+                    "releaseTime": "2026-10-10T01:00:00+00:00"
+                },
+                {
+                    "type": "episode",
+                    "ref": "1399:2:2",
+                    "title": "Chapter 2",
+                    "posterPath": null,
+                    "backdropPath": "/dune-wide.jpg",
+                    "extra": {
+                        "seasonNumber": 2,
+                        "showBackdrop": "/show.jpg"
+                    },
+                    "number": 2,
+                    "releaseTime": "2026-10-10T01:00:00+00:00"
+                },
+                {
+                    "type": "episode",
+                    "ref": "1399:2:3",
+                    "title": "Chapter 3",
+                    "posterPath": null,
+                    "backdropPath": "/dune-wide.jpg",
+                    "extra": {
+                        "seasonNumber": 2,
+                        "showBackdrop": "/show.jpg"
+                    },
+                    "number": 3,
+                    "releaseTime": "2026-10-10T01:00:00+00:00"
+                }
+            ],
+            "showTitle": "Severance",
+            "date": null,
+            "oldDate": null,
+            "status": null,
+            "oldStatus": null,
+            "season": null
+        }
+    },
+    "a premiere": {
+        "en": {
+            "title": "Out today: Dune",
+            "detail": [],
+            "plain": null,
+            "timed": null,
+            "digest": {
+                "subject": "Dune",
+                "label": "Out today",
+                "meta": null
+            }
+        },
+        "pl": {
+            "title": "Dziś premiera: Dune",
+            "detail": [],
+            "plain": null,
+            "timed": null,
+            "digest": {
+                "subject": "Dune",
+                "label": "Dziś premiera",
+                "meta": null
+            }
+        },
+        "href": "http://localhost/movie/603",
+        "url": "http://localhost/movie/603",
+        "image": [
+            "/dune.jpg",
+            "https://image.tmdb.org/t/p/w500/dune.jpg"
+        ],
+        "color": 3051770,
+        "stored": {
+            "key": "key-of-a premiere",
+            "event": "premiere",
+            "media": {
+                "type": "movie",
+                "ref": "603",
+                "title": "Dune",
+                "posterPath": "/dune.jpg",
+                "backdropPath": "/dune-wide.jpg",
+                "extra": []
+            },
+            "showTitle": null,
+            "date": "2026-10-10",
+            "oldDate": null,
+            "status": null,
+            "oldStatus": null,
+            "season": null
+        }
+    },
+    "a game premiere on platforms": {
+        "en": {
+            "title": "Out today: The Witcher 3",
+            "detail": [
+                "PC, PS5"
+            ],
+            "plain": "PC, PS5",
+            "timed": "PC, PS5",
+            "digest": {
+                "subject": "The Witcher 3",
+                "label": "Out today",
+                "meta": "PC, PS5"
+            }
+        },
+        "pl": {
+            "title": "Dziś premiera: The Witcher 3",
+            "detail": [
+                "PC, PS5"
+            ],
+            "plain": "PC, PS5",
+            "timed": "PC, PS5",
+            "digest": {
+                "subject": "The Witcher 3",
+                "label": "Dziś premiera",
+                "meta": "PC, PS5"
+            }
+        },
+        "href": "http://localhost/search",
+        "url": "http://localhost/search",
+        "image": [
+            "/dune.jpg",
+            "https://image.tmdb.org/t/p/w500/dune.jpg"
+        ],
+        "color": 7550975,
+        "stored": {
+            "key": "key-of-a game premiere on platforms",
+            "event": "premiere",
+            "media": {
+                "type": "game",
+                "ref": "1942",
+                "title": "The Witcher 3",
+                "posterPath": "/dune.jpg",
+                "backdropPath": "/dune-wide.jpg",
+                "extra": {
+                    "platform": "PC, PS5"
+                }
+            },
+            "showTitle": null,
+            "date": "2026-10-10",
+            "oldDate": null,
+            "status": null,
+            "oldStatus": null,
+            "season": null
+        }
+    },
+    "a dlc premiere": {
+        "en": {
+            "title": "Out today: The Master Trials",
+            "detail": [
+                "DLC",
+                "Breath of the Wild",
+                "Switch, PC"
+            ],
+            "plain": "DLC – Breath of the Wild – Switch, PC",
+            "timed": "DLC – Breath of the Wild – Switch, PC",
+            "digest": {
+                "subject": "The Master Trials",
+                "label": "Out today",
+                "meta": "DLC – Breath of the Wild – Switch, PC"
+            }
+        },
+        "pl": {
+            "title": "Dziś premiera: The Master Trials",
+            "detail": [
+                "DLC",
+                "Breath of the Wild",
+                "Switch, PC"
+            ],
+            "plain": "DLC – Breath of the Wild – Switch, PC",
+            "timed": "DLC – Breath of the Wild – Switch, PC",
+            "digest": {
+                "subject": "The Master Trials",
+                "label": "Dziś premiera",
+                "meta": "DLC – Breath of the Wild – Switch, PC"
+            }
+        },
+        "href": "http://localhost/search",
+        "url": "http://localhost/search",
+        "image": [
+            "/dune.jpg",
+            "https://image.tmdb.org/t/p/w500/dune.jpg"
+        ],
+        "color": 7550975,
+        "stored": {
+            "key": "key-of-a dlc premiere",
+            "event": "premiere",
+            "media": {
+                "type": "game",
+                "ref": "5000",
+                "title": "The Master Trials",
+                "posterPath": "/dune.jpg",
+                "backdropPath": "/dune-wide.jpg",
+                "extra": {
+                    "gameType": "dlc",
+                    "relatedTo": "Breath of the Wild",
+                    "platform": "Switch, PC"
+                }
+            },
+            "showTitle": null,
+            "date": "2026-10-10",
+            "oldDate": null,
+            "status": null,
+            "oldStatus": null,
+            "season": null
+        }
+    },
+    "a home release": {
+        "en": {
+            "title": "Now available outside cinemas: Dune",
+            "detail": [],
+            "plain": null,
+            "timed": null,
+            "digest": {
+                "subject": "Dune",
+                "label": "Outside cinemas",
+                "meta": null
+            }
+        },
+        "pl": {
+            "title": "Dostępny poza kinem: Dune",
+            "detail": [],
+            "plain": null,
+            "timed": null,
+            "digest": {
+                "subject": "Dune",
+                "label": "Poza kinem",
+                "meta": null
+            }
+        },
+        "href": "http://localhost/movie/603",
+        "url": "http://localhost/movie/603",
+        "image": [
+            "/dune.jpg",
+            "https://image.tmdb.org/t/p/w500/dune.jpg"
+        ],
+        "color": 3051770,
+        "stored": {
+            "key": "key-of-a home release",
+            "event": "home_release",
+            "media": {
+                "type": "movie",
+                "ref": "603",
+                "title": "Dune",
+                "posterPath": "/dune.jpg",
+                "backdropPath": "/dune-wide.jpg",
+                "extra": []
+            },
+            "showTitle": null,
+            "date": "2026-10-10",
+            "oldDate": null,
+            "status": null,
+            "oldStatus": null,
+            "season": null
+        }
+    },
+    "a moved date": {
+        "en": {
+            "title": "New release date for Dune",
+            "detail": [
+                "November 20, 2026 → March 12, 2027"
+            ],
+            "plain": "November 20, 2026 → March 12, 2027",
+            "timed": "November 20, 2026 → March 12, 2027",
+            "digest": {
+                "subject": "Dune",
+                "label": "New release date",
+                "meta": "November 20, 2026 → March 12, 2027"
+            }
+        },
+        "pl": {
+            "title": "Nowa data premiery Dune",
+            "detail": [
+                "20 listopada 2026 → 12 marca 2027"
+            ],
+            "plain": "20 listopada 2026 → 12 marca 2027",
+            "timed": "20 listopada 2026 → 12 marca 2027",
+            "digest": {
+                "subject": "Dune",
+                "label": "Nowa data premiery",
+                "meta": "20 listopada 2026 → 12 marca 2027"
+            }
+        },
+        "href": "http://localhost/movie/603",
+        "url": "http://localhost/movie/603",
+        "image": [
+            "/dune.jpg",
+            "https://image.tmdb.org/t/p/w500/dune.jpg"
+        ],
+        "color": 3051770,
+        "stored": {
+            "key": "key-of-a moved date",
+            "event": "date_changed",
+            "media": {
+                "type": "movie",
+                "ref": "603",
+                "title": "Dune",
+                "posterPath": "/dune.jpg",
+                "backdropPath": "/dune-wide.jpg",
+                "extra": []
+            },
+            "showTitle": null,
+            "date": "2027-03-12",
+            "oldDate": "2026-11-20",
+            "status": null,
+            "oldStatus": null,
+            "season": null
+        }
+    },
+    "a date sharpened from a year": {
+        "en": {
+            "title": "New release date for Dune",
+            "detail": [
+                "2028 → March 12, 2028"
+            ],
+            "plain": "2028 → March 12, 2028",
+            "timed": "2028 → March 12, 2028",
+            "digest": {
+                "subject": "Dune",
+                "label": "New release date",
+                "meta": "2028 → March 12, 2028"
+            }
+        },
+        "pl": {
+            "title": "Nowa data premiery Dune",
+            "detail": [
+                "2028 → 12 marca 2028"
+            ],
+            "plain": "2028 → 12 marca 2028",
+            "timed": "2028 → 12 marca 2028",
+            "digest": {
+                "subject": "Dune",
+                "label": "Nowa data premiery",
+                "meta": "2028 → 12 marca 2028"
+            }
+        },
+        "href": "http://localhost/movie/603",
+        "url": "http://localhost/movie/603",
+        "image": [
+            "/dune.jpg",
+            "https://image.tmdb.org/t/p/w500/dune.jpg"
+        ],
+        "color": 3051770,
+        "stored": {
+            "key": "key-of-a date sharpened from a year",
+            "event": "date_changed",
+            "media": {
+                "type": "movie",
+                "ref": "603",
+                "title": "Dune",
+                "posterPath": "/dune.jpg",
+                "backdropPath": "/dune-wide.jpg",
+                "extra": {
+                    "releasePrecision": "day"
+                }
+            },
+            "showTitle": null,
+            "date": "2028-03-12",
+            "oldDate": "2028-12-31",
+            "oldDatePrecision": "year",
+            "status": null,
+            "oldStatus": null,
+            "season": null
+        }
+    },
+    "a date first announced, a quarter": {
+        "en": {
+            "title": "New release date for Dune",
+            "detail": [
+                "Q1 2027"
+            ],
+            "plain": "Q1 2027",
+            "timed": "Q1 2027",
+            "digest": {
+                "subject": "Dune",
+                "label": "New release date",
+                "meta": "Q1 2027"
+            }
+        },
+        "pl": {
+            "title": "Nowa data premiery Dune",
+            "detail": [
+                "1. kwartał 2027"
+            ],
+            "plain": "1. kwartał 2027",
+            "timed": "1. kwartał 2027",
+            "digest": {
+                "subject": "Dune",
+                "label": "Nowa data premiery",
+                "meta": "1. kwartał 2027"
+            }
+        },
+        "href": "http://localhost/movie/603",
+        "url": "http://localhost/movie/603",
+        "image": [
+            "/dune.jpg",
+            "https://image.tmdb.org/t/p/w500/dune.jpg"
+        ],
+        "color": 3051770,
+        "stored": {
+            "key": "key-of-a date first announced, a quarter",
+            "event": "date_changed",
+            "media": {
+                "type": "movie",
+                "ref": "603",
+                "title": "Dune",
+                "posterPath": "/dune.jpg",
+                "backdropPath": "/dune-wide.jpg",
+                "extra": {
+                    "releasePrecision": "quarter"
+                }
+            },
+            "showTitle": null,
+            "date": "2027-03-31",
+            "oldDate": null,
+            "status": null,
+            "oldStatus": null,
+            "season": null
+        }
+    },
+    "a dlc date moved": {
+        "en": {
+            "title": "New release date for The Master Trials",
+            "detail": [
+                "DLC",
+                "Breath of the Wild",
+                "January 15, 2027 → March 12, 2027"
+            ],
+            "plain": "DLC – Breath of the Wild – January 15, 2027 → March 12, 2027",
+            "timed": "DLC – Breath of the Wild – January 15, 2027 → March 12, 2027",
+            "digest": {
+                "subject": "The Master Trials",
+                "label": "New release date",
+                "meta": "DLC – Breath of the Wild – January 15, 2027 → March 12, 2027"
+            }
+        },
+        "pl": {
+            "title": "Nowa data premiery The Master Trials",
+            "detail": [
+                "DLC",
+                "Breath of the Wild",
+                "15 stycznia 2027 → 12 marca 2027"
+            ],
+            "plain": "DLC – Breath of the Wild – 15 stycznia 2027 → 12 marca 2027",
+            "timed": "DLC – Breath of the Wild – 15 stycznia 2027 → 12 marca 2027",
+            "digest": {
+                "subject": "The Master Trials",
+                "label": "Nowa data premiery",
+                "meta": "DLC – Breath of the Wild – 15 stycznia 2027 → 12 marca 2027"
+            }
+        },
+        "href": "http://localhost/search",
+        "url": "http://localhost/search",
+        "image": [
+            "/dune.jpg",
+            "https://image.tmdb.org/t/p/w500/dune.jpg"
+        ],
+        "color": 7550975,
+        "stored": {
+            "key": "key-of-a dlc date moved",
+            "event": "date_changed",
+            "media": {
+                "type": "game",
+                "ref": "5000",
+                "title": "The Master Trials",
+                "posterPath": "/dune.jpg",
+                "backdropPath": "/dune-wide.jpg",
+                "extra": {
+                    "gameType": "dlc",
+                    "relatedTo": "Breath of the Wild",
+                    "platform": "Switch, PC"
+                }
+            },
+            "showTitle": null,
+            "date": "2027-03-12",
+            "oldDate": "2027-01-15",
+            "status": null,
+            "oldStatus": null,
+            "season": null
+        }
+    },
+    "a status change": {
+        "en": {
+            "title": "Severance changed status",
+            "detail": [
+                "Returning series → Ended"
+            ],
+            "plain": "Returning series → Ended",
+            "timed": "Returning series → Ended",
+            "digest": {
+                "subject": "Severance",
+                "label": "Status change",
+                "meta": "Returning series → Ended"
+            }
+        },
+        "pl": {
+            "title": "Zmiana statusu: Severance",
+            "detail": [
+                "Powracający serial → Zakończony"
+            ],
+            "plain": "Powracający serial → Zakończony",
+            "timed": "Powracający serial → Zakończony",
+            "digest": {
+                "subject": "Severance",
+                "label": "Zmiana statusu",
+                "meta": "Powracający serial → Zakończony"
+            }
+        },
+        "href": "http://localhost/show/1399",
+        "url": "http://localhost/show/1399",
+        "image": [
+            "/dune.jpg",
+            "https://image.tmdb.org/t/p/w500/dune.jpg"
+        ],
+        "color": 8468223,
+        "stored": {
+            "key": "key-of-a status change",
+            "event": "show_status",
+            "media": {
+                "type": "show",
+                "ref": "1399",
+                "title": "Severance",
+                "posterPath": "/dune.jpg",
+                "backdropPath": "/dune-wide.jpg",
+                "extra": []
+            },
+            "showTitle": null,
+            "date": null,
+            "oldDate": null,
+            "status": "ended",
+            "oldStatus": "returning_series",
+            "season": null
+        }
+    },
+    "a status of no known kind": {
+        "en": {
+            "title": "Dune changed status",
+            "detail": [],
+            "plain": null,
+            "timed": null,
+            "digest": {
+                "subject": "Dune",
+                "label": "Status change",
+                "meta": null
+            }
+        },
+        "pl": {
+            "title": "Zmiana statusu: Dune",
+            "detail": [],
+            "plain": null,
+            "timed": null,
+            "digest": {
+                "subject": "Dune",
+                "label": "Zmiana statusu",
+                "meta": null
+            }
+        },
+        "href": "http://localhost/show/603",
+        "url": "http://localhost/show/603",
+        "image": [
+            "/dune.jpg",
+            "https://image.tmdb.org/t/p/w500/dune.jpg"
+        ],
+        "color": 8468223,
+        "stored": {
+            "key": "key-of-a status of no known kind",
+            "event": "show_status",
+            "media": {
+                "type": "show",
+                "ref": "603",
+                "title": "Dune",
+                "posterPath": "/dune.jpg",
+                "backdropPath": "/dune-wide.jpg",
+                "extra": []
+            },
+            "showTitle": null,
+            "date": null,
+            "oldDate": null,
+            "status": "something_new",
+            "oldStatus": "ended",
+            "season": null
+        }
+    },
+    "a season announced": {
+        "en": {
+            "title": "New season of Severance announced",
+            "detail": [
+                "Season 3"
+            ],
+            "plain": "Season 3",
+            "timed": "Season 3",
+            "digest": {
+                "subject": "Severance",
+                "label": "Season 3 announced",
+                "meta": null
+            }
+        },
+        "pl": {
+            "title": "Zapowiedziano nowy sezon Severance",
+            "detail": [
+                "Sezon 3"
+            ],
+            "plain": "Sezon 3",
+            "timed": "Sezon 3",
+            "digest": {
+                "subject": "Severance",
+                "label": "Zapowiedziano sezon 3",
+                "meta": null
+            }
+        },
+        "href": "http://localhost/show/1399",
+        "url": "http://localhost/show/1399",
+        "image": [
+            "/dune.jpg",
+            "https://image.tmdb.org/t/p/w500/dune.jpg"
+        ],
+        "color": 8468223,
+        "stored": {
+            "key": "key-of-a season announced",
+            "event": "season_announced",
+            "media": {
+                "type": "show",
+                "ref": "1399",
+                "title": "Severance",
+                "posterPath": "/dune.jpg",
+                "backdropPath": "/dune-wide.jpg",
+                "extra": []
+            },
+            "showTitle": null,
+            "date": null,
+            "oldDate": null,
+            "status": null,
+            "oldStatus": null,
+            "season": 3
+        }
+    },
+    "a person's new title": {
+        "en": {
+            "title": "New title with Denis Villeneuve",
+            "detail": [
+                "Dune",
+                "March 12, 2027"
+            ],
+            "plain": "Dune – March 12, 2027",
+            "timed": "Dune – March 12, 2027",
+            "digest": {
+                "subject": "Dune",
+                "label": "New title with Denis Villeneuve",
+                "meta": "March 12, 2027"
+            }
+        },
+        "pl": {
+            "title": "Nowy tytuł z Denis Villeneuve",
+            "detail": [
+                "Dune",
+                "12 marca 2027"
+            ],
+            "plain": "Dune – 12 marca 2027",
+            "timed": "Dune – 12 marca 2027",
+            "digest": {
+                "subject": "Dune",
+                "label": "Nowy tytuł z Denis Villeneuve",
+                "meta": "12 marca 2027"
+            }
+        },
+        "href": "http://localhost/movie/603",
+        "url": "http://localhost/movie/603",
+        "image": [
+            "/dune.jpg",
+            "https://image.tmdb.org/t/p/w500/dune.jpg"
+        ],
+        "color": 3051770,
+        "stored": {
+            "key": "key-of-a person's new title",
+            "event": "person_new_title",
+            "media": {
+                "type": "movie",
+                "ref": "603",
+                "title": "Dune",
+                "posterPath": "/dune.jpg",
+                "backdropPath": "/dune-wide.jpg",
+                "extra": []
+            },
+            "showTitle": null,
+            "date": "2027-03-12",
+            "oldDate": null,
+            "status": null,
+            "oldStatus": null,
+            "season": null,
+            "personName": "Denis Villeneuve"
+        }
+    },
+    "a company's new title": {
+        "en": {
+            "title": "New title from Legendary",
+            "detail": [
+                "Dune"
+            ],
+            "plain": "Dune",
+            "timed": "Dune",
+            "digest": {
+                "subject": "Dune",
+                "label": "New title from Legendary",
+                "meta": null
+            }
+        },
+        "pl": {
+            "title": "Nowy tytuł od Legendary",
+            "detail": [
+                "Dune"
+            ],
+            "plain": "Dune",
+            "timed": "Dune",
+            "digest": {
+                "subject": "Dune",
+                "label": "Nowy tytuł od Legendary",
+                "meta": null
+            }
+        },
+        "href": "http://localhost/movie/603",
+        "url": "http://localhost/movie/603",
+        "image": [
+            "/dune.jpg",
+            "https://image.tmdb.org/t/p/w500/dune.jpg"
+        ],
+        "color": 3051770,
+        "stored": {
+            "key": "key-of-a company's new title",
+            "event": "company_new_title",
+            "media": {
+                "type": "movie",
+                "ref": "603",
+                "title": "Dune",
+                "posterPath": "/dune.jpg",
+                "backdropPath": "/dune-wide.jpg",
+                "extra": []
+            },
+            "showTitle": null,
+            "date": null,
+            "oldDate": null,
+            "status": null,
+            "oldStatus": null,
+            "season": null,
+            "companyName": "Legendary"
+        }
+    },
+    "a collection's new part": {
+        "en": {
+            "title": "New part of Dune Collection",
+            "detail": [
+                "Dune",
+                "March 12, 2027"
+            ],
+            "plain": "Dune – March 12, 2027",
+            "timed": "Dune – March 12, 2027",
+            "digest": {
+                "subject": "Dune",
+                "label": "New part of Dune Collection",
+                "meta": "March 12, 2027"
+            }
+        },
+        "pl": {
+            "title": "Nowa część serii Dune Collection",
+            "detail": [
+                "Dune",
+                "12 marca 2027"
+            ],
+            "plain": "Dune – 12 marca 2027",
+            "timed": "Dune – 12 marca 2027",
+            "digest": {
+                "subject": "Dune",
+                "label": "Nowa część serii Dune Collection",
+                "meta": "12 marca 2027"
+            }
+        },
+        "href": "http://localhost/movie/603",
+        "url": "http://localhost/movie/603",
+        "image": [
+            "/dune.jpg",
+            "https://image.tmdb.org/t/p/w500/dune.jpg"
+        ],
+        "color": 3051770,
+        "stored": {
+            "key": "key-of-a collection's new part",
+            "event": "collection_new_item",
+            "media": {
+                "type": "movie",
+                "ref": "603",
+                "title": "Dune",
+                "posterPath": "/dune.jpg",
+                "backdropPath": "/dune-wide.jpg",
+                "extra": []
+            },
+            "showTitle": null,
+            "date": "2027-03-12",
+            "oldDate": null,
+            "status": null,
+            "oldStatus": null,
+            "season": null,
+            "collectionTitle": "Dune Collection",
+            "collectionProvider": "tmdb",
+            "collectionRef": "726871"
+        }
+    },
+    "a collection's new parts": {
+        "en": {
+            "title": "5 new parts of Dune Collection",
+            "detail": [
+                "Title 1",
+                "Title 2",
+                "Title 3",
+                "2 more"
+            ],
+            "plain": "Title 1 – Title 2 – Title 3 – 2 more",
+            "timed": "Title 1 – Title 2 – Title 3 – 2 more",
+            "digest": {
+                "subject": "5 new parts of Dune Collection",
+                "label": "",
+                "meta": "Title 1 – Title 2 – Title 3 – 2 more"
+            }
+        },
+        "pl": {
+            "title": "5 nowych części serii Dune Collection",
+            "detail": [
+                "Title 1",
+                "Title 2",
+                "Title 3",
+                "i jeszcze 2"
+            ],
+            "plain": "Title 1 – Title 2 – Title 3 – i jeszcze 2",
+            "timed": "Title 1 – Title 2 – Title 3 – i jeszcze 2",
+            "digest": {
+                "subject": "5 nowych części serii Dune Collection",
+                "label": "",
+                "meta": "Title 1 – Title 2 – Title 3 – i jeszcze 2"
+            }
+        },
+        "href": "http://localhost/notifications/notification-1",
+        "url": "http://localhost/collection/tmdb/726871",
+        "image": [
+            "/dune.jpg",
+            "https://image.tmdb.org/t/p/w500/dune.jpg"
+        ],
+        "color": 3051770,
+        "stored": {
+            "key": "key-of-a collection's new parts",
+            "event": "collection_new_item",
+            "media": {
+                "type": "movie",
+                "ref": "701",
+                "title": "Title 1",
+                "posterPath": "/dune.jpg",
+                "backdropPath": "/dune-wide.jpg",
+                "extra": []
+            },
+            "items": [
+                {
+                    "type": "movie",
+                    "ref": "701",
+                    "title": "Title 1",
+                    "posterPath": "/dune.jpg",
+                    "backdropPath": "/dune-wide.jpg",
+                    "extra": []
+                },
+                {
+                    "type": "movie",
+                    "ref": "702",
+                    "title": "Title 2",
+                    "posterPath": "/dune.jpg",
+                    "backdropPath": "/dune-wide.jpg",
+                    "extra": []
+                },
+                {
+                    "type": "movie",
+                    "ref": "703",
+                    "title": "Title 3",
+                    "posterPath": "/dune.jpg",
+                    "backdropPath": "/dune-wide.jpg",
+                    "extra": []
+                },
+                {
+                    "type": "movie",
+                    "ref": "704",
+                    "title": "Title 4",
+                    "posterPath": "/dune.jpg",
+                    "backdropPath": "/dune-wide.jpg",
+                    "extra": []
+                },
+                {
+                    "type": "movie",
+                    "ref": "705",
+                    "title": "Title 5",
+                    "posterPath": "/dune.jpg",
+                    "backdropPath": "/dune-wide.jpg",
+                    "extra": []
+                }
+            ],
+            "showTitle": null,
+            "date": null,
+            "oldDate": null,
+            "status": null,
+            "oldStatus": null,
+            "season": null,
+            "collectionTitle": "Dune Collection",
+            "collectionProvider": "tmdb",
+            "collectionRef": "726871"
+        }
+    },
+    "a collection without an address": {
+        "en": {
+            "title": "2 new parts of Old List",
+            "detail": [
+                "Title 1",
+                "Title 2"
+            ],
+            "plain": "Title 1 – Title 2",
+            "timed": "Title 1 – Title 2",
+            "digest": {
+                "subject": "2 new parts of Old List",
+                "label": "",
+                "meta": "Title 1 – Title 2"
+            }
+        },
+        "pl": {
+            "title": "2 nowe części serii Old List",
+            "detail": [
+                "Title 1",
+                "Title 2"
+            ],
+            "plain": "Title 1 – Title 2",
+            "timed": "Title 1 – Title 2",
+            "digest": {
+                "subject": "2 nowe części serii Old List",
+                "label": "",
+                "meta": "Title 1 – Title 2"
+            }
+        },
+        "href": "http://localhost/notifications/notification-1",
+        "url": "http://localhost/movie/701",
+        "image": [
+            "/dune.jpg",
+            "https://image.tmdb.org/t/p/w500/dune.jpg"
+        ],
+        "color": 3051770,
+        "stored": {
+            "key": "key-of-a collection without an address",
+            "event": "collection_new_item",
+            "media": {
+                "type": "movie",
+                "ref": "701",
+                "title": "Title 1",
+                "posterPath": "/dune.jpg",
+                "backdropPath": "/dune-wide.jpg",
+                "extra": []
+            },
+            "items": [
+                {
+                    "type": "movie",
+                    "ref": "701",
+                    "title": "Title 1",
+                    "posterPath": "/dune.jpg",
+                    "backdropPath": "/dune-wide.jpg",
+                    "extra": []
+                },
+                {
+                    "type": "movie",
+                    "ref": "702",
+                    "title": "Title 2",
+                    "posterPath": "/dune.jpg",
+                    "backdropPath": "/dune-wide.jpg",
+                    "extra": []
+                }
+            ],
+            "showTitle": null,
+            "date": null,
+            "oldDate": null,
+            "status": null,
+            "oldStatus": null,
+            "season": null,
+            "collectionTitle": "Old List",
+            "collectionProvider": null,
+            "collectionRef": null
+        }
+    },
+    "one title removed": {
+        "en": {
+            "title": "1 title from your library is no longer available at its data source",
+            "detail": [
+                "Dune"
+            ],
+            "plain": "Dune",
+            "timed": "Dune",
+            "digest": {
+                "subject": "1 title from your library is no longer available at its data source",
+                "label": "",
+                "meta": "Dune"
+            }
+        },
+        "pl": {
+            "title": "1 tytuł z Twojej biblioteki zniknął ze swojego źródła danych",
+            "detail": [
+                "Dune"
+            ],
+            "plain": "Dune",
+            "timed": "Dune",
+            "digest": {
+                "subject": "1 tytuł z Twojej biblioteki zniknął ze swojego źródła danych",
+                "label": "",
+                "meta": "Dune"
+            }
+        },
+        "href": "http://localhost/notifications/notification-1",
+        "url": "http://localhost/archived",
+        "image": [
+            "/dune.jpg",
+            "https://image.tmdb.org/t/p/w500/dune.jpg"
+        ],
+        "color": 3051770,
+        "stored": {
+            "key": "key-of-one title removed",
+            "event": "titles_removed",
+            "media": {
+                "type": "movie",
+                "ref": "603",
+                "title": "Dune",
+                "posterPath": "/dune.jpg",
+                "backdropPath": "/dune-wide.jpg",
+                "extra": []
+            },
+            "items": [
+                {
+                    "type": "movie",
+                    "ref": "603",
+                    "title": "Dune",
+                    "posterPath": "/dune.jpg",
+                    "backdropPath": "/dune-wide.jpg",
+                    "extra": []
+                }
+            ],
+            "showTitle": null,
+            "date": null,
+            "oldDate": null,
+            "status": null,
+            "oldStatus": null,
+            "season": null
+        }
+    },
+    "titles removed": {
+        "en": {
+            "title": "4 titles from your library are no longer available at their data source",
+            "detail": [
+                "Title 1",
+                "Title 2",
+                "Title 3",
+                "1 more"
+            ],
+            "plain": "Title 1 – Title 2 – Title 3 – 1 more",
+            "timed": "Title 1 – Title 2 – Title 3 – 1 more",
+            "digest": {
+                "subject": "4 titles from your library are no longer available at their data source",
+                "label": "",
+                "meta": "Title 1 – Title 2 – Title 3 – 1 more"
+            }
+        },
+        "pl": {
+            "title": "4 tytuły z Twojej biblioteki zniknęły ze swoich źródeł danych",
+            "detail": [
+                "Title 1",
+                "Title 2",
+                "Title 3",
+                "i jeszcze 1"
+            ],
+            "plain": "Title 1 – Title 2 – Title 3 – i jeszcze 1",
+            "timed": "Title 1 – Title 2 – Title 3 – i jeszcze 1",
+            "digest": {
+                "subject": "4 tytuły z Twojej biblioteki zniknęły ze swoich źródeł danych",
+                "label": "",
+                "meta": "Title 1 – Title 2 – Title 3 – i jeszcze 1"
+            }
+        },
+        "href": "http://localhost/notifications/notification-1",
+        "url": "http://localhost/archived",
+        "image": [
+            "/dune.jpg",
+            "https://image.tmdb.org/t/p/w500/dune.jpg"
+        ],
+        "color": 3051770,
+        "stored": {
+            "key": "key-of-titles removed",
+            "event": "titles_removed",
+            "media": {
+                "type": "movie",
+                "ref": "701",
+                "title": "Title 1",
+                "posterPath": "/dune.jpg",
+                "backdropPath": "/dune-wide.jpg",
+                "extra": []
+            },
+            "items": [
+                {
+                    "type": "movie",
+                    "ref": "701",
+                    "title": "Title 1",
+                    "posterPath": "/dune.jpg",
+                    "backdropPath": "/dune-wide.jpg",
+                    "extra": []
+                },
+                {
+                    "type": "movie",
+                    "ref": "702",
+                    "title": "Title 2",
+                    "posterPath": "/dune.jpg",
+                    "backdropPath": "/dune-wide.jpg",
+                    "extra": []
+                },
+                {
+                    "type": "movie",
+                    "ref": "703",
+                    "title": "Title 3",
+                    "posterPath": "/dune.jpg",
+                    "backdropPath": "/dune-wide.jpg",
+                    "extra": []
+                },
+                {
+                    "type": "movie",
+                    "ref": "704",
+                    "title": "Title 4",
+                    "posterPath": "/dune.jpg",
+                    "backdropPath": "/dune-wide.jpg",
+                    "extra": []
+                }
+            ],
+            "showTitle": null,
+            "date": null,
+            "oldDate": null,
+            "status": null,
+            "oldStatus": null,
+            "season": null
+        }
+    },
+    "a dlc announced": {
+        "en": {
+            "title": "Announced: The Master Trials",
+            "detail": [
+                "DLC",
+                "Breath of the Wild",
+                "March 12, 2027"
+            ],
+            "plain": "DLC – Breath of the Wild – March 12, 2027",
+            "timed": "DLC – Breath of the Wild – March 12, 2027",
+            "digest": {
+                "subject": "The Master Trials",
+                "label": "Announced",
+                "meta": "DLC – Breath of the Wild – March 12, 2027"
+            }
+        },
+        "pl": {
+            "title": "Zapowiedź: The Master Trials",
+            "detail": [
+                "DLC",
+                "Breath of the Wild",
+                "12 marca 2027"
+            ],
+            "plain": "DLC – Breath of the Wild – 12 marca 2027",
+            "timed": "DLC – Breath of the Wild – 12 marca 2027",
+            "digest": {
+                "subject": "The Master Trials",
+                "label": "Zapowiedź",
+                "meta": "DLC – Breath of the Wild – 12 marca 2027"
+            }
+        },
+        "href": "http://localhost/search",
+        "url": "http://localhost/search",
+        "image": [
+            "/dune.jpg",
+            "https://image.tmdb.org/t/p/w500/dune.jpg"
+        ],
+        "color": 7550975,
+        "stored": {
+            "key": "key-of-a dlc announced",
+            "event": "related_announced",
+            "media": {
+                "type": "game",
+                "ref": "5000",
+                "title": "The Master Trials",
+                "posterPath": "/dune.jpg",
+                "backdropPath": "/dune-wide.jpg",
+                "extra": {
+                    "gameType": "dlc",
+                    "relatedTo": "Breath of the Wild",
+                    "platform": "Switch, PC"
+                }
+            },
+            "showTitle": null,
+            "date": "2027-03-12",
+            "oldDate": null,
+            "status": null,
+            "oldStatus": null,
+            "season": null
+        }
+    },
+    "a remaster announced for a year": {
+        "en": {
+            "title": "Announced: HD",
+            "detail": [
+                "Remaster",
+                "Breath of the Wild",
+                "2027"
+            ],
+            "plain": "Remaster – Breath of the Wild – 2027",
+            "timed": "Remaster – Breath of the Wild – 2027",
+            "digest": {
+                "subject": "HD",
+                "label": "Announced",
+                "meta": "Remaster – Breath of the Wild – 2027"
+            }
+        },
+        "pl": {
+            "title": "Zapowiedź: HD",
+            "detail": [
+                "Remaster",
+                "Breath of the Wild",
+                "2027"
+            ],
+            "plain": "Remaster – Breath of the Wild – 2027",
+            "timed": "Remaster – Breath of the Wild – 2027",
+            "digest": {
+                "subject": "HD",
+                "label": "Zapowiedź",
+                "meta": "Remaster – Breath of the Wild – 2027"
+            }
+        },
+        "href": "http://localhost/search",
+        "url": "http://localhost/search",
+        "image": [
+            "/dune.jpg",
+            "https://image.tmdb.org/t/p/w500/dune.jpg"
+        ],
+        "color": 7550975,
+        "stored": {
+            "key": "key-of-a remaster announced for a year",
+            "event": "related_announced",
+            "media": {
+                "type": "game",
+                "ref": "5003",
+                "title": "HD",
+                "posterPath": "/dune.jpg",
+                "backdropPath": "/dune-wide.jpg",
+                "extra": {
+                    "gameType": "remaster",
+                    "relatedTo": "Breath of the Wild",
+                    "releasePrecision": "year"
+                }
+            },
+            "showTitle": null,
+            "date": "2027-12-31",
+            "oldDate": null,
+            "status": null,
+            "oldStatus": null,
+            "season": null
+        }
+    }
+}
