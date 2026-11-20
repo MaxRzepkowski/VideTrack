@@ -6,6 +6,7 @@ import type {
     CredentialField,
     CreditData,
     OutgoingWebhookData,
+    TypePanel,
     UserMediaState,
     WebhookEventGroup,
     WebhookGroupOption,
@@ -14,6 +15,7 @@ import type { MediaSummary } from '@/types/media';
 import { trans } from 'laravel-vue-i18n';
 import ALL_MODULES_TYPES from '../../../tests/Fixtures/media-types/all-modules.json';
 import DEFAULT_PREFERENCES from '../../../tests/Fixtures/preferences/defaults.json';
+import TYPE_PANELS from '../../../tests/Fixtures/tracking/type-panels.json';
 
 /**
  * The registry as a fully configured instance shares it (every optional
@@ -89,6 +91,11 @@ export function userState(overrides: Partial<UserMediaState> = {}): UserMediaSta
  */
 export function userPreferences(overrides: Partial<UserPreferences> = {}): UserPreferences {
     return { ...(DEFAULT_PREFERENCES as UserPreferences), ...overrides };
+}
+
+/** The kinds of title on the tracking page, every module on, as the server sends them (a PHP test checks the file). */
+export function typePanels(): TypePanel[] {
+    return TYPE_PANELS as TypePanel[];
 }
 
 /** A title's credit: a lead actor unless the test says otherwise. */

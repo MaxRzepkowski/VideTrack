@@ -246,3 +246,58 @@ test('countdowns count down to the events among the premieres until each show is
             ->where('filters.type', 'event')
             ->where('entries', fn ($entries): bool => collect($entries)->pluck('event.name')->all() === ['Next week']));
 });
+
+// Events are the medium's, not a tracked title's: the games' own sources leave them be.
+test("a game's own sources, taking no titles, leave its medium's events on the views", function () {
+    enableGamesModule();
+    $user = User::factory()->create(['preferences' => ['type_sources' => ['game' => ['calendar' => [], 'countdowns' => []]]]]);
+    CatalogEvent::factory()->create(['name' => 'On now', 'starts_at' => now()->subMinutes(10), 'ends_at' => now()->addHour()]);
+    $events = app(VisibleEvents::class);
+
+    expect($events->between($user, now()->subDay(), now()->addDay()))->toHaveCount(1)
+        ->and($events->ahead($user, now()))->toHaveCount(1)
+        ->and($events->liveOrSoon($user, now()))->toHaveCount(1);
+});
+
+dataset('event switches', function () {
+    $rows = [];
+
+    foreach ([true, false] as $games) {
+        foreach ([true, false] as $hidden) {
+            foreach ([true, false] as $calendar) {
+                foreach ([true, false] as $countdowns) {
+                    $rows[sprintf('games %d, hidden %d, calendar %d, countdowns %d', $games, $hidden, $calendar, $countdowns)] = [$games, $hidden, $calendar, $countdowns];
+                }
+            }
+        }
+    }
+
+    return $rows;
+});
+
+test('the module, a hidden event and each view\'s switch agree on every surface', function (bool $games, bool $hidden, bool $calendar, bool $countdowns) {
+    if ($games) {
+        enableGamesModule();
+    }
+
+    $user = User::factory()->create(['preferences' => ['calendar_events' => $calendar, 'countdown_events' => $countdowns]]);
+    $event = CatalogEvent::factory()->create(['name' => 'On now', 'starts_at' => now()->subMinutes(10), 'ends_at' => now()->addHour()]);
+
+    if ($hidden) {
+        app(HideEvent::class)->execute($user, $event);
+    }
+
+    $shown = $games && ! $hidden;
+    $events = app(VisibleEvents::class);
+
+    expect($events->between($user, now()->subDay(), now()->addDay())->isNotEmpty())->toBe($shown && $calendar)
+        ->and(str_contains(app(IcsFeed::class)->render($user, new FeedFilter(['game'])), 'On now'))->toBe($shown && $calendar)
+        ->and(str_contains(app(IcsFeed::class)->render($user, new FeedFilter(['movie'])), 'On now'))->toBeFalse()
+        ->and($events->ahead($user, now())->isNotEmpty())->toBe($shown && $countdowns)
+        ->and($events->liveOrSoon($user, now())->isNotEmpty())->toBe($shown && ($calendar || $countdowns));
+
+    $this->actingAs($user)->get(route('countdowns', ['type' => 'event']))
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('filters.type', $shown && $countdowns ? 'event' : null)
+            ->where('types', fn ($types): bool => collect($types)->contains(fn ($type): bool => $type['type'] === 'event') === ($shown && $countdowns)));
+})->with('event switches');

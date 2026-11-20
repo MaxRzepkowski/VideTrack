@@ -3,24 +3,47 @@ import HeadingSmall from '@/components/HeadingSmall.vue';
 import SettingsCard from '@/components/settings/SettingsCard.vue';
 import SettingsRow from '@/components/settings/SettingsRow.vue';
 import SettingsSaveBar from '@/components/settings/SettingsSaveBar.vue';
-import ViewOptionsCard from '@/components/settings/tracking/ViewOptionsCard.vue';
+import TrackingGrid, { type GridRow } from '@/components/settings/tracking/TrackingGrid.vue';
+import TrackingTypeRow from '@/components/settings/tracking/TrackingTypeRow.vue';
 import { ToggleSwitch } from '@/components/ui/toggle-switch';
 import { usePreferences } from '@/composables/usePreferences';
 import { useUnsavedChanges } from '@/composables/useUnsavedChanges';
 import AppLayout from '@/layouts/AppLayout.vue';
 import SettingsLayout from '@/layouts/settings/Layout.vue';
-import { TRACKING_TABS, trackingSources, type TrackingTab } from '@/lib/tracking';
+import {
+    defaultSources,
+    offeredOwnSources,
+    optionSettings,
+    TAB_SURFACES,
+    toggledSource,
+    TRACKING_TABS,
+    trackingSources,
+    withOwnSources,
+    type TrackingTab,
+    type OwnSources,
+    type TypeTab,
+} from '@/lib/tracking';
 import { SETTINGS_FIELD_CLASS } from '@/lib/ui';
+import type { Surface, TrackingSource, TypePanel } from '@/types/generated';
 import { Head, useForm, usePage } from '@inertiajs/vue3';
 import { trans } from 'laravel-vue-i18n';
 import { Bell, CalendarDays, Users, type LucideIcon } from '@lucide/vue';
 import { computed, ref } from 'vue';
 import { toast } from 'vue-sonner';
 
+const props = defineProps<{
+    /** Every kind of title, with the settings only it has. */
+    types: TypePanel[];
+}>();
+
 // The page's settings as they stand — the server fills in every default.
 const preferences = usePreferences().value;
 
 const form = useForm({
+    // What the kinds of title declare, held apart since the page cannot name
+    // them; sent alongside the rest.
+    options: optionSettings(props.types, { ...preferences }),
+    type_sources: offeredOwnSources(props.types, preferences.type_sources),
     calendar_active: preferences.calendar_active,
     countdown_active: preferences.countdown_active,
     notifications_active: preferences.notifications_active,
@@ -39,51 +62,27 @@ const form = useForm({
     calendar_creators: preferences.calendar_creators,
     countdown_creators: preferences.countdown_creators,
     notifications_creators: preferences.notifications_creators,
-    calendar_game_platforms: preferences.calendar_game_platforms,
-    countdown_game_platforms: preferences.countdown_game_platforms,
-    calendar_episode_image: preferences.calendar_episode_image,
-    countdown_episode_image: preferences.countdown_episode_image,
-    notify_episodes: preferences.notify_episodes,
     notify_premieres: preferences.notify_premieres,
     notify_date_changes: preferences.notify_date_changes,
-    notify_show_status: preferences.notify_show_status,
     notify_person_titles: preferences.notify_person_titles,
     notify_company_titles: preferences.notify_company_titles,
     notify_collection_items: preferences.notify_collection_items,
     person_follow_scope: preferences.person_follow_scope,
     company_follow_scope: preferences.company_follow_scope,
-    calendar_release_mode: preferences.calendar_release_mode,
-    countdown_release_mode: preferences.countdown_release_mode,
-    notifications_release_mode: preferences.notifications_release_mode,
 });
-
-// A film has up to two moments worth announcing, and people want different
-// ones: a cinemagoer the premiere, someone who never goes the day it lands at
-// home. "Cinema" announces the premiere only.
-const releaseModes = computed(() => [
-    { value: 'both', label: trans('settings.premiere_and_availability') },
-    { value: 'cinema', label: trans('settings.premiere_only') },
-    { value: 'digital', label: trans('settings.availability_only') },
-]);
 
 // Labels in computeds: a page opened straight from its address renders before
 // the translations arrive, and a label read once would stay a bare key.
 
-// The kinds of events that create notifications about the titles themselves.
+// What any title's notifications can be about; a kind of title adds its own.
 const notificationEvents = computed(
     () =>
         [
-            { field: 'notify_episodes', label: trans('settings.new_episodes'), description: trans('settings.an_episode_of_a_tracked_show') },
             { field: 'notify_premieres', label: trans('settings.premieres'), description: trans('settings.a_tracked_movie_game_or_book') },
             {
                 field: 'notify_date_changes',
                 label: trans('settings.release_date_changes'),
                 description: trans('settings.a_tracked_title_moves_its_release'),
-            },
-            {
-                field: 'notify_show_status',
-                label: trans('common.show_status'),
-                description: trans('settings.a_tracked_show_gets_a_new'),
             },
         ] as const,
 );
@@ -110,17 +109,56 @@ const followedEvents = computed(
         ] as const,
 );
 
-const viewColumns = computed(
-    () =>
-        [
-            { field: 'calendar', label: trans('common.calendar') },
-            { field: 'countdown', label: trans('common.countdowns') },
-        ] as const,
-);
-
 const sources = computed(trackingSources);
 
-const VIEWS = ['calendar', 'countdown'] as const;
+const defaults = computed(() => defaultSources(form));
+
+const defaultViewRows = computed<GridRow[]>(() =>
+    sources.value.map((source) => ({
+        key: source.key,
+        label: source.label,
+        description: source.description,
+        cells: Object.fromEntries(TAB_SURFACES.views.map((surface) => [surface, { checked: form[source.preferences[surface]] === true }])),
+    })),
+);
+
+function toggleDefault(key: string, surface: Surface): void {
+    const preference = sources.value.find((source) => source.key === key)?.preferences[surface];
+
+    if (preference !== undefined) {
+        form[preference] = !form[preference];
+    }
+}
+
+/** A setting the page holds by its name: one a kind of title declares, else one of the page's own. */
+function readSetting(preference: string): unknown {
+    const settings: Readonly<Record<string, unknown>> = form.data();
+
+    return preference in form.options ? form.options[preference] : settings[preference];
+}
+
+function setSetting(preference: string, value: boolean | string): void {
+    form.options[preference] = value;
+}
+
+/** A kind of title's own sources; with none left in any tab, it follows the defaults everywhere. */
+function setOwnSources(type: string, own: OwnSources): void {
+    if (Object.keys(own).length === 0) {
+        delete form.type_sources[type];
+    } else {
+        form.type_sources[type] = own;
+    }
+}
+
+function switchOwnSources(type: string, tab: TypeTab, on: boolean): void {
+    setOwnSources(type, withOwnSources(form.type_sources[type], tab, on, defaults.value));
+}
+
+function toggleTypeSource(type: string, surface: Surface, row: TrackingSource): void {
+    const own = form.type_sources[type] ?? {};
+
+    setOwnSources(type, { ...own, [surface]: toggledSource(own[surface] ?? [], row) });
+}
 
 const TAB_ICONS: Record<TrackingTab, LucideIcon> = { views: CalendarDays, notifications: Bell, creators: Users };
 
@@ -173,9 +211,11 @@ function submit(): void {
         return;
     }
 
-    form.patch(route('settings.preferences.update'), {
+    form.transform(({ options, ...settings }) => ({ ...settings, ...options })).patch(route('settings.preferences.update'), {
         preserveScroll: true,
         onSuccess: () => toast.success(trans('settings.saved_2')),
+        // The page has no field to show a refusal under: say it, rather than leave the bar waiting.
+        onError: () => toast.error(trans('common.something_went_wrong_please_try_again')),
     });
 }
 
@@ -214,53 +254,32 @@ const inGroup = (group: string, setting: string): string => trans('settings.sett
                 <fieldset :disabled="form.processing" class="min-w-0">
                     <div v-show="tab === 'views'" id="tracking-panel-views" role="tabpanel" aria-labelledby="tracking-tab-views" class="space-y-8">
                         <SettingsCard
-                            :title="trans('settings.sources')"
+                            :title="trans('settings.by_default')"
                             :description="trans('settings.which_titles_the_calendar_and_countdowns_show')"
                         >
-                            <table class="w-full border-collapse">
-                                <thead>
-                                    <tr>
-                                        <th class="pb-3 text-left">
-                                            <span class="sr-only">{{ trans('settings.sources') }}</span>
-                                        </th>
-                                        <th
-                                            v-for="column in viewColumns"
-                                            :key="column.field"
-                                            scope="col"
-                                            class="text-ink-muted w-24 pb-3 text-center text-sm font-medium sm:w-32"
-                                        >
-                                            {{ column.label }}
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr v-for="source in sources" :key="source.key" class="border-line-subtle border-t">
-                                        <th scope="row" class="py-3.5 pr-4 text-left font-normal">
-                                            <div class="text-ink text-base font-semibold">{{ source.label }}</div>
-                                            <div class="text-ink-muted mt-0.5 text-sm">{{ source.description }}</div>
-                                        </th>
-                                        <td v-for="column in viewColumns" :key="column.field" class="py-3.5 text-center">
-                                            <input
-                                                v-model="form[source[column.field]]"
-                                                type="checkbox"
-                                                :aria-label="inGroup(column.label, source.label)"
-                                                class="border-line-subtle bg-surface-base accent-brand size-5 rounded border align-middle"
-                                            />
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                            <TrackingGrid
+                                id="tracking-defaults"
+                                :columns="TAB_SURFACES.views"
+                                :rows="defaultViewRows"
+                                :heading="trans('settings.sources')"
+                                @toggle="toggleDefault"
+                            />
                         </SettingsCard>
 
-                        <ViewOptionsCard
-                            v-for="view in VIEWS"
-                            :key="view"
-                            v-model:game-platforms="form[`${view}_game_platforms`]"
-                            v-model:release-mode="form[`${view}_release_mode`]"
-                            v-model:episode-image="form[`${view}_episode_image`]"
-                            :view="view"
-                            :release-modes="releaseModes"
-                        />
+                        <SettingsCard :title="trans('settings.types')" :description="trans('settings.own_sources_and_settings_of_each_type')">
+                            <TrackingTypeRow
+                                v-for="panel in types"
+                                :key="panel.type"
+                                :panel
+                                tab="views"
+                                :read="readSetting"
+                                :own="form.type_sources[panel.type]"
+                                :defaults
+                                @set="setSetting"
+                                @own="switchOwnSources(panel.type, 'views', $event)"
+                                @source="(surface, row) => toggleTypeSource(panel.type, surface, row)"
+                            />
+                        </SettingsCard>
                     </div>
 
                     <div
@@ -270,7 +289,7 @@ const inGroup = (group: string, setting: string): string => trans('settings.sett
                         aria-labelledby="tracking-tab-notifications"
                         class="space-y-8"
                     >
-                        <SettingsCard :title="trans('settings.sources')" :description="trans('settings.which_titles_can_notify_you')">
+                        <SettingsCard :title="trans('settings.by_default')" :description="trans('settings.which_titles_can_notify_you_and')">
                             <SettingsRow
                                 v-for="source in sources"
                                 :key="source.key"
@@ -278,14 +297,11 @@ const inGroup = (group: string, setting: string): string => trans('settings.sett
                                 :description="source.description"
                                 layout="inline"
                             >
-                                <ToggleSwitch v-model="form[source.notifications]" :label="inGroup(trans('common.notifications'), source.label)" />
+                                <ToggleSwitch
+                                    v-model="form[source.preferences.notifications]"
+                                    :label="inGroup(trans('common.notifications'), source.label)"
+                                />
                             </SettingsRow>
-                        </SettingsCard>
-
-                        <SettingsCard
-                            :title="trans('settings.notification_events')"
-                            :description="trans('settings.which_kinds_of_events_create_notifications')"
-                        >
                             <SettingsRow
                                 v-for="event in notificationEvents"
                                 :key="event.field"
@@ -295,22 +311,24 @@ const inGroup = (group: string, setting: string): string => trans('settings.sett
                             >
                                 <ToggleSwitch v-model="form[event.field]" :label="event.label" />
                             </SettingsRow>
-                            <SettingsRow
-                                :title="trans('settings.film_releases')"
-                                :description="trans('settings.which_of_a_films_dates_pings')"
-                                for="notifications-release-mode"
-                            >
-                                <select
-                                    id="notifications-release-mode"
-                                    v-model="form.notifications_release_mode"
-                                    :class="[SETTINGS_FIELD_CLASS, 'block w-full']"
-                                >
-                                    <option v-for="mode in releaseModes" :key="mode.value" :value="mode.value">{{ mode.label }}</option>
-                                </select>
-                            </SettingsRow>
                         </SettingsCard>
 
-                        <SettingsCard :title="trans('settings.followed_creators')">
+                        <SettingsCard :title="trans('settings.types')" :description="trans('settings.what_each_type_notifies_about')">
+                            <TrackingTypeRow
+                                v-for="panel in types"
+                                :key="panel.type"
+                                :panel
+                                tab="notifications"
+                                :read="readSetting"
+                                :own="form.type_sources[panel.type]"
+                                :defaults
+                                @set="setSetting"
+                                @own="switchOwnSources(panel.type, 'notifications', $event)"
+                                @source="(surface, row) => toggleTypeSource(panel.type, surface, row)"
+                            />
+                        </SettingsCard>
+
+                        <SettingsCard :title="trans('settings.followed_creators')" :description="trans('settings.each_also_needs_the_creators_row')">
                             <SettingsRow
                                 v-for="event in followedEvents"
                                 :key="event.field"

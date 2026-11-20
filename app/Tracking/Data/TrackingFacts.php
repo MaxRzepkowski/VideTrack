@@ -25,6 +25,12 @@ final readonly class TrackingFacts
         public bool $manualFollow = false,
         /** A bell a followed person, company or collection rang for the user. */
         public bool $creatorFollow = false,
+        /**
+         * The title's kind, which may have sources of its own. Null on facts
+         * read for a card, which say only why a title is tracked: no surface
+         * can be asked about them.
+         */
+        public ?string $type = null,
     ) {}
 
     /**

@@ -137,6 +137,31 @@ test('a film with nothing left ahead is not followed', function () {
     expect(Follow::query()->where('user_id', $user->id)->whereNotNull('media_item_id')->exists())->toBeFalse();
 });
 
+test("a new title is announced only where the creators' row reaches the notifications, as its kind of title has them", function (array $preferences, bool $announced) {
+    fakePersonWithUpcomingMovie();
+
+    $user = User::factory()->create(['preferences' => $preferences]);
+
+    $this->actingAs($user)
+        ->putJson(route('ui.people.follow.update', ['provider' => 'tmdb', 'ref' => '6384']), ['mode' => 'follow'])
+        ->assertSuccessful();
+
+    runFollowedPeople();
+
+    // The bell is rung either way: the row decides only what is said.
+    expect($user->follows()->whereNotNull('media_item_id')->count())->toBe(1)
+        ->and($user->notifications()->count())->toBe($announced ? 1 : 0);
+})->with([
+    'the default row off' => [['notifications_creators' => false], false],
+    "the films' own row off" => [['type_sources' => ['movie' => ['notifications' => ['activity', 'backlog']]]], false],
+    "another kind of title's own row off" => [['type_sources' => ['show' => ['notifications' => []]]], true],
+    "the films' own row on, the default off" => [['notifications_creators' => false, 'type_sources' => ['movie' => ['notifications' => ['creator']]]], true],
+    'the event switched off' => [['notify_person_titles' => false], false],
+    "the event off, the films' own row on" => [['notify_person_titles' => false, 'type_sources' => ['movie' => ['notifications' => ['creator']]]], false],
+    "the films' own views only, the default row on" => [['type_sources' => ['movie' => ['calendar' => [], 'countdowns' => []]]], true],
+    "the films' own views only, the default row off" => [['notifications_creators' => false, 'type_sources' => ['movie' => ['calendar' => ['creator'], 'countdowns' => ['creator']]]], false],
+]);
+
 test('a followed person auto-follows their upcoming title and announces it once', function () {
     fakePersonWithUpcomingMovie();
 

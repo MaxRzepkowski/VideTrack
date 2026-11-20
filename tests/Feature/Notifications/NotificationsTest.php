@@ -19,6 +19,8 @@ use App\Notifications\MediaEvent;
 use App\Notifications\MediaEventPayload;
 use App\Notifications\MediaEventType;
 use App\Tracking\MetadataChanges;
+use App\Tracking\Releases\ReleaseFeed;
+use App\Tracking\Surface;
 use App\Tracking\Surfaces\TodaysReleases;
 use App\Tracking\TrackedAudience;
 use Carbon\CarbonImmutable;
@@ -67,6 +69,92 @@ test('the cinema release mode silences the home-release ping', function () {
 
     expect(DatabaseNotification::query()->where('notifiable_id', $user->id)->count())->toBe(0);
 });
+
+test('neither of a film\'s dates pings when both are switched off, while its other surfaces keep them', function () {
+    $user = User::factory()->create(['preferences' => ['notifications_release_mode' => 'none']]);
+
+    $movie = MediaItem::factory()->movie()->create([
+        'release_date' => today()->toDateString(),
+        'home_release_date' => today()->addDay()->toDateString(),
+    ]);
+    app(SyncListMembership::class)->execute($user, $movie, [$user->watchlist()->id]);
+
+    runNotifyReleases();
+
+    expect($user->notifications()->count())->toBe(0)
+        ->and(app(ReleaseFeed::class)->entries($user->refresh(), Surface::Calendar, today()->toDateString(), today()->addDay()->toDateString()))->toHaveCount(2);
+});
+
+test("the daily task follows each kind of title's own sources, the others the defaults", function (array $own, array $events) {
+    $user = User::factory()->create(['preferences' => ['type_sources' => $own]]);
+
+    $movie = MediaItem::factory()->movie()->create(['release_date' => today()->toDateString()]);
+    app(SyncListMembership::class)->execute($user, $movie, [$user->watchlist()->id]);
+
+    $show = makeShowTree([1 => ['2020-01-01', today()->toDateString()]]);
+    app(MarkWatched::class)->execute($user, $show->children()->firstOrFail()->children()->where('number', 1)->firstOrFail(), WatchedAt::at(CarbonImmutable::parse('2026-01-01')));
+
+    runNotifyReleases();
+
+    expect($user->notifications()->get()->map(fn (DatabaseNotification $n) => $n->data['event'])->sort()->values()->all())->toBe($events);
+})->with([
+    'none of their own' => [[], ['episode_aired', 'premiere']],
+    'films without the backlog' => [['movie' => ['notifications' => ['activity']]], ['episode_aired']],
+    'shows without history' => [['show' => ['notifications' => ['backlog']]], ['premiere']],
+    'films with views of their own only' => [['movie' => ['calendar' => [], 'countdowns' => []]], ['episode_aired', 'premiere']],
+    'both with nothing' => [['movie' => ['notifications' => []], 'show' => ['notifications' => []]], []],
+]);
+
+test("the day's pings of a film follow its release mode and the premieres switch", function (string $mode, bool $premieres, bool $sameDay, array $events) {
+    $user = User::factory()->create(['preferences' => [
+        'notifications_release_mode' => $mode,
+        'notify_premieres' => $premieres,
+        // The views' own modes say nothing about the pings.
+        'calendar_release_mode' => 'none',
+        'countdown_release_mode' => 'cinema',
+    ]]);
+    $movie = MediaItem::factory()->movie()->create([
+        'release_date' => $sameDay ? today()->toDateString() : today()->subMonths(2)->toDateString(),
+        'home_release_date' => today()->toDateString(),
+    ]);
+    app(SyncListMembership::class)->execute($user, $movie, [$user->watchlist()->id]);
+
+    runNotifyReleases();
+
+    expect($user->notifications()->get()->map(fn (DatabaseNotification $n) => $n->data['event'])->sort()->values()->all())->toBe($events);
+})->with([
+    'both, premieres on, same day' => ['both', true, true, ['premiere']],
+    'both, premieres off, same day' => ['both', false, true, ['home_release']],
+    'cinema, premieres off, same day' => ['cinema', false, true, []],
+    'cinema, premieres on, home only' => ['cinema', true, false, []],
+    'digital, premieres off, same day' => ['digital', false, true, ['home_release']],
+    'digital, premieres on, home only' => ['digital', true, false, ['home_release']],
+    'none, premieres on, same day' => ['none', true, true, []],
+    'none, premieres on, home only' => ['none', true, false, []],
+]);
+
+test('with premieres off, three films out today ping, run twice, only for what comes home', function (string $mode, array $events) {
+    $user = User::factory()->create(['preferences' => ['notify_premieres' => false, 'notifications_release_mode' => $mode]]);
+
+    // Opening and coming home today, opening today, coming home today.
+    foreach ([[0, 0], [0, 60], [-60, 0]] as [$premiere, $home]) {
+        $film = MediaItem::factory()->movie()->create([
+            'release_date' => today()->addDays($premiere)->toDateString(),
+            'home_release_date' => today()->addDays($home)->toDateString(),
+        ]);
+        app(SyncListMembership::class)->execute($user, $film, [$user->watchlist()->id]);
+    }
+
+    runNotifyReleases();
+    runNotifyReleases();
+
+    expect($user->notifications()->get()->map(fn (DatabaseNotification $n) => $n->data['event'])->sort()->values()->all())->toBe($events);
+})->with([
+    'both' => ['both', ['home_release', 'home_release']],
+    'cinema' => ['cinema', []],
+    'digital' => ['digital', ['home_release', 'home_release']],
+    'none' => ['none', []],
+]);
 
 test('home releases ping even with premiere notifications switched off', function () {
     $user = User::factory()->create();

@@ -2,11 +2,16 @@
 
 namespace App\Tracking\Releases;
 
+use App\Accounts\Preferences\NotificationEvent;
+use App\Accounts\Preferences\UserPreferences;
 use App\Catalog\ItemMetadata;
 use App\Catalog\MediaItemSummaries;
+use App\Catalog\MediaTypeDefinition;
 use App\Enums\PlayOutcome;
 use App\Models\MediaItem;
 use App\Models\Play;
+use App\Tracking\Settings\TypeOption;
+use App\Tracking\Surface;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\App;
 
@@ -18,6 +23,22 @@ use Illuminate\Support\Facades\App;
  */
 final readonly class EpisodeReleases implements ReleaseSource
 {
+    /**
+     * Every tracked series shows its episodes in the views; whether one airing
+     * pings is the series' own question.
+     */
+    public function typeOptions(MediaTypeDefinition $type): array
+    {
+        return [TypeOption::on(
+            key: 'episodes',
+            label: 'settings.new_episodes',
+            description: 'settings.an_episode_of_a_tracked_show',
+            phrase: 'settings.phrase_new_episodes',
+            surfaces: [Surface::Notifications],
+            preference: fn (): string => UserPreferences::notifiesKey(NotificationEvent::Episodes),
+        )];
+    }
+
     public function releases(Collection $roots, ReleaseWindow $window): Collection
     {
         $shows = $roots->keyBy('id');

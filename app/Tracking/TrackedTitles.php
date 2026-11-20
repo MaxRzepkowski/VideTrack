@@ -17,13 +17,12 @@ final readonly class TrackedTitles
      */
     public function of(User $user, Surface $surface): array
     {
-        $rows = $user->preferences->matrix($surface);
         $tracked = [];
 
         foreach ($this->facts->forUser($user) as $rootId => $facts) {
             $source = $facts->source();
 
-            if ($source !== null && in_array($source, $rows, true)) {
+            if ($source !== null && $surface->carries($user->preferences, $facts)) {
                 $tracked[$rootId] = $source;
             }
         }

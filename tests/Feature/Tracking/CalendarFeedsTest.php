@@ -61,6 +61,19 @@ test('every release keeps the UID calendars already hold', function () {
     ]);
 });
 
+test('the feed leaves out a kind of title whose own sources keep it off the calendar', function () {
+    enableGamesModule();
+    $user = User::factory()->create(['preferences' => ['type_sources' => ['game' => ['calendar' => [], 'countdowns' => ['backlog']]]]]);
+    feedLibrary($user);
+
+    expect(uidsOf(app(IcsFeed::class)->render($user, new FeedFilter)))->toBe([
+        'episode-1399:2:1--'.today()->addDays(3)->toDateString().'@videtrack',
+        'episode-1399:2:2--'.today()->addDays(10)->toDateString().'@videtrack',
+        'event-igdb-6045@videtrack',
+        'movie-603--'.today()->addDays(5)->toDateString().'@videtrack',
+    ]);
+});
+
 /** @return list<string> the SUMMARY of every event, unfolded */
 function summariesOf(string $ics): array
 {
@@ -127,6 +140,22 @@ test('each variant and language is kept apart in the cache', function () {
 
     $user->update(['locale' => 'pl']);
     expect($this->get(route('calendar.feed', ['token' => $token]))->getContent())->toContain(__('common.season_premiere', [], 'pl'));
+});
+
+test('a source switched off on the tracking page leaves the feeds at once, not when the cache runs out', function () {
+    enableGamesModule();
+    $user = User::factory()->create();
+    feedLibrary($user);
+    $token = $user->calendarToken();
+
+    expect(uidsOf($this->get(route('calendar.feed', ['token' => $token]))->getContent()))->toHaveCount(6)
+        ->and(rssItems($this->get(route('calendar.rss', ['token' => $token]))->getContent()))->not->toBeEmpty();
+
+    // Every title is on the backlog: switching that row off empties both feeds of releases.
+    $this->actingAs($user)->patch(route('settings.preferences.update'), ['calendar_watchlist' => false, 'calendar_events' => false])->assertSessionHasNoErrors();
+
+    expect(uidsOf($this->get(route('calendar.feed', ['token' => $token]))->getContent()))->toBe([])
+        ->and(rssItems($this->get(route('calendar.rss', ['token' => $token]))->getContent()))->toBe([]);
 });
 
 /** @return list<SimpleXMLElement> */

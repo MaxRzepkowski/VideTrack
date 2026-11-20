@@ -3,6 +3,7 @@
 use App\Accounts\Preferences\UserPreferences;
 use App\Actions\Users\UpdatePreferences;
 use App\Enums\UpNextSort;
+use App\Http\Requests\Settings\PreferencesUpdateRequest;
 use App\Models\User;
 use App\Tracking\Surface;
 use App\Tracking\TrackingSource;
@@ -62,6 +63,7 @@ test('a timezone preference can be set and cleared back to automatic', function 
 });
 
 test('calendar toggles persist and default to enabled', function () {
+    enableGamesModule();
     $user = User::factory()->create();
 
     expect($user->preferences->matrix(Surface::Calendar))->toBe(TrackingSource::cases())
@@ -337,7 +339,8 @@ test('every page shares every setting, defaults filled in, so the front keeps no
     $user = User::factory()->create(['preferences' => ['countdown_dropped' => true]]);
 
     $this->actingAs($user)->get('/settings/preferences')->assertInertia(fn (Assert $page) => $page
-        ->where('auth.user.preferences', $user->preferences->resolved())
+        // As the page decodes it: the empty map of own sources an object.
+        ->where('auth.user.preferences', json_decode((string) json_encode($user->preferences->resolved()), true))
         ->where('auth.user.preferences.countdown_dropped', true)
         ->where('auth.user.preferences.notifications_dropped', false));
 });
@@ -349,7 +352,7 @@ test('a flag sent as a form value is stored as a flag, a country in capitals', f
         ->patch('/settings/preferences', ['calendar_dropped' => '0', 'notify_episodes' => '1', 'region' => 'de'])
         ->assertSessionHasNoErrors();
 
-    expect($user->refresh()->preferences->toStored())->toBe(['calendar_dropped' => false, 'notify_episodes' => true, 'region' => 'DE']);
+    expect($user->refresh()->preferences->toStored())->toEqual(['calendar_dropped' => false, 'notify_episodes' => true, 'region' => 'DE']);
 });
 
 test('a reading pace persists as a whole number and is validated', function () {
@@ -367,3 +370,30 @@ test('a reading pace persists as a whole number and is validated', function () {
         ->patch(route('settings.preferences.update'), ['reading_pace_chapters' => 0, 'reading_pace_pages' => UserPreferences::READING_PACE_MAX + 1])
         ->assertSessionHasErrors(['reading_pace_chapters', 'reading_pace_pages']);
 });
+
+test('every setting a page can save has a default to read it back by', function () {
+    // Every kind of title present, so every setting one declares is offered.
+    enableGamesModule();
+    enableBooksModule();
+    enableMangaModule();
+    enableComicsModule();
+
+    // A structured setting's parts are validated under its own name.
+    $saved = array_filter(array_keys((new PreferencesUpdateRequest)->rules()), fn (string $key): bool => ! str_contains($key, '.'));
+
+    expect(array_diff($saved, array_keys(UserPreferences::fromStored([])->resolved())))->toBe([]);
+});
+
+test('the timezone report keeps every own source as stored', function (array $own) {
+    $user = User::factory()->create(['preferences' => ['type_sources' => $own]]);
+
+    $this->actingAs($user)->patch(route('settings.timezone.detected'), ['detected_timezone' => 'Asia/Tokyo'])->assertNoContent();
+
+    expect($user->refresh()->preferences->toStored()['type_sources'])->toBe($own)
+        ->and($user->preferences->toStored()['detected_timezone'])->toBe('Asia/Tokyo');
+})->with([
+    'a kind whose module is off' => [['game' => ['notifications' => ['followed']]]],
+    'a kind offered' => [['movie' => ['calendar' => ['backlog'], 'countdowns' => ['backlog']]]],
+    'a kind no module has' => [['boardgame' => ['notifications' => ['backlog']], 'movie' => ['notifications' => ['backlog']]]],
+    'a kind of a wrong shape' => [['book' => 'garbage', 'movie' => ['notifications' => ['backlog']]]],
+]);

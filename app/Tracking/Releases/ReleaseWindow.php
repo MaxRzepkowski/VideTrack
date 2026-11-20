@@ -3,13 +3,14 @@
 namespace App\Tracking\Releases;
 
 use App\Catalog\DatePrecision;
-use App\Enums\ReleaseDateMode;
 use App\Models\MediaItem;
 use App\Models\User;
+use App\Tracking\Surface;
 
 /**
  * What a surface asks of the release sources: whose releases, between which
- * days, and how it shows them.
+ * days, and on which surface — each source reads its own settings for it
+ * from the viewer's preferences.
  */
 final readonly class ReleaseWindow
 {
@@ -20,8 +21,7 @@ final readonly class ReleaseWindow
         public User $viewer,
         public string $from,
         public string $to,
-        public ReleaseDateMode $mode,
-        public bool $perPlatform,
+        public Surface $surface,
         /** Whether a release known only to its month, quarter or year belongs here. */
         public bool $approximateDates,
         public array $followedVia = [],

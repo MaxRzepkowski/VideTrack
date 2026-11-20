@@ -2,12 +2,17 @@
 
 namespace App\Tracking;
 
+use App\Accounts\Preferences\NotificationEvent;
+use App\Accounts\Preferences\UserPreferences;
 use App\Catalog\DatePrecision;
+use App\Catalog\MediaTypeDefinition;
 use App\Catalog\MediaTypeRegistry;
 use App\Catalog\TitleStore;
 use App\Models\MediaItem;
 use App\Notifications\MediaEventPayload;
 use App\Support\Numbers;
+use App\Tracking\Settings\DeclaresTypeOptions;
+use App\Tracking\Settings\TypeOption;
 
 /**
  * Diff-based media events around a metadata refresh: the caller snapshots a
@@ -18,9 +23,29 @@ use App\Support\Numbers;
  * episodes, premieres) are not diffs — the daily notify-releases task derives
  * them from the same engine as the calendar.
  */
-final readonly class MetadataChanges
+final readonly class MetadataChanges implements DeclaresTypeOptions
 {
     public function __construct(private MediaTypeRegistry $types) {}
+
+    /**
+     * A title released in parts has a status and seasons to come; a moved
+     * date is news for every kind of title, so it is not a type's own.
+     */
+    public function typeOptions(MediaTypeDefinition $type): array
+    {
+        if ($type->childType === null) {
+            return [];
+        }
+
+        return [TypeOption::on(
+            key: 'status',
+            label: 'settings.show_status_and_new_seasons',
+            description: 'settings.a_tracked_show_gets_a_new',
+            phrase: 'settings.phrase_show_status',
+            surfaces: [Surface::Notifications],
+            preference: fn (): string => UserPreferences::notifiesKey(NotificationEvent::ShowStatus),
+        )];
+    }
 
     /**
      * @return array{release_date: string|null, release_date_precision: DatePrecision, status: string|null, maxSeason: int|null}

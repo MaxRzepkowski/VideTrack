@@ -19,7 +19,7 @@ use Laravel\Mcp\Server\Tools\Annotations\IsReadOnly;
  * GET /api/v1/countdowns, soonest first.
  */
 #[Name('get_countdowns')]
-#[Description('Every premiere the user counts down to, soonest first and up to ten years ahead: each title they follow, a show by its next episode only, and the showcases on their calendar (`event`). `meta.types` counts every kind.')]
+#[Description('Every premiere the user counts down to, soonest first and up to ten years ahead: each title they follow, a show by its next episode only, and the showcases their countdowns show (`event`). `meta.types` counts every kind.')]
 #[IsReadOnly]
 final class GetCountdowns extends LibraryTool
 {

@@ -1,6 +1,7 @@
 import Preferences from '@/pages/settings/Preferences.vue';
 import { useMediaTypes, userPreferences } from '@/test/factories';
 import { setPageProps } from '@/test/page';
+import { router } from '@inertiajs/vue3';
 import { mount } from '@vue/test-utils';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -51,6 +52,19 @@ describe('Preferences', () => {
         expect(values('time_format')).toEqual(['auto', '24', '12']);
         expect(values('week_start')).toEqual(['auto', 'monday', 'sunday']);
         expect(values('up-next-sort')).toEqual(['activity', 'remaining', 'released', 'title']);
+    });
+
+    it('sets which image an episode shows on the calendar and on the countdowns, each on its own', async () => {
+        const visit = vi.spyOn(router, 'visit').mockImplementation(() => undefined);
+        vi.spyOn(Intl, 'supportedValuesOf').mockReturnValue(['Europe/Warsaw']);
+        const wrapper = page(null);
+
+        expect((wrapper.find('select#calendar_episode_image').element as HTMLSelectElement).value).toBe('backdrop');
+
+        await wrapper.find('select#countdown_episode_image').setValue('still');
+        await wrapper.find('form').trigger('submit');
+
+        expect(visit.mock.lastCall?.[1]).toMatchObject({ data: { calendar_episode_image: 'backdrop', countdown_episode_image: 'still' } });
     });
 
     it('asks the reading pace of each type that is read, starting from the saved one', () => {

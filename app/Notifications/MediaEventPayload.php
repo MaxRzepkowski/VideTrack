@@ -11,6 +11,8 @@ use App\Models\MediaList;
 use App\Models\User;
 use App\Support\Payload;
 use App\Tracking\Releases\ReleaseEntry;
+use App\Tracking\Surface;
+use App\Tracking\TrackingSource;
 use InvalidArgumentException;
 
 /**
@@ -271,12 +273,22 @@ final readonly class MediaEventPayload
         );
     }
 
-    /** Whether the user's toggles let this event through; one with no toggle always goes. */
+    /**
+     * Whether the user's toggles let this event through; one with no toggle
+     * always goes. A title the user's followed creators brought in also
+     * answers to their row of the notifications, as its kind of title has it:
+     * switching that row off silences what they bring, news of it included.
+     */
     public function wantedBy(User $user): bool
     {
         $preference = $this->type?->preference();
 
-        return $preference === null || $user->preferences->notifies($preference);
+        if ($preference !== null && ! $user->preferences->notifies($preference)) {
+            return false;
+        }
+
+        return $this->type?->comesFromCreators() !== true
+            || Surface::Notifications->takes($user->preferences, TrackingSource::CreatorFollow, Payload::string($this->media, 'type'));
     }
 
     /**

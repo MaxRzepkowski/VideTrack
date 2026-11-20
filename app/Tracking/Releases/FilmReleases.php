@@ -2,11 +2,18 @@
 
 namespace App\Tracking\Releases;
 
+use App\Accounts\Preferences\NotificationEvent;
+use App\Accounts\Preferences\UserPreferences;
 use App\Catalog\Data\MediaSummary;
 use App\Catalog\ItemMetadata;
 use App\Catalog\MediaItemSummaries;
+use App\Catalog\MediaTypeDefinition;
+use App\Enums\ReleaseDateMode;
 use App\Enums\ReleaseKind;
 use App\Models\MediaItem;
+use App\Tracking\Settings\TypeOption;
+use App\Tracking\Settings\TypeOptionRequirement;
+use App\Tracking\Surface;
 use Illuminate\Support\Collection;
 
 /**
@@ -36,12 +43,53 @@ final readonly class FilmReleases implements ReleaseSource
     }
 
     /**
+     * Its two moments, each switched on every surface: the halves of the
+     * surface's release mode. With both off the surface shows no film dates.
+     */
+    public function typeOptions(MediaTypeDefinition $type): array
+    {
+        $choices = array_map(fn (ReleaseDateMode $mode): string => $mode->value, ReleaseDateMode::cases());
+        $modes = fn (callable $shows): array => array_values(array_map(
+            fn (ReleaseDateMode $mode): string => $mode->value,
+            array_filter(ReleaseDateMode::cases(), $shows),
+        ));
+
+        return [
+            TypeOption::on(
+                key: 'premiere',
+                label: 'settings.cinema_premiere',
+                description: 'settings.its_first_release_in_cinemas',
+                phrase: 'settings.phrase_cinema_premiere',
+                surfaces: Surface::cases(),
+                preference: UserPreferences::releaseModeKey(...),
+                onWhen: $modes(fn (ReleaseDateMode $mode): bool => $mode->showsPremiere()),
+                choices: $choices,
+                // The premiere is the day's premiere ping, which has its own default switch.
+                requires: fn (Surface $surface): ?TypeOptionRequirement => $surface === Surface::Notifications
+                    ? new TypeOptionRequirement(UserPreferences::notifiesKey(NotificationEvent::Premieres), 'settings.premieres')
+                    : null,
+            ),
+            TypeOption::on(
+                key: 'home',
+                label: 'settings.home_release',
+                description: 'settings.digital_or_on_disc',
+                phrase: 'settings.phrase_home_release',
+                surfaces: Surface::cases(),
+                preference: UserPreferences::releaseModeKey(...),
+                onWhen: $modes(fn (ReleaseDateMode $mode): bool => $mode->showsDigital()),
+                choices: $choices,
+            ),
+        ];
+    }
+
+    /**
      * @return list<ReleaseEntry>
      */
     private function entries(MediaItem $film, ReleaseWindow $window): array
     {
-        $premiere = $window->mode->showsPremiere() && $film->release_date !== null && $window->contains($film->release_date->toDateString());
-        $home = $window->mode->showsDigital() && $film->home_release_date !== null && $window->contains($film->home_release_date->toDateString());
+        $mode = $window->viewer->preferences->releaseMode($window->surface);
+        $premiere = $mode->showsPremiere() && $film->release_date !== null && $window->contains($film->release_date->toDateString());
+        $home = $mode->showsDigital() && $film->home_release_date !== null && $window->contains($film->home_release_date->toDateString());
 
         $sameDay = $film->release_date !== null
             && $film->home_release_date !== null
