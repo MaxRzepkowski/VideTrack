@@ -1,6 +1,7 @@
 <?php
 
 use App\Catalog\Data\MediaSummary;
+use App\Notifications\Events\Released;
 use App\Notifications\MediaEventPayload;
 use App\Tracking\Releases\ReleaseEntry;
 
@@ -8,7 +9,7 @@ use App\Tracking\Releases\ReleaseEntry;
 
 function premiereEvent(string $title = 'Dune', string $ref = 'tmdb:1'): MediaEventPayload
 {
-    return MediaEventPayload::released(
+    return Released::of(
         new ReleaseEntry(new MediaSummary(type: 'movie', ref: $ref, provider: 'tmdb', title: $title), rootId: 1, rootType: 'movie'),
         today()->toDateString(),
     );

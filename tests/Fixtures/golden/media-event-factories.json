@@ -1,0 +1,459 @@
+{
+    "premiere": {
+        "key": "released:movie:603:2026-10-10",
+        "event": "premiere",
+        "media": {
+            "type": "movie",
+            "ref": "603",
+            "title": "Dune",
+            "releaseDate": null,
+            "extra": []
+        },
+        "showTitle": null,
+        "date": "2026-10-10",
+        "oldDate": null,
+        "status": null,
+        "oldStatus": null,
+        "season": null
+    },
+    "premiere and home release on one day": {
+        "key": "released:movie:603:2026-10-10",
+        "event": "premiere",
+        "media": {
+            "type": "movie",
+            "ref": "603",
+            "title": "Dune",
+            "releaseDate": null,
+            "extra": {
+                "releaseKind": "both"
+            }
+        },
+        "showTitle": null,
+        "date": "2026-10-10",
+        "oldDate": null,
+        "status": null,
+        "oldStatus": null,
+        "season": null
+    },
+    "home release": {
+        "key": "home-release:movie:603:2026-10-10",
+        "event": "home_release",
+        "media": {
+            "type": "movie",
+            "ref": "603",
+            "title": "Dune",
+            "releaseDate": null,
+            "extra": {
+                "releaseKind": "home"
+            }
+        },
+        "showTitle": null,
+        "date": "2026-10-10",
+        "oldDate": null,
+        "status": null,
+        "oldStatus": null,
+        "season": null
+    },
+    "home release beside a premiere": {
+        "key": "home-release:movie:603:2026-10-10",
+        "event": "home_release",
+        "media": {
+            "type": "movie",
+            "ref": "603",
+            "title": "Dune",
+            "releaseDate": null,
+            "extra": {
+                "releaseKind": "both"
+            }
+        },
+        "showTitle": null,
+        "date": "2026-10-10",
+        "oldDate": null,
+        "status": null,
+        "oldStatus": null,
+        "season": null
+    },
+    "episode": {
+        "key": "released:episode:1399:2:5:2026-10-10",
+        "event": "episode_aired",
+        "media": {
+            "type": "episode",
+            "ref": "1399:2:5",
+            "title": "Chapter 5",
+            "releaseDate": null,
+            "extra": {
+                "seasonNumber": 2
+            }
+        },
+        "showTitle": "Severance",
+        "date": "2026-10-10",
+        "oldDate": null,
+        "status": null,
+        "oldStatus": null,
+        "season": 2
+    },
+    "season premiere": {
+        "key": "released:episode:1399:2:1:2026-10-10",
+        "event": "season_premiere",
+        "media": {
+            "type": "episode",
+            "ref": "1399:2:1",
+            "title": "Chapter 1",
+            "releaseDate": null,
+            "extra": {
+                "seasonNumber": 2,
+                "episodeBadge": "season_premiere"
+            }
+        },
+        "showTitle": "Severance",
+        "date": "2026-10-10",
+        "oldDate": null,
+        "status": null,
+        "oldStatus": null,
+        "season": 2
+    },
+    "episodes": {
+        "key": "episodes_released:3:2026-10-10:808a1377d831fab6799cae536dddad39",
+        "event": "episode_aired",
+        "media": {
+            "type": "episode",
+            "ref": "1399:2:5",
+            "title": "Chapter 5",
+            "releaseDate": null,
+            "extra": {
+                "seasonNumber": 2
+            }
+        },
+        "items": [
+            {
+                "type": "episode",
+                "ref": "1399:2:5",
+                "title": "Chapter 5",
+                "releaseDate": null,
+                "extra": {
+                    "seasonNumber": 2
+                }
+            },
+            {
+                "type": "episode",
+                "ref": "1399:2:6",
+                "title": "Chapter 6",
+                "releaseDate": null,
+                "extra": {
+                    "seasonNumber": 2
+                }
+            }
+        ],
+        "showTitle": "Severance",
+        "date": "2026-10-10",
+        "oldDate": null,
+        "status": null,
+        "oldStatus": null,
+        "season": 2
+    },
+    "episodes opening a season": {
+        "key": "episodes_released:3:2026-10-10:f9c7e34993ccf0c1d36a2a618a11d9a4",
+        "event": "season_premiere",
+        "media": {
+            "type": "episode",
+            "ref": "1399:2:1",
+            "title": "Chapter 1",
+            "releaseDate": null,
+            "extra": {
+                "seasonNumber": 2,
+                "episodeBadge": "season_premiere"
+            }
+        },
+        "items": [
+            {
+                "type": "episode",
+                "ref": "1399:2:1",
+                "title": "Chapter 1",
+                "releaseDate": null,
+                "extra": {
+                    "seasonNumber": 2,
+                    "episodeBadge": "season_premiere"
+                }
+            },
+            {
+                "type": "episode",
+                "ref": "1399:2:2",
+                "title": "Chapter 2",
+                "releaseDate": null,
+                "extra": {
+                    "seasonNumber": 2
+                }
+            }
+        ],
+        "showTitle": "Severance",
+        "date": "2026-10-10",
+        "oldDate": null,
+        "status": null,
+        "oldStatus": null,
+        "season": 2
+    },
+    "date moved": {
+        "key": "date_changed:movie:603:2027-03-12",
+        "event": "date_changed",
+        "media": {
+            "type": "movie",
+            "ref": "603",
+            "title": "Dune",
+            "releaseDate": "2027-03-12",
+            "extra": []
+        },
+        "showTitle": null,
+        "date": "2027-03-12",
+        "oldDate": "2026-11-20",
+        "status": null,
+        "oldStatus": null,
+        "season": null
+    },
+    "date moved to a year": {
+        "key": "date_changed:movie:604:2028-12-31:year",
+        "event": "date_changed",
+        "media": {
+            "type": "movie",
+            "ref": "604",
+            "title": "Dune Two",
+            "releaseDate": "2028-12-31",
+            "extra": {
+                "releasePrecision": "year"
+            }
+        },
+        "showTitle": null,
+        "date": "2028-12-31",
+        "oldDate": "2028-03-01",
+        "oldDatePrecision": "month",
+        "status": null,
+        "oldStatus": null,
+        "season": null
+    },
+    "date first announced": {
+        "key": "date_changed:movie:603:2027-03-12",
+        "event": "date_changed",
+        "media": {
+            "type": "movie",
+            "ref": "603",
+            "title": "Dune",
+            "releaseDate": "2027-03-12",
+            "extra": []
+        },
+        "showTitle": null,
+        "date": "2027-03-12",
+        "oldDate": null,
+        "status": null,
+        "oldStatus": null,
+        "season": null
+    },
+    "dlc date moved": {
+        "key": "date_changed:game:5000:2027-12-31:year",
+        "event": "date_changed",
+        "media": {
+            "type": "game",
+            "ref": "5000",
+            "title": "The Master Trials",
+            "releaseDate": "2027-12-31",
+            "extra": {
+                "gameType": "dlc",
+                "relatedTo": "Breath of the Wild",
+                "releasePrecision": "year"
+            }
+        },
+        "showTitle": null,
+        "date": "2027-12-31",
+        "oldDate": "2027-06-30",
+        "oldDatePrecision": "quarter",
+        "status": null,
+        "oldStatus": null,
+        "season": null
+    },
+    "dlc announced": {
+        "key": "related_announced:game:5000",
+        "event": "related_announced",
+        "media": {
+            "type": "game",
+            "ref": "5000",
+            "title": "The Master Trials",
+            "releaseDate": "2027-12-31",
+            "extra": {
+                "gameType": "dlc",
+                "relatedTo": "Breath of the Wild",
+                "releasePrecision": "year"
+            }
+        },
+        "showTitle": null,
+        "date": "2027-12-31",
+        "oldDate": null,
+        "status": null,
+        "oldStatus": null,
+        "season": null
+    },
+    "status": {
+        "key": "show_status:show:1399:returning-series",
+        "event": "show_status",
+        "media": {
+            "type": "show",
+            "ref": "1399",
+            "title": "Severance",
+            "releaseDate": "2022-02-18",
+            "extra": []
+        },
+        "showTitle": null,
+        "date": null,
+        "oldDate": null,
+        "status": "Returning Series",
+        "oldStatus": "Ended",
+        "season": null
+    },
+    "season announced": {
+        "key": "season_announced:show:1399:3",
+        "event": "season_announced",
+        "media": {
+            "type": "show",
+            "ref": "1399",
+            "title": "Severance",
+            "releaseDate": "2022-02-18",
+            "extra": []
+        },
+        "showTitle": null,
+        "date": null,
+        "oldDate": null,
+        "status": null,
+        "oldStatus": null,
+        "season": 3
+    },
+    "person title": {
+        "key": "new_title:movie:603",
+        "event": "person_new_title",
+        "media": {
+            "type": "movie",
+            "ref": "603",
+            "title": "Dune",
+            "releaseDate": "2027-03-12",
+            "extra": []
+        },
+        "showTitle": null,
+        "date": "2027-03-12",
+        "oldDate": null,
+        "status": null,
+        "oldStatus": null,
+        "season": null,
+        "personName": "Denis Villeneuve"
+    },
+    "company title": {
+        "key": "new_title:movie:604",
+        "event": "company_new_title",
+        "media": {
+            "type": "movie",
+            "ref": "604",
+            "title": "Dune Two",
+            "releaseDate": "2028-12-31",
+            "extra": {
+                "releasePrecision": "year"
+            }
+        },
+        "showTitle": null,
+        "date": "2028-12-31",
+        "oldDate": null,
+        "status": null,
+        "oldStatus": null,
+        "season": null,
+        "companyName": "Legendary"
+    },
+    "collection part": {
+        "key": "new_title:movie:603",
+        "event": "collection_new_item",
+        "media": {
+            "type": "movie",
+            "ref": "603",
+            "title": "Dune",
+            "releaseDate": "2027-03-12",
+            "extra": []
+        },
+        "showTitle": null,
+        "date": "2027-03-12",
+        "oldDate": null,
+        "status": null,
+        "oldStatus": null,
+        "season": null,
+        "collectionTitle": "Dune Collection",
+        "collectionProvider": "tmdb",
+        "collectionRef": "726871"
+    },
+    "collection parts": {
+        "key": "collection_items:1:05cf281c050be3da4eecf3bc6e8aac1b",
+        "event": "collection_new_item",
+        "media": {
+            "type": "movie",
+            "ref": "604",
+            "title": "Dune Two",
+            "releaseDate": "2028-12-31",
+            "extra": {
+                "releasePrecision": "year"
+            }
+        },
+        "items": [
+            {
+                "type": "movie",
+                "ref": "604",
+                "title": "Dune Two",
+                "releaseDate": "2028-12-31",
+                "extra": {
+                    "releasePrecision": "year"
+                }
+            },
+            {
+                "type": "movie",
+                "ref": "603",
+                "title": "Dune",
+                "releaseDate": "2027-03-12",
+                "extra": []
+            }
+        ],
+        "showTitle": null,
+        "date": null,
+        "oldDate": null,
+        "status": null,
+        "oldStatus": null,
+        "season": null,
+        "collectionTitle": "Dune Collection",
+        "collectionProvider": "tmdb",
+        "collectionRef": "726871"
+    },
+    "titles removed": {
+        "key": "titles_removed:05cf281c050be3da4eecf3bc6e8aac1b",
+        "event": "titles_removed",
+        "media": {
+            "type": "movie",
+            "ref": "603",
+            "title": "Dune",
+            "releaseDate": "2027-03-12",
+            "extra": []
+        },
+        "items": [
+            {
+                "type": "movie",
+                "ref": "603",
+                "title": "Dune",
+                "releaseDate": "2027-03-12",
+                "extra": []
+            },
+            {
+                "type": "movie",
+                "ref": "604",
+                "title": "Dune Two",
+                "releaseDate": "2028-12-31",
+                "extra": {
+                    "releasePrecision": "year"
+                }
+            }
+        ],
+        "showTitle": null,
+        "date": null,
+        "oldDate": null,
+        "status": null,
+        "oldStatus": null,
+        "season": null
+    }
+}

@@ -16,7 +16,7 @@ use App\Models\Follow;
 use App\Models\MediaItem;
 use App\Models\Person;
 use App\Models\User;
-use App\Notifications\MediaEventPayload;
+use App\Notifications\Events\CreatorNewTitle;
 use App\Support\ExternalServiceException;
 use App\Tracking\Creators\CompanyTitles;
 use App\Tracking\Creators\CreatorTitleSource;
@@ -188,7 +188,7 @@ final readonly class SyncCreatorTitles
 
             // In the order the titles come, soonest first.
             foreach (MediaItem::query()->whereIn('id', $backed)->get()->sortBy(fn (MediaItem $item): int|false => array_search($item->id, $backed, true)) as $item) {
-                $event = MediaEventPayload::creatorTitle($announcement, $item, $titles->name);
+                $event = CreatorNewTitle::of($announcement, $item, $titles->name);
 
                 if ($event->wantedBy($follower)) {
                     $this->send->execute($follower, $event);

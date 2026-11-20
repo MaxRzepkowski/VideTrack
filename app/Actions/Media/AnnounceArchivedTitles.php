@@ -4,7 +4,7 @@ namespace App\Actions\Media;
 
 use App\Models\MediaItem;
 use App\Models\User;
-use App\Notifications\MediaEventPayload;
+use App\Notifications\Events\TitlesRemoved;
 
 /**
  * One notification per user for every title of theirs that became an archive
@@ -23,7 +23,7 @@ final readonly class AnnounceArchivedTitles
         $sent = 0;
 
         foreach (User::query()->whereIn('id', array_keys($archived))->get() as $user) {
-            $sent += (int) $this->send->execute($user, MediaEventPayload::titlesRemoved($archived[$user->id]));
+            $sent += (int) $this->send->execute($user, TitlesRemoved::of($archived[$user->id]));
         }
 
         return $sent;

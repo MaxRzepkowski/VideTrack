@@ -7,6 +7,7 @@ use App\Enums\FollowMode;
 use App\Library\Data\CollectionSyncResult;
 use App\Models\Follow;
 use App\Models\MediaItem;
+use App\Notifications\Events\CollectionParts;
 use App\Notifications\MediaEventPayload;
 use App\Tracking\UpcomingTitleWindow;
 
@@ -74,8 +75,8 @@ final readonly class NotifyCollectionAdditions
         }
 
         $payloads = $items->count() <= self::SEPARATE_UP_TO
-            ? $items->map(fn (MediaItem $item): MediaEventPayload => MediaEventPayload::collectionParts($result->list, [$item]))->all()
-            : [MediaEventPayload::collectionParts($result->list, array_values($items->all()))];
+            ? $items->map(fn (MediaItem $item): MediaEventPayload => CollectionParts::of($result->list, [$item]))->all()
+            : [CollectionParts::of($result->list, array_values($items->all()))];
 
         $sent = 0;
 

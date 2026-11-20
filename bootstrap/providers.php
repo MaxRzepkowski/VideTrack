@@ -41,6 +41,7 @@ use App\Integrations\TvTime\TvTimeServiceProvider;
 use App\Integrations\VideTrack\VideTrackServiceProvider;
 use App\Integrations\WebPush\WebPushServiceProvider;
 use App\Integrations\Yamtrack\YamtrackServiceProvider;
+use App\Notifications\NotificationsServiceProvider;
 use App\Providers\AppServiceProvider;
 use App\Providers\RegistryServiceProvider;
 use App\Providers\TypeScriptServiceProvider;
@@ -90,7 +91,8 @@ return [
     EmbyServiceProvider::class,
     GenericServiceProvider::class,
 
-    // Where notifications go beyond the bell.
+    // What notifications say, and where they go beyond the bell.
+    NotificationsServiceProvider::class,
     DiscordServiceProvider::class,
     MailServiceProvider::class,
     AppriseServiceProvider::class,
