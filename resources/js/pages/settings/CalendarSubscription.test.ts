@@ -1,5 +1,5 @@
-import CalendarSubscriptionCard from '@/components/settings/CalendarSubscriptionCard.vue';
 import { confirm } from '@/composables/useConfirm';
+import CalendarSubscription from '@/pages/settings/CalendarSubscription.vue';
 import { useMediaTypes } from '@/test/factories';
 import { router } from '@inertiajs/vue3';
 import { flushPromises, mount } from '@vue/test-utils';
@@ -16,12 +16,15 @@ beforeEach(() => {
 });
 
 function card() {
-    return mount(CalendarSubscriptionCard, { props: { calendarFeed, rssFeed } });
+    return mount(CalendarSubscription, {
+        props: { calendarFeed, rssFeed },
+        global: { stubs: { AppLayout: { template: '<div><slot /></div>' }, SettingsLayout: { template: '<div><slot /></div>' }, Head: true } },
+    });
 }
 
 const address = (wrapper: ReturnType<typeof card>, id: string) => (wrapper.get(`#${id}`).element as HTMLInputElement).value;
 
-describe('CalendarSubscriptionCard', () => {
+describe('CalendarSubscription', () => {
     it('starts on the plain address of each feed, in the scope each carries by default', () => {
         const wrapper = card();
 

@@ -2,21 +2,18 @@
 import HeadingSmall from '@/components/HeadingSmall.vue';
 import ServiceLogo from '@/components/ServiceLogo.vue';
 import ServiceTile from '@/components/settings/ServiceTile.vue';
-import CalendarSubscriptionCard from '@/components/settings/CalendarSubscriptionCard.vue';
 import SettingsCard from '@/components/settings/SettingsCard.vue';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/AppLayout.vue';
 import SettingsLayout from '@/layouts/settings/Layout.vue';
 import { SETTINGS_CARD_CLASS } from '@/lib/ui';
-import type { ExportDownload, ExportShelf, SubscriptionFeed } from '@/types/generated';
+import type { ExportDownload, ExportShelf } from '@/types/generated';
 import { Head } from '@inertiajs/vue3';
 import { Download, FileDown, FileSpreadsheet, DatabaseBackup } from '@lucide/vue';
 import { trans } from 'laravel-vue-i18n';
 import { computed } from 'vue';
 
 const props = defineProps<{
-    calendarFeed: SubscriptionFeed;
-    rssFeed: SubscriptionFeed;
     /** Every download this instance offers, in the order the page shows them. */
     formats: ExportDownload[];
 }>();
@@ -85,8 +82,6 @@ const services = onShelf('service');
                         </li>
                     </ul>
                 </SettingsCard>
-
-                <CalendarSubscriptionCard :calendar-feed="calendarFeed" :rss-feed="rssFeed" />
             </div>
         </SettingsLayout>
     </AppLayout>

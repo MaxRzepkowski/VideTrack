@@ -36,6 +36,7 @@ return [
     'keywords_settings_tracking' => 'śledzenie, ustawienia, tracking, settings',
     'keywords_settings_integrations' => 'integracje, ustawienia, plex, jellyfin, emby, webhook, integrations, settings',
     'keywords_settings_import' => 'import, trakt, ustawienia, settings',
+    'keywords_settings_calendar' => 'kalendarz, subskrypcja, ical, rss, kanał, ustawienia, calendar, subscription, feed',
     'keywords_settings_export' => 'eksport, kopia, ustawienia, export, backup, settings',
     'keywords_settings_api' => 'api, token, tokeny, ustawienia, settings',
     'keywords_settings_tasks' => 'zadania, kolejka, ustawienia, tasks, queue, settings',

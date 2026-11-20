@@ -3,6 +3,7 @@ import type { NonEmpty } from '@/types';
 import {
     Bell,
     Braces,
+    Calendar,
     CalendarDays,
     ChartNoAxesColumn,
     CirclePlay,
@@ -246,6 +247,13 @@ export const SETTINGS_NAV: NonEmpty<NavEntry> = [
         label: () => trans('common.notifications'),
         icon: Send,
         keywords: () => trans('palette.keywords_settings_channels'),
+    },
+    {
+        id: 'settings.calendar',
+        route: 'settings.calendar-subscription.edit',
+        label: () => trans('settings.calendar_subscription'),
+        icon: Calendar,
+        keywords: () => trans('palette.keywords_settings_calendar'),
     },
     {
         id: 'settings.integrations',
