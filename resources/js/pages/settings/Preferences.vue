@@ -15,6 +15,7 @@ import { SETTINGS_FIELD_CLASS } from '@/lib/ui';
 import type { ProgressUnit, TimeFormat, UpNextSort, UpNextTarget, WeekStart } from '@/types/generated';
 import { Head, useForm } from '@inertiajs/vue3';
 import { trans } from 'laravel-vue-i18n';
+import { computed } from 'vue';
 import { toast } from 'vue-sonner';
 
 const props = defineProps<{
@@ -37,7 +38,22 @@ const form = useForm({
     reading_pace_pages: preferences.reading_pace_pages,
     reading_pace_chapters: preferences.reading_pace_chapters,
     reading_pace_issues: preferences.reading_pace_issues,
+    calendar_episode_image: preferences.calendar_episode_image,
+    countdown_episode_image: preferences.countdown_episode_image,
 });
+
+// Which image an episode shows: on the calendar, and on the countdowns.
+const episodeImages = computed(
+    () =>
+        [
+            { field: 'calendar_episode_image', label: trans('common.calendar'), description: trans('settings.which_image_episodes_use_in_the') },
+            {
+                field: 'countdown_episode_image',
+                label: trans('common.countdowns'),
+                description: trans('settings.which_image_episodes_use_in_countdowns'),
+            },
+        ] as const,
+);
 
 const defaultRegionLabel = props.regions[props.defaultRegion] ?? props.defaultRegion;
 
@@ -203,6 +219,22 @@ const UP_NEXT_SORTS: Choice<UpNextSort>[] = [
                             layout="inline"
                         >
                             <ToggleSwitch v-model="form.up_next_keep_finished" :label="trans('settings.keep_finished_shows_on_screen')" />
+                        </SettingsRow>
+                    </SettingsCard>
+
+                    <SettingsCard :title="trans('settings.episode_thumbnails')">
+                        <SettingsRow
+                            v-for="image in episodeImages"
+                            :key="image.field"
+                            :title="image.label"
+                            :description="image.description"
+                            :for="image.field"
+                            :error="form.errors[image.field]"
+                        >
+                            <select :id="image.field" v-model="form[image.field]" :class="[SETTINGS_FIELD_CLASS, 'block w-full']">
+                                <option value="backdrop">{{ trans('settings.show_backdrop') }}</option>
+                                <option value="still">{{ trans('settings.episode_still') }}</option>
+                            </select>
                         </SettingsRow>
                     </SettingsCard>
 

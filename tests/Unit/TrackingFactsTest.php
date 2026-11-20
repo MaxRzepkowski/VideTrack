@@ -1,6 +1,8 @@
 <?php
 
+use App\Accounts\Preferences\UserPreferences;
 use App\Tracking\Data\TrackingFacts;
+use App\Tracking\Surface;
 use App\Tracking\TrackingSource;
 
 /*
@@ -24,3 +26,17 @@ test('a title falls in the first row that applies', function (array $facts, ?Tra
     'your own bell over a creator' => [['manualFollow' => true, 'creatorFollow' => true], TrackingSource::ManualFollow],
     'a creator alone' => [['creatorFollow' => true], TrackingSource::CreatorFollow],
 ]);
+
+test('facts without their kind of title cannot say which surface carries them', function () {
+    expect(fn () => Surface::Calendar->carries(UserPreferences::fromStored([]), new TrackingFacts(backlog: true)))
+        ->toThrow(LogicException::class);
+});
+
+test('a surface carries a title by its row, as its kind of title has the rows', function () {
+    $preferences = UserPreferences::fromStored(['type_sources' => ['book' => ['notifications' => ['followed']]]]);
+
+    expect(Surface::Notifications->carries($preferences, new TrackingFacts(backlog: true, type: 'book')))->toBeFalse()
+        ->and(Surface::Notifications->carries($preferences, new TrackingFacts(manualFollow: true, type: 'book')))->toBeTrue()
+        ->and(Surface::Notifications->carries($preferences, new TrackingFacts(backlog: true, type: 'movie')))->toBeTrue()
+        ->and(Surface::Notifications->carries($preferences, new TrackingFacts(muted: true, backlog: true, type: 'movie')))->toBeFalse();
+});

@@ -11,7 +11,7 @@ import { Play, X } from '@lucide/vue';
 import { computed, ref } from 'vue';
 
 // A small "Live" mark in the bottom-left corner of every page while a
-// showcase on the viewer's calendar is on the air. Its name opens its page,
+// showcase the viewer's calendar or countdowns show is on the air. Its name opens its page,
 // the play button its stream. The page brought the events starting within
 // hours; the shared clock switches the mark on at the start and off at the
 // end, without a word to the server.

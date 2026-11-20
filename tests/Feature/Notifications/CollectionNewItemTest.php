@@ -89,6 +89,25 @@ test('a new part notifies whoever follows the collection', function () {
         ->and($notification->data['key'])->toBe('new_title:movie:624860');
 });
 
+test("a new part answers to the notifications row of the creators' titles, as its kind of title has it", function (array $preferences, bool $announced) {
+    Http::fake(matrixSequence(matrixGrown()));
+
+    $user = User::factory()->create(['preferences' => $preferences]);
+    $list = openMatrix($user);
+
+    followCollection($user, $list, FollowMode::Follow);
+
+    runRefresh();
+
+    expect($user->notifications()->count())->toBe($announced ? 1 : 0);
+})->with([
+    'the defaults' => [[], true],
+    'the default row off' => [['notifications_creators' => false], false],
+    "the films' own row off" => [['type_sources' => ['movie' => ['notifications' => ['backlog']]]], false],
+    "the films' own row on, the default off" => [['notifications_creators' => false, 'type_sources' => ['movie' => ['notifications' => ['creator']]]], true],
+    'the event switched off' => [['notify_collection_items' => false], false],
+]);
+
 test('a part the provider files under the saga long after it came out is not news', function () {
     Http::fake([
         ...matrixSequence([

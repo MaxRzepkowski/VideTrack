@@ -42,4 +42,10 @@ enum MediaEventType: string
             self::CollectionNewItem => NotificationEvent::CollectionItems,
         };
     }
+
+    /** Whether it announces a title a followed person, company or collection brought in. */
+    public function comesFromCreators(): bool
+    {
+        return in_array($this, [self::PersonNewTitle, self::CompanyNewTitle, self::CollectionNewItem], true);
+    }
 }

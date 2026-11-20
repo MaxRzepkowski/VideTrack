@@ -10,6 +10,7 @@ use App\Tracking\TrackingSource;
 use BackedEnum;
 use IntlCalendar;
 use LogicException;
+use stdClass;
 
 /**
  * A user's settings, each with its default in one place. Stored as JSON that
@@ -21,6 +22,14 @@ final readonly class UserPreferences
 {
     /** The fastest reading pace a setting takes, per hour in any unit. */
     public const READING_PACE_MAX = 1000;
+
+    /**
+     * The kinds of title with sources of their own, kept apart from the
+     * scalar settings: type => surface => the rows switched on there. A kind
+     * of title absent here, or a surface absent under it, follows the
+     * default rows; its own were copied from them once and stay its own.
+     */
+    public const TYPE_SOURCES = 'type_sources';
 
     /**
      * Every setting and its default: a flag, a choice (its enum's default
@@ -56,6 +65,7 @@ final readonly class UserPreferences
         'calendar_game_platforms' => true,
         'calendar_release_mode' => ReleaseDateMode::Both,
         'calendar_episode_image' => EpisodeImage::Backdrop,
+        'calendar_events' => true,
         'countdown_active' => true,
         'countdown_dropped' => false,
         'countdown_on_hold' => true,
@@ -65,6 +75,7 @@ final readonly class UserPreferences
         'countdown_game_platforms' => false,
         'countdown_release_mode' => ReleaseDateMode::Both,
         'countdown_episode_image' => EpisodeImage::Backdrop,
+        'countdown_events' => true,
         'notifications_active' => true,
         'notifications_dropped' => false,
         'notifications_on_hold' => false,
@@ -90,10 +101,16 @@ final readonly class UserPreferences
         'reading_pace_issues' => 6,
     ];
 
+    /** The kinds of title with sources of their own, read once: the matrix asks for every tracked title. */
+    private TypeSources $typeSources;
+
     /**
      * @param  array<string, mixed>  $stored  what the user chose, keyed as above
      */
-    private function __construct(private array $stored) {}
+    private function __construct(private array $stored)
+    {
+        $this->typeSources = TypeSources::fromStored($stored[self::TYPE_SOURCES] ?? null);
+    }
 
     /**
      * @param  array<string, mixed>  $stored
@@ -126,7 +143,7 @@ final readonly class UserPreferences
      * Every setting, the user's choice or its default — what the front reads,
      * so it never keeps defaults of its own.
      *
-     * @return array<string, bool|int|string|null>
+     * @return array<string, bool|int|string|array<string, array<string, list<string>>>|stdClass|null>
      */
     public function resolved(): array
     {
@@ -139,6 +156,8 @@ final readonly class UserPreferences
         // As the server reads it, so the page's picker shows the country
         // the calendar actually uses.
         $resolved['region'] = $this->region();
+
+        $resolved[self::TYPE_SOURCES] = $this->typeSources->toWire();
 
         return $resolved;
     }
@@ -175,15 +194,20 @@ final readonly class UserPreferences
     }
 
     /**
-     * The rows of the tracking matrix the user lets feed a surface.
+     * The rows of the tracking matrix the user lets feed a surface: for a
+     * kind of title with sources of its own there, its own; else the default.
      *
      * @return list<TrackingSource>
      */
-    public function matrix(Surface $surface): array
+    public function matrix(Surface $surface, ?string $type = null): array
     {
+        $own = $type === null ? null : $this->typeSources->rows($type, $surface);
+
         return array_values(array_filter(
             TrackingSource::cases(),
-            fn (TrackingSource $row): bool => $this->flag(self::surfaceKey($surface).'_'.self::rowKey($row)),
+            fn (TrackingSource $row): bool => $own !== null
+                ? in_array($row, $own, true)
+                : $this->flag(self::surfaceKey($surface).'_'.self::rowKey($row)),
         ));
     }
 
@@ -194,7 +218,7 @@ final readonly class UserPreferences
      */
     public function releaseMode(Surface $surface): ReleaseDateMode
     {
-        return $this->choice(self::surfaceKey($surface).'_release_mode', ReleaseDateMode::class);
+        return $this->choice(self::releaseModeKey($surface), ReleaseDateMode::class);
     }
 
     /**
@@ -204,12 +228,45 @@ final readonly class UserPreferences
      */
     public function perPlatform(Surface $surface): bool
     {
-        return $surface !== Surface::Notifications && $this->flag(self::surfaceKey($surface).'_game_platforms');
+        return $surface->isView() && $this->flag(self::perPlatformKey($surface));
+    }
+
+    /**
+     * Whether a view shows the events (showcases, presentations) of the
+     * providers here. No event pings, so the notifications never do.
+     */
+    public function showsEvents(Surface $surface): bool
+    {
+        return $surface->isView() && $this->flag(self::eventsKey($surface));
     }
 
     public function notifies(NotificationEvent $event): bool
     {
-        return $this->flag('notify_'.$event->value);
+        return $this->flag(self::notifiesKey($event));
+    }
+
+    /** The setting {@see releaseMode()} reads, for the settings page to name. */
+    public static function releaseModeKey(Surface $surface): string
+    {
+        return self::surfaceKey($surface).'_release_mode';
+    }
+
+    /** The setting {@see perPlatform()} reads, for the settings page to name. */
+    public static function perPlatformKey(Surface $surface): string
+    {
+        return self::surfaceKey($surface).'_game_platforms';
+    }
+
+    /** The setting {@see showsEvents()} reads, for the settings page to name. */
+    public static function eventsKey(Surface $surface): string
+    {
+        return self::surfaceKey($surface).'_events';
+    }
+
+    /** The setting {@see notifies()} reads, for the settings page to name. */
+    public static function notifiesKey(NotificationEvent $event): string
+    {
+        return 'notify_'.$event->value;
     }
 
     public function personFollowScope(): PersonFollowScope

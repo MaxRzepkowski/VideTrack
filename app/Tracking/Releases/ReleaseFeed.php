@@ -46,8 +46,7 @@ final readonly class ReleaseFeed
             viewer: $user,
             from: $from,
             to: $to,
-            mode: $user->preferences->releaseMode($surface),
-            perPlatform: $user->preferences->perPlatform($surface),
+            surface: $surface,
             approximateDates: $surface->showsApproximateDates(),
             followedVia: $this->followedVia($user, $byCreators),
         );
@@ -67,7 +66,7 @@ final readonly class ReleaseFeed
     }
 
     /** Where a kind of title keeps its releases; null for one that has none of its own. */
-    private function sourceOf(MediaTypeDefinition $type): ?ReleaseSource
+    public function sourceOf(MediaTypeDefinition $type): ?ReleaseSource
     {
         return match (true) {
             $type->childType !== null => $this->episodes,

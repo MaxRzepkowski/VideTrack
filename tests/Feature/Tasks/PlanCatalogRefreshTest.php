@@ -70,6 +70,18 @@ test('a film with a bell and its home release still ahead is in the daily set', 
     expect(plannedReason($film))->toBe(RefreshReason::Active);
 });
 
+test('a film whose kind of title keeps its bell out of the notifications is left to the cycle', function () {
+    $film = MediaItem::factory()->movie()->create(['status' => TitleStatus::Released, 'release_date' => '2026-09-01', 'home_release_date' => '2026-12-01']);
+    // Another film's turn comes first, so this one is not today's share.
+    MediaItem::factory()->movie()->create(['created_at' => now()->subYear()]);
+    $user = User::factory()->create(['preferences' => ['type_sources' => ['movie' => ['notifications' => ['backlog']]]]]);
+    Follow::factory()->for($user)->create(['media_item_id' => $film->id]);
+
+    app(PlanCatalogRefresh::class)->execute();
+
+    expect(plannedReason($film))->toBeNull();
+});
+
 test('an unreleased game with a bell is in the daily set', function () {
     enableGamesModule();
     $game = MediaItem::factory()->game()->create(['release_date' => '2027-03-01', 'status' => null]);

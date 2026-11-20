@@ -6,7 +6,9 @@ import type {
     IdentityProviderOption,
     PersonFollowScope,
     ReleaseDateMode,
+    Surface,
     TimeFormat,
+    TrackingSource,
     UpNextSort,
     UpNextTarget,
     UserMediaState,
@@ -103,6 +105,7 @@ export interface UserPreferences {
     calendar_game_platforms: boolean;
     calendar_release_mode: ReleaseDateMode;
     calendar_episode_image: EpisodeImage;
+    calendar_events: boolean;
     countdown_active: boolean;
     countdown_dropped: boolean;
     countdown_on_hold: boolean;
@@ -112,6 +115,7 @@ export interface UserPreferences {
     countdown_game_platforms: boolean;
     countdown_release_mode: ReleaseDateMode;
     countdown_episode_image: EpisodeImage;
+    countdown_events: boolean;
     notifications_active: boolean;
     notifications_dropped: boolean;
     notifications_on_hold: boolean;
@@ -132,4 +136,6 @@ export interface UserPreferences {
     reading_pace_pages: number;
     reading_pace_chapters: number;
     reading_pace_issues: number;
+    /** The kinds of title with sources of their own: type => surface => its rows. */
+    type_sources: Partial<Record<string, Partial<Record<Surface, TrackingSource[]>>>>;
 }

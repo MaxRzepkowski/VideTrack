@@ -15,8 +15,10 @@ use App\Tracking\UpcomingTitleWindow;
  * book series and game series, because all three are provider collections.
  *
  * The criterion is explicit and narrow: the bell on the collection page, in
- * follow mode. Neither the tracking matrix nor a guess from watched parts
- * qualifies — a saga browsed once out of curiosity must stay silent.
+ * follow mode. A guess from watched parts does not qualify — a saga browsed
+ * once out of curiosity must stay silent — and the notifications row of
+ * titles followed creators bring in can still silence it, as it does a
+ * person's or a company's new title.
  *
  * The event fires when the provider ADDS the part, not on its release day:
  * the release itself is covered for anyone whose countdowns the part enters.
@@ -55,6 +57,7 @@ final readonly class NotifyCollectionAdditions
             ->where('mode', FollowMode::Follow->value)
             ->with('user')
             ->get()
+            // Who switched the news off is not asked about each part; what is left of it, `wantedBy` decides per part.
             ->filter(fn (Follow $follow): bool => $follow->user->preferences->notifies(NotificationEvent::CollectionItems));
 
         if ($followers->isEmpty()) {
@@ -78,7 +81,9 @@ final readonly class NotifyCollectionAdditions
 
         foreach ($followers as $follow) {
             foreach ($payloads as $payload) {
-                $sent += (int) $this->send->execute($follow->user, $payload);
+                if ($payload->wantedBy($follow->user)) {
+                    $sent += (int) $this->send->execute($follow->user, $payload);
+                }
             }
         }
 

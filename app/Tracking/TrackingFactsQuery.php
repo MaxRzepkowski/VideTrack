@@ -20,7 +20,7 @@ use Illuminate\Support\Facades\DB;
  * read the same traces with the same rules, so a title the calendar carries is
  * a title whose changes are announced — they differ only in what they narrow
  * by. Every trace comes back in one query; climbing to the titles adds one per
- * level of the hierarchy.
+ * level of the hierarchy, and naming their kinds one more.
  */
 final readonly class TrackingFactsQuery
 {
@@ -31,11 +31,27 @@ final readonly class TrackingFactsQuery
      */
     public function forUser(User $user): array
     {
-        return $this->byRoot($this->traces(userId: $user->id));
+        $byRoot = $this->byRoot($this->traces(userId: $user->id));
+        // Its kind of title may have sources of its own.
+        $types = [];
+
+        foreach (MediaItem::query()->toBase()->whereIn('id', array_keys($byRoot))->get(['id', 'type']) as $row) {
+            $types[QueryRow::int($row, 'id')] = QueryRow::text($row, 'type');
+        }
+
+        $facts = [];
+
+        // A title gone since its traces were read is not tracked any more.
+        foreach (array_intersect_key($byRoot, $types) as $rootId => $traces) {
+            $facts[$rootId] = $this->facts($traces, $rootId, $types[$rootId]);
+        }
+
+        return $facts;
     }
 
     /**
-     * The same, for just the given titles — what the cards on a page need.
+     * The same, for just the given titles — what the cards on a page need:
+     * the row alone, so the facts leave the kind of title out.
      *
      * @param  list<int>  $rootIds
      * @return array<int, TrackingFacts> root id => facts, for those of the titles the user touched
@@ -47,8 +63,13 @@ final readonly class TrackingFactsQuery
         }
 
         $traces = $this->traces(userId: $user->id, items: $this->hierarchy->treeIdsQuery($rootIds));
+        $facts = [];
 
-        return array_intersect_key($this->byRoot($traces), array_flip($rootIds));
+        foreach (array_intersect_key($this->byRoot($traces), array_flip($rootIds)) as $rootId => $rootTraces) {
+            $facts[$rootId] = $this->facts($rootTraces, $rootId, null);
+        }
+
+        return $facts;
     }
 
     /**
@@ -62,14 +83,14 @@ final readonly class TrackingFactsQuery
             $byUser[$trace['user']][] = $trace;
         }
 
-        return array_map(fn (array $userTraces): TrackingFacts => $this->facts($userTraces, $root->id), $byUser);
+        return array_map(fn (array $userTraces): TrackingFacts => $this->facts($userTraces, $root->id, $root->type), $byUser);
     }
 
     /**
-     * Traces grouped by the title they belong to, each group folded into facts.
+     * Traces grouped by the title they belong to.
      *
      * @param  list<array{user: int, item: int, trace: Trace}>  $traces
-     * @return array<int, TrackingFacts>
+     * @return array<int, list<array{user: int, item: int, trace: Trace}>> root id => its traces
      */
     private function byRoot(array $traces): array
     {
@@ -84,13 +105,7 @@ final readonly class TrackingFactsQuery
             }
         }
 
-        $facts = [];
-
-        foreach ($byRoot as $rootId => $rootTraces) {
-            $facts[$rootId] = $this->facts($rootTraces, $rootId);
-        }
-
-        return $facts;
+        return $byRoot;
     }
 
     /**
@@ -101,7 +116,7 @@ final readonly class TrackingFactsQuery
      *
      * @param  list<array{user: int, item: int, trace: Trace}>  $traces
      */
-    private function facts(array $traces, int $rootId): TrackingFacts
+    private function facts(array $traces, int $rootId, ?string $type): TrackingFacts
     {
         $on = [];
 
@@ -125,6 +140,7 @@ final readonly class TrackingFactsQuery
             activity: isset($on[Trace::Activity->value]),
             manualFollow: isset($on[Trace::ManualFollow->value]),
             creatorFollow: isset($on[Trace::CreatorFollow->value]),
+            type: $type,
         );
     }
 

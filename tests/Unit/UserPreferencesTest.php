@@ -7,7 +7,6 @@ use App\Accounts\Preferences\UserPreferences;
 use App\Catalog\ProgressUnit;
 use App\Enums\ReleaseDateMode;
 use App\Enums\UpNextSort;
-use App\Http\Requests\Settings\PreferencesUpdateRequest;
 use App\Tracking\Surface;
 use App\Tracking\TrackingSource;
 
@@ -18,7 +17,8 @@ use App\Tracking\TrackingSource;
 
 // The front's test factory reads the same file, so its account is the server's.
 test('an account that never chose anything reads every default', function () {
-    expect(UserPreferences::fromStored([])->resolved())->toBe(jsonFixture('preferences/defaults'));
+    // As the page reads them, an empty map an object.
+    expect(json_encode(UserPreferences::fromStored([])->resolved()))->toBe(json_encode(json_decode((string) file_get_contents(fixture('preferences/defaults.json')))));
 });
 
 test('the typed reads of an untouched account', function () {
@@ -110,8 +110,33 @@ test('a partial write keeps every other choice, unknown ones too, and stores no 
         ->and($preferences->spoilerProtection())->toBeTrue();
 });
 
-test('every setting a page can save has a default to read it back by', function () {
-    $saved = array_keys((new PreferencesUpdateRequest)->rules());
+test("a kind of title's own sources are its whole say on a surface, the rest follows the defaults", function () {
+    $preferences = UserPreferences::fromStored(['calendar_dropped' => false, 'type_sources' => ['book' => [
+        'calendar' => ['dropped', 'backlog'],
+        'countdowns' => [],
+    ]]]);
 
-    expect(array_diff($saved, array_keys(UserPreferences::fromStored([])->resolved())))->toBe([]);
+    expect($preferences->matrix(Surface::Calendar, 'book'))->toBe([TrackingSource::Dropped, TrackingSource::Backlog])
+        ->and($preferences->matrix(Surface::Countdowns, 'book'))->toBe([])
+        ->and($preferences->matrix(Surface::Notifications, 'book'))->toBe($preferences->matrix(Surface::Notifications))
+        ->and($preferences->matrix(Surface::Calendar, 'movie'))->toBe($preferences->matrix(Surface::Calendar))
+        ->and($preferences->matrix(Surface::Calendar))->not->toContain(TrackingSource::Dropped);
 });
+
+test('own sources that no longer mean anything read as no say at all', function (mixed $stored, string $resolved) {
+    $preferences = UserPreferences::fromStored(['type_sources' => $stored]);
+
+    expect(json_encode($preferences->resolved()['type_sources']))->toBe($resolved);
+})->with([
+    'not a map' => ['everything', '{}'],
+    'a list' => [[['notifications' => ['backlog']]], '{}'],
+    'a kind of title that is not a map' => [['book' => 'calendar'], '{}'],
+    'a surface that is gone' => [['book' => ['digest' => ['backlog']]], '{}'],
+    'a surface that is not a list' => [['book' => ['notifications' => 'backlog']], '{}'],
+    'a row that is gone, or not a row' => [['book' => ['notifications' => ['backlog', 'someday', 7, null, ['x']]]], '{"book":{"notifications":["backlog"]}}'],
+    'a row twice' => [['book' => ['notifications' => ['backlog', 'backlog']]], '{"book":{"notifications":["backlog"]}}'],
+    'rows under names' => [['book' => ['notifications' => ['a' => 'activity', 'b' => 'creator']]], '{"book":{"notifications":["activity","creator"]}}'],
+    'the calendar without the countdowns' => [['book' => ['calendar' => ['backlog'], 'notifications' => []]], '{"book":{"notifications":[]}}'],
+    'the countdowns alone' => [['book' => ['countdowns' => ['backlog']]], '{}'],
+    'nothing at all on every surface' => [['book' => ['calendar' => [], 'countdowns' => [], 'notifications' => []]], '{"book":{"calendar":[],"countdowns":[],"notifications":[]}}'],
+]);

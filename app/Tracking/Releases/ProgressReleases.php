@@ -2,12 +2,18 @@
 
 namespace App\Tracking\Releases;
 
+use App\Accounts\Preferences\UserPreferences;
+use App\Catalog\Contracts\SupportsPlatforms;
 use App\Catalog\Data\PlatformRelease;
 use App\Catalog\ItemMetadata;
 use App\Catalog\MediaItemSummaries;
+use App\Catalog\MediaTypeDefinition;
+use App\Catalog\ProviderRegistry;
 use App\Catalog\ReleaseRegion;
 use App\Catalog\ViewerRegion;
 use App\Models\MediaItem;
+use App\Tracking\Settings\TypeOption;
+use App\Tracking\Surface;
 use Illuminate\Support\Collection;
 
 /**
@@ -19,6 +25,8 @@ use Illuminate\Support\Collection;
  */
 final readonly class ProgressReleases implements ReleaseSource
 {
+    public function __construct(private ProviderRegistry $providers) {}
+
     public function releases(Collection $roots, ReleaseWindow $window): Collection
     {
         $viewer = $window->viewer;
@@ -30,11 +38,32 @@ final readonly class ProgressReleases implements ReleaseSource
     }
 
     /**
+     * Every platform's premiere as its own entry, for a kind of title whose
+     * service tells the platforms apart. A notification is about the title,
+     * so only the views have the choice.
+     */
+    public function typeOptions(MediaTypeDefinition $type): array
+    {
+        if (! $this->providers->forType($type) instanceof SupportsPlatforms) {
+            return [];
+        }
+
+        return [TypeOption::on(
+            key: 'platforms',
+            label: 'settings.every_platform_on_its_own',
+            description: 'settings.ports_early_access_and_patches_instead',
+            phrase: 'settings.phrase_every_platform',
+            surfaces: Surface::views(),
+            preference: UserPreferences::perPlatformKey(...),
+        )];
+    }
+
+    /**
      * @return Collection<int, ReleaseEntry>
      */
     private function entries(MediaItem $title, ReleaseWindow $window, ReleaseRegion $region): Collection
     {
-        $releases = $window->perPlatform ? $this->pickRegionalVariants($title, $region) : null;
+        $releases = $window->viewer->preferences->perPlatform($window->surface) ? $this->pickRegionalVariants($title, $region) : null;
 
         if ($releases !== null && $releases->isNotEmpty()) {
             return $releases

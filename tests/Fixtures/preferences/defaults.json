@@ -17,6 +17,7 @@
     "calendar_game_platforms": true,
     "calendar_release_mode": "both",
     "calendar_episode_image": "backdrop",
+    "calendar_events": true,
     "countdown_active": true,
     "countdown_dropped": false,
     "countdown_on_hold": true,
@@ -26,6 +27,7 @@
     "countdown_game_platforms": false,
     "countdown_release_mode": "both",
     "countdown_episode_image": "backdrop",
+    "countdown_events": true,
     "notifications_active": true,
     "notifications_dropped": false,
     "notifications_on_hold": false,
@@ -44,5 +46,6 @@
     "company_follow_scope": "both",
     "reading_pace_pages": 50,
     "reading_pace_chapters": 12,
-    "reading_pace_issues": 6
+    "reading_pace_issues": 6,
+    "type_sources": {}
 }

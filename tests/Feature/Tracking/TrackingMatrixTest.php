@@ -23,6 +23,7 @@ use App\Tracking\Releases\ReleaseFeed;
 use App\Tracking\Surface;
 use App\Tracking\TrackedAudience;
 use Carbon\CarbonImmutable;
+use Laravel\Sanctum\Sanctum;
 
 /*
  * One rule behind the calendar, the countdowns and both kinds of
@@ -295,4 +296,63 @@ test('the bell names the row the calendar reads the title through', function () 
 
     // A season carries no bell of its own.
     expect(app(LibraryStates::class)->resolveItem($user, $show->children()->firstOrFail())->followSource?->value)->toBeNull();
+});
+
+test('a kind of title with sources of its own follows them on each surface, the others keep the defaults', function () {
+    $user = User::factory()->create();
+    $show = airingShow('Slow Horses');
+    $film = MediaItem::factory()->movie()->create(['title' => 'Dune: Part Three', 'release_date' => today()->addDays(10)->toDateString()]);
+    putOnBacklog($user, $show);
+    putOnBacklog($user, $film);
+
+    setToggles($user, ['type_sources' => ['movie' => [
+        'calendar' => ['activity'],
+        'countdowns' => ['backlog'],
+        'notifications' => [],
+    ]]]);
+
+    expect(carriedTitles($user))->toBe(['Slow Horses'])
+        ->and(carriedTitles($user, Surface::Countdowns))->toBe(['Dune: Part Three', 'Slow Horses'])
+        ->and(carriedTitles($user, Surface::Notifications))->toBe(['Slow Horses'])
+        ->and(app(TrackedAudience::class)->usersFor($film))->toBeEmpty()
+        ->and(app(TrackedAudience::class)->usersFor($show)->pluck('id')->all())->toBe([$user->id]);
+});
+
+test('sources of its own are the whole say for a kind of title: one the defaults leave out comes back', function () {
+    $user = User::factory()->create();
+    $film = MediaItem::factory()->movie()->create(['title' => 'Nosferatu', 'release_date' => today()->addDays(10)->toDateString()]);
+    putOnBacklog($user, $film);
+    app(DropAttempt::class)->execute($user, $film, WatchedAt::releaseDateOrNow());
+
+    setToggles($user, ['notifications_dropped' => false]);
+    expect(carriedTitles($user, Surface::Notifications))->toBe([]);
+
+    setToggles($user, ['notifications_dropped' => false, 'type_sources' => ['movie' => ['notifications' => ['dropped']]]]);
+    expect(carriedTitles($user, Surface::Notifications))->toBe(['Nosferatu'])
+        ->and(app(TrackedAudience::class)->usersFor($film)->pluck('id')->all())->toBe([$user->id]);
+});
+
+test("the API and the assistants' tools read a kind of title's own sources as the pages do", function () {
+    $user = User::factory()->create(['preferences' => [
+        'calendar_watchlist' => false,
+        'countdown_watchlist' => false,
+        'type_sources' => ['movie' => ['calendar' => ['backlog'], 'countdowns' => ['backlog']]],
+    ]]);
+    $show = airingShow('Slow Horses');
+    $film = MediaItem::factory()->movie()->create(['title' => 'Dune: Part Three', 'release_date' => today()->addDays(3)->toDateString()]);
+    putOnBacklog($user, $show);
+    putOnBacklog($user, $film);
+    Sanctum::actingAs($user, ['read']);
+
+    $from = today()->toDateString();
+    $tool = fn (string $name, array $arguments): string => (string) $this->postJson(route('api.mcp'), [
+        'jsonrpc' => '2.0', 'id' => 1, 'method' => 'tools/call', 'params' => ['name' => $name, 'arguments' => $arguments],
+    ])->assertOk()->getContent();
+
+    expect((string) $this->getJson(route('api.v1.calendar', ['from' => $from, 'to' => today()->addDays(10)->toDateString()]))->assertOk()->getContent())
+        ->toContain('Dune: Part Three')->not->toContain('Slow Horses')
+        ->and((string) $this->getJson(route('api.v1.countdowns'))->assertOk()->getContent())
+        ->toContain('Dune: Part Three')->not->toContain('Slow Horses')
+        ->and($tool('get_calendar', ['from' => $from, 'days' => 11]))->toContain('Dune: Part Three')->not->toContain('Slow Horses')
+        ->and($tool('get_countdowns', []))->toContain('Dune: Part Three')->not->toContain('Slow Horses');
 });

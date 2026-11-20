@@ -1,0 +1,174 @@
+[
+    {
+        "type": "show",
+        "options": [
+            {
+                "key": "episodes",
+                "label": "settings.new_episodes",
+                "description": "settings.an_episode_of_a_tracked_show",
+                "phrase": "settings.phrase_new_episodes",
+                "switches": [
+                    {
+                        "surface": "notifications",
+                        "preference": "notify_episodes",
+                        "requires": null
+                    }
+                ],
+                "onWhen": null,
+                "choices": null,
+                "ofTrackedTitles": true
+            },
+            {
+                "key": "status",
+                "label": "settings.show_status_and_new_seasons",
+                "description": "settings.a_tracked_show_gets_a_new",
+                "phrase": "settings.phrase_show_status",
+                "switches": [
+                    {
+                        "surface": "notifications",
+                        "preference": "notify_show_status",
+                        "requires": null
+                    }
+                ],
+                "onWhen": null,
+                "choices": null,
+                "ofTrackedTitles": true
+            }
+        ]
+    },
+    {
+        "type": "movie",
+        "options": [
+            {
+                "key": "premiere",
+                "label": "settings.cinema_premiere",
+                "description": "settings.its_first_release_in_cinemas",
+                "phrase": "settings.phrase_cinema_premiere",
+                "switches": [
+                    {
+                        "surface": "calendar",
+                        "preference": "calendar_release_mode",
+                        "requires": null
+                    },
+                    {
+                        "surface": "countdowns",
+                        "preference": "countdown_release_mode",
+                        "requires": null
+                    },
+                    {
+                        "surface": "notifications",
+                        "preference": "notifications_release_mode",
+                        "requires": {
+                            "preference": "notify_premieres",
+                            "label": "settings.premieres"
+                        }
+                    }
+                ],
+                "onWhen": [
+                    "both",
+                    "cinema"
+                ],
+                "choices": [
+                    "both",
+                    "cinema",
+                    "digital",
+                    "none"
+                ],
+                "ofTrackedTitles": true
+            },
+            {
+                "key": "home",
+                "label": "settings.home_release",
+                "description": "settings.digital_or_on_disc",
+                "phrase": "settings.phrase_home_release",
+                "switches": [
+                    {
+                        "surface": "calendar",
+                        "preference": "calendar_release_mode",
+                        "requires": null
+                    },
+                    {
+                        "surface": "countdowns",
+                        "preference": "countdown_release_mode",
+                        "requires": null
+                    },
+                    {
+                        "surface": "notifications",
+                        "preference": "notifications_release_mode",
+                        "requires": null
+                    }
+                ],
+                "onWhen": [
+                    "both",
+                    "digital"
+                ],
+                "choices": [
+                    "both",
+                    "cinema",
+                    "digital",
+                    "none"
+                ],
+                "ofTrackedTitles": true
+            }
+        ]
+    },
+    {
+        "type": "game",
+        "options": [
+            {
+                "key": "platforms",
+                "label": "settings.every_platform_on_its_own",
+                "description": "settings.ports_early_access_and_patches_instead",
+                "phrase": "settings.phrase_every_platform",
+                "switches": [
+                    {
+                        "surface": "calendar",
+                        "preference": "calendar_game_platforms",
+                        "requires": null
+                    },
+                    {
+                        "surface": "countdowns",
+                        "preference": "countdown_game_platforms",
+                        "requires": null
+                    }
+                ],
+                "onWhen": null,
+                "choices": null,
+                "ofTrackedTitles": true
+            },
+            {
+                "key": "events",
+                "label": "settings.events_and_showcases",
+                "description": "settings.presentations_where_new_titles_are_announced",
+                "phrase": "settings.phrase_events",
+                "switches": [
+                    {
+                        "surface": "calendar",
+                        "preference": "calendar_events",
+                        "requires": null
+                    },
+                    {
+                        "surface": "countdowns",
+                        "preference": "countdown_events",
+                        "requires": null
+                    }
+                ],
+                "onWhen": null,
+                "choices": null,
+                "ofTrackedTitles": false
+            }
+        ]
+    },
+    {
+        "type": "book",
+        "options": []
+    },
+    {
+        "type": "manga",
+        "options": []
+    },
+    {
+        "type": "comic",
+        "options": []
+    }
+]

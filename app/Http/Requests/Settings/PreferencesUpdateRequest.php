@@ -9,20 +9,27 @@ use App\Accounts\Preferences\TimeFormat;
 use App\Accounts\Preferences\UpNextTarget;
 use App\Accounts\Preferences\UserPreferences;
 use App\Accounts\Preferences\WeekStart;
-use App\Enums\ReleaseDateMode;
+use App\Catalog\MediaTypeRegistry;
 use App\Enums\UpNextSort;
 use App\Support\Payload;
+use App\Tracking\Settings\TypePanels;
+use App\Tracking\Surface;
+use App\Tracking\TrackingSource;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
 class PreferencesUpdateRequest extends FormRequest
 {
+    /** @var array<string, mixed>|null */
+    private ?array $rules = null;
+
     /**
      * @return array<string, mixed>
      */
     public function rules(): array
     {
-        return [
+        // Read again by preferences(): the type panels are built once.
+        return $this->rules ??= [
             // Two settings pages (Preferences, Tracking) share this endpoint,
             // each sending only its own keys — everything is `sometimes`.
             'spoiler_protection' => ['sometimes', 'boolean'],
@@ -40,7 +47,6 @@ class PreferencesUpdateRequest extends FormRequest
             'calendar_watchlist' => ['sometimes', 'boolean'],
             'calendar_followed' => ['sometimes', 'boolean'],
             'calendar_creators' => ['sometimes', 'boolean'],
-            'calendar_game_platforms' => ['sometimes', 'boolean'],
             // Which image an episode shows in the calendar.
             'calendar_episode_image' => ['sometimes', 'string', Rule::enum(EpisodeImage::class)],
             'countdown_active' => ['sometimes', 'boolean'],
@@ -49,23 +55,15 @@ class PreferencesUpdateRequest extends FormRequest
             'countdown_watchlist' => ['sometimes', 'boolean'],
             'countdown_followed' => ['sometimes', 'boolean'],
             'countdown_creators' => ['sometimes', 'boolean'],
-            'countdown_game_platforms' => ['sometimes', 'boolean'],
             'notifications_active' => ['sometimes', 'boolean'],
             'notifications_dropped' => ['sometimes', 'boolean'],
             'notifications_on_hold' => ['sometimes', 'boolean'],
             'notifications_watchlist' => ['sometimes', 'boolean'],
             'notifications_followed' => ['sometimes', 'boolean'],
             'notifications_creators' => ['sometimes', 'boolean'],
-            // Which of a film's release moments each surface shows: its
-            // premiere, the day it leaves cinemas, or both.
-            'calendar_release_mode' => ['sometimes', 'string', Rule::enum(ReleaseDateMode::class)],
-            'countdown_release_mode' => ['sometimes', 'string', Rule::enum(ReleaseDateMode::class)],
-            'notifications_release_mode' => ['sometimes', 'string', Rule::enum(ReleaseDateMode::class)],
-            // Which event kinds create notifications.
-            'notify_episodes' => ['sometimes', 'boolean'],
+            // Which event kinds create notifications, besides those of a kind of title.
             'notify_premieres' => ['sometimes', 'boolean'],
             'notify_date_changes' => ['sometimes', 'boolean'],
-            'notify_show_status' => ['sometimes', 'boolean'],
             'notify_person_titles' => ['sometimes', 'boolean'],
             'notify_company_titles' => ['sometimes', 'boolean'],
             'notify_collection_items' => ['sometimes', 'boolean'],
@@ -87,7 +85,44 @@ class PreferencesUpdateRequest extends FormRequest
             'reading_pace_pages' => ['sometimes', 'integer', 'min:1', 'max:'.UserPreferences::READING_PACE_MAX],
             'reading_pace_chapters' => ['sometimes', 'integer', 'min:1', 'max:'.UserPreferences::READING_PACE_MAX],
             'reading_pace_issues' => ['sometimes', 'integer', 'min:1', 'max:'.UserPreferences::READING_PACE_MAX],
+            // What only some kinds of title have (a film's two dates, a game's
+            // platforms, a series' episodes), as the code reading it declares.
+            ...array_map(
+                fn (?array $choices): array => $choices === null ? ['sometimes', 'boolean'] : ['sometimes', 'string', Rule::in($choices)],
+                app(TypePanels::class)->preferences(),
+            ),
+            // The kinds of title with sources of their own, sent whole: a kind
+            // left out follows the defaults again. The views share one switch,
+            // so the calendar and the countdowns come together.
+            UserPreferences::TYPE_SOURCES => ['sometimes', 'array:'.implode(',', app(MediaTypeRegistry::class)->rootCodes())],
+            UserPreferences::TYPE_SOURCES.'.*' => ['array:'.implode(',', array_column(Surface::cases(), 'value'))],
+            ...$this->surfaceRules(),
+            // A row twice in one list reads once; `distinct` would compare every list with every other.
+            UserPreferences::TYPE_SOURCES.'.*.*.*' => [Rule::enum(TrackingSource::class)],
         ];
+    }
+
+    /**
+     * Each surface's rows, a list no longer than the rows there are; the
+     * views come together, as their one switch sends them.
+     *
+     * @return array<string, list<string>>
+     */
+    private function surfaceRules(): array
+    {
+        $rules = [];
+        $views = Surface::views();
+
+        foreach (Surface::cases() as $surface) {
+            $partners = array_map(
+                fn (Surface $view): string => 'present_with:'.UserPreferences::TYPE_SOURCES.'.*.'.$view->value,
+                $surface->isView() ? array_values(array_filter($views, fn (Surface $view): bool => $view !== $surface)) : [],
+            );
+
+            $rules[UserPreferences::TYPE_SOURCES.'.*.'.$surface->value] = [...$partners, 'list', 'max:'.count(TrackingSource::cases())];
+        }
+
+        return $rules;
     }
 
     /**

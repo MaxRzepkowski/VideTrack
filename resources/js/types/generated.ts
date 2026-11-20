@@ -858,7 +858,7 @@ export type RatingPoint = {
     readonly community: number;
     readonly titles: number;
 };
-export type ReleaseDateMode = 'both' | 'cinema' | 'digital';
+export type ReleaseDateMode = 'both' | 'cinema' | 'digital' | 'none';
 export type ReleaseDot = {
     readonly year: number;
     readonly type: string;
@@ -1009,6 +1009,7 @@ export type SuggestionSubject = {
     readonly posterPath: string | null;
     readonly count: number;
 };
+export type Surface = 'calendar' | 'countdowns' | 'notifications';
 export type TaskRunItem = {
     readonly id: number;
     readonly name: string;
@@ -1059,6 +1060,29 @@ export type TrackingSource = 'on_hold' | 'dropped' | 'backlog' | 'activity' | 'f
 export type TypeCount = {
     readonly type: string;
     readonly count: number;
+};
+export type TypeOption = {
+    readonly key: string;
+    readonly label: string;
+    readonly description: string | null;
+    readonly phrase: string;
+    readonly switches: TypeOptionSwitch[];
+    readonly onWhen: string[] | null;
+    readonly choices: string[] | null;
+    readonly ofTrackedTitles: boolean;
+};
+export type TypeOptionRequirement = {
+    readonly preference: string;
+    readonly label: string;
+};
+export type TypeOptionSwitch = {
+    readonly surface: Surface;
+    readonly preference: string;
+    readonly requires: TypeOptionRequirement | null;
+};
+export type TypePanel = {
+    readonly type: string;
+    readonly options: TypeOption[];
 };
 export type TypeSeries = {
     readonly type: string;

@@ -35,13 +35,16 @@ enum ReleaseDateMode: string
      */
     case Digital = 'digital';
 
+    /** Neither: the surface shows no film dates at all. */
+    case None = 'none';
+
     public function showsPremiere(): bool
     {
-        return $this !== self::Digital;
+        return $this === self::Both || $this === self::Cinema;
     }
 
     public function showsDigital(): bool
     {
-        return $this !== self::Cinema;
+        return $this === self::Both || $this === self::Digital;
     }
 }

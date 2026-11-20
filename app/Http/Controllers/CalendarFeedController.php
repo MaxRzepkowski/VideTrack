@@ -56,7 +56,10 @@ class CalendarFeedController extends Controller
      */
     private function cached(string $feed, User $user, FeedFilter $filter, Closure $render): string
     {
-        $key = implode(':', [$feed, $user->id, UserCalendar::of($user)->today()->toDateString(), $user->preferredLocale(), $filter->key()]);
+        // The settings in the key: a calendar app asks again within the hour, and a
+        // source switched off on the tracking page should be gone by then.
+        $settings = hash('xxh128', json_encode($user->preferences->resolved(), JSON_THROW_ON_ERROR));
+        $key = implode(':', [$feed, $user->id, UserCalendar::of($user)->today()->toDateString(), $user->preferredLocale(), $filter->key(), $settings]);
 
         return Cache::remember($key, now()->addHour(), $render);
     }
