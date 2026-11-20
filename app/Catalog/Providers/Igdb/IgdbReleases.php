@@ -3,7 +3,9 @@
 namespace App\Catalog\Providers\Igdb;
 
 use App\Catalog\Data\PlatformRelease;
+use App\Catalog\Data\RelatedRelease;
 use App\Catalog\DatePrecision;
+use App\Catalog\GameKind;
 use App\Catalog\ReleaseRegion;
 use App\Support\Payload;
 
@@ -17,6 +19,22 @@ final readonly class IgdbReleases
     /** The `release_dates` fields both readings need, for the details query. */
     public const FIELDS = 'release_dates.date, release_dates.date_format.format, release_dates.platform.abbreviation, '
         .'release_dates.platform.name, release_dates.status.name, release_dates.release_region';
+
+    /**
+     * The relations naming a game's releases of its own a calendar shows
+     * beside it, and what each is: the relation says it, whatever the
+     * related game's own type was filed as.
+     */
+    private const RELATED = [
+        'dlcs' => GameKind::Dlc,
+        'expansions' => GameKind::Expansion,
+        'standalone_expansions' => GameKind::StandaloneExpansion,
+        'remakes' => GameKind::Remake,
+        'remasters' => GameKind::Remaster,
+    ];
+
+    /** More than a game with years of DLC needs on a calendar (The Sims 4 lists over a hundred, most long out). */
+    private const RELATED_LIMIT = 60;
 
     /**
      * What IGDB calls a plain release. It leaves the status off plenty of
@@ -55,6 +73,63 @@ final readonly class IgdbReleases
     ];
 
     public function __construct(private IgdbPayload $payload) {}
+
+    /**
+     * The fields {@see related()} reads beyond the shelves' own, for the
+     * details query: each related game's releases, as the game's are read.
+     */
+    public static function relatedFields(): string
+    {
+        $fields = [];
+
+        foreach (array_keys(self::RELATED) as $relation) {
+            foreach (explode(',', self::FIELDS) as $field) {
+                $fields[] = $relation.'.'.trim($field);
+            }
+        }
+
+        return implode(', ', $fields);
+    }
+
+    /**
+     * The game's DLC, expansions, remakes and remasters that have a date,
+     * newest first, each with its own releases per platform. One listed under
+     * two relations is the first relation's.
+     *
+     * @param  array<array-key, mixed>  $data
+     * @return list<RelatedRelease>
+     */
+    public function related(array $data): array
+    {
+        $related = [];
+
+        foreach (self::RELATED as $relation => $kind) {
+            foreach (Payload::rows($data[$relation] ?? null) as $game) {
+                $ref = $this->payload->ref($game);
+                $first = Payload::int($game, 'first_release_date');
+                $title = Payload::string($game, 'name');
+
+                if ($first === null || $title === null || isset($related[$ref])) {
+                    continue;
+                }
+
+                $related[$ref] = new RelatedRelease(
+                    ref: $ref,
+                    title: $title,
+                    kind: $kind,
+                    posterPath: $this->payload->imageUrl($game, 'cover', 'cover_big_2x'),
+                    date: $this->payload->utcDate($first),
+                    precision: $this->firstDatePrecision($game),
+                    platformReleases: $this->byPlatform($game),
+                );
+            }
+        }
+
+        $related = array_values($related);
+        usort($related, fn (RelatedRelease $a, RelatedRelease $b): int => [$b->date, $a->ref] <=> [$a->date, $b->ref]);
+
+        return array_slice($related, 0, self::RELATED_LIMIT);
+    }
 
     /**
      * Per-platform release dates — ports, early access, next-gen patches and

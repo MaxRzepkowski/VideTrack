@@ -18,10 +18,12 @@ use App\Models\MediaItem;
 use App\Models\Person;
 use App\Models\Rating;
 use App\Models\User;
+use App\Tracking\Data\TrackingFacts;
 use App\Tracking\Releases\ReleaseEntry;
 use App\Tracking\Releases\ReleaseFeed;
 use App\Tracking\Surface;
 use App\Tracking\TrackedAudience;
+use App\Tracking\TrackingFactsQuery;
 use Carbon\CarbonImmutable;
 use Laravel\Sanctum\Sanctum;
 
@@ -355,4 +357,20 @@ test("the API and the assistants' tools read a kind of title's own sources as th
         ->toContain('Dune: Part Three')->not->toContain('Slow Horses')
         ->and($tool('get_calendar', ['from' => $from, 'days' => 11]))->toContain('Dune: Part Three')->not->toContain('Slow Horses')
         ->and($tool('get_countdowns', []))->toContain('Dune: Part Three')->not->toContain('Slow Horses');
+});
+
+test('several titles read at once give each user the facts one title read alone gives', function () {
+    [$alex, $sam] = [User::factory()->create(), User::factory()->create()];
+    [$film, $game, $untouched] = [MediaItem::factory()->movie()->create(), MediaItem::factory()->game()->create(), MediaItem::factory()->movie()->create()];
+    app(SyncListMembership::class)->execute($alex, $film, [$alex->watchlist()->id]);
+    Follow::factory()->create(['user_id' => $sam->id, 'media_item_id' => $film->id, 'mode' => FollowMode::Mute]);
+    Follow::factory()->create(['user_id' => $alex->id, 'media_item_id' => $game->id])->viaPeople()->attach(Person::factory()->create());
+
+    $query = app(TrackingFactsQuery::class);
+    $alone = fn (MediaItem $root): array => array_map(fn (TrackingFacts $facts): TrackingFacts => new TrackingFacts(...[...get_object_vars($facts), 'type' => null]), $query->forRoot($root));
+
+    expect($query->forRoots([$film->id, $game->id, $untouched->id]))->toEqual([
+        $film->id => $alone($film),
+        $game->id => $alone($game),
+    ]);
 });

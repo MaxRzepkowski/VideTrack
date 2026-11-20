@@ -61,6 +61,7 @@ final readonly class DetailsFromLibrary
             crew: $crew,
             wikidataId: $metadata->wikidataId,
             collection: $metadata->collection,
+            relatedReleases: $metadata->relatedReleases,
         );
     }
 

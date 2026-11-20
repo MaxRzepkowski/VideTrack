@@ -15,6 +15,8 @@ return [
     'new_release_date' => 'Nowa data premiery',
     'new_release_date_for_title' => 'Nowa data premiery :title',
     'new_season_of_title_announced' => 'Zapowiedziano nowy sezon :title',
+    'announced_title' => 'Zapowiedź: :title',
+    'announced' => 'Zapowiedź',
     'new_title_from_name' => 'Nowy tytuł od :name',
     'new_title_with_name' => 'Nowy tytuł z :name',
     'now_available_outside_cinemas_title' => 'Dostępny poza kinem: :title',

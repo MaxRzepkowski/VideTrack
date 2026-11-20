@@ -23,7 +23,7 @@ run() {
 # The suite with coverage: pcov switched on for this run only. The floor is
 # the coverage reached so far and only ever goes up. The per-class table is
 # noise on a pass, so a pass prints the totals and a failure prints it all.
-PHP_COVERAGE_MIN=96.2
+PHP_COVERAGE_MIN=96.6
 # Points a result may sit above its floor before the floor must be raised.
 COVERAGE_SLACK=0.3
 

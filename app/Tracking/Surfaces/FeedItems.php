@@ -4,6 +4,7 @@ namespace App\Tracking\Surfaces;
 
 use App\Catalog\EpisodeCode;
 use App\Catalog\ImageUrls;
+use App\Catalog\RelatedReleaseCard;
 use App\Enums\ReleaseKind;
 use App\Http\CardPages;
 use App\Models\User;
@@ -44,8 +45,9 @@ final readonly class FeedItems
 
     /**
      * What the calendar card says beside the title, one fact per line: what
-     * the episode opens or closes, which release of a film, where, why it is
-     * on the calendar, and an episode's synopsis.
+     * the episode opens or closes, which game a DLC or a remake is of, which
+     * release of a film, where, why it is on the calendar, and an episode's
+     * synopsis.
      *
      * @return list<string>
      */
@@ -60,6 +62,9 @@ final readonly class FeedItems
         if ($media->episodeBadge !== null) {
             $facts[] = $media->episodeBadge->label();
         }
+
+        // A DLC or a remake: its title alone says neither what it is nor whose.
+        $facts = [...$facts, ...RelatedReleaseCard::of($media->extra)?->facts() ?? []];
 
         if (in_array($media->releaseKind, [ReleaseKind::Home, ReleaseKind::Both], true)) {
             $facts[] = __('common.outside_cinemas');

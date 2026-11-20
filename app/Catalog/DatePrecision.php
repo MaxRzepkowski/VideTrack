@@ -36,6 +36,12 @@ enum DatePrecision: string
         };
     }
 
+    /** Whether a date known this well may still mean `$day` (Y-m-d) or later: a release "in March" is still to come on the 20th. */
+    public function isStillAhead(string $date, string $day): bool
+    {
+        return $this->lastDay($date) >= $day;
+    }
+
     /** Whether this says more of a date than the other: a day more than a month, a month more than a year. */
     public function isFinerThan(self $other): bool
     {

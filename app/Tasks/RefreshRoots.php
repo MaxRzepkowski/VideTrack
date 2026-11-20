@@ -3,6 +3,7 @@
 namespace App\Tasks;
 
 use App\Catalog\Hierarchy;
+use App\Catalog\ItemMetadata;
 use App\Catalog\MediaTypeRegistry;
 use App\Models\LibraryEntry;
 use App\Models\ListItem;
@@ -10,6 +11,7 @@ use App\Models\MediaItem;
 use App\Models\MediaList;
 use App\Models\User;
 use App\Support\Numbers;
+use App\Tracking\Releases\RelatedReleases;
 use App\Tracking\Surface;
 use App\Tracking\TrackedTitles;
 use Illuminate\Database\Eloquent\Builder;
@@ -25,12 +27,14 @@ final readonly class RefreshRoots
         private MediaTypeRegistry $types,
         private Hierarchy $hierarchy,
         private TrackedTitles $tracked,
+        private RelatedReleases $related,
     ) {}
 
     /**
      * The daily set, by id: shows anyone has watched any of, roots with
-     * episodes still to come, everything on a watchlist, the archive entries,
-     * and every open title somebody would be notified about — less the roots
+     * episodes still to come, games with a DLC, remake or remaster still to
+     * come or never listed yet, everything on a watchlist, the archive
+     * entries, and every open title somebody would be notified about — less the roots
      * of $coveredTypes, whose complete list of changes answered today. An
      * archive entry stays: a list of changes says nothing of a title gone.
      *
@@ -68,6 +72,8 @@ final readonly class RefreshRoots
 
         return $this->watchedByAnyone()
             ->concat($this->withUpcomingReleases())
+            ->concat($this->withUpcomingRelatedReleases())
+            ->concat($this->neverListedRelatedReleases())
             ->concat($this->onWatchlists())
             // Archive entries are asked about daily: one the source restores
             // comes back to life, and one nobody holds any more is pruned.
@@ -140,6 +146,53 @@ final readonly class RefreshRoots
             ->pluck('id');
 
         return $this->hierarchy->rootIds(Numbers::ints($upcomingIds));
+    }
+
+    /**
+     * Games with a DLC, remake or remaster still to come: its date moves
+     * like any other, and a user hears of the move the day it happens, not
+     * when the cycle comes round.
+     *
+     * @return Collection<int, int>
+     */
+    private function withUpcomingRelatedReleases(): Collection
+    {
+        $today = today()->toDateString();
+        $ids = [];
+
+        foreach (ItemMetadata::having(MediaItem::query()->whereNull('parent_id'), 'relatedReleases')->select(['id', 'metadata'])->lazyById(self::CHUNK) as $root) {
+            foreach (ItemMetadata::fromStored($root->metadata)->relatedReleases ?? [] as $release) {
+                if ($release->precision->isStillAhead($release->date, $today)) {
+                    $ids[] = $root->id;
+
+                    break;
+                }
+            }
+        }
+
+        return collect($ids);
+    }
+
+    /**
+     * Games whose provider lists the releases of their own its games have,
+     * but never did for these, as none was read since it began to: asked
+     * tomorrow rather than when the cycle comes round, so a DLC already
+     * announced shows within a day.
+     *
+     * @return Collection<int, int>
+     */
+    private function neverListedRelatedReleases(): Collection
+    {
+        $types = array_values(array_filter(
+            $this->types->rootCodes(),
+            fn (string $type): bool => $this->related->serves($this->types->get($type)),
+        ));
+
+        if ($types === []) {
+            return new Collection;
+        }
+
+        return collect(Numbers::ints(ItemMetadata::lacking(MediaItem::query()->whereNull('parent_id')->whereIn('type', $types), 'relatedReleases')->pluck('id')));
     }
 
     /**

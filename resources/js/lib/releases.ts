@@ -16,8 +16,14 @@ import { trans, transChoice } from 'laravel-vue-i18n';
  * line has to say which of the two this one is, or the calendar looks like it
  * duplicated the title; landing on ONE day they arrive merged, and the line
  * names both. An episode is said by its code instead, which each card sets.
+ * A game's DLC, remake or remaster names the game it belongs to.
  */
 export function releaseFacts(media: MediaSummary): string[] {
+    // A game's DLC or remake names its game instead: its badge says what kind of release it is.
+    if (media.extra.relatedTo) {
+        return [media.extra.relatedTo, media.extra.platform].filter((fact): fact is string => fact !== undefined && fact !== '');
+    }
+
     const label = MEDIA_TYPE_META[media.type]?.release?.();
 
     switch (media.extra.releaseKind) {

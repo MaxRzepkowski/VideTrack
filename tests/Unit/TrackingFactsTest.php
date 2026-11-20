@@ -27,6 +27,20 @@ test('a title falls in the first row that applies', function (array $facts, ?Tra
     'a creator alone' => [['creatorFollow' => true], TrackingSource::CreatorFollow],
 ]);
 
+test('every stance the user took counts as theirs, a bell a followed creator rang does not', function (array $facts, bool $chosen) {
+    expect((new TrackingFacts(...$facts))->isChosenByUser())->toBe($chosen);
+})->with([
+    'untouched' => [[], false],
+    'muted' => [['muted' => true], true],
+    'on hold' => [['onHold' => true], true],
+    'dropped' => [['dropped' => true], true],
+    'on the backlog' => [['backlog' => true], true],
+    'with history' => [['activity' => true], true],
+    'their own bell' => [['manualFollow' => true], true],
+    'a creator\'s bell alone' => [['creatorFollow' => true], false],
+    'a creator\'s bell beside their own' => [['creatorFollow' => true, 'manualFollow' => true], true],
+]);
+
 test('facts without their kind of title cannot say which surface carries them', function () {
     expect(fn () => Surface::Calendar->carries(UserPreferences::fromStored([]), new TrackingFacts(backlog: true)))
         ->toThrow(LogicException::class);

@@ -34,6 +34,15 @@ final readonly class TrackingFacts
     ) {}
 
     /**
+     * Whether the user took a stance on the title themselves: a bell a
+     * followed person, company or collection rang is not one.
+     */
+    public function isChosenByUser(): bool
+    {
+        return $this->muted || ! in_array($this->source(), [null, TrackingSource::CreatorFollow], true);
+    }
+
+    /**
      * The row the title falls in, in the order the bell reads it: a status
      * outranks the backlog, the backlog outranks history, and a bell only
      * speaks for a title nothing else covers. Null when muted or untouched.

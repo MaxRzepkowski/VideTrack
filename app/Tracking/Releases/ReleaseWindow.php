@@ -3,6 +3,7 @@
 namespace App\Tracking\Releases;
 
 use App\Catalog\DatePrecision;
+use App\Catalog\ReleaseRegion;
 use App\Models\MediaItem;
 use App\Models\User;
 use App\Tracking\Surface;
@@ -24,6 +25,8 @@ final readonly class ReleaseWindow
         public Surface $surface,
         /** Whether a release known only to its month, quarter or year belongs here. */
         public bool $approximateDates,
+        /** Where the viewer is, as a game's regional release dates name places. */
+        public ReleaseRegion $region,
         public array $followedVia = [],
     ) {}
 
@@ -55,6 +58,6 @@ final readonly class ReleaseWindow
             return $this->contains($date);
         }
 
-        return $this->approximateDates && $precision->lastDay($date) >= $this->from && $date <= $this->to;
+        return $this->approximateDates && $precision->isStillAhead($date, $this->from) && $date <= $this->to;
     }
 }

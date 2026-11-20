@@ -26,6 +26,13 @@ describe('releaseFacts', () => {
         expect(releaseFacts(mediaSummary({ type: 'game' }))).toEqual(['Game release']);
         expect(releaseFacts(mediaSummary({ type: 'book' }))).toEqual(['Book release']);
     });
+
+    it('names the game a DLC or a remake belongs to, then its platforms', () => {
+        const dlc = (platform?: string) => mediaSummary({ type: 'game', extra: { gameType: 'dlc', relatedTo: 'Breath of the Wild', platform } });
+
+        expect(releaseFacts(dlc('Switch, PC'))).toEqual(['Breath of the Wild', 'Switch, PC']);
+        expect(releaseFacts(dlc())).toEqual(['Breath of the Wild']);
+    });
 });
 
 describe('releaseStatusChip', () => {

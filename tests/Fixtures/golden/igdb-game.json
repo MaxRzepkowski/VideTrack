@@ -383,5 +383,71 @@
     "nextEpisodeToAir": null,
     "adult": false,
     "rankings": [],
-    "ties": []
+    "ties": [],
+    "relatedReleases": [
+        {
+            "@class": "RelatedRelease",
+            "ref": "5003",
+            "title": "Breath of the Wild HD",
+            "kind": "remaster",
+            "posterPath": null,
+            "date": "2027-03-12",
+            "precision": "day",
+            "platformReleases": [
+                {
+                    "@class": "PlatformRelease",
+                    "date": "2027-03-12",
+                    "platform": "Switch 2",
+                    "status": "Early Access",
+                    "region": "europe",
+                    "precision": "day"
+                },
+                {
+                    "@class": "PlatformRelease",
+                    "date": "2027-12-31",
+                    "platform": "Switch 2",
+                    "status": null,
+                    "region": "worldwide",
+                    "precision": "year"
+                }
+            ]
+        },
+        {
+            "@class": "RelatedRelease",
+            "ref": "5001",
+            "title": "The Champions Ballad",
+            "kind": "expansion",
+            "posterPath": "https://images.igdb.com/igdb/image/upload/t_cover_big_2x/codlc2.jpg",
+            "date": "2017-12-07",
+            "precision": "day",
+            "platformReleases": []
+        },
+        {
+            "@class": "RelatedRelease",
+            "ref": "5000",
+            "title": "The Master Trials",
+            "kind": "dlc",
+            "posterPath": "https://images.igdb.com/igdb/image/upload/t_cover_big_2x/codlc1.jpg",
+            "date": "2017-06-23",
+            "precision": "day",
+            "platformReleases": [
+                {
+                    "@class": "PlatformRelease",
+                    "date": "2017-06-23",
+                    "platform": "Switch",
+                    "status": null,
+                    "region": "worldwide",
+                    "precision": "day"
+                },
+                {
+                    "@class": "PlatformRelease",
+                    "date": "2017-06-30",
+                    "platform": "WiiU",
+                    "status": null,
+                    "region": "north_america",
+                    "precision": "day"
+                }
+            ]
+        }
+    ]
 }

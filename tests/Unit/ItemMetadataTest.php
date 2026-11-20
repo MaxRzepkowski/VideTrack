@@ -6,10 +6,12 @@ use App\Catalog\Data\KeywordData;
 use App\Catalog\Data\MediaDetails;
 use App\Catalog\Data\MediaSummary;
 use App\Catalog\Data\PlatformRelease;
+use App\Catalog\Data\RelatedRelease;
 use App\Catalog\Data\ReleaseEntry;
 use App\Catalog\DatePrecision;
 use App\Catalog\EpisodeType;
 use App\Catalog\FilmReleaseType;
+use App\Catalog\GameKind;
 use App\Catalog\ItemMetadata;
 use App\Catalog\ProgressUnit;
 use App\Catalog\ReleaseRegion;
@@ -128,6 +130,35 @@ test('an archived title keeps only the releases that already happened', function
     expect($released->releases)->toEqual([new ReleaseEntry('US', FilmReleaseType::Theatrical, '2026-01-01')])
         ->and($released->platformReleases)->toEqual([new PlatformRelease('2026-10-10', 'PC')])
         ->and($released->extra)->toBe(['budget' => 1]);
+});
+
+test('an archived game keeps only the related releases that already came out, each less its dates still ahead', function () {
+    $metadata = new ItemMetadata(relatedReleases: [
+        new RelatedRelease('2', 'Remaster', GameKind::Remaster, null, '2027-01-01'),
+        new RelatedRelease('1', 'Expansion', GameKind::Expansion, null, '2026-05-01', platformReleases: [
+            new PlatformRelease('2026-05-01', 'PC'),
+            new PlatformRelease('2027-02-01', 'Switch 2'),
+        ]),
+    ]);
+
+    expect($metadata->releasedBy('2026-10-10')->relatedReleases)->toEqual([
+        new RelatedRelease('1', 'Expansion', GameKind::Expansion, null, '2026-05-01', platformReleases: [new PlatformRelease('2026-05-01', 'PC')]),
+    ])
+        ->and((new ItemMetadata)->releasedBy('2026-10-10')->relatedReleases)->toBeNull();
+});
+
+test('related releases a provider never listed read apart from a list it gave empty', function () {
+    $listed = new RelatedRelease('5000', 'The Master Trials', GameKind::Dlc, 'https://example.com/cover.jpg', '2028-12-31', DatePrecision::Year, [
+        new PlatformRelease('2028-12-31', 'Switch', null, ReleaseRegion::Worldwide, DatePrecision::Year),
+    ]);
+
+    expect((new ItemMetadata)->toStored())->toBeNull()
+        ->and(ItemMetadata::fromStored(null)->relatedReleases)->toBeNull()
+        ->and((new ItemMetadata(relatedReleases: []))->toStored())->toBe(['relatedReleases' => []])
+        ->and(ItemMetadata::fromStored(['relatedReleases' => []])->relatedReleases)->toBe([])
+        ->and(ItemMetadata::fromStored((new ItemMetadata(relatedReleases: [$listed]))->toStored())->relatedReleases)->toEqual([$listed])
+        // An entry that no longer reads as one is skipped, not the list.
+        ->and(ItemMetadata::fromStored(['relatedReleases' => [['ref' => '1']]])->relatedReleases)->toBe([]);
 });
 
 test('a platform release keeps how much of its date is known, one stored without it reads as an exact day', function () {

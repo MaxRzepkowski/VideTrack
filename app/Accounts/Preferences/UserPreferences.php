@@ -3,6 +3,7 @@
 namespace App\Accounts\Preferences;
 
 use App\Catalog\ProgressUnit;
+use App\Catalog\RelatedReleaseKind;
 use App\Enums\ReleaseDateMode;
 use App\Enums\UpNextSort;
 use App\Tracking\Surface;
@@ -66,6 +67,9 @@ final readonly class UserPreferences
         'calendar_release_mode' => ReleaseDateMode::Both,
         'calendar_episode_image' => EpisodeImage::Backdrop,
         'calendar_events' => true,
+        'calendar_game_addons' => true,
+        'calendar_game_remakes' => true,
+        'calendar_game_remasters' => true,
         'countdown_active' => true,
         'countdown_dropped' => false,
         'countdown_on_hold' => true,
@@ -76,6 +80,9 @@ final readonly class UserPreferences
         'countdown_release_mode' => ReleaseDateMode::Both,
         'countdown_episode_image' => EpisodeImage::Backdrop,
         'countdown_events' => true,
+        'countdown_game_addons' => true,
+        'countdown_game_remakes' => true,
+        'countdown_game_remasters' => true,
         'notifications_active' => true,
         'notifications_dropped' => false,
         'notifications_on_hold' => false,
@@ -83,6 +90,9 @@ final readonly class UserPreferences
         'notifications_followed' => true,
         'notifications_creators' => true,
         'notifications_release_mode' => ReleaseDateMode::Both,
+        'notifications_game_addons' => true,
+        'notifications_game_remakes' => true,
+        'notifications_game_remasters' => true,
 
         'notify_episodes' => true,
         'notify_premieres' => true,
@@ -91,6 +101,7 @@ final readonly class UserPreferences
         'notify_person_titles' => true,
         'notify_company_titles' => true,
         'notify_collection_items' => true,
+        'notify_related_announced' => false,
         'person_follow_scope' => PersonFollowScope::KnownFor,
         'company_follow_scope' => CompanyFollowScope::Both,
 
@@ -240,6 +251,15 @@ final readonly class UserPreferences
         return $surface->isView() && $this->flag(self::eventsKey($surface));
     }
 
+    /**
+     * Whether a surface tells of a tracked game's releases of their own of
+     * one kind (its DLC, its remakes, its remasters) beside the game.
+     */
+    public function showsRelated(Surface $surface, RelatedReleaseKind $kind): bool
+    {
+        return $this->flag(self::relatedKey($surface, $kind));
+    }
+
     public function notifies(NotificationEvent $event): bool
     {
         return $this->flag(self::notifiesKey($event));
@@ -261,6 +281,12 @@ final readonly class UserPreferences
     public static function eventsKey(Surface $surface): string
     {
         return self::surfaceKey($surface).'_events';
+    }
+
+    /** The setting {@see showsRelated()} reads, for the settings page to name. */
+    public static function relatedKey(Surface $surface, RelatedReleaseKind $kind): string
+    {
+        return self::surfaceKey($surface).'_game_'.$kind->value;
     }
 
     /** The setting {@see notifies()} reads, for the settings page to name. */

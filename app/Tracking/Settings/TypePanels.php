@@ -6,6 +6,7 @@ use App\Catalog\MediaTypeRegistry;
 use App\Tracking\Events\VisibleEvents;
 use App\Tracking\MetadataChanges;
 use App\Tracking\Releases\ReleaseFeed;
+use App\Tracking\Releases\ReleaseSource;
 
 /**
  * Every kind of title the tracking page offers, in the registry's order, each
@@ -31,8 +32,10 @@ final readonly class TypePanels
         foreach ($this->types->rootCodes() as $code) {
             $type = $this->types->get($code);
 
+            $sources = array_map(fn (ReleaseSource $source): array => $source->typeOptions($type), $this->feed->sourcesOf($type));
+
             $panels[] = new TypePanel($code, [
-                ...$this->feed->sourceOf($type)?->typeOptions($type) ?? [],
+                ...array_merge(...$sources),
                 ...$this->events->typeOptions($type),
                 ...$this->changes->typeOptions($type),
             ]);

@@ -8,8 +8,6 @@ use App\Catalog\ItemMetadata;
 use App\Catalog\MediaItemSummaries;
 use App\Catalog\MediaTypeDefinition;
 use App\Catalog\ProviderRegistry;
-use App\Catalog\ReleaseRegion;
-use App\Catalog\ViewerRegion;
 use App\Models\MediaItem;
 use App\Tracking\Settings\TypeOption;
 use App\Tracking\Surface;
@@ -31,11 +29,8 @@ final readonly class ProgressReleases implements ReleaseSource
 
     public function releases(Collection $roots, ReleaseWindow $window): Collection
     {
-        $viewer = $window->viewer;
-        $region = ReleaseRegion::ofCountry(ViewerRegion::resolve($viewer, $viewer->preferredLocale()));
-
         return $roots
-            ->flatMap(fn (MediaItem $title): Collection => $this->entries($title, $window, $region))
+            ->flatMap(fn (MediaItem $title): Collection => $this->entries($title, $window))
             ->values();
     }
 
@@ -63,12 +58,12 @@ final readonly class ProgressReleases implements ReleaseSource
     /**
      * @return Collection<int, ReleaseEntry>
      */
-    private function entries(MediaItem $title, ReleaseWindow $window, ReleaseRegion $region): Collection
+    private function entries(MediaItem $title, ReleaseWindow $window): Collection
     {
         $releases = $window->viewer->preferences->perPlatform($window->surface) ? ItemMetadata::fromStored($title->metadata)->platformReleases : [];
 
         if ($releases !== []) {
-            return collect($this->premieres->inWindow($releases, $region, $window))
+            return collect($this->premieres->inWindow($releases, $window))
                 ->map(fn (PlatformPremiere $premiere): ReleaseEntry => new ReleaseEntry(
                     media: MediaItemSummaries::summary(
                         $title,

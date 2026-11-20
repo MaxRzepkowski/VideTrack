@@ -586,6 +586,7 @@ export type MediaDetails = {
         readonly releaseNote?: string;
         readonly episodeCount?: number | null;
         readonly gameType?: GameKind;
+        readonly relatedTo?: string;
         readonly bookKind?: BookKind;
         readonly awaitedBy?: number;
         readonly knownForDepartment?: string | null;
@@ -618,6 +619,7 @@ export type MediaEventType =
     | 'date_changed'
     | 'show_status'
     | 'season_announced'
+    | 'related_announced'
     | 'person_new_title'
     | 'company_new_title'
     | 'collection_new_item'
@@ -658,6 +660,7 @@ export type MediaSummary = {
         readonly releaseNote?: string;
         readonly episodeCount?: number | null;
         readonly gameType?: GameKind;
+        readonly relatedTo?: string;
         readonly bookKind?: BookKind;
         readonly awaitedBy?: number;
         readonly knownForDepartment?: string | null;

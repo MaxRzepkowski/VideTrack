@@ -15,6 +15,8 @@ return [
     'new_release_date' => 'New release date',
     'new_release_date_for_title' => 'New release date for :title',
     'new_season_of_title_announced' => 'New season of :title announced',
+    'announced_title' => 'Announced: :title',
+    'announced' => 'Announced',
     'new_title_from_name' => 'New title from :name',
     'new_title_with_name' => 'New title with :name',
     'now_available_outside_cinemas_title' => 'Now available outside cinemas: :title',

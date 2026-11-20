@@ -87,6 +87,33 @@ final readonly class TrackingFactsQuery
     }
 
     /**
+     * The same for several titles at once, as one read.
+     *
+     * @param  list<int>  $rootIds
+     * @return array<int, array<int, TrackingFacts>> root id => user id => facts, for the titles anyone touched
+     */
+    public function forRoots(array $rootIds): array
+    {
+        if ($rootIds === []) {
+            return [];
+        }
+
+        $facts = [];
+
+        foreach (array_intersect_key($this->byRoot($this->traces(items: $this->hierarchy->treeIdsQuery($rootIds))), array_flip($rootIds)) as $rootId => $rootTraces) {
+            $byUser = [];
+
+            foreach ($rootTraces as $trace) {
+                $byUser[$trace['user']][] = $trace;
+            }
+
+            $facts[$rootId] = array_map(fn (array $userTraces): TrackingFacts => $this->facts($userTraces, $rootId, null), $byUser);
+        }
+
+        return $facts;
+    }
+
+    /**
      * Traces grouped by the title they belong to.
      *
      * @param  list<array{user: int, item: int, trace: Trace}>  $traces

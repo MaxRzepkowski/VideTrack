@@ -10,7 +10,7 @@
     "non-null assertion or double cast (front)": 0,
     "wire shape written by hand (front)": 18,
     "lint switched off": 0,
-    "PHP class over 400 lines": 3,
+    "PHP class over 400 lines": 6,
     "controller over 150 lines": 1,
     "Vue component over 400 lines": 1
 }

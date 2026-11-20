@@ -4,6 +4,7 @@ namespace App\Tracking\Surfaces;
 
 use App\Accounts\UserCalendar;
 use App\Catalog\Hierarchy;
+use App\Catalog\RelatedReleaseCard;
 use App\Models\User;
 use App\Tracking\Data\CountdownEntry;
 use App\Tracking\Data\EventCountdown;
@@ -43,8 +44,9 @@ final readonly class Countdowns
                 'key' => $this->sortKey($entry),
                 'type' => $entry->rootType,
                 'title' => $entry->showTitle ?? $entry->media->title,
-                // A search hits the show's title as well as the episode's own.
-                'names' => [$entry->showTitle, $entry->media->title],
+                // A search hits the show's title as well as the episode's own,
+                // and the game's as well as its DLC's.
+                'names' => [$entry->showTitle, $entry->media->title, RelatedReleaseCard::of($entry->media->extra)?->game],
                 'card' => CountdownEntry::of($entry),
             ];
         }

@@ -10,6 +10,7 @@ use App\Catalog\Data\KeywordData;
 use App\Catalog\Data\MediaDetails;
 use App\Catalog\Data\MediaSummary;
 use App\Catalog\Data\PlatformRelease;
+use App\Catalog\Data\RelatedRelease;
 use App\Catalog\Data\ReleaseEntry;
 use App\Models\MediaItem;
 use App\Support\Payload;
@@ -32,7 +33,7 @@ final readonly class ItemMetadata
     /** Keys the typed fields are stored under; the rest of the column is `extra`. */
     private const TYPED_KEYS = [
         'tagline', 'originalLanguage', 'certification', 'genres',
-        'certifications', 'releases', 'platformReleases', 'keywords', 'externalLinks', 'modules', 'episodeType', 'episodeBadge', 'authors', 'wikidataId', 'collection',
+        'certifications', 'releases', 'platformReleases', 'relatedReleases', 'keywords', 'externalLinks', 'modules', 'episodeType', 'episodeBadge', 'authors', 'wikidataId', 'collection',
     ];
 
     public function __construct(
@@ -62,6 +63,8 @@ final readonly class ItemMetadata
         public array $authors = [],
         public ?string $wikidataId = null,
         public ?CollectionLink $collection = null,
+        /** @var list<RelatedRelease>|null a game's dated DLC, remakes and remasters; null until its provider lists them, so a first listing announces none */
+        public ?array $relatedReleases = null,
     ) {}
 
     public static function fromDetails(MediaDetails $details): self
@@ -82,6 +85,7 @@ final readonly class ItemMetadata
             authors: $details->summary->authors,
             wikidataId: $details->wikidataId,
             collection: $details->collection,
+            relatedReleases: $details->relatedReleases,
         );
     }
 
@@ -119,6 +123,7 @@ final readonly class ItemMetadata
             authors: Payload::strings($stored['authors'] ?? null),
             wikidataId: Payload::string($stored, 'wikidataId'),
             collection: is_array($stored['collection'] ?? null) ? CollectionLink::fromStored($stored['collection']) : null,
+            relatedReleases: is_array($stored['relatedReleases'] ?? null) ? Payload::listOf($stored['relatedReleases'], RelatedRelease::fromStored(...)) : null,
         );
     }
 
@@ -131,11 +136,24 @@ final readonly class ItemMetadata
      */
     public static function having(Builder $query, string $field): Builder
     {
-        if (! in_array($field, self::TYPED_KEYS, true)) {
-            throw new InvalidArgumentException("Item metadata has no typed field [{$field}].");
-        }
+        return $query->whereNotNull(self::column($field));
+    }
 
-        return $query->whereNotNull("media_items.metadata->{$field}");
+    /**
+     * The same, narrowed to the rows that do not carry it.
+     *
+     * @param  Builder<MediaItem>  $query
+     * @return Builder<MediaItem>
+     */
+    public static function lacking(Builder $query, string $field): Builder
+    {
+        return $query->whereNull(self::column($field));
+    }
+
+    /** Where a typed field is stored, for a query. */
+    private static function column(string $field): string
+    {
+        return in_array($field, self::TYPED_KEYS, true) ? "media_items.metadata->{$field}" : throw new InvalidArgumentException("Item metadata has no typed field [{$field}].");
     }
 
     /** What a module remembered under its key; null when it never did. */
@@ -189,6 +207,11 @@ final readonly class ItemMetadata
 
         foreach ($typed as $key => $value) {
             $stored[$key] = $value;
+        }
+
+        // Kept also when empty: a provider that listed none said so.
+        if ($this->relatedReleases !== null) {
+            $stored['relatedReleases'] = array_map(fn (RelatedRelease $release): array => $release->jsonSerialize(), $this->relatedReleases);
         }
 
         return $stored === [] ? null : $stored;
@@ -309,6 +332,10 @@ final readonly class ItemMetadata
         return $this->with(
             releases: array_values(array_filter($this->releases, fn (ReleaseEntry $release): bool => $release->date <= $day)),
             platformReleases: array_values(array_filter($this->platformReleases, fn (PlatformRelease $release): bool => $release->date <= $day)),
+            relatedReleases: $this->relatedReleases === null ? null : array_values(array_map(
+                fn (RelatedRelease $release): RelatedRelease => $release->releasedBy($day),
+                array_filter($this->relatedReleases, fn (RelatedRelease $release): bool => $release->date <= $day),
+            )),
         );
     }
 
@@ -320,8 +347,9 @@ final readonly class ItemMetadata
      * @param  list<ReleaseEntry>|null  $releases
      * @param  list<PlatformRelease>|null  $platformReleases
      * @param  array<string, mixed>|null  $modules
+     * @param  list<RelatedRelease>|null  $relatedReleases
      */
-    private function with(?array $releases = null, ?array $platformReleases = null, ?array $modules = null): self
+    private function with(?array $releases = null, ?array $platformReleases = null, ?array $modules = null, ?array $relatedReleases = null): self
     {
         return new self(
             tagline: $this->tagline,
@@ -340,6 +368,7 @@ final readonly class ItemMetadata
             authors: $this->authors,
             wikidataId: $this->wikidataId,
             collection: $this->collection,
+            relatedReleases: $relatedReleases ?? $this->relatedReleases,
         );
     }
 

@@ -3,8 +3,10 @@
 namespace App\Notifications;
 
 use App\Catalog\Data\MediaSummary;
+use App\Catalog\Data\RelatedRelease;
 use App\Catalog\DatePrecision;
 use App\Catalog\MediaItemSummaries;
+use App\Catalog\RelatedReleaseCard;
 use App\Enums\ReleaseKind;
 use App\Models\MediaItem;
 use App\Models\MediaList;
@@ -159,7 +161,6 @@ final readonly class MediaEventPayload
         );
     }
 
-    /** A release date first announced or moved, still ahead. */
     /**
      * The title's date, as `$root` now holds it, moved from the one before —
      * or only sharpened: "2028" becoming 12 March 2028 is news about the day.
@@ -167,13 +168,38 @@ final readonly class MediaEventPayload
     public static function dateChanged(MediaItem $root, ?string $oldDate, DatePrecision $oldPrecision): self
     {
         $date = $root->release_date?->toDateString() ?? throw new InvalidArgumentException('A moved date names the new one.');
-        $precision = $root->release_date_precision;
 
+        return self::moved(MediaItemSummaries::summary($root), $date, $root->release_date_precision, $oldDate, $oldPrecision);
+    }
+
+    /**
+     * The date of a tracked game's DLC, remake or remaster moved, or only
+     * sharpened. Keyed as the release's own move, so a user who also tracks
+     * it directly hears of it once.
+     */
+    public static function relatedDateChanged(MediaItem $game, RelatedRelease $release, string $oldDate, DatePrecision $oldPrecision): self
+    {
+        return self::moved(MediaItemSummaries::related($game, $release), $release->date, $release->precision, $oldDate, $oldPrecision);
+    }
+
+    /** A tracked game's DLC, remake or remaster listed for the first time, still to come. */
+    public static function relatedAnnounced(MediaItem $game, RelatedRelease $release): self
+    {
+        return new self(
+            type: MediaEventType::RelatedAnnounced,
+            key: "related_announced:{$game->type}:{$release->ref}",
+            media: MediaItemSummaries::related($game, $release)->jsonSerialize(),
+            date: $release->date,
+        );
+    }
+
+    private static function moved(MediaSummary $card, string $date, DatePrecision $precision, ?string $oldDate, DatePrecision $oldPrecision): self
+    {
         return new self(
             type: MediaEventType::DateChanged,
             // An exact day keeps the plain key.
-            key: "date_changed:{$root->type}:{$root->provider_ref}:{$date}".($precision === DatePrecision::Day ? '' : ":{$precision->value}"),
-            media: MediaItemSummaries::summary($root)->jsonSerialize(),
+            key: "date_changed:{$card->type}:{$card->ref}:{$date}".($precision === DatePrecision::Day ? '' : ":{$precision->value}"),
+            media: $card->jsonSerialize(),
             date: $date,
             oldDate: $oldDate,
             oldDatePrecision: $oldDate === null || $oldPrecision === DatePrecision::Day ? null : $oldPrecision,
@@ -287,6 +313,13 @@ final readonly class MediaEventPayload
             return false;
         }
 
+        // A tracked game's DLC, remake or remaster also answers to its kind's switch.
+        $related = $this->relatedCard()?->kind();
+
+        if ($related !== null && ! $user->preferences->showsRelated(Surface::Notifications, $related)) {
+            return false;
+        }
+
         return $this->type?->comesFromCreators() !== true
             || Surface::Notifications->takes($user->preferences, TrackingSource::CreatorFollow, Payload::string($this->media, 'type'));
     }
@@ -301,6 +334,18 @@ final readonly class MediaEventPayload
         $extra = Payload::map($this->media['extra'] ?? null);
 
         return Payload::enum($extra, 'releasePrecision', DatePrecision::class) ?? DatePrecision::Day;
+    }
+
+    /** What a tracked game's release of its own (its DLC, a remake) is and whose; null for a title tracked in its own right. */
+    public function relatedCard(): ?RelatedReleaseCard
+    {
+        return RelatedReleaseCard::of(Payload::map($this->media['extra'] ?? null));
+    }
+
+    /** The release a tracked game's DLC or remake news is about, by its ref; null for news of a title tracked in its own right. */
+    public function relatedRef(): ?string
+    {
+        return $this->relatedCard() === null ? null : Payload::string($this->media, 'ref');
     }
 
     /** The name of the title the event is about. */
