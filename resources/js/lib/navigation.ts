@@ -55,6 +55,8 @@ export interface NavEntry {
     prefix?: string;
     /** Whether this instance has the place at all; absent, it always does. */
     exists?: () => boolean;
+    /** A place whose actions cannot be undone reads in the danger colour, quietly. */
+    destructive?: boolean;
 }
 
 /** The main menu, in its order. */
@@ -293,6 +295,7 @@ export const SETTINGS_NAV: NonEmpty<NavEntry> = [
         label: () => trans('common.danger_zone'),
         icon: TriangleAlert,
         keywords: () => trans('palette.keywords_settings_danger'),
+        destructive: true,
     },
 ];
 

@@ -298,13 +298,7 @@ function displayUrl(url: string): string {
                  (an upstream error) shows as it came. -->
             <p v-if="connection.lastError" class="text-danger text-sm">{{ connection.lastError }}</p>
 
-            <SettingsSaveBar
-                v-if="settings.isDirty || settings.processing"
-                :dirty="settings.isDirty"
-                :processing="settings.processing"
-                @save="save"
-                @discard="settings.reset()"
-            />
+            <SettingsSaveBar placement="card" :dirty="settings.isDirty" :processing="settings.processing" @save="save" @discard="settings.reset()" />
         </template>
 
         <template v-else>

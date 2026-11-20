@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import Hairline from '@/components/Hairline.vue';
 import HeadingSmall from '@/components/HeadingSmall.vue';
+import SettingsCard from '@/components/settings/SettingsCard.vue';
+import { Button } from '@/components/ui/button';
 import MetaLine from '@/components/MetaLine.vue';
 import { confirm } from '@/composables/useConfirm';
 import AppLayout from '@/layouts/AppLayout.vue';
@@ -9,6 +11,7 @@ import { formatDateTime, relativeTime } from '@/lib/format';
 import { jsonFetch } from '@/lib/http';
 import type { ScheduleEntry, TaskRunItem, TaskRunStatus } from '@/types/generated';
 import { Head, router } from '@inertiajs/vue3';
+import { ChevronDown, CircleCheck, CircleX, Clock, LoaderCircle, Play, Trash2, type LucideIcon } from '@lucide/vue';
 import { trans, transChoice } from 'laravel-vue-i18n';
 import { computed, onUnmounted, ref, watch } from 'vue';
 
@@ -36,22 +39,34 @@ watch(
     },
 );
 
-// "Finished with errors" is derived: success with a non-empty error list.
-function badge(run: TaskRunItem): { label: string; classes: string } {
-    if (run.status === 'success' && run.errors.length > 0) {
-        return { label: trans('tasks.finished_with_errors'), classes: 'bg-status-onhold/15 text-status-onhold' };
-    }
+/** @view How a run's ending reads: its word, its icon and their colour. */
+interface StatusLook {
+    label: string;
+    icon: LucideIcon;
+    /** The colour of the icon and the word. */
+    tone: string;
+    spin?: boolean;
+}
 
-    switch (run.status) {
+function statusLook(status: TaskRunStatus): StatusLook {
+    switch (status) {
         case 'pending':
-            return { label: trans('tasks.pending'), classes: 'bg-ink-muted/15 text-ink-muted' };
+            return { label: trans('tasks.pending'), icon: Clock, tone: 'text-ink-muted' };
         case 'started':
-            return { label: trans('tasks.started'), classes: 'bg-status-progress/15 text-status-progress' };
+            return { label: trans('tasks.started'), icon: LoaderCircle, tone: 'text-status-progress', spin: true };
         case 'success':
-            return { label: trans('tasks.success'), classes: 'bg-success/15 text-success' };
+            return { label: trans('tasks.success'), icon: CircleCheck, tone: 'text-success' };
         case 'failure':
-            return { label: trans('tasks.failed'), classes: 'bg-danger/15 text-danger' };
+            return { label: trans('tasks.failed'), icon: CircleX, tone: 'text-danger' };
     }
+}
+
+// "Finished with errors" is derived: success with a non-empty error list.
+// A run says its ending in a word only: the list reads as text, the schedule above carries the icons.
+function runLook(run: TaskRunItem): Pick<StatusLook, 'label' | 'tone'> {
+    return run.status === 'success' && run.errors.length > 0
+        ? { label: trans('tasks.finished_with_errors'), tone: 'text-status-onhold' }
+        : statusLook(run.status);
 }
 
 // While a run is pending/started (e.g. an import in progress) the list asks
@@ -105,21 +120,6 @@ function toggle(open: Set<number>, id: number): void {
     }
 }
 
-// Muted status word next to a scheduled task's last run — red when it failed,
-// otherwise the neutral caption colour.
-function lastStatusLabel(status: TaskRunStatus): string {
-    switch (status) {
-        case 'pending':
-            return trans('tasks.pending');
-        case 'started':
-            return trans('tasks.started');
-        case 'success':
-            return trans('tasks.success');
-        case 'failure':
-            return trans('tasks.failed');
-    }
-}
-
 async function clearFinished(): Promise<void> {
     if (!(await confirm({ message: trans('tasks.clear_the_finished_task_history'), confirmLabel: trans('tasks.clear_finished_runs') }))) {
         return;
@@ -156,107 +156,131 @@ function runNow(name: string): void {
         <Head :title="trans('common.tasks')" />
 
         <SettingsLayout>
-            <div class="space-y-6">
+            <div class="space-y-8">
                 <HeadingSmall :title="trans('common.tasks')" :description="trans('tasks.background_task_runs_and_the_recurring')" />
 
-                <div v-if="props.schedule.length > 0" class="border-line-subtle bg-surface rounded-xl border px-5 py-4">
-                    <div class="text-ink text-base font-semibold">{{ trans('tasks.scheduled_tasks') }}</div>
-                    <ul class="divide-line-subtle mt-3 divide-y">
-                        <li
-                            v-for="entry in props.schedule"
-                            :key="entry.name"
-                            class="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 py-2"
-                        >
-                            <span class="text-ink w-full text-sm sm:w-auto">{{ entry.label }}</span>
-                            <div class="flex items-center gap-3">
+                <SettingsCard v-if="props.schedule.length > 0" :title="trans('tasks.scheduled_tasks')">
+                    <ul class="divide-line-subtle -my-1 divide-y">
+                        <li v-for="entry in props.schedule" :key="entry.name" class="flex flex-wrap items-center gap-x-6 gap-y-3 py-4">
+                            <div class="min-w-0 flex-1 basis-56">
+                                <div class="text-ink text-base font-medium">{{ entry.label }}</div>
                                 <MetaLine
                                     :parts="[trans(entry.frequency), trans('tasks.next_run_time', { time: formatDateTime(entry.nextRunAt) ?? '' })]"
-                                    class="text-ink-muted text-sm"
+                                    class="text-ink-muted mt-0.5 text-sm"
+                                    wrap
                                 />
-                                <button
-                                    type="button"
-                                    class="text-brand-soft shrink-0 text-sm font-medium hover:underline disabled:opacity-50"
-                                    :disabled="running.has(entry.name)"
-                                    @click="runNow(entry.name)"
-                                >
-                                    {{ running.has(entry.name) ? trans('tasks.running') : trans('tasks.run_now') }}
-                                </button>
+                                <div class="mt-1 flex flex-wrap items-center gap-x-2 text-sm">
+                                    <template v-if="entry.lastRunAt">
+                                        <template v-if="entry.lastStatus">
+                                            <component
+                                                :is="statusLook(entry.lastStatus).icon"
+                                                :class="[
+                                                    'size-4 shrink-0',
+                                                    statusLook(entry.lastStatus).tone,
+                                                    { 'animate-spin': statusLook(entry.lastStatus).spin },
+                                                ]"
+                                                aria-hidden="true"
+                                            />
+                                            <span :class="statusLook(entry.lastStatus).tone">{{ statusLook(entry.lastStatus).label }}</span>
+                                            <Hairline />
+                                        </template>
+                                        <span v-tooltip="formatDateTime(entry.lastRunAt)" class="text-ink-muted">
+                                            {{ trans('tasks.last_run_time', { time: relativeTime(entry.lastRunAt) ?? '' }) }}
+                                        </span>
+                                    </template>
+                                    <span v-else class="text-ink-faint">{{ trans('tasks.never_run_yet') }}</span>
+                                </div>
                             </div>
-                            <span class="text-ink-faint w-full text-sm">
-                                <template v-if="entry.lastRunAt">
-                                    {{ trans('tasks.last_run_time', { time: relativeTime(entry.lastRunAt) ?? '' }) }}
-                                    <span
-                                        v-if="entry.lastStatus"
-                                        v-tooltip="formatDateTime(entry.lastRunAt)"
-                                        :class="entry.lastStatus === 'failure' ? 'text-danger' : 'text-ink-muted'"
-                                    >
-                                        <Hairline /><span>{{ lastStatusLabel(entry.lastStatus) }}</span>
-                                    </span>
-                                </template>
-                                <template v-else>{{ trans('tasks.never_run_yet') }}</template>
-                            </span>
+                            <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                class="shrink-0"
+                                :disabled="running.has(entry.name)"
+                                @click="runNow(entry.name)"
+                            >
+                                <LoaderCircle v-if="running.has(entry.name)" class="animate-spin" aria-hidden="true" />
+                                <Play v-else aria-hidden="true" />
+                                {{ running.has(entry.name) ? trans('tasks.running') : trans('tasks.run_now') }}
+                            </Button>
                         </li>
                     </ul>
-                </div>
+                </SettingsCard>
 
-                <div class="flex flex-wrap items-center justify-between gap-2">
-                    <div class="text-ink text-base font-semibold">{{ trans('tasks.recent_runs') }}</div>
-                    <button
-                        v-if="canClear"
-                        type="button"
-                        class="text-ink-muted hover:text-danger text-sm font-medium hover:underline"
-                        @click="clearFinished"
-                    >
-                        {{ trans('tasks.clear_finished_runs') }}
-                    </button>
-                </div>
+                <SettingsCard :title="trans('tasks.recent_runs')">
+                    <template v-if="canClear" #actions>
+                        <Button type="button" variant="ghost" size="sm" class="text-ink-muted hover:text-danger" @click="clearFinished">
+                            <Trash2 aria-hidden="true" />
+                            {{ trans('tasks.clear_finished_runs') }}
+                        </Button>
+                    </template>
 
-                <div v-if="runs.length === 0" class="border-line-subtle bg-surface text-ink-muted rounded-xl border px-5 py-8 text-center text-sm">
-                    {{ trans('tasks.no_recent_task_runs') }}
-                </div>
+                    <p v-if="runs.length === 0" class="text-ink-muted py-4 text-center text-sm">{{ trans('tasks.no_recent_task_runs') }}</p>
 
-                <div v-else class="space-y-3">
-                    <div v-for="run in runs" :key="run.id" class="border-line-subtle bg-surface rounded-xl border px-5 py-4">
-                        <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
-                            <span class="rounded-full px-2.5 py-0.5 text-sm font-semibold" :class="badge(run).classes">
-                                {{ badge(run).label }}
-                            </span>
-                            <span class="text-ink text-base font-semibold">{{ run.label }}</span>
-                            <span v-tooltip="formatDateTime(run.queuedAt)" class="text-ink-muted ml-auto text-sm">
-                                {{ relativeTime(run.queuedAt) }}
-                            </span>
-                        </div>
-                        <p v-if="run.summary" class="text-ink-muted mt-2 text-sm">{{ run.summary }}</p>
-                        <div v-if="run.errors.length > 0" class="mt-2">
-                            <button type="button" class="text-status-onhold text-sm font-medium hover:underline" @click="toggle(expanded, run.id)">
-                                {{
-                                    expanded.has(run.id)
-                                        ? trans('tasks.hide_errors')
-                                        : transChoice('tasks.show_count_error', run.errors.length, { count: String(run.errors.length) })
-                                }}
-                            </button>
-                            <ul v-if="expanded.has(run.id)" class="bg-surface-base mt-2 space-y-1 rounded-lg p-3">
-                                <li v-for="(error, index) in run.errors" :key="index" class="text-danger font-mono text-sm break-words">
-                                    {{ error }}
-                                </li>
-                            </ul>
-                        </div>
-                        <div v-if="run.details.length > 0" class="mt-2">
-                            <button type="button" class="text-ink-muted text-sm font-medium hover:underline" @click="toggle(expandedDetails, run.id)">
-                                {{
-                                    expandedDetails.has(run.id)
-                                        ? trans('tasks.hide_details')
-                                        : transChoice('tasks.show_count_detail', run.details.length, { count: String(run.details.length) })
-                                }}
-                            </button>
-                            <ul v-if="expandedDetails.has(run.id)" class="bg-surface-base mt-2 space-y-1 rounded-lg p-3">
-                                <li v-for="(detail, index) in run.details" :key="index" class="text-ink-muted text-sm break-words">
-                                    {{ detail }}
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
+                    <ul v-else class="divide-line-subtle -my-1 divide-y">
+                        <li v-for="run in runs" :key="run.id" class="py-4">
+                            <div class="min-w-0">
+                                <div class="flex flex-wrap items-baseline gap-x-3 gap-y-0.5">
+                                    <span class="text-ink text-base font-medium">{{ run.label }}</span>
+                                    <span :class="['text-sm font-medium', runLook(run).tone]">{{ runLook(run).label }}</span>
+                                    <span v-tooltip="formatDateTime(run.queuedAt)" class="text-ink-muted ml-auto text-sm">
+                                        {{ relativeTime(run.queuedAt) }}
+                                    </span>
+                                </div>
+                                <p v-if="run.summary" class="text-ink-muted mt-1 text-sm">{{ run.summary }}</p>
+
+                                <div v-if="run.errors.length > 0 || run.details.length > 0" class="mt-2 flex flex-wrap gap-x-4 gap-y-1">
+                                    <button
+                                        v-if="run.errors.length > 0"
+                                        type="button"
+                                        class="text-status-onhold flex items-center gap-1 text-sm font-medium hover:underline"
+                                        :aria-expanded="expanded.has(run.id)"
+                                        @click="toggle(expanded, run.id)"
+                                    >
+                                        {{
+                                            expanded.has(run.id)
+                                                ? trans('tasks.hide_errors')
+                                                : transChoice('tasks.show_count_error', run.errors.length, { count: String(run.errors.length) })
+                                        }}
+                                        <ChevronDown
+                                            :class="['size-4 transition-transform', { 'rotate-180': expanded.has(run.id) }]"
+                                            aria-hidden="true"
+                                        />
+                                    </button>
+                                    <button
+                                        v-if="run.details.length > 0"
+                                        type="button"
+                                        class="text-ink-muted hover:text-ink flex items-center gap-1 text-sm font-medium hover:underline"
+                                        :aria-expanded="expandedDetails.has(run.id)"
+                                        @click="toggle(expandedDetails, run.id)"
+                                    >
+                                        {{
+                                            expandedDetails.has(run.id)
+                                                ? trans('tasks.hide_details')
+                                                : transChoice('tasks.show_count_detail', run.details.length, {
+                                                      count: String(run.details.length),
+                                                  })
+                                        }}
+                                        <ChevronDown
+                                            :class="['size-4 transition-transform', { 'rotate-180': expandedDetails.has(run.id) }]"
+                                            aria-hidden="true"
+                                        />
+                                    </button>
+                                </div>
+                                <ul v-if="expanded.has(run.id)" class="bg-surface-base mt-2 space-y-1 rounded-lg p-3">
+                                    <li v-for="(error, index) in run.errors" :key="index" class="text-danger font-mono text-sm break-words">
+                                        {{ error }}
+                                    </li>
+                                </ul>
+                                <ul v-if="expandedDetails.has(run.id)" class="bg-surface-base mt-2 space-y-1 rounded-lg p-3">
+                                    <li v-for="(detail, index) in run.details" :key="index" class="text-ink-muted text-sm break-words">
+                                        {{ detail }}
+                                    </li>
+                                </ul>
+                            </div>
+                        </li>
+                    </ul>
+                </SettingsCard>
             </div>
         </SettingsLayout>
     </AppLayout>

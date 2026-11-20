@@ -43,3 +43,69 @@ export function nextFollowMode(state: Pick<UserMediaState, 'follow' | 'followSou
 
     return 'follow';
 }
+
+/**
+ * The groups of titles the tracking settings route to the calendar, the
+ * countdowns and the notifications, each with the preference that switches it
+ * for each of the three.
+ */
+export function trackingSources() {
+    return [
+        {
+            key: 'active',
+            // The row holds anything with a play on it. A series is "in the
+            // middle", a film is simply seen — one word has to cover both, and
+            // the app already calls that place your history.
+            label: trans('settings.in_your_history'),
+            description: trans('settings.series_and_games_you_are_in'),
+            calendar: 'calendar_active',
+            countdown: 'countdown_active',
+            notifications: 'notifications_active',
+        },
+        {
+            key: 'watchlist',
+            label: trans('common.backlog'),
+            description: trans('settings.titles_you_plan_to_get_to'),
+            calendar: 'calendar_watchlist',
+            countdown: 'countdown_watchlist',
+            notifications: 'notifications_watchlist',
+        },
+        {
+            key: 'on_hold',
+            label: trans('settings.on_hold_titles'),
+            description: trans('settings.paused_titles_a_fresh_season_is'),
+            calendar: 'calendar_on_hold',
+            countdown: 'countdown_on_hold',
+            notifications: 'notifications_on_hold',
+        },
+        {
+            key: 'dropped',
+            label: trans('settings.dropped_titles'),
+            description: trans('settings.you_gave_up_on_it_but'),
+            calendar: 'calendar_dropped',
+            countdown: 'countdown_dropped',
+            notifications: 'notifications_dropped',
+        },
+        {
+            key: 'followed',
+            label: trans('common.followed_manually'),
+            description: trans('settings.titles_you_rang_the_bell_on'),
+            calendar: 'calendar_followed',
+            countdown: 'countdown_followed',
+            notifications: 'notifications_followed',
+        },
+        {
+            key: 'creators',
+            label: trans('settings.new_titles_from_followed_creators'),
+            description: trans('settings.titles_the_bell_picked_up_from'),
+            calendar: 'calendar_creators',
+            countdown: 'countdown_creators',
+            notifications: 'notifications_creators',
+        },
+    ] as const;
+}
+
+/** The tabs of the tracking settings, in their order; `?tab=` opens one from a link. */
+export const TRACKING_TABS = ['views', 'notifications', 'creators'] as const;
+
+export type TrackingTab = (typeof TRACKING_TABS)[number];

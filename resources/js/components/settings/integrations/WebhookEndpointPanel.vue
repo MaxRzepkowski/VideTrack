@@ -154,6 +154,6 @@ async function disconnect(): Promise<void> {
 
         <DeliveryLog v-if="props.endpoint.deliveries.length > 0" :deliveries="props.endpoint.deliveries" />
 
-        <SettingsSaveBar v-if="form.isDirty || form.processing" :dirty="form.isDirty" :processing="form.processing" @save="save" @discard="discard" />
+        <SettingsSaveBar placement="card" :dirty="form.isDirty" :processing="form.processing" @save="save" @discard="discard" />
     </div>
 </template>

@@ -1,4 +1,4 @@
-import { nextFollowMode, trackedBecause } from '@/lib/tracking';
+import { nextFollowMode, trackedBecause, trackingSources } from '@/lib/tracking';
 import { describe, expect, it } from 'vitest';
 
 describe('trackedBecause', () => {
@@ -23,5 +23,20 @@ describe('nextFollowMode', () => {
         ['it is muted', { follow: 'mute', followSource: null, followVia: null }, null],
     ] as const)('when %s, one click moves it on', (_, state, next) => {
         expect(nextFollowMode(state)).toBe(next);
+    });
+});
+
+describe('trackingSources', () => {
+    it('gives every group of titles its own switch in each of the three places', () => {
+        const sources = trackingSources();
+
+        for (const source of sources) {
+            expect([source.calendar, source.countdown, source.notifications]).toEqual([
+                `calendar_${source.key}`,
+                `countdown_${source.key}`,
+                `notifications_${source.key}`,
+            ]);
+        }
+        expect(new Set(sources.map((source) => source.key)).size).toBe(sources.length);
     });
 });

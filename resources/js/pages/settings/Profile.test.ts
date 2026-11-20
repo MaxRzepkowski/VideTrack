@@ -44,7 +44,7 @@ describe('Profile', () => {
         await button(wrapper, 'Discard')?.trigger('click');
 
         expect(wrapper.find('img').exists()).toBe(false);
-        expect(wrapper.text()).not.toContain('You have unsaved changes.');
+        expect(wrapper.text()).toContain('All changes saved');
         expect(button(wrapper, 'Save')?.attributes('disabled')).toBeDefined();
     });
 });

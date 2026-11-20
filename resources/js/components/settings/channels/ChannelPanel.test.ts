@@ -115,9 +115,11 @@ describe('ChannelPanel', () => {
         const visit = vi.spyOn(router, 'visit').mockImplementation(() => undefined);
         const panel = mountPanel();
 
-        expect(panel.text()).not.toContain('You have unsaved changes');
+        expect(button(panel, 'Save')).toBeUndefined();
 
         await panel.find('#channel-4-mode').setValue('instant');
+
+        expect(panel.text()).toContain('You have unsaved changes');
         await button(panel, 'Save')?.trigger('click');
 
         expect(visit).toHaveBeenCalledWith(
