@@ -118,6 +118,6 @@ async function remove(): Promise<void> {
             </div>
         </div>
 
-        <SettingsSaveBar v-if="form.isDirty || form.processing" :dirty="form.isDirty" :processing="form.processing" @save="save" @discard="discard" />
+        <SettingsSaveBar placement="card" :dirty="form.isDirty" :processing="form.processing" @save="save" @discard="discard" />
     </div>
 </template>

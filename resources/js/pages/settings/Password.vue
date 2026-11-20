@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import HeadingSmall from '@/components/HeadingSmall.vue';
-import InputError from '@/components/InputError.vue';
+import SettingsCard from '@/components/settings/SettingsCard.vue';
+import SettingsRow from '@/components/settings/SettingsRow.vue';
 import SettingsSaveBar from '@/components/settings/SettingsSaveBar.vue';
-import { Label } from '@/components/ui/label';
 import { useUnsavedChanges } from '@/composables/useUnsavedChanges';
 import { signedInUser } from '@/lib/pageContext';
 import AppLayout from '@/layouts/AppLayout.vue';
 import SettingsLayout from '@/layouts/settings/Layout.vue';
-import { SETTINGS_CARD_CLASS, SETTINGS_FIELD_CLASS } from '@/lib/ui';
+import { SETTINGS_FIELD_CLASS } from '@/lib/ui';
 import { Head, useForm } from '@inertiajs/vue3';
 import { trans } from 'laravel-vue-i18n';
 import { ref } from 'vue';
@@ -74,43 +74,39 @@ function submit(): void {
                         :description="hasPassword ? trans('settings.ensure_your_account_is_using_a') : trans('settings.set_a_password_to_log_in')"
                     />
 
-                    <div v-if="hasPassword" :class="SETTINGS_CARD_CLASS">
-                        <Label for="current_password" class="text-ink text-base font-semibold">{{ trans('settings.current_password') }}</Label>
-                        <input
-                            id="current_password"
-                            ref="currentPasswordInput"
-                            v-model="form.current_password"
-                            type="password"
-                            autocomplete="current-password"
-                            :class="[SETTINGS_FIELD_CLASS, 'mt-3 block w-full']"
-                        />
-                        <InputError class="mt-2" :message="form.errors.current_password" />
-                    </div>
-
-                    <div :class="SETTINGS_CARD_CLASS">
-                        <Label for="password" class="text-ink text-base font-semibold">{{ trans('settings.new_password') }}</Label>
-                        <input
-                            id="password"
-                            ref="passwordInput"
-                            v-model="form.password"
-                            type="password"
-                            autocomplete="new-password"
-                            :class="[SETTINGS_FIELD_CLASS, 'mt-3 block w-full']"
-                        />
-                        <InputError class="mt-2" :message="form.errors.password" />
-
-                        <Label for="password_confirmation" class="text-ink mt-5 block text-base font-semibold">{{
-                            trans('common.confirm_password')
-                        }}</Label>
-                        <input
-                            id="password_confirmation"
-                            v-model="form.password_confirmation"
-                            type="password"
-                            autocomplete="new-password"
-                            :class="[SETTINGS_FIELD_CLASS, 'mt-3 block w-full']"
-                        />
-                        <InputError class="mt-2" :message="form.errors.password_confirmation" />
-                    </div>
+                    <SettingsCard>
+                        <template v-if="hasPassword">
+                            <SettingsRow :title="trans('settings.current_password')" for="current_password" :error="form.errors.current_password">
+                                <input
+                                    id="current_password"
+                                    ref="currentPasswordInput"
+                                    v-model="form.current_password"
+                                    type="password"
+                                    autocomplete="current-password"
+                                    :class="[SETTINGS_FIELD_CLASS, 'block w-full']"
+                                />
+                            </SettingsRow>
+                        </template>
+                        <SettingsRow :title="trans('settings.new_password')" for="password" :error="form.errors.password">
+                            <input
+                                id="password"
+                                ref="passwordInput"
+                                v-model="form.password"
+                                type="password"
+                                autocomplete="new-password"
+                                :class="[SETTINGS_FIELD_CLASS, 'block w-full']"
+                            />
+                        </SettingsRow>
+                        <SettingsRow :title="trans('common.confirm_password')" for="password_confirmation" :error="form.errors.password_confirmation">
+                            <input
+                                id="password_confirmation"
+                                v-model="form.password_confirmation"
+                                type="password"
+                                autocomplete="new-password"
+                                :class="[SETTINGS_FIELD_CLASS, 'block w-full']"
+                            />
+                        </SettingsRow>
+                    </SettingsCard>
                 </fieldset>
                 <SettingsSaveBar :dirty="form.isDirty" :processing="form.processing" @save="submit" @discard="discard" />
             </form>

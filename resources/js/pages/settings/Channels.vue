@@ -6,7 +6,12 @@ import PushDevices from '@/components/settings/channels/PushDevices.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import SettingsLayout from '@/layouts/settings/Layout.vue';
 import type { ChannelsPage } from '@/types/generated';
-import { Head } from '@inertiajs/vue3';
+import { Button } from '@/components/ui/button';
+import SettingsCard from '@/components/settings/SettingsCard.vue';
+import SettingsRow from '@/components/settings/SettingsRow.vue';
+import type { TrackingTab } from '@/lib/tracking';
+import { Head, Link } from '@inertiajs/vue3';
+import { ArrowRight } from '@lucide/vue';
 import { trans } from 'laravel-vue-i18n';
 import { computed } from 'vue';
 
@@ -31,6 +36,17 @@ const rows = computed(() =>
         <SettingsLayout>
             <div class="space-y-6">
                 <HeadingSmall :title="trans('common.notifications')" :description="trans('settings.where_your_notifications_go_besides_the')" />
+
+                <SettingsCard>
+                    <SettingsRow :title="trans('settings.what_you_are_notified_about')" :description="trans('settings.notified_about_description')">
+                        <Button variant="outline" class="h-10 py-2" as-child>
+                            <Link :href="route('settings.tracking.edit', { tab: 'notifications' satisfies TrackingTab })">
+                                {{ trans('settings.choose_what_notifies_you') }}
+                                <ArrowRight class="size-4" aria-hidden="true" />
+                            </Link>
+                        </Button>
+                    </SettingsRow>
+                </SettingsCard>
 
                 <p v-if="props.page.channels.length === 0" class="text-ink-muted text-sm">
                     {{ trans('settings.no_channels_yet_notifications_show_only') }}

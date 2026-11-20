@@ -15,10 +15,11 @@ function page() {
 const button = (wrapper: ReturnType<typeof page>, text: string) => wrapper.findAll('button').find((candidate) => candidate.text() === text);
 
 describe('Password', () => {
-    it('has nothing to save until a field is filled, and puts it back on discard', async () => {
+    it('wakes the save button once a field is filled, and puts it back to rest on discard', async () => {
         const wrapper = page();
 
         expect(button(wrapper, 'Save')?.attributes('disabled')).toBeDefined();
+        expect(wrapper.text()).toContain('All changes saved');
 
         await wrapper.find('#current_password').setValue('old-secret');
 
