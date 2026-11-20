@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import ServiceLogo from '@/components/ServiceLogo.vue';
+import ServiceTile from '@/components/settings/ServiceTile.vue';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { kindsMatching } from '@/lib/channels';
 import { SETTINGS_FIELD_CLASS } from '@/lib/ui';
@@ -64,17 +64,7 @@ function pick(kind: ChannelKindData): void {
 
                 <ul class="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-5">
                     <li v-for="kind in tiles" :key="`${kind.driver}:${kind.code}`">
-                        <button
-                            type="button"
-                            class="border-line-subtle bg-surface-raised hover:border-brand focus-visible:border-brand text-ink flex aspect-square w-full flex-col items-center gap-2 rounded-xl border p-3 text-center transition-colors duration-150"
-                            @click="pick(kind)"
-                        >
-                            <!-- The name keeps two lines' room whatever its length, so every logo sits on one row. -->
-                            <span class="flex w-full flex-1 items-center justify-center">
-                                <ServiceLogo :code="kind.code" :fallback="Bell" class="h-11 max-w-full" />
-                            </span>
-                            <span class="line-clamp-2 h-[2.5em] text-sm leading-tight font-medium">{{ kind.label }}</span>
-                        </button>
+                        <ServiceTile :code="kind.code" :label="kind.label" :fallback="Bell" @click="pick(kind)" />
                     </li>
                 </ul>
 

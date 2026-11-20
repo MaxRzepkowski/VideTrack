@@ -1,12 +1,13 @@
 <script setup lang="ts">
+import ServiceLogo from '@/components/ServiceLogo.vue';
 import WebhookEndpointPanel from '@/components/settings/integrations/WebhookEndpointPanel.vue';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { useCopyToClipboard } from '@/composables/useCopyToClipboard';
-import { glyphFor } from '@/lib/serviceGlyphs';
+import { SETTINGS_CARD_CLASS } from '@/lib/ui';
 import type { ScrobbleSourceData } from '@/types/integrations';
 import { router } from '@inertiajs/vue3';
 import { trans, transChoice } from 'laravel-vue-i18n';
-import { ChevronDown, Server } from '@lucide/vue';
+import { ChevronDown, Webhook } from '@lucide/vue';
 
 /**
  * One connectable source, rendered from what the scrobble registry says
@@ -23,12 +24,9 @@ function connect(): void {
 </script>
 
 <template>
-    <div class="border-line-subtle bg-surface rounded-xl border px-5 py-4">
-        <div class="flex items-start gap-3">
-            <svg v-if="glyphFor(props.source.code)" class="text-ink-muted mt-0.5 size-6 shrink-0" viewBox="0 0 24 24" aria-hidden="true">
-                <path :d="glyphFor(props.source.code) ?? ''" fill="currentColor" />
-            </svg>
-            <Server v-else class="text-ink-muted mt-0.5 size-6 shrink-0" aria-hidden="true" />
+    <div :class="SETTINGS_CARD_CLASS">
+        <div class="flex items-start gap-4">
+            <ServiceLogo :code="props.source.code" :fallback="Webhook" class="h-12 max-w-24" />
 
             <div class="min-w-0 flex-1">
                 <div class="text-ink text-base font-semibold">{{ props.source.name }}</div>
@@ -37,13 +35,13 @@ function connect(): void {
             </div>
         </div>
 
-        <div v-if="props.source.endpoints.length > 0" class="divide-line-subtle mt-4 divide-y">
+        <div v-if="props.source.endpoints.length > 0" class="divide-line-subtle mt-4 divide-y sm:pl-16">
             <div v-for="endpoint in props.source.endpoints" :key="endpoint.id" class="py-4 first:pt-0 last:pb-0">
                 <WebhookEndpointPanel :source="props.source" :endpoint="endpoint" />
             </div>
         </div>
 
-        <div class="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2">
+        <div class="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 sm:pl-16">
             <button
                 v-if="props.source.endpoints.length === 0"
                 type="button"

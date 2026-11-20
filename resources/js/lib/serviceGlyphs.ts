@@ -2,7 +2,6 @@ import {
     siAppstore,
     siBluesky,
     siDiscord,
-    siEmby,
     siEpicgames,
     siFacebook,
     siFandom,
@@ -17,16 +16,12 @@ import {
     siImdb,
     siInstagram,
     siItchdotio,
-    siJellyfin,
-    siKodi,
     siMeta,
     siMyanimelist,
     siOpenid,
     siPlaystation,
-    siPlex,
     siReddit,
     siSteam,
-    siStremio,
     siThemoviedatabase,
     siTiktok,
     siTwitch,
@@ -37,8 +32,10 @@ import {
 } from 'simple-icons';
 
 /**
- * Brand marks, one map for the app: the things you can connect and the
- * services a title page links out to, by the code the backend uses.
+ * Brand marks drawn in the colour of the text around them, one map for the
+ * app: the services a title page links out to, the stores a game is sold in
+ * and the ways to sign in, by the code the backend uses. A service's colour
+ * logo, shown on its own (import, export, notifications), is `serviceLogos`.
  *
  * Official paths from simple-icons (Xbox and Nintendo below). A product with no glyph (Nuvio,
  * Harbor) falls back to a generic mark at the call site — inventing one
@@ -55,11 +52,6 @@ const NINTENDO_PATH =
     'M10.04,20.4H7.12C6.19,20.4 5.3,20 4.64,19.36C4,18.7 3.6,17.81 3.6,16.88V7.12C3.6,6.19 4,5.3 4.64,4.64C5.3,4 6.19,3.62 7.12,3.62H10.04V20.4M7.12,2A5.12,5.12 0 0,0 2,7.12V16.88C2,19.71 4.29,22 7.12,22H11.65V2H7.12M5.11,8C5.11,9.04 5.95,9.88 7,9.88C8.03,9.88 8.87,9.04 8.87,8C8.87,6.96 8.03,6.12 7,6.12C5.95,6.12 5.11,6.96 5.11,8M17.61,11C18.72,11 19.62,11.89 19.62,13C19.62,14.12 18.72,15 17.61,15C16.5,15 15.58,14.12 15.58,13C15.58,11.89 16.5,11 17.61,11M16.88,22A5.12,5.12 0 0,0 22,16.88V7.12C22,4.29 19.71,2 16.88,2H13.65V22H16.88Z';
 
 const BRANDS: Record<string, { path: string; label: string }> = {
-    jellyfin: { path: siJellyfin.path, label: 'Jellyfin' },
-    plex: { path: siPlex.path, label: 'Plex' },
-    emby: { path: siEmby.path, label: 'Emby' },
-    kodi: { path: siKodi.path, label: 'Kodi' },
-    stremio: { path: siStremio.path, label: 'Stremio' },
     tmdb: { path: siThemoviedatabase.path, label: 'TMDB' },
     imdb: { path: siImdb.path, label: 'IMDb' },
     instagram: { path: siInstagram.path, label: 'Instagram' },

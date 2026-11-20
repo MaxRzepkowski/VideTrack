@@ -315,4 +315,5 @@ return [
     'shelf_did_not_finish' => 'Porzucone',
     'watch_history' => 'Historia oglądania',
     'library_on_a_list' => 'Twoja biblioteka, na liście :source',
+    'where_your_data_comes_from' => 'Skąd przenosisz dane',
 ];
