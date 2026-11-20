@@ -2,7 +2,7 @@
 
 namespace App\Tracking\Releases;
 
-use App\Accounts\Preferences\UserPreferences;
+use App\Accounts\Preferences\PreferenceKeys;
 use App\Catalog\Contracts\SupportsPlatforms;
 use App\Catalog\ItemMetadata;
 use App\Catalog\MediaItemSummaries;
@@ -51,7 +51,7 @@ final readonly class ProgressReleases implements ReleaseSource
             description: 'settings.ports_early_access_and_patches_instead',
             phrase: 'settings.phrase_every_platform',
             surfaces: Surface::views(),
-            preference: UserPreferences::perPlatformKey(...),
+            preference: PreferenceKeys::perPlatform(...),
         )];
     }
 

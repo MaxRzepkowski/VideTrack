@@ -3,7 +3,7 @@
 namespace App\Tracking\Releases;
 
 use App\Accounts\Preferences\NotificationEvent;
-use App\Accounts\Preferences\UserPreferences;
+use App\Accounts\Preferences\PreferenceKeys;
 use App\Catalog\ItemMetadata;
 use App\Catalog\MediaItemSummaries;
 use App\Catalog\MediaTypeDefinition;
@@ -35,7 +35,7 @@ final readonly class EpisodeReleases implements ReleaseSource
             description: 'settings.an_episode_of_a_tracked_show',
             phrase: 'settings.phrase_new_episodes',
             surfaces: [Surface::Notifications],
-            preference: fn (): string => UserPreferences::notifiesKey(NotificationEvent::Episodes),
+            preference: fn (): string => PreferenceKeys::notifies(NotificationEvent::Episodes),
         )];
     }
 

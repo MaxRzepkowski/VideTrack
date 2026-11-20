@@ -2,7 +2,7 @@
 
 namespace App\Tracking\Releases;
 
-use App\Accounts\Preferences\UserPreferences;
+use App\Accounts\Preferences\PreferenceKeys;
 use App\Catalog\Contracts\SupportsRelatedReleases;
 use App\Catalog\Data\RelatedRelease;
 use App\Catalog\ItemMetadata;
@@ -121,7 +121,7 @@ final readonly class RelatedReleases implements ReleaseSource
                 RelatedReleaseKind::Remasters => 'settings.phrase_remasters',
             },
             surfaces: Surface::cases(),
-            preference: fn (Surface $surface): string => UserPreferences::relatedKey($surface, $kind),
+            preference: fn (Surface $surface): string => PreferenceKeys::related($surface, $kind),
         ), $provider->relatedReleaseKinds());
     }
 

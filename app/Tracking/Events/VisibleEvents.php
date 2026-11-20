@@ -2,7 +2,7 @@
 
 namespace App\Tracking\Events;
 
-use App\Accounts\Preferences\UserPreferences;
+use App\Accounts\Preferences\PreferenceKeys;
 use App\Catalog\Contracts\SupportsEvents;
 use App\Catalog\Events\EventStore;
 use App\Catalog\MediaTypeDefinition;
@@ -52,7 +52,7 @@ final readonly class VisibleEvents implements DeclaresTypeOptions
             description: 'settings.presentations_where_new_titles_are_announced',
             phrase: 'settings.phrase_events',
             surfaces: Surface::views(),
-            preference: UserPreferences::eventsKey(...),
+            preference: PreferenceKeys::events(...),
             ofTrackedTitles: false,
         )];
     }
