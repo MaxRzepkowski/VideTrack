@@ -3,8 +3,8 @@ import { describe, expect, it } from 'vitest';
 
 describe('glyphFor', () => {
     it('gives the brand path of a known service', () => {
-        expect(glyphFor('plex')).toMatch(/^M/);
-        expect(glyphFor('jellyfin')).not.toBe(glyphFor('plex'));
+        expect(glyphFor('imdb')).toMatch(/^M/);
+        expect(glyphFor('tmdb')).not.toBe(glyphFor('imdb'));
     });
 
     it('has nothing for a service without a mark, so the caller falls back', () => {

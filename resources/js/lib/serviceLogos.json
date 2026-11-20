@@ -13,6 +13,20 @@
         "source": "apprise-docs",
         "licence": "CC BY 4.0"
     },
+    "anilist": {
+        "file": "anilist.svg",
+        "width": 512,
+        "height": 512,
+        "source": "https://commons.wikimedia.org/wiki/File:AniList_logo.svg",
+        "licence": "public domain on Wikimedia Commons; trademark of its owner"
+    },
+    "anime-planet": {
+        "file": "anime-planet.svg",
+        "width": 586,
+        "height": 95,
+        "source": "https://www.anime-planet.com/ (the logo in the site header, its desktop variant)",
+        "licence": "trademark of its owner"
+    },
     "apprises": {
         "file": "apprises.svg",
         "width": 95,
@@ -33,6 +47,13 @@
         "height": 46,
         "source": "apprise-docs",
         "licence": "CC BY 4.0"
+    },
+    "backloggd": {
+        "file": "backloggd.png",
+        "width": 1600,
+        "height": 338,
+        "source": "https://backloggd.b-cdn.net/logos/backloggd-logo-full.png",
+        "licence": "trademark of its owner"
     },
     "barks": {
         "file": "barks.svg",
@@ -83,6 +104,13 @@
         "source": "apprise-docs",
         "licence": "CC BY 4.0"
     },
+    "calibre": {
+        "file": "calibre.svg",
+        "width": 1024,
+        "height": 1024,
+        "source": "https://raw.githubusercontent.com/kovidgoyal/calibre/master/resources/images/calibre.svg",
+        "licence": "GPL-3.0; trademark of its owner"
+    },
     "chanify": {
         "file": "chanify.png",
         "width": 180,
@@ -117,6 +145,13 @@
         "height": 30,
         "source": "apprise-docs",
         "licence": "CC BY 4.0"
+    },
+    "criticker": {
+        "file": "criticker.svg",
+        "width": 192,
+        "height": 36,
+        "source": "https://www.criticker.com/ (the logo in the site header, its lettering in white for the dark interface)",
+        "licence": "trademark of its owner"
     },
     "d7sms": {
         "file": "d7sms.svg",
@@ -167,12 +202,19 @@
         "source": "apprise-docs",
         "licence": "CC BY 4.0"
     },
+    "emby": {
+        "file": "emby.svg",
+        "width": 512,
+        "height": 512,
+        "source": "https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/svg/emby.svg",
+        "licence": "Apache-2.0; trademark of its owner"
+    },
     "embys": {
-        "file": "embys.svg",
-        "width": 25,
-        "height": 25,
-        "source": "simple-icons",
-        "licence": "CC0"
+        "file": "emby.svg",
+        "width": 512,
+        "height": 512,
+        "source": "https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/svg/emby.svg",
+        "licence": "Apache-2.0; trademark of its owner"
     },
     "evolutions": {
         "file": "evolutions.png",
@@ -258,6 +300,20 @@
         "source": "https://github.com/target/goalert/blob/master/web/src/app/public/logos/darkmode_logo.svg",
         "licence": "Apache-2.0; trademark of its owner"
     },
+    "gog-galaxy": {
+        "file": "gog-galaxy.svg",
+        "width": 34,
+        "height": 31,
+        "source": "https://commons.wikimedia.org/wiki/File:GOG.com_logo_white.svg",
+        "licence": "public domain on Wikimedia Commons; trademark of its owner"
+    },
+    "goodreads": {
+        "file": "goodreads.svg",
+        "width": 48,
+        "height": 48,
+        "source": "https://commons.wikimedia.org/wiki/File:Goodreads_favicon_2025.svg",
+        "licence": "public domain on Wikimedia Commons; trademark of its owner"
+    },
     "gotifys": {
         "file": "gotifys.svg",
         "width": 390,
@@ -278,6 +334,13 @@
         "height": 100,
         "source": "apprise-docs",
         "licence": "CC BY 4.0"
+    },
+    "grouvee": {
+        "file": "grouvee.png",
+        "width": 400,
+        "height": 400,
+        "source": "https://www.grouvee.com/ (the logo in the site header)",
+        "licence": "trademark of its owner"
     },
     "growl": {
         "file": "growl.png",
@@ -307,6 +370,13 @@
         "source": "apprise-docs",
         "licence": "CC BY 4.0"
     },
+    "hltb": {
+        "file": "hltb.png",
+        "width": 192,
+        "height": 192,
+        "source": "https://howlongtobeat.com/img/icons/android-chrome-192x192.png",
+        "licence": "trademark of its owner"
+    },
     "httpsms": {
         "file": "httpsms.svg",
         "width": 299,
@@ -320,6 +390,13 @@
         "height": 532,
         "source": "apprise-docs",
         "licence": "CC BY 4.0"
+    },
+    "icheckmovies": {
+        "file": "icheckmovies.png",
+        "width": 177,
+        "height": 31,
+        "source": "https://www.icheckmovies.com/images/logo.gif (without the tagline, its lettering in white for the dark interface)",
+        "licence": "trademark of its owner"
     },
     "ifttt": {
         "file": "ifttt.png",
@@ -335,6 +412,13 @@
         "source": "apprise-docs",
         "licence": "CC BY 4.0"
     },
+    "imdb": {
+        "file": "imdb.svg",
+        "width": 575,
+        "height": 290,
+        "source": "https://commons.wikimedia.org/wiki/File:IMDB_Logo_2016.svg",
+        "licence": "public domain on Wikimedia Commons; trademark of its owner"
+    },
     "incidentio": {
         "file": "incidentio.svg",
         "width": 133,
@@ -349,8 +433,22 @@
         "source": "apprise-docs",
         "licence": "CC BY 4.0"
     },
+    "jellyfin": {
+        "file": "jellyfin.svg",
+        "width": 75,
+        "height": 75,
+        "source": "https://github.com/jellyfin/jellyfin-ux/blob/master/logos/SVG/jellyfin-icon--color-on-dark.svg",
+        "licence": "CC BY-SA 4.0; trademark of its owner"
+    },
+    "jellyfin-playback-reporting": {
+        "file": "jellyfin.svg",
+        "width": 75,
+        "height": 75,
+        "source": "https://github.com/jellyfin/jellyfin-ux/blob/master/logos/SVG/jellyfin-icon--color-on-dark.svg",
+        "licence": "CC BY-SA 4.0; trademark of its owner"
+    },
     "jellyfins": {
-        "file": "jellyfins.svg",
+        "file": "jellyfin.svg",
         "width": 75,
         "height": 75,
         "source": "https://github.com/jellyfin/jellyfin-ux/blob/master/logos/SVG/jellyfin-icon--color-on-dark.svg",
@@ -390,6 +488,13 @@
         "height": 500,
         "source": "https://kavenegar.com/images/logo.svg",
         "licence": "trademark of its owner"
+    },
+    "kitsu": {
+        "file": "kitsu.svg",
+        "width": 814,
+        "height": 814,
+        "source": "https://raw.githubusercontent.com/hummingbird-me/kitsu-web/react/src/assets/favicon.svg",
+        "licence": "Apache-2.0; trademark of its owner"
     },
     "kodis": {
         "file": "kodis.svg",
@@ -433,12 +538,26 @@
         "source": "apprise-docs",
         "licence": "CC BY 4.0"
     },
+    "letterboxd": {
+        "file": "letterboxd.svg",
+        "width": 512,
+        "height": 512,
+        "source": "https://raw.githubusercontent.com/selfhst/icons/main/svg/letterboxd.svg",
+        "licence": "CC BY 4.0; trademark of its owner"
+    },
     "lfg": {
         "file": "lfg.svg",
         "width": 1065,
         "height": 1065,
         "source": "apprise-docs",
         "licence": "CC BY 4.0"
+    },
+    "librarything": {
+        "file": "librarything.svg",
+        "width": 128,
+        "height": 128,
+        "source": "https://commons.wikimedia.org/wiki/File:LibararyThing_favicon.svg",
+        "licence": "public domain on Wikimedia Commons; trademark of its owner"
     },
     "line": {
         "file": "line.svg",
@@ -460,6 +579,20 @@
         "height": 25,
         "source": "simple-icons",
         "licence": "CC0"
+    },
+    "mal": {
+        "file": "myanimelist.svg",
+        "width": 256,
+        "height": 256,
+        "source": "https://commons.wikimedia.org/wiki/File:MyAnimeList_favicon.svg",
+        "licence": "public domain on Wikimedia Commons; trademark of its owner"
+    },
+    "mal-xml": {
+        "file": "myanimelist.svg",
+        "width": 256,
+        "height": 256,
+        "source": "https://commons.wikimedia.org/wiki/File:MyAnimeList_favicon.svg",
+        "licence": "public domain on Wikimedia Commons; trademark of its owner"
     },
     "mastodons": {
         "file": "mastodons.svg",
@@ -517,6 +650,20 @@
         "source": "https://bird.com/favicon.svg",
         "licence": "trademark of its owner"
     },
+    "myanimelist-anime": {
+        "file": "myanimelist.svg",
+        "width": 256,
+        "height": 256,
+        "source": "https://commons.wikimedia.org/wiki/File:MyAnimeList_favicon.svg",
+        "licence": "public domain on Wikimedia Commons; trademark of its owner"
+    },
+    "myanimelist-manga": {
+        "file": "myanimelist.svg",
+        "width": 256,
+        "height": 256,
+        "source": "https://commons.wikimedia.org/wiki/File:MyAnimeList_favicon.svg",
+        "licence": "public domain on Wikimedia Commons; trademark of its owner"
+    },
     "nclouds": {
         "file": "nclouds.svg",
         "width": 25,
@@ -530,6 +677,13 @@
         "height": 16,
         "source": "https://github.com/nextcloud/spreed/blob/main/img/app.svg",
         "licence": "AGPL-3.0-or-later; trademark of its owner"
+    },
+    "netflix": {
+        "file": "netflix.svg",
+        "width": 551,
+        "height": 1000,
+        "source": "https://commons.wikimedia.org/wiki/File:Netflix_2016_N_logo.svg",
+        "licence": "public domain on Wikimedia Commons; trademark of its owner"
     },
     "nostr": {
         "file": "nostr.png",
@@ -649,6 +803,20 @@
         "height": 322,
         "source": "https://github.com/Pushjet/Pushjet-Website/blob/master/images/pushjet.svg",
         "licence": "BSD-2-Clause; trademark of its owner"
+    },
+    "playnite": {
+        "file": "playnite.svg",
+        "width": 1024,
+        "height": 1024,
+        "source": "https://raw.githubusercontent.com/JosefNemec/Playnite/master/media/playnite-logo-default.svg",
+        "licence": "MIT; trademark of its owner"
+    },
+    "plex": {
+        "file": "plex.svg",
+        "width": 512,
+        "height": 512,
+        "source": "https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/svg/plex.svg",
+        "licence": "Apache-2.0; trademark of its owner"
     },
     "plivo": {
         "file": "plivo.svg",
@@ -860,6 +1028,13 @@
         "source": "apprise-docs",
         "licence": "CC BY 4.0"
     },
+    "simkl": {
+        "file": "simkl.svg",
+        "width": 1536,
+        "height": 1536,
+        "source": "https://eu.simkl.in/img_favicon/v2/safari-pinned-tab.svg (in white, as the dark interface needs)",
+        "licence": "trademark of its owner"
+    },
     "sinch": {
         "file": "sinch.png",
         "width": 256,
@@ -965,6 +1140,20 @@
         "source": "apprise-docs",
         "licence": "CC BY 4.0"
     },
+    "steam": {
+        "file": "steam.svg",
+        "width": 65,
+        "height": 65,
+        "source": "https://commons.wikimedia.org/wiki/File:Steam_icon_logo.svg",
+        "licence": "public domain on Wikimedia Commons; trademark of its owner"
+    },
+    "storygraph": {
+        "file": "storygraph.svg",
+        "width": 512,
+        "height": 512,
+        "source": "https://raw.githubusercontent.com/selfhst/icons/main/svg/storygraph-light.svg (the light variant)",
+        "licence": "CC BY 4.0; trademark of its owner"
+    },
     "strmlabs": {
         "file": "strmlabs.svg",
         "width": 25,
@@ -978,6 +1167,13 @@
         "height": 256,
         "source": "apprise-docs",
         "licence": "CC BY 4.0"
+    },
+    "tautulli": {
+        "file": "tautulli.svg",
+        "width": 350,
+        "height": 350,
+        "source": "https://raw.githubusercontent.com/Tautulli/Tautulli/nightly/data/interfaces/default/images/logo-circle.svg",
+        "licence": "GPL-3.0; trademark of its owner"
     },
     "telesign": {
         "file": "telesign.svg",
@@ -1007,12 +1203,33 @@
         "source": "simple-icons",
         "licence": "CC0"
     },
+    "tracearr": {
+        "file": "tracearr.svg",
+        "width": 320,
+        "height": 415,
+        "source": "https://raw.githubusercontent.com/connorgallopo/Tracearr/main/apps/web/public/favicon.svg",
+        "licence": "AGPL-3.0; trademark of its owner"
+    },
+    "trakt": {
+        "file": "trakt.svg",
+        "width": 48,
+        "height": 48,
+        "source": "https://trakt.tv/favicon.svg",
+        "licence": "trademark of its owner, used unmodified under the Trakt brand guidelines"
+    },
     "trigvs": {
         "file": "trigvs.svg",
         "width": 265,
         "height": 246,
         "source": "apprise-docs",
         "licence": "CC BY 4.0"
+    },
+    "tvtime": {
+        "file": "tvtime.svg",
+        "width": 100,
+        "height": 100,
+        "source": "https://www.tvtime.com/ (inline data:image/svg+xml favicon in the page head)",
+        "licence": "trademark of its owner"
     },
     "twilio": {
         "file": "twilio.svg",
@@ -1041,6 +1258,13 @@
         "height": 2,
         "source": "apprise-docs",
         "licence": "CC BY 4.0"
+    },
+    "videtrack": {
+        "file": "videtrack.svg",
+        "width": 512,
+        "height": 512,
+        "source": "this project (public/favicon.svg)",
+        "licence": "AGPL-3.0"
     },
     "voipms": {
         "file": "voipms.svg",
@@ -1132,6 +1356,13 @@
         "height": 200,
         "source": "apprise-docs",
         "licence": "CC BY 4.0"
+    },
+    "yamtrack": {
+        "file": "yamtrack.svg",
+        "width": 512,
+        "height": 512,
+        "source": "https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/svg/yamtrack.svg",
+        "licence": "Apache-2.0; trademark of its owner"
     },
     "youlmk": {
         "file": "youlmk.svg",

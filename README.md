@@ -115,6 +115,8 @@ linters and architecture rules) before it lands.
 VideTrack is licensed under the [GNU AGPL-3.0](LICENSE).
 
 The service logos in `public/images/logos` are trademarks of their owners, shown only to name the
-service a notification goes to. Most come from the [Apprise documentation](https://github.com/caronc/apprise-docs)
-(CC BY 4.0) and [Simple Icons](https://simpleicons.org) (CC0); the others from each service's own site.
-`resources/js/lib/serviceLogos.json` names the source of every file.
+service a notification goes to, a media server that reports what you watched, an import comes from or an export is meant for. Most come from the
+[Apprise documentation](https://github.com/caronc/apprise-docs) (CC BY 4.0), [Simple Icons](https://simpleicons.org)
+(CC0), [Wikimedia Commons](https://commons.wikimedia.org), [Dashboard Icons](https://github.com/homarr-labs/dashboard-icons)
+(Apache-2.0) and [selfh.st icons](https://github.com/selfhst/icons) (CC BY 4.0); the others from each project's
+repository or each service's own site. `resources/js/lib/serviceLogos.json` names the source of every file.
