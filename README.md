@@ -114,7 +114,7 @@ linters and architecture rules) before it lands.
 
 VideTrack is licensed under the [GNU AGPL-3.0](LICENSE).
 
-The service logos in `public/images/channels` are trademarks of their owners, shown only to name the
+The service logos in `public/images/logos` are trademarks of their owners, shown only to name the
 service a notification goes to. Most come from the [Apprise documentation](https://github.com/caronc/apprise-docs)
 (CC BY 4.0) and [Simple Icons](https://simpleicons.org) (CC0); the others from each service's own site.
-`resources/js/lib/channelLogos.json` names the source of every file.
+`resources/js/lib/serviceLogos.json` names the source of every file.

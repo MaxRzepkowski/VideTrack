@@ -1,19 +1,20 @@
 <?php
 
 /*
- * The proportions of the notification services' logos, written into their
- * list so each <img> holds its box before the file loads. It reads the files
- * and never changes them.
+ * The proportions of the outside services' logos (notification channels,
+ * import sources, export formats, media servers), written into their list so
+ * each <img> holds its box before the file loads. It reads the files and never
+ * changes them.
  *
- *   php scripts/channel-logos.php
+ *   php scripts/service-logos.php
  *
- * Adding a logo: put the file in public/images/channels, name it in
- * resources/js/lib/channelLogos.json under the service's code (`file`,
- * `source`, `licence`), then run this.
+ * Adding a logo: put the file in public/images/logos, name it in
+ * resources/js/lib/serviceLogos.json under the service's code (`file`,
+ * `source`, `licence`), then run this. Codes of the same brand name one file.
  */
 
-const MANIFEST = __DIR__.'/../resources/js/lib/channelLogos.json';
-const FOLDER = __DIR__.'/../public/images/channels';
+const MANIFEST = __DIR__.'/../resources/js/lib/serviceLogos.json';
+const FOLDER = __DIR__.'/../public/images/logos';
 
 /**
  * @return array{int, int} width and height: a PNG's pixels, an SVG's viewBox
@@ -51,7 +52,9 @@ foreach ($manifest as $kind => $entry) {
     $file = is_array($entry) && is_string($entry['file'] ?? null) ? $entry['file'] : throw new RuntimeException("No file for {$kind}");
     $listed[] = $file;
     [$width, $height] = size(FOLDER.'/'.$file);
-    $manifest[$kind] = ['file' => $file, 'width' => $width, 'height' => $height, 'source' => $entry['source'] ?? '', 'licence' => $entry['licence'] ?? ''];
+    $source = is_string($entry['source'] ?? null) && $entry['source'] !== '' ? $entry['source'] : throw new RuntimeException("No source for {$kind}");
+    $licence = is_string($entry['licence'] ?? null) && $entry['licence'] !== '' ? $entry['licence'] : throw new RuntimeException("No licence for {$kind}");
+    $manifest[$kind] = ['file' => $file, 'width' => $width, 'height' => $height, 'source' => $source, 'licence' => $licence];
 }
 
 $unlisted = array_diff(array_map('basename', glob(FOLDER.'/*') ?: []), $listed);

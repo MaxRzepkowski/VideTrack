@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import InputError from '@/components/InputError.vue';
-import ChannelLogo from '@/components/settings/channels/ChannelLogo.vue';
+import ServiceLogo from '@/components/ServiceLogo.vue';
 import CredentialFields from '@/components/settings/CredentialFields.vue';
 import SettingsSaveBar from '@/components/settings/SettingsSaveBar.vue';
 import { Label } from '@/components/ui/label';
@@ -12,7 +12,7 @@ import { channelModes, configError, savedConfig } from '@/lib/channels';
 import { SETTINGS_CARD_CLASS, SETTINGS_FIELD_CLASS } from '@/lib/ui';
 import type { ChannelData, ChannelKindData } from '@/types/generated';
 import { router, useForm } from '@inertiajs/vue3';
-import { Check } from '@lucide/vue';
+import { Check, Bell } from '@lucide/vue';
 import { trans } from 'laravel-vue-i18n';
 import { ref } from 'vue';
 import { toast } from 'vue-sonner';
@@ -85,7 +85,7 @@ async function remove(): Promise<void> {
 <template>
     <div :class="[SETTINGS_CARD_CLASS, 'space-y-4']">
         <div class="flex items-center gap-3">
-            <ChannelLogo :kind="props.channel.kind" class="h-10 max-w-28" />
+            <ServiceLogo :code="props.channel.kind" :fallback="Bell" class="h-10 max-w-28" />
             <div class="min-w-0 flex-1">
                 <div class="text-ink truncate text-base font-semibold">{{ props.channel.label }}</div>
                 <div v-if="props.channel.kindLabel && props.channel.label !== props.channel.kindLabel" class="text-ink-muted text-sm">

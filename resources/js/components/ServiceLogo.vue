@@ -1,17 +1,19 @@
 <script setup lang="ts">
-import { channelIcon, channelLogo } from '@/lib/channelLogos';
-import { Bell } from '@lucide/vue';
+import { serviceIcon, serviceLogo } from '@/lib/serviceLogos';
+import type { LucideIcon } from '@lucide/vue';
 import { computed } from 'vue';
 
 /**
  * A service's mark at the height its caller sets and as wide as it is: a
  * wordmark is not squeezed into a square. Decorative: the service's name
- * always stands beside it. A service with no mark yet gets a quiet bell.
+ * always stands beside it. A service with no mark yet gets the caller's quiet
+ * stand-in: what it is depends on where the service shows (a bell for a
+ * notification channel, a file for an import).
  */
-const props = defineProps<{ kind: string }>();
+const props = defineProps<{ code: string; fallback: LucideIcon }>();
 
-const icon = computed(() => channelIcon(props.kind));
-const logo = computed(() => (icon.value === null ? channelLogo(props.kind) : null));
+const icon = computed(() => serviceIcon(props.code));
+const logo = computed(() => (icon.value === null ? serviceLogo(props.code) : null));
 </script>
 
 <template>
@@ -27,6 +29,6 @@ const logo = computed(() => (icon.value === null ? channelLogo(props.kind) : nul
             loading="lazy"
             class="h-full w-auto max-w-full object-contain p-1"
         />
-        <Bell v-else class="text-ink-faint aspect-square h-full w-auto p-1" />
+        <component :is="fallback" v-else class="text-ink-faint aspect-square h-full w-auto p-1" />
     </span>
 </template>
