@@ -98,6 +98,22 @@ test('an upcoming game without platform data falls back to its release date', fu
         ->and($days[0]->entries[0]->media->title)->toBe($game->title);
 });
 
+test('a game with platform data none of which falls in the window does not fall back to its release date', function () {
+    enableGamesModule();
+
+    $user = User::factory()->create();
+    $game = MediaItem::factory()->game()->create([
+        'release_date' => today()->addDays(7)->toDateString(),
+        'metadata' => ['platformReleases' => [
+            ['date' => today()->subDays(30)->toDateString(), 'platform' => 'PC', 'status' => null, 'region' => 'worldwide'],
+        ]],
+    ]);
+
+    app(SyncListMembership::class)->execute($user, $game, [$user->watchlist()->id]);
+
+    expect(calendarFor($user))->toBe([]);
+});
+
 test('a release known only to its quarter or year stays off the calendar', function () {
     enableGamesModule();
 
