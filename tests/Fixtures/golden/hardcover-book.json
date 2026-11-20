@@ -138,5 +138,6 @@
     "nextEpisodeToAir": null,
     "adult": false,
     "rankings": [],
-    "ties": []
+    "ties": [],
+    "relatedReleases": null
 }

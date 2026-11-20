@@ -9,9 +9,9 @@ use App\Tracking\Releases\PlatformPremieres;
 use App\Tracking\Releases\ReleaseWindow;
 use App\Tracking\Surface;
 
-function premieresWindow(Surface $surface = Surface::Calendar): ReleaseWindow
+function premieresWindow(Surface $surface = Surface::Calendar, ReleaseRegion $region = ReleaseRegion::Europe): ReleaseWindow
 {
-    return new ReleaseWindow(new User, '2026-11-01', '2026-11-30', $surface, $surface->showsApproximateDates());
+    return new ReleaseWindow(new User, '2026-11-01', '2026-11-30', $surface, $surface->showsApproximateDates(), $region);
 }
 
 test('the viewer\'s region picks one date per platform and kind, then worldwide, then the earliest', function () {
@@ -22,7 +22,7 @@ test('the viewer\'s region picks one date per platform and kind, then worldwide,
         new PlatformRelease('2026-11-05', 'PC', null, ReleaseRegion::Japan),
         new PlatformRelease('2026-11-25', 'PS5', null, ReleaseRegion::Japan),
         new PlatformRelease('2026-11-22', 'PS5', null, ReleaseRegion::Korea),
-    ], ReleaseRegion::Europe, premieresWindow());
+    ], premieresWindow());
 
     expect(array_map(fn (PlatformPremiere $premiere): string => "{$premiere->cardPlatform()} {$premiere->date}", $premieres))
         ->toEqualCanonicalizing(['Switch 2026-11-10', 'PC 2026-11-12', 'PS5 2026-11-22']);
@@ -34,7 +34,7 @@ test('platforms premiering the same day as the same kind are one premiere naming
         new PlatformRelease('2026-11-10', 'PS5'),
         new PlatformRelease('2026-11-10', 'Switch 2', 'Next-Gen Optimization Patch Release'),
         new PlatformRelease('2026-11-18', 'Xbox'),
-    ], ReleaseRegion::Europe, premieresWindow());
+    ], premieresWindow());
 
     expect(array_map(fn (PlatformPremiere $premiere): array => [$premiere->date, $premiere->platforms, $premiere->status], $premieres))->toEqual([
         ['2026-11-10', ['PC', 'PS5'], null],
@@ -52,7 +52,7 @@ test('only what the window holds is left: an approximate date only where the sur
 
     $platforms = fn (Surface $surface): array => array_map(
         fn (PlatformPremiere $premiere): ?string => $premiere->cardPlatform(),
-        (new PlatformPremieres)->inWindow($releases, ReleaseRegion::Europe, premieresWindow($surface)),
+        (new PlatformPremieres)->inWindow($releases, premieresWindow($surface)),
     );
 
     expect($platforms(Surface::Calendar))->toBe(['Switch'])

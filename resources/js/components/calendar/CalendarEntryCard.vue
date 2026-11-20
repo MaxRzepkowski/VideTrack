@@ -2,7 +2,7 @@
 import ReleaseStatusChip from '@/components/media/ReleaseStatusChip.vue';
 import MetaLine from '@/components/MetaLine.vue';
 import { usePreferences } from '@/composables/usePreferences';
-import { episodeBadge } from '@/lib/badges';
+import { episodeBadge, gameTypeBadge } from '@/lib/badges';
 import { episodeCode, formatTime } from '@/lib/format';
 import { mediaImage } from '@/lib/images';
 import { mediaTypeMeta } from '@/lib/mediaTypes';
@@ -118,6 +118,9 @@ const href = computed<string>(() => {
 
 const releaseStatus = computed(() => releaseStatusChip(props.entry.media));
 
+// What the release is beyond its title: an episode's milestone, a game's DLC or remake.
+const badge = computed(() => (batch.value === null ? (episodeBadge(props.entry.media) ?? gameTypeBadge(props.entry.media)) : null));
+
 const followedVia = computed(() => compactFollowedVia(props.entry.media));
 </script>
 
@@ -168,11 +171,11 @@ const followedVia = computed(() => compactFollowedVia(props.entry.media));
                 {{ trans('calendar.because_you_follow_name', { name: followedVia.compact }) }}
             </div>
             <span
-                v-if="batch === null && episodeBadge(entry.media)"
+                v-if="badge"
                 class="text-on-photo mt-1 inline-block rounded px-1.5 py-0.5 text-sm font-extrabold"
-                :style="{ background: episodeBadge(entry.media)?.color }"
+                :style="{ background: badge.color }"
             >
-                {{ episodeBadge(entry.media)?.label }}
+                {{ badge.label }}
             </span>
             <ReleaseStatusChip v-if="releaseStatus" :status="releaseStatus" class="mt-1" />
         </div>

@@ -73,6 +73,7 @@ final readonly class NotificationCopy
             MediaEventType::DateChanged => __('notifications.new_release_date_for_title', ['title' => $title], $locale),
             MediaEventType::ShowStatus => __('notifications.title_changed_status', ['title' => $title], $locale),
             MediaEventType::SeasonAnnounced => __('notifications.new_season_of_title_announced', ['title' => $title], $locale),
+            MediaEventType::RelatedAnnounced => __('notifications.announced_title', ['title' => $title], $locale),
             MediaEventType::PersonNewTitle => __('notifications.new_title_with_name', ['name' => $event->personName ?? ''], $locale),
             MediaEventType::CompanyNewTitle => __('notifications.new_title_from_name', ['name' => $event->companyName ?? ''], $locale),
             // The series has to be named — the part's own title says nothing
@@ -91,6 +92,15 @@ final readonly class NotificationCopy
      * @return list<string>
      */
     public function detail(MediaEventPayload $event, string $locale): array
+    {
+        // A game's DLC or remake says first what it is and whose: its title alone says neither.
+        return [...$event->relatedCard()?->facts($locale) ?? [], ...$this->ownDetail($event, $locale)];
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function ownDetail(MediaEventPayload $event, string $locale): array
     {
         $media = $event->media;
 
@@ -129,6 +139,10 @@ final readonly class NotificationCopy
                 return [$old === null ? $status->label($locale) : "{$old->label($locale)} → {$status->label($locale)}"];
             case MediaEventType::SeasonAnnounced:
                 return [__('common.season_number', ['number' => (string) $event->season], $locale)];
+            case MediaEventType::RelatedAnnounced:
+                $date = $this->date($event->date, $event->datePrecision(), $locale);
+
+                return $date === null ? [] : [$date];
             case MediaEventType::CollectionNewItem:
             case MediaEventType::PersonNewTitle:
             case MediaEventType::CompanyNewTitle:
@@ -253,6 +267,8 @@ final readonly class NotificationCopy
                     'label' => __('notifications.season_number_announced', ['number' => (string) $event->season], $locale),
                     'meta' => null,
                 ];
+            case MediaEventType::RelatedAnnounced:
+                return ['subject' => $title, 'label' => __('notifications.announced', [], $locale), 'meta' => $this->plainDetail($event, $locale)];
             case MediaEventType::PersonNewTitle:
                 return ['subject' => $title, 'label' => __('notifications.new_title_with_name', ['name' => $event->personName ?? ''], $locale), 'meta' => $date];
             case MediaEventType::CompanyNewTitle:

@@ -10,6 +10,7 @@ use App\Notifications\MediaEventPayload;
 use App\Support\ExternalServiceException;
 use App\Tracking\EpisodeTimes;
 use App\Tracking\MetadataChanges;
+use App\Tracking\Releases\OwnStances;
 use App\Tracking\TrackedAudience;
 
 /**
@@ -27,6 +28,7 @@ final readonly class RefreshTitle
         private RetireGoneParts $retireParts,
         private ScheduleFingerprint $fingerprint,
         private EpisodeTimes $episodeTimes,
+        private OwnStances $stances,
     ) {}
 
     /**
@@ -56,9 +58,26 @@ final readonly class RefreshTitle
     private function notify(MediaItem $root, array $events): int
     {
         $sent = 0;
+        // The news of a game's DLC or remake, by the release it is about.
+        $related = [];
+
+        foreach ($events as $index => $event) {
+            $ref = $event->relatedRef();
+
+            if ($ref !== null) {
+                $related[$index] = $ref;
+            }
+        }
+
+        // A release a user keeps as a title of their own is told of as that title, not as the game's.
+        $own = $this->stances->ofEveryone($root->provider, $root->type, array_values(array_unique($related)));
 
         foreach ($this->audience->usersFor($root) as $user) {
-            foreach ($events as $event) {
+            foreach ($events as $index => $event) {
+                if (isset($related[$index], $own[$user->id][$related[$index]])) {
+                    continue;
+                }
+
                 if ($event->wantedBy($user) && $this->send->execute($user, $event)) {
                     $sent++;
                 }

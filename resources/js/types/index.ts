@@ -106,6 +106,9 @@ export interface UserPreferences {
     calendar_release_mode: ReleaseDateMode;
     calendar_episode_image: EpisodeImage;
     calendar_events: boolean;
+    calendar_game_addons: boolean;
+    calendar_game_remakes: boolean;
+    calendar_game_remasters: boolean;
     countdown_active: boolean;
     countdown_dropped: boolean;
     countdown_on_hold: boolean;
@@ -116,6 +119,9 @@ export interface UserPreferences {
     countdown_release_mode: ReleaseDateMode;
     countdown_episode_image: EpisodeImage;
     countdown_events: boolean;
+    countdown_game_addons: boolean;
+    countdown_game_remakes: boolean;
+    countdown_game_remasters: boolean;
     notifications_active: boolean;
     notifications_dropped: boolean;
     notifications_on_hold: boolean;
@@ -123,6 +129,9 @@ export interface UserPreferences {
     notifications_followed: boolean;
     notifications_creators: boolean;
     notifications_release_mode: ReleaseDateMode;
+    notifications_game_addons: boolean;
+    notifications_game_remakes: boolean;
+    notifications_game_remasters: boolean;
     notify_episodes: boolean;
     notify_premieres: boolean;
     notify_date_changes: boolean;
@@ -130,6 +139,7 @@ export interface UserPreferences {
     notify_person_titles: boolean;
     notify_company_titles: boolean;
     notify_collection_items: boolean;
+    notify_related_announced: boolean;
     person_follow_scope: PersonFollowScope;
     company_follow_scope: CompanyFollowScope;
     /** How many pages, chapters and issues the user reads in an hour: the statistics' estimated reading time. */

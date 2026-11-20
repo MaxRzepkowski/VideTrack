@@ -5,6 +5,7 @@ use App\Accounts\Preferences\NotificationEvent;
 use App\Accounts\Preferences\PersonFollowScope;
 use App\Accounts\Preferences\UserPreferences;
 use App\Catalog\ProgressUnit;
+use App\Catalog\RelatedReleaseKind;
 use App\Enums\ReleaseDateMode;
 use App\Enums\UpNextSort;
 use App\Tracking\Surface;
@@ -29,7 +30,10 @@ test('the typed reads of an untouched account', function () {
         ->and($preferences->upNextSort())->toBe(UpNextSort::Activity)
         ->and($preferences->personFollowScope())->toBe(PersonFollowScope::KnownFor)
         ->and($preferences->companyFollowScope())->toBe(CompanyFollowScope::Both)
-        ->and(array_filter(NotificationEvent::cases(), $preferences->notifies(...)))->toBe(NotificationEvent::cases());
+        // A long-lived game is announced DLC often: those wait until asked for.
+        ->and(array_values(array_filter(NotificationEvent::cases(), $preferences->notifies(...))))
+        ->toBe(array_values(array_filter(NotificationEvent::cases(), fn (NotificationEvent $event): bool => $event !== NotificationEvent::RelatedAnnounced)))
+        ->and(array_filter(Surface::cases(), fn (Surface $surface): bool => array_filter(RelatedReleaseKind::cases(), fn (RelatedReleaseKind $kind): bool => ! $preferences->showsRelated($surface, $kind)) !== []))->toBe([]);
 });
 
 test("each surface's column of the matrix and its own options", function (Surface $surface, array $rows, bool $perPlatform) {

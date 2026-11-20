@@ -11,6 +11,7 @@ use App\Catalog\Contracts\SupportsExternalIdLookup;
 use App\Catalog\Contracts\SupportsFilteredDiscovery;
 use App\Catalog\Contracts\SupportsFranchises;
 use App\Catalog\Contracts\SupportsPlatforms;
+use App\Catalog\Contracts\SupportsRelatedReleases;
 use App\Catalog\Contracts\SupportsTrending;
 use App\Catalog\Data\CollectionDetails;
 use App\Catalog\Data\CompanyDetails;
@@ -22,6 +23,7 @@ use App\Catalog\Data\MediaSummary;
 use App\Catalog\Data\Paginated;
 use App\Catalog\Data\PlatformDetails;
 use App\Catalog\ExternalIdSource;
+use App\Catalog\RelatedReleaseKind;
 use App\Support\Payload;
 use Carbon\CarbonImmutable;
 
@@ -36,7 +38,7 @@ use Carbon\CarbonImmutable;
  *
  * Each method is described where it is implemented, not here.
  */
-class IgdbProvider implements MetadataProvider, SupportsCollections, SupportsCompanyPage, SupportsDiscovery, SupportsEvents, SupportsExternalIdLookup, SupportsFilteredDiscovery, SupportsFranchises, SupportsPlatforms, SupportsTrending
+class IgdbProvider implements MetadataProvider, SupportsCollections, SupportsCompanyPage, SupportsDiscovery, SupportsEvents, SupportsExternalIdLookup, SupportsFilteredDiscovery, SupportsFranchises, SupportsPlatforms, SupportsRelatedReleases, SupportsTrending
 {
     /**
      * Steam in /external_game_sources. The per-row `category` enum that named
@@ -149,6 +151,11 @@ class IgdbProvider implements MetadataProvider, SupportsCollections, SupportsCom
     public function eventsShowing(string $ref): array
     {
         return $this->eventList->showing($ref);
+    }
+
+    public function relatedReleaseKinds(): array
+    {
+        return RelatedReleaseKind::cases();
     }
 
     public function platform(string $ref, string $locale): PlatformDetails

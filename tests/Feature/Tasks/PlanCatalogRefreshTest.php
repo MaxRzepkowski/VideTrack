@@ -2,6 +2,7 @@
 
 use App\Actions\Library\MarkWatched;
 use App\Actions\Media\PlanCatalogRefresh;
+use App\Catalog\GameKind;
 use App\Catalog\TitleStatus;
 use App\Library\WatchedAt;
 use App\Models\ChangeCursor;
@@ -92,12 +93,40 @@ test('an unreleased game with a bell is in the daily set', function () {
     expect(plannedReason($game))->toBe(RefreshReason::Active);
 });
 
+test('a released game with a dlc still to come is in the daily set, one whose dlc are all out is left to the cycle', function () {
+    enableGamesModule();
+    $dlc = fn (string $date): array => storedRelatedRelease('5000', 'The Master Trials', GameKind::Dlc, $date);
+    $awaited = MediaItem::factory()->game()->create(['release_date' => '2017-03-03', 'status' => TitleStatus::Released, 'metadata' => ['relatedReleases' => [$dlc('2027-03-01')]]]);
+    $done = MediaItem::factory()->game()->create(['release_date' => '2017-03-03', 'status' => TitleStatus::Released, 'metadata' => ['relatedReleases' => [$dlc('2017-06-30')]]]);
+    // Another game's turn comes first, so the one whose DLC are out is not today's share.
+    MediaItem::factory()->game()->create(['created_at' => now()->subYear(), 'metadata' => ['relatedReleases' => []]]);
+
+    app(PlanCatalogRefresh::class)->execute();
+
+    expect(plannedReason($awaited))->toBe(RefreshReason::Active)
+        ->and(plannedReason($done))->toBeNull();
+});
+
+test('a game its provider never listed releases of their own for is in the daily set until it has', function () {
+    enableGamesModule();
+    $never = MediaItem::factory()->game()->create(['release_date' => '2017-03-03', 'status' => TitleStatus::Released, 'metadata' => null]);
+    $none = MediaItem::factory()->game()->create(['release_date' => '2017-03-03', 'status' => TitleStatus::Released, 'metadata' => ['relatedReleases' => []]]);
+    // Another game's turn comes first, so the one listed with none is not today's share.
+    MediaItem::factory()->game()->create(['created_at' => now()->subYear(), 'metadata' => ['relatedReleases' => []]]);
+
+    app(PlanCatalogRefresh::class)->execute();
+
+    expect(plannedReason($never))->toBe(RefreshReason::Active)
+        ->and(plannedReason($none))->toBeNull();
+});
+
 test('each day the cycle takes the share of a type that brings every root round within the cycle, longest unasked first', function () {
-    // Games: a provider with no list of changes, so the cycle alone watches them.
+    // Games: a provider with no list of changes, so the cycle alone watches
+    // them, once it has listed what they bring of their own.
     enableGamesModule();
     $count = PlanCatalogRefresh::CYCLE_DAYS * 2 + 1;
     $games = collect(range(1, $count))
-        ->map(fn (int $age): MediaItem => MediaItem::factory()->game()->create(['created_at' => now()->subDays($count - $age)]))
+        ->map(fn (int $age): MediaItem => MediaItem::factory()->game()->create(['created_at' => now()->subDays($count - $age), 'metadata' => ['relatedReleases' => []]]))
         ->all();
     $share = (int) ceil($count / PlanCatalogRefresh::CYCLE_DAYS);
 

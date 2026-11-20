@@ -12,8 +12,10 @@ use App\Catalog\Data\LanguageSupport;
 use App\Catalog\Data\MultiplayerSupport;
 use App\Catalog\Data\PlatformRelease;
 use App\Catalog\Data\ProviderRating;
+use App\Catalog\Data\RelatedRelease;
 use App\Catalog\Data\StoreLink;
 use App\Catalog\DatePrecision;
+use App\Catalog\GameKind;
 use App\Catalog\GameStore;
 use App\Catalog\ItemNotFoundException;
 use App\Catalog\MediaTypeRegistry;
@@ -144,6 +146,43 @@ test('game dlcs merge dlc and expansions, newest first', function () {
         ->and($dlcs[0]->extra['gameType'])->toBe('expansion')
         ->and($dlcs[1]->title)->toBe('The Master Trials')
         ->and($dlcs[1]->extra['gameType'])->toBe('dlc');
+});
+
+test('game details list the dated dlc, expansions, remakes and remasters, newest first, with their own releases', function () {
+    enableGamesModule();
+    Http::fake([
+        '*/multiquery' => Http::response(igdbGamePage(jsonFixture('igdb/game'))),
+    ]);
+
+    $related = igdbProvider()->details('game', '7346', 'en')->relatedReleases;
+
+    // The remake has no date yet: nothing a calendar could show.
+    expect(array_map(fn (RelatedRelease $release): array => [$release->ref, $release->kind, $release->date], $related ?? []))->toBe([
+        ['5003', GameKind::Remaster, '2027-03-12'],
+        ['5001', GameKind::Expansion, '2017-12-07'],
+        ['5000', GameKind::Dlc, '2017-06-23'],
+    ])
+        ->and($related[0]->title)->toBe('Breath of the Wild HD')
+        ->and($related[0]->posterPath)->toBeNull()
+        ->and($related[0]->platformReleases)->toEqual([
+            new PlatformRelease('2027-03-12', 'Switch 2', 'Early Access', ReleaseRegion::Europe),
+            new PlatformRelease('2027-12-31', 'Switch 2', null, ReleaseRegion::Worldwide, DatePrecision::Year),
+        ])
+        ->and($related[1]->platformReleases)->toBe([])
+        ->and($related[2]->posterPath)->toContain('codlc1')
+        ->and($related[2]->platformReleases)->toHaveCount(2);
+});
+
+test('the details query asks for the releases of every related game it lists', function () {
+    enableGamesModule();
+    Http::fake([
+        '*/multiquery' => Http::response(igdbGamePage(jsonFixture('igdb/game'))),
+    ]);
+
+    igdbProvider()->details('game', '7346', 'en');
+
+    Http::assertSent(fn (Request $request): bool => collect(['dlcs', 'expansions', 'standalone_expansions', 'remakes', 'remasters'])
+        ->every(fn (string $relation): bool => str_contains($request->body(), "{$relation}.release_dates.date_format.format")));
 });
 
 test('game other releases and parent game are exposed', function () {

@@ -49,7 +49,11 @@ test('every kind of title comes with the settings the code reading them declares
         ])
         ->and($panels['game'])->toBe([
             ['key' => 'platforms', 'preferences' => ['calendar' => 'calendar_game_platforms', 'countdowns' => 'countdown_game_platforms']],
+            ['key' => 'related_addons', 'preferences' => ['calendar' => 'calendar_game_addons', 'countdowns' => 'countdown_game_addons', 'notifications' => 'notifications_game_addons']],
+            ['key' => 'related_remakes', 'preferences' => ['calendar' => 'calendar_game_remakes', 'countdowns' => 'countdown_game_remakes', 'notifications' => 'notifications_game_remakes']],
+            ['key' => 'related_remasters', 'preferences' => ['calendar' => 'calendar_game_remasters', 'countdowns' => 'countdown_game_remasters', 'notifications' => 'notifications_game_remasters']],
             ['key' => 'events', 'preferences' => ['calendar' => 'calendar_events', 'countdowns' => 'countdown_events']],
+            ['key' => 'related_announced', 'preferences' => ['notifications' => 'notify_related_announced']],
         ]);
 });
 

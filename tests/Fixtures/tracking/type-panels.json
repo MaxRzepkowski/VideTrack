@@ -137,6 +137,84 @@
                 "ofTrackedTitles": true
             },
             {
+                "key": "related_addons",
+                "label": "settings.dlc_and_expansions",
+                "description": "settings.dlc_and_expansions_of_tracked_games",
+                "phrase": "settings.phrase_dlc_and_expansions",
+                "switches": [
+                    {
+                        "surface": "calendar",
+                        "preference": "calendar_game_addons",
+                        "requires": null
+                    },
+                    {
+                        "surface": "countdowns",
+                        "preference": "countdown_game_addons",
+                        "requires": null
+                    },
+                    {
+                        "surface": "notifications",
+                        "preference": "notifications_game_addons",
+                        "requires": null
+                    }
+                ],
+                "onWhen": null,
+                "choices": null,
+                "ofTrackedTitles": true
+            },
+            {
+                "key": "related_remakes",
+                "label": "settings.remakes",
+                "description": "settings.remakes_of_tracked_games",
+                "phrase": "settings.phrase_remakes",
+                "switches": [
+                    {
+                        "surface": "calendar",
+                        "preference": "calendar_game_remakes",
+                        "requires": null
+                    },
+                    {
+                        "surface": "countdowns",
+                        "preference": "countdown_game_remakes",
+                        "requires": null
+                    },
+                    {
+                        "surface": "notifications",
+                        "preference": "notifications_game_remakes",
+                        "requires": null
+                    }
+                ],
+                "onWhen": null,
+                "choices": null,
+                "ofTrackedTitles": true
+            },
+            {
+                "key": "related_remasters",
+                "label": "settings.remasters",
+                "description": "settings.remasters_of_tracked_games",
+                "phrase": "settings.phrase_remasters",
+                "switches": [
+                    {
+                        "surface": "calendar",
+                        "preference": "calendar_game_remasters",
+                        "requires": null
+                    },
+                    {
+                        "surface": "countdowns",
+                        "preference": "countdown_game_remasters",
+                        "requires": null
+                    },
+                    {
+                        "surface": "notifications",
+                        "preference": "notifications_game_remasters",
+                        "requires": null
+                    }
+                ],
+                "onWhen": null,
+                "choices": null,
+                "ofTrackedTitles": true
+            },
+            {
                 "key": "events",
                 "label": "settings.events_and_showcases",
                 "description": "settings.presentations_where_new_titles_are_announced",
@@ -156,6 +234,22 @@
                 "onWhen": null,
                 "choices": null,
                 "ofTrackedTitles": false
+            },
+            {
+                "key": "related_announced",
+                "label": "settings.new_dlc_remakes_and_remasters",
+                "description": "settings.announced_for_a_tracked_game",
+                "phrase": "settings.phrase_related_announced",
+                "switches": [
+                    {
+                        "surface": "notifications",
+                        "preference": "notify_related_announced",
+                        "requires": null
+                    }
+                ],
+                "onWhen": null,
+                "choices": null,
+                "ofTrackedTitles": true
             }
         ]
     },

@@ -101,6 +101,7 @@ final readonly class IgdbGames
             .'bundles.name, bundles.first_release_date, bundles.cover.image_id, bundles.total_rating, bundles.game_type, '
             .'remakes.name, remakes.first_release_date, remakes.cover.image_id, remakes.total_rating, remakes.game_type, '
             .'remasters.name, remasters.first_release_date, remasters.cover.image_id, remasters.total_rating, remasters.game_type, '
+            .IgdbReleases::relatedFields().', '
             .'ports.name, ports.first_release_date, ports.cover.image_id, ports.total_rating, ports.game_type, '
             .'similar_games.name, similar_games.first_release_date, similar_games.cover.image_id, similar_games.total_rating, similar_games.game_type; '
             ."where id = {$ref};"],
@@ -180,6 +181,7 @@ final readonly class IgdbGames
             posters: array_filter([$this->payload->imageUrl($data, 'cover', 'cover_big_2x')]),
             related: $this->mapRelated($data),
             collection: $this->series->of($data),
+            relatedReleases: $this->releases->related($data),
         );
     }
 

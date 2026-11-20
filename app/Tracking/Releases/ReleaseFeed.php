@@ -4,6 +4,8 @@ namespace App\Tracking\Releases;
 
 use App\Catalog\MediaTypeDefinition;
 use App\Catalog\MediaTypeRegistry;
+use App\Catalog\ReleaseRegion;
+use App\Catalog\ViewerRegion;
 use App\Enums\FollowMode;
 use App\Models\Follow;
 use App\Models\MediaItem;
@@ -27,6 +29,7 @@ final readonly class ReleaseFeed
         private EpisodeReleases $episodes,
         private FilmReleases $films,
         private ProgressReleases $progress,
+        private RelatedReleases $related,
     ) {}
 
     /**
@@ -48,14 +51,21 @@ final readonly class ReleaseFeed
             to: $to,
             surface: $surface,
             approximateDates: $surface->showsApproximateDates(),
+            region: ReleaseRegion::ofCountry(ViewerRegion::resolve($user, $user->preferredLocale())),
             followedVia: $this->followedVia($user, $byCreators),
         );
 
         /** @var Collection<int, ReleaseEntry> $entries */
         $entries = collect();
 
-        foreach ([$this->episodes, $this->films, $this->progress] as $source) {
-            $titles = $roots->filter(fn (MediaItem $root): bool => $this->sourceOf($this->types->get($root->type)) === $source);
+        $sources = [];
+
+        foreach ($roots as $root) {
+            $sources[$root->type] ??= $this->sourcesOf($this->types->get($root->type));
+        }
+
+        foreach ([$this->episodes, $this->films, $this->progress, $this->related] as $source) {
+            $titles = $roots->filter(fn (MediaItem $root): bool => in_array($source, $sources[$root->type], true));
 
             if ($titles->isNotEmpty()) {
                 $entries = $entries->concat($source->releases($titles->toBase()->values(), $window));
@@ -65,15 +75,23 @@ final readonly class ReleaseFeed
         return $entries->values();
     }
 
-    /** Where a kind of title keeps its releases; null for one that has none of its own. */
-    public function sourceOf(MediaTypeDefinition $type): ?ReleaseSource
+    /**
+     * Where a kind of title keeps its releases: its own, then the releases
+     * of their own its provider lists beside it (a game's DLC). Empty for one
+     * that has none.
+     *
+     * @return list<ReleaseSource>
+     */
+    public function sourcesOf(MediaTypeDefinition $type): array
     {
-        return match (true) {
+        $own = match (true) {
             $type->childType !== null => $this->episodes,
             $type->progressUnit !== null => $this->progress,
             $type->releasesWhole() => $this->films,
             default => null,
         };
+
+        return array_values(array_filter([$own, $this->related->serves($type) ? $this->related : null]));
     }
 
     /**

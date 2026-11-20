@@ -284,7 +284,7 @@ describe('Tracking', () => {
         await box(wrapper, 'Games – Countdowns – Events and showcases').trigger('change');
 
         expect(row(wrapper, 'views', 'game').text()).toContain(
-            'same as default; every platform on its own in the calendar and events in the calendar',
+            'same as default; every platform on its own in the calendar, DLC and expansions, remakes, remasters, and events in the calendar',
         );
 
         await save(wrapper);

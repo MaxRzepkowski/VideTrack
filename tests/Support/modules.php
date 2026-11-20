@@ -1,5 +1,9 @@
 <?php
 
+use App\Catalog\Data\PlatformRelease;
+use App\Catalog\Data\RelatedRelease;
+use App\Catalog\DatePrecision;
+use App\Catalog\GameKind;
 use App\Catalog\Providers\Igdb\IgdbGames;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
@@ -40,6 +44,17 @@ function igdbGamePage(array $game, array $timeToBeat = [], array $editions = [],
         ['name' => IgdbGames::EDITIONS, 'result' => $editions],
         ['name' => IgdbGames::BUNDLE_CONTENTS, 'result' => $bundleContents],
     ];
+}
+
+/**
+ * A game's DLC, remake or remaster as a title's metadata stores it.
+ *
+ * @param  list<PlatformRelease>  $platformReleases
+ * @return array<string, mixed>
+ */
+function storedRelatedRelease(string $ref, string $title, GameKind $kind, string $date, array $platformReleases = [], DatePrecision $precision = DatePrecision::Day): array
+{
+    return (new RelatedRelease($ref, $title, $kind, null, $date, $precision, $platformReleases))->jsonSerialize();
 }
 
 /**

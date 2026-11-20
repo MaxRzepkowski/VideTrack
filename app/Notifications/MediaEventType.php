@@ -17,6 +17,8 @@ enum MediaEventType: string
     case DateChanged = 'date_changed';
     case ShowStatus = 'show_status';
     case SeasonAnnounced = 'season_announced';
+    /** A tracked game's DLC, remake or remaster first listed, still to come. */
+    case RelatedAnnounced = 'related_announced';
     case PersonNewTitle = 'person_new_title';
     case CompanyNewTitle = 'company_new_title';
     case CollectionNewItem = 'collection_new_item';
@@ -40,6 +42,7 @@ enum MediaEventType: string
             self::PersonNewTitle => NotificationEvent::PersonTitles,
             self::CompanyNewTitle => NotificationEvent::CompanyTitles,
             self::CollectionNewItem => NotificationEvent::CollectionItems,
+            self::RelatedAnnounced => NotificationEvent::RelatedAnnounced,
         };
     }
 

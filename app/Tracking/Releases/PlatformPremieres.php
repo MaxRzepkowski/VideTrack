@@ -16,11 +16,11 @@ final readonly class PlatformPremieres
      * @param  list<PlatformRelease>  $releases  every regional variant the title stores
      * @return list<PlatformPremiere> in the order their first platform was picked
      */
-    public function inWindow(array $releases, ReleaseRegion $region, ReleaseWindow $window): array
+    public function inWindow(array $releases, ReleaseWindow $window): array
     {
         $premieres = [];
 
-        foreach ($this->pickRegionalVariants($releases, $region) as $release) {
+        foreach ($this->pickRegionalVariants($releases, $window->region) as $release) {
             if (! $window->holds($release->date, $release->precision)) {
                 continue;
             }

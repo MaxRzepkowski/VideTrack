@@ -96,6 +96,13 @@ final readonly class MediaDetails implements JsonSerializable
          * @var list<TitleTie>
          */
         public array $ties = [],
+        /**
+         * A game's DLC, expansions, remakes and remasters with a date, for
+         * the calendar; null from a provider that does not list them.
+         *
+         * @var list<RelatedRelease>|null
+         */
+        public ?array $relatedReleases = null,
     ) {}
 
     /**

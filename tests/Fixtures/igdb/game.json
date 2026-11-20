@@ -123,7 +123,25 @@
                 "first_release_date": 1498176000,
                 "total_rating": 80.0,
                 "game_type": 1,
-                "cover": { "id": 10, "image_id": "codlc1" }
+                "cover": { "id": 10, "image_id": "codlc1" },
+                "release_dates": [
+                    {
+                        "id": 50,
+                        "date": 1498176000,
+                        "date_format": { "id": 0, "format": "YYYYMMDD" },
+                        "platform": { "id": 130, "abbreviation": "Switch" },
+                        "status": { "id": 6, "name": "Full Release" },
+                        "release_region": 8
+                    },
+                    {
+                        "id": 51,
+                        "date": 1498780800,
+                        "date_format": { "id": 0, "format": "YYYYMMDD" },
+                        "platform": { "id": 41, "abbreviation": "WiiU" },
+                        "status": { "id": 6, "name": "Full Release" },
+                        "release_region": 2
+                    }
+                ]
             }
         ],
         "expansions": [
@@ -134,6 +152,39 @@
                 "total_rating": 82.0,
                 "game_type": 2,
                 "cover": { "id": 11, "image_id": "codlc2" }
+            }
+        ],
+        "remakes": [
+            {
+                "id": 5004,
+                "name": "Breath of the Wild Reimagined",
+                "game_type": 8
+            }
+        ],
+        "remasters": [
+            {
+                "id": 5003,
+                "name": "Breath of the Wild HD",
+                "first_release_date": 1804809600,
+                "game_type": 9,
+                "release_dates": [
+                    {
+                        "id": 52,
+                        "date": 1830211200,
+                        "date_format": { "id": 4, "format": "YYYY" },
+                        "platform": { "id": 508, "abbreviation": "Switch 2" },
+                        "status": { "id": 6, "name": "Full Release" },
+                        "release_region": 8
+                    },
+                    {
+                        "id": 53,
+                        "date": 1804809600,
+                        "date_format": { "id": 0, "format": "YYYYMMDD" },
+                        "platform": { "id": 508, "abbreviation": "Switch 2" },
+                        "status": { "id": 3, "name": "Early Access" },
+                        "release_region": 1
+                    }
+                ]
             }
         ],
         "bundles": [

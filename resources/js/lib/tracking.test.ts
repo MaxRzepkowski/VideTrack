@@ -156,8 +156,18 @@ describe('type options', () => {
             notifications_release_mode: 'both',
             calendar_game_platforms: true,
             countdown_game_platforms: false,
+            calendar_game_addons: true,
+            countdown_game_addons: true,
+            notifications_game_addons: true,
+            calendar_game_remakes: true,
+            countdown_game_remakes: true,
+            notifications_game_remakes: true,
+            calendar_game_remasters: true,
+            countdown_game_remasters: true,
+            notifications_game_remasters: true,
             calendar_events: true,
             countdown_events: true,
+            notify_related_announced: false,
         });
     });
 });
@@ -224,16 +234,36 @@ describe('typeSummary', () => {
         ['movie', { calendar_release_mode: 'cinema', countdown_release_mode: 'cinema' }, 'same as default; cinema premiere'],
         ['movie', { calendar_release_mode: 'none' }, 'same as default; cinema premiere in the countdowns and home release in the countdowns'],
         ['movie', { calendar_release_mode: 'none', countdown_release_mode: 'none' }, 'same as default; off: cinema premiere and home release'],
-        ['game', {}, 'same as default; every platform on its own in the calendar and events'],
+        ['game', {}, 'same as default; every platform on its own in the calendar, DLC and expansions, remakes, remasters, and events'],
         [
             'game',
             { countdown_game_platforms: true, calendar_events: false },
-            'same as default; every platform on its own and events in the countdowns',
+            'same as default; every platform on its own, DLC and expansions, remakes, remasters, and events in the countdowns',
         ],
         [
             'game',
             { calendar_game_platforms: false, calendar_events: false, countdown_events: false },
-            'same as default; off: every platform on its own and events',
+            'same as default; DLC and expansions, remakes, and remasters',
+        ],
+        [
+            'game',
+            {
+                calendar_game_platforms: false,
+                calendar_events: false,
+                countdown_events: false,
+                calendar_game_addons: false,
+                countdown_game_addons: false,
+                calendar_game_remakes: false,
+                countdown_game_remakes: false,
+                calendar_game_remasters: false,
+                countdown_game_remasters: false,
+            },
+            'same as default; off: every platform on its own, DLC and expansions, remakes, remasters, and events',
+        ],
+        [
+            'game',
+            { countdown_game_remakes: false },
+            'same as default; every platform on its own in the calendar, DLC and expansions, remakes in the calendar, remasters, and events',
         ],
         ['show', {}, 'same as default'],
         ['book', {}, 'same as default'],
@@ -250,7 +280,12 @@ describe('typeSummary', () => {
         // Premieres ping only while the defaults let them: held off, the premiere is not said.
         ['movie', { notify_premieres: false }, 'same as default; home release'],
         ['movie', { notify_premieres: false, notifications_release_mode: 'cinema' }, 'same as default; off: cinema premiere and home release'],
-        ['game', { calendar_game_platforms: false }, 'same as default'],
+        ['game', { calendar_game_platforms: false }, 'same as default; DLC and expansions, remakes, and remasters'],
+        [
+            'game',
+            { notifications_game_remakes: false, notify_related_announced: true },
+            'same as default; DLC and expansions, remasters, and announcements of DLC, remakes and remasters',
+        ],
         ['book', {}, 'same as default'],
     ])('in the notifications, %s with %o reads "%s"', (type, settings, words) => {
         expect(summary(type, 'notifications', settings)).toBe(words);
@@ -296,10 +331,10 @@ describe('typeSummary', () => {
             `own sources: calendar 0 of ${TOTAL}, countdowns 1 of ${TOTAL}; cinema premiere and home release`,
         );
         expect(summary('game', 'views', {}, views(['backlog'], []))).toBe(
-            `own sources: calendar 1 of ${TOTAL}, countdowns 0 of ${TOTAL}; every platform on its own and events`,
+            `own sources: calendar 1 of ${TOTAL}, countdowns 0 of ${TOTAL}; every platform on its own, DLC and expansions, remakes, remasters, and events`,
         );
         expect(summary('game', 'views', { calendar_events: false }, views(['backlog'], []))).toBe(
-            `own sources: calendar 1 of ${TOTAL}, countdowns 0 of ${TOTAL}; every platform on its own and events in the countdowns`,
+            `own sources: calendar 1 of ${TOTAL}, countdowns 0 of ${TOTAL}; every platform on its own, DLC and expansions, remakes, remasters, and events in the countdowns`,
         );
     });
 

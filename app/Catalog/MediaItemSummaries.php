@@ -3,8 +3,10 @@
 namespace App\Catalog;
 
 use App\Catalog\Data\MediaSummary;
+use App\Catalog\Data\RelatedRelease;
 use App\Enums\ReleaseKind;
 use App\Models\MediaItem;
+use App\Support\Payload;
 use Illuminate\Support\Facades\App;
 
 /**
@@ -74,6 +76,38 @@ final readonly class MediaItemSummaries
             authors: $authors,
             episodeBadge: $episodeBadge,
             releasePrecision: $releasePrecision ?? ($releaseDate === null ? $item->release_date_precision : DatePrecision::Day),
+        );
+    }
+
+    /**
+     * A game's release of its own (its DLC, a remake) as a card of its own:
+     * it has no row to read, so it names the game it belongs to and shows
+     * that game's art.
+     *
+     * @param  CardExtra  $extra
+     */
+    public static function related(
+        MediaItem $game,
+        RelatedRelease $release,
+        array $extra = [],
+        ?string $releaseDate = null,
+        ?string $platform = null,
+        ?string $releaseStatus = null,
+        ?DatePrecision $releasePrecision = null,
+    ): MediaSummary {
+        return new MediaSummary(
+            type: $game->type,
+            ref: $release->ref,
+            provider: $game->provider,
+            title: $release->title,
+            year: Payload::yearOf($release->date),
+            posterPath: $release->posterPath,
+            backdropPath: $game->backdrop_path,
+            releaseDate: $releaseDate ?? $release->date,
+            platform: $platform,
+            releaseStatus: $releaseStatus,
+            extra: ['gameType' => $release->kind->value, 'relatedTo' => $game->titleIn(App::getLocale()), ...$extra],
+            releasePrecision: $releasePrecision ?? $release->precision,
         );
     }
 
