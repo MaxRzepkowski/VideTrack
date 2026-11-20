@@ -9,9 +9,9 @@ test('a new calendar address retires the old one for both feeds at once', functi
     $old = $user->calendarToken();
 
     $this->actingAs($user)
-        ->from(route('settings.export.index'))
+        ->from(route('settings.calendar-subscription.edit'))
         ->post(route('settings.calendar-token.update'))
-        ->assertRedirect(route('settings.export.index'));
+        ->assertRedirect(route('settings.calendar-subscription.edit'));
 
     $new = $user->fresh()->calendarToken();
 
@@ -27,11 +27,11 @@ test('only a signed-in user changes their calendar address', function () {
     $this->post(route('settings.calendar-token.update'))->assertRedirect(route('login'));
 });
 
-test('the export page hands out both feed addresses with the scope each carries by default', function () {
+test('the subscription page hands out both feed addresses with the scope each carries by default', function () {
     $user = User::factory()->create();
     $token = $user->calendarToken();
 
-    $this->actingAs($user)->get(route('settings.export.index'))
+    $this->actingAs($user)->get(route('settings.calendar-subscription.edit'))
         ->assertInertia(fn (Assert $page) => $page
             ->where('calendarFeed', ['url' => route('calendar.feed', ['token' => $token]), 'defaultScope' => FeedScope::All->value])
             ->where('rssFeed', ['url' => route('calendar.rss', ['token' => $token]), 'defaultScope' => FeedScope::Premieres->value]));

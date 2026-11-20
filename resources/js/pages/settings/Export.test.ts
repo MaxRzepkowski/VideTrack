@@ -15,8 +15,6 @@ const formats: Format[] = [
 function page(offered: Format[]) {
     return mount(Export, {
         props: {
-            calendarFeed: { url: 'https://example.com/feed.ics', defaultScope: 'all' },
-            rssFeed: { url: 'https://example.com/feed.rss', defaultScope: 'premieres' },
             formats: offered,
         },
         global: { stubs: { AppLayout: { template: '<div><slot /></div>' }, SettingsLayout: { template: '<div><slot /></div>' } } },

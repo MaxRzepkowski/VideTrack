@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Settings\ApiTokenController;
+use App\Http\Controllers\Settings\CalendarSubscriptionController;
 use App\Http\Controllers\Settings\CalendarTokenController;
 use App\Http\Controllers\Settings\ChannelsController;
 use App\Http\Controllers\Settings\ConnectionController;
@@ -61,6 +62,9 @@ Route::middleware(['auth', 'throttle:web'])->name('settings.')->group(function (
         ->middleware('throttle:channel-test')
         ->name('channels.test');
 
+    Route::get('settings/calendar', [CalendarSubscriptionController::class, 'edit'])->name('calendar-subscription.edit');
+    Route::post('settings/calendar-token', CalendarTokenController::class)->name('calendar-token.update');
+
     Route::get('settings/integrations', [IntegrationsController::class, 'index'])->name('integrations.index');
     Route::post('settings/integrations/{source}', [IntegrationsController::class, 'store'])->name('integrations.store');
     Route::patch('settings/integrations/endpoints/{endpoint}', [IntegrationsController::class, 'update'])->name('integrations.update');
@@ -95,7 +99,6 @@ Route::middleware(['auth', 'throttle:web'])->name('settings.')->group(function (
 
     Route::get('settings/export', [ExportController::class, 'index'])->name('export.index');
     Route::get('settings/export/{format}', [ExportController::class, 'download'])->middleware('throttle:library-heavy')->name('export.download');
-    Route::post('settings/calendar-token', CalendarTokenController::class)->name('calendar-token.update');
 
     Route::get('settings/api', [ApiTokenController::class, 'index'])->name('api-tokens.index');
     Route::post('settings/api/tokens', [ApiTokenController::class, 'store'])->name('api-tokens.store');
