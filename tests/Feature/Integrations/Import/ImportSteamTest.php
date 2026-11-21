@@ -3,9 +3,11 @@
 use App\Catalog\MediaTypeRegistry;
 use App\Enums\PlayOutcome;
 use App\Enums\TaskRunStatus;
+use App\Integrations\Import\Contracts\ExplainsSetup;
 use App\Integrations\Import\Data\ImportInput;
 use App\Integrations\Import\Data\ImportSelection;
 use App\Integrations\Import\ImportSourceRegistry;
+use App\Integrations\Steam\SteamClient;
 use App\Jobs\RunImport;
 use App\Models\MediaItem;
 use App\Models\TaskRun;
@@ -26,7 +28,6 @@ beforeEach(function () {
 
 function enableSteam(): void
 {
-    config(['tracker.steam.api_key' => 'steam-key']);
     enableGamesModule();
 }
 
@@ -35,7 +36,7 @@ function runSteamImport(User $user, string $profile, bool $unplayed = false): Ta
     $taskRun = TaskRun::queueTask('import-steam', $user->id);
 
     app()->call([
-        new RunImport($taskRun, 'steam', ImportInput::credentials(['profile' => $profile, 'unplayed' => $unplayed ? '1' : '']), ImportSelection::everything()),
+        new RunImport($taskRun, 'steam', ImportInput::credentials(['profile' => $profile, 'key' => 'steam-key-of-alex', 'unplayed' => $unplayed ? '1' : '']), ImportSelection::everything()),
         'handle',
     ]);
 
@@ -61,11 +62,7 @@ function steamIgdbFakes(): array
     ];
 }
 
-test('Steam is offered only with a Steam key and the game type', function () {
-    expect(app(ImportSourceRegistry::class)->has('steam'))->toBeFalse();
-
-    app()->forgetInstance(ImportSourceRegistry::class);
-    config(['tracker.steam.api_key' => 'steam-key']);
+test('Steam is offered with the game type, with a field for the user\'s own key and where to get it', function () {
     expect(app(ImportSourceRegistry::class)->has('steam'))->toBeFalse();
 
     // The modules an instance runs are fixed at boot; switching one on
@@ -73,7 +70,10 @@ test('Steam is offered only with a Steam key and the game type', function () {
     app()->forgetInstance(ImportSourceRegistry::class);
     app()->forgetInstance(MediaTypeRegistry::class);
     enableGamesModule();
-    expect(app(ImportSourceRegistry::class)->has('steam'))->toBeTrue();
+    $steam = app(ImportSourceRegistry::class)->get('steam');
+
+    expect(array_map(fn ($field) => $field->key, $steam->credentialsSchema()))->toBe(['profile', 'key', 'unplayed'])
+        ->and($steam instanceof ExplainsSetup ? $steam->notes()[0]->url : null)->toBe(SteamClient::KEY_URL);
 });
 
 test('played games come over finished, with their time and last launch', function () {
@@ -113,7 +113,7 @@ test('played games come over finished, with their time and last launch', functio
         && $request['steamid'] === '76561197960287930'
         && $request['include_appinfo'] === '1'
         && $request['include_played_free_games'] === '1'
-        && $request['key'] === 'steam-key');
+        && $request['key'] === 'steam-key-of-alex');
 });
 
 test('games never started go on the watchlist only when asked', function () {
@@ -149,7 +149,7 @@ test('a profile address or name is turned into the SteamID64', function (string 
     Http::assertSent(fn (Request $request) => str_contains($request->url(), 'GetOwnedGames') && $request['steamid'] === '76561197960287930');
 
     if ($resolves) {
-        Http::assertSent(fn (Request $request) => str_contains($request->url(), 'ResolveVanityURL') && $request['vanityurl'] === 'gabelogannewell');
+        Http::assertSent(fn (Request $request) => str_contains($request->url(), 'ResolveVanityURL') && $request['vanityurl'] === 'gabelogannewell' && $request['key'] === 'steam-key-of-alex');
     } else {
         Http::assertNotSent(fn (Request $request) => str_contains($request->url(), 'ResolveVanityURL'));
     }
@@ -165,7 +165,7 @@ test('a profile Steam does not know is said so on the page', function () {
     Http::fake(['api.steampowered.com/ISteamUser/ResolveVanityURL/*' => Http::response(jsonFixture('transfer/steam/vanity-missing'))]);
 
     $this->actingAs(User::factory()->create())
-        ->post('/settings/import/steam/analyze', ['credentials' => ['profile' => 'nobody-here']])
+        ->post(route('settings.import.analyze', ['source' => 'steam']), ['credentials' => ['profile' => 'nobody-here', 'key' => 'steam-key-of-alex']])
         ->assertOk()
         ->assertJsonPath('valid', false)
         ->assertJsonPath('error', 'Steam knows no profile by that name.');
@@ -176,18 +176,18 @@ test('a private library is explained, not imported as empty', function () {
     Http::fake(['api.steampowered.com/IPlayerService/GetOwnedGames/*' => Http::response(['response' => []])]);
 
     $this->actingAs(User::factory()->create())
-        ->post('/settings/import/steam/analyze', ['credentials' => ['profile' => '76561197960287930']])
+        ->post(route('settings.import.analyze', ['source' => 'steam']), ['credentials' => ['profile' => '76561197960287930', 'key' => 'steam-key-of-alex']])
         ->assertJsonPath('valid', false)
         ->assertJsonPath('error', 'Steam shows no games on this profile. In Steam, set Privacy → Game details to Public.');
 });
 
-test('a rejected instance key is asked about once', function () {
+test('a rejected key is asked about once', function () {
     enableSteam();
     Http::fake(['api.steampowered.com/*' => Http::response('Forbidden', 403)]);
 
     $this->actingAs(User::factory()->create())
-        ->post('/settings/import/steam/analyze', ['credentials' => ['profile' => '76561197960287930']])
-        ->assertJsonPath('error', "Steam did not accept this instance's API key.");
+        ->post(route('settings.import.analyze', ['source' => 'steam']), ['credentials' => ['profile' => '76561197960287930', 'key' => 'wrong-key']])
+        ->assertJsonPath('error', 'Steam did not accept this API key.');
 
     expect(Http::recorded(fn (Request $request) => str_contains($request->url(), 'steampowered'))->count())->toBe(1);
 });
@@ -197,18 +197,46 @@ test('the watchlist box is optional and travels with the run', function () {
     Queue::fake();
 
     $this->actingAs(User::factory()->create())
-        ->post('/settings/import', ['source' => 'steam', 'credentials' => ['profile' => 'gabelogannewell']])
+        ->post(route('settings.import.store'), ['source' => 'steam', 'credentials' => ['profile' => 'gabelogannewell', 'key' => 'steam-key-of-alex']])
         ->assertSessionHasNoErrors();
 
-    $this->post('/settings/import', ['source' => 'steam', 'credentials' => ['profile' => 'gabelogannewell', 'unplayed' => true]])
+    $this->post(route('settings.import.store'), ['source' => 'steam', 'credentials' => ['profile' => 'gabelogannewell', 'key' => 'steam-key-of-alex', 'unplayed' => true]])
         ->assertSessionHasNoErrors();
 
     $flags = [];
     Queue::assertPushed(RunImport::class, function (RunImport $job) use (&$flags): bool {
-        $flags[] = (fn () => $this->input)->call($job)->credential('unplayed');
+        $input = (fn () => $this->input)->call($job);
+        $flags[] = [$input->credential('unplayed'), $input->credential('key')];
 
         return true;
     });
 
-    expect($flags)->toBe(['', '1']);
+    // The key reaches the run, sealed: never in the clear in the job.
+    expect($flags)->toBe([['', 'steam-key-of-alex'], ['1', 'steam-key-of-alex']]);
+    Queue::assertPushed(RunImport::class, fn (RunImport $job) => ! str_contains(serialize($job), 'steam-key-of-alex'));
+});
+
+test('an import without a key is refused, and a key typed into a refused form stays out of the session', function () {
+    enableSteam();
+    Queue::fake();
+
+    $this->actingAs(User::factory()->create())
+        ->post(route('settings.import.store'), ['source' => 'steam', 'credentials' => ['profile' => 'gabelogannewell']])
+        ->assertSessionHasErrors('credentials.key');
+
+    $this->post(route('settings.import.store'), ['source' => 'steam', 'credentials' => ['profile' => str_repeat('x', 3000), 'key' => 'steam-key-of-alex']])
+        ->assertSessionHasErrors();
+
+    expect(session()->getOldInput('credentials'))->toBeNull();
+    Queue::assertNothingPushed();
+});
+
+test('the key is not kept with the run', function () {
+    enableSteam();
+    Http::fake(['api.steampowered.com/*' => Http::response(['response' => ['game_count' => 0, 'games' => []]])]);
+    $user = User::factory()->create();
+
+    $taskRun = runSteamImport($user, '76561197960287930');
+
+    expect(json_encode($taskRun->toArray()))->not->toContain('steam-key-of-alex');
 });

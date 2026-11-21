@@ -92,9 +92,9 @@ return Application::configure(basePath: dirname(__DIR__))
         );
 
         // A failed validation flashes the input into the session; a
-        // notification channel's settings and a service's sign-in values are
-        // credentials and stay out.
-        $exceptions->dontFlash(['config', 'values']);
+        // notification channel's settings, a service's sign-in values and an
+        // import's credentials (an API key typed for one run) stay out.
+        $exceptions->dontFlash(['config', 'values', 'credentials']);
 
         // A rule of the library refused the change: the same validation error
         // on the web (back with errors) and in the API (422).

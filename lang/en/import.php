@@ -205,7 +205,6 @@ return [
     'start_import' => 'Start import',
     'steam' => 'Steam',
     'steam_could_not_be_reached_try' => 'Steam could not be reached. Try again later.',
-    'steam_did_not_accept_this_instances' => 'Steam did not accept this instance\'s API key.',
     'steam_knows_no_profile_by_that' => 'Steam knows no profile by that name.',
     'steam_profile' => 'Steam profile',
     'steam_shows_no_games_on_this' => 'Steam shows no games on this profile. In Steam, set Privacy → Game details to Public.',
@@ -381,4 +380,8 @@ return [
     'the_key_from_your_mdblist_preferences_linked' => 'The key from your MDBList preferences, linked above.',
     'your_mdblist_api_key_is_in' => 'Your API key is in your MDBList preferences:',
     'mdblist_did_not_accept_this_key' => 'MDBList did not accept this API key.',
+    'steam_web_api_key' => 'Steam Web API key',
+    'the_key_from_the_steam_page_linked' => 'From the Steam page linked above. Used for this import only, not kept.',
+    'make_a_steam_web_api_key' => 'Make your Steam Web API key:',
+    'steam_did_not_accept_this_key' => 'Steam did not accept this API key.',
 ];

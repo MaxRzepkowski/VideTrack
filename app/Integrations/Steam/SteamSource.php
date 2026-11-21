@@ -4,6 +4,7 @@ namespace App\Integrations\Steam;
 
 use App\Catalog\ExternalIdSource;
 use App\Catalog\MediaKind;
+use App\Integrations\Import\Contracts\ExplainsSetup;
 use App\Integrations\Import\Contracts\ReadsCredentials;
 use App\Integrations\Import\Data\ImportInput;
 use App\Integrations\Import\Data\ImportManifest;
@@ -12,6 +13,7 @@ use App\Integrations\Import\Data\ImportPlay;
 use App\Integrations\Import\Data\ImportSelection;
 use App\Integrations\Import\Data\ManifestCategory;
 use App\Integrations\Import\Data\MediaSubject;
+use App\Integrations\Import\Data\SetupNote;
 use App\Integrations\Import\Rows\MediaRow;
 use App\Library\PlayDating;
 use App\Support\Forms\CredentialField;
@@ -31,10 +33,10 @@ use LogicException;
  * (Yamtrack's "played in the last two weeks = in progress" is not).
  *
  * Games are placed by their Steam app id through IGDB's external games —
- * never by name. A profile is not a secret, so this is a one-off form, not
- * a connection.
+ * never by name. Steam's API answers only with a key, the user's own; the
+ * form carries it for this one import and nothing keeps it.
  */
-class SteamSource implements ReadsCredentials
+class SteamSource implements ExplainsSetup, ReadsCredentials
 {
     public const CODE = 'steam';
 
@@ -67,8 +69,14 @@ class SteamSource implements ReadsCredentials
     {
         return [
             new CredentialField('profile', __('import.steam_profile'), CredentialFieldType::Text, __('import.your_profile_address_or_your_steamid64')),
+            new CredentialField('key', __('import.steam_web_api_key'), CredentialFieldType::Password, __('import.the_key_from_the_steam_page_linked')),
             new CredentialField('unplayed', __('import.put_games_you_never_started_on'), CredentialFieldType::Checkbox),
         ];
+    }
+
+    public function notes(): array
+    {
+        return [new SetupNote(__('import.make_a_steam_web_api_key'), SteamClient::KEY_URL)];
     }
 
     public function analyze(ImportInput $input): ImportManifest
@@ -80,7 +88,7 @@ class SteamSource implements ReadsCredentials
         }
 
         try {
-            $games = $this->games($profile);
+            $games = $this->games($input->credential('key'), $profile);
         } catch (SteamNotFound|SteamRejected|SteamUnavailable $e) {
             return ImportManifest::invalid($e->wording());
         }
@@ -100,7 +108,7 @@ class SteamSource implements ReadsCredentials
         // The run follows an analysis that accepted the profile.
         $profile = SteamProfile::parse($input->credential('profile')) ?? throw new LogicException('Rows of a Steam profile the analysis refused.');
 
-        foreach ($this->games($profile) as $game) {
+        foreach ($this->games($input->credential('key'), $profile) as $game) {
             $appId = $game['appid'] ?? null;
 
             if (! is_int($appId)) {
@@ -125,10 +133,11 @@ class SteamSource implements ReadsCredentials
      *
      * @throws SteamNotFound|SteamRejected|SteamUnavailable
      */
-    private function games(SteamProfile $profile): array
+    private function games(string $key, SteamProfile $profile): array
     {
         return $this->games[$profile->key()] ??= $this->client->ownedGames(
-            $profile->isCustomName ? $this->client->resolveVanityName($profile->value) : $profile->value,
+            $key,
+            $profile->isCustomName ? $this->client->resolveVanityName($key, $profile->value) : $profile->value,
         );
     }
 
