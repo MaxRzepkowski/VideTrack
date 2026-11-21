@@ -13,6 +13,7 @@ class FakeHostResolver extends HostResolver
         'tracearr.lan' => ['192.168.1.20'],
         'abs.lan' => ['192.168.1.21'],
         'storyteller.lan' => ['192.168.1.22'],
+        'kavita.lan' => ['192.168.1.23'],
         'tracearr.example.com' => ['93.184.215.14'],
         'rebound.example.com' => ['93.184.215.14', '10.0.0.5'],
         'push.example.com' => ['93.184.215.14'],

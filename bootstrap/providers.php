@@ -27,6 +27,7 @@ use App\Integrations\Hltb\HltbServiceProvider;
 use App\Integrations\ICheckMovies\ICheckMoviesServiceProvider;
 use App\Integrations\Imdb\ImdbServiceProvider;
 use App\Integrations\Jellyfin\JellyfinServiceProvider;
+use App\Integrations\Kavita\KavitaServiceProvider;
 use App\Integrations\KOReader\KOReaderServiceProvider;
 use App\Integrations\Letterboxd\LetterboxdServiceProvider;
 use App\Integrations\LibraryThing\LibraryThingServiceProvider;
@@ -105,6 +106,7 @@ return [
     TracearrServiceProvider::class,
     AudiobookshelfServiceProvider::class,
     StorytellerServiceProvider::class,
+    KavitaServiceProvider::class,
     JellyfinServiceProvider::class,
     PlexServiceProvider::class,
     TautulliServiceProvider::class,

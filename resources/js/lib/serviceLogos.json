@@ -510,6 +510,13 @@
         "source": "https://kavenegar.com/images/logo.svg",
         "licence": "trademark of its owner"
     },
+    "kavita": {
+        "file": "kavita.svg",
+        "width": 64,
+        "height": 64,
+        "source": "https://raw.githubusercontent.com/Kareadita/Kavita/develop/Logo/kavita.svg",
+        "licence": "GPL-3.0; trademark of its owner"
+    },
     "kitsu": {
         "file": "kitsu.svg",
         "width": 814,

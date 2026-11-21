@@ -400,4 +400,10 @@ return [
     'this_storyteller_token_has_no_full_access' => 'This token has reading access only. Make one with Full access.',
     'your_storyteller_user_may_not_list' => 'Your Storyteller user may not list the books.',
     'skip_storyteller_no_title' => 'A Storyteller book without a title.',
+    'auth_key' => 'Auth key',
+    'in_kavita_user_settings_manage_auth_keys' => 'In Kavita, User Settings → Manage Auth Keys.',
+    'manga_comics_and_books_you_read_on_kavita' => 'Manga, comics and books you read or are reading on Kavita, each by its library\'s type, with your ratings.',
+    'import_from_kavita' => 'Import from Kavita',
+    'skip_kavita_no_title' => 'A Kavita series without a title.',
+    'skip_kavita_library_of_a_type_off' => 'Kavita library “:library” left out: this instance does not track its type.',
 ];
