@@ -69,6 +69,13 @@
         "source": "apprise-docs",
         "licence": "CC BY 4.0"
     },
+    "bookwyrm": {
+        "file": "bookwyrm.svg",
+        "width": 512,
+        "height": 512,
+        "source": "https://raw.githubusercontent.com/selfhst/icons/main/svg/bookwyrm.svg",
+        "licence": "CC BY 4.0; trademark of its owner"
+    },
     "brevo": {
         "file": "brevo.svg",
         "width": 25,

@@ -306,4 +306,10 @@ return [
     'watch_history' => 'Watch history',
     'library_on_a_list' => 'Your library, on the :source list',
     'where_your_data_comes_from' => 'Where your data comes from',
+    'bookwyrm_export_csv' => 'BookWyrm export (CSV)',
+    'import_from_bookwyrm' => 'Import from BookWyrm',
+    'books_you_read_are_reading_want_to' => 'Books you read, are reading, want to read or stopped reading, with your ratings and your own shelves.',
+    'on_bookwyrm_open_settings_export' => 'On your BookWyrm instance, open Settings → Export Book List and choose “Download file”.',
+    'the_file_is_not_a_bookwyrm' => 'The file is not a BookWyrm export.',
+    'skip_bookwyrm_no_shelf' => ':label: on no shelf.',
 ];

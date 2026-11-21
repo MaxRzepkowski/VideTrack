@@ -12,6 +12,7 @@ use App\Integrations\Anime\AnimeServiceProvider;
 use App\Integrations\AnimePlanet\AnimePlanetServiceProvider;
 use App\Integrations\Apprise\AppriseServiceProvider;
 use App\Integrations\Backloggd\BackloggdServiceProvider;
+use App\Integrations\BookWyrm\BookWyrmServiceProvider;
 use App\Integrations\Calibre\CalibreServiceProvider;
 use App\Integrations\Criticker\CritickerServiceProvider;
 use App\Integrations\Discord\DiscordServiceProvider;
@@ -73,6 +74,7 @@ return [
     ICheckMoviesServiceProvider::class,
     GoodreadsServiceProvider::class,
     StoryGraphServiceProvider::class,
+    BookWyrmServiceProvider::class,
     LibraryThingServiceProvider::class,
     CalibreServiceProvider::class,
     HltbServiceProvider::class,
