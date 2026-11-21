@@ -328,6 +328,12 @@ return [
     'the_file_is_not_koreader_statistics' => 'Ten plik nie jest statystykami czytania z KOReadera.',
     'skip_koreader_no_title' => 'Książka bez tytułu.',
     'skip_koreader_never_read' => ':label: otwarta, ale bez przeczytanej strony.',
+    'books_you_read_are_reading_and_want_on_hardcover' => 'Książki przeczytane, czytane i do przeczytania w Hardcoverze, z ocenami.',
+    'import_from_hardcover' => 'Import z Hardcovera',
+    'hardcover_did_not_accept_this_instance' => 'Hardcover nie przyjął tej instancji. Jej client id musi należeć do aplikacji z włączonym Device Authorization Grant.',
+    'hardcover_stopped_accepting_this_connection' => 'Hardcover przestał przyjmować to połączenie. Połącz konto ponownie.',
+    'hardcover_refused_the_library_query' => 'Hardcover odpowiedział :status i nie wydał biblioteki.',
+    'skip_hardcover_unknown_status' => ':label: status czytania w Hardcoverze, którego ten import nie zna.',
     'service_gave_no_token' => ':service odpowiedział bez tokenu.',
     'service_token_refresh_under_way' => ':service: inne odświeżenie tego połączenia jeszcze trwa. Spróbuj później.',
 ];

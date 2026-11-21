@@ -29,11 +29,20 @@ final class RatingScale
     {
         $value = trim($value);
 
-        if (! is_numeric($value) || (float) $value <= 0 || (float) $value > self::STARS) {
+        return is_numeric($value) ? self::stars((float) $value) : null;
+    }
+
+    /**
+     * A score in stars a service sends as a number (4.5); null for none, a
+     * zero (unrated) or anything off the five stars.
+     */
+    public static function stars(?float $stars): ?int
+    {
+        if ($stars === null || $stars <= 0 || $stars > self::STARS) {
             return null;
         }
 
-        return max(self::MIN, self::fromStars((float) $value));
+        return max(self::MIN, self::fromStars($stars));
     }
 
     /** A score already on this scale as a file writes it ("8", "7.0"); null when it is off the scale. */

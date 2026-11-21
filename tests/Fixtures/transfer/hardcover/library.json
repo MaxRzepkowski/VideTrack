@@ -1,0 +1,99 @@
+{
+    "data": {
+        "me": [
+            {
+                "user_books": [
+                    {
+                        "book_id": 101,
+                        "status_id": 3,
+                        "rating": 4.5,
+                        "date_added": "2022-12-30",
+                        "first_started_reading_date": "2023-01-02",
+                        "last_read_date": "2024-05-12",
+                        "book": { "title": "The Left Hand of Darkness" },
+                        "user_book_reads": [
+                            { "started_at": "2023-01-02", "finished_at": "2023-01-20", "progress_pages": 304 },
+                            { "started_at": "2024-05-01", "finished_at": "2024-05-12", "progress_pages": null }
+                        ]
+                    },
+                    {
+                        "book_id": 102,
+                        "status_id": 3,
+                        "rating": null,
+                        "date_added": "2022-08-01",
+                        "first_started_reading_date": null,
+                        "last_read_date": "2022-08-14",
+                        "book": { "title": "Piranesi" },
+                        "user_book_reads": []
+                    },
+                    {
+                        "book_id": 103,
+                        "status_id": 2,
+                        "rating": null,
+                        "date_added": "2026-08-28",
+                        "first_started_reading_date": "2026-09-01",
+                        "last_read_date": null,
+                        "book": { "title": "Dune" },
+                        "user_book_reads": [
+                            { "started_at": "2026-09-01", "finished_at": null, "progress_pages": 212 }
+                        ]
+                    },
+                    {
+                        "book_id": 104,
+                        "status_id": 1,
+                        "rating": null,
+                        "date_added": "2025-02-03",
+                        "first_started_reading_date": null,
+                        "last_read_date": null,
+                        "book": { "title": "Middlemarch" },
+                        "user_book_reads": []
+                    },
+                    {
+                        "book_id": 105,
+                        "status_id": 5,
+                        "rating": 1.5,
+                        "date_added": "2021-02-20",
+                        "first_started_reading_date": "2021-03-01",
+                        "last_read_date": "2021-04-10",
+                        "book": { "title": "Infinite Jest" },
+                        "user_book_reads": [
+                            { "started_at": "2021-03-01", "finished_at": null, "progress_pages": 150 }
+                        ]
+                    },
+                    {
+                        "book_id": 106,
+                        "status_id": 4,
+                        "rating": null,
+                        "date_added": "2026-05-20",
+                        "first_started_reading_date": "2026-06-01",
+                        "last_read_date": null,
+                        "book": { "title": "Moby-Dick" },
+                        "user_book_reads": [
+                            { "started_at": "2026-06-01", "finished_at": null, "progress_pages": 40 }
+                        ]
+                    },
+                    {
+                        "book_id": 107,
+                        "status_id": 6,
+                        "rating": null,
+                        "date_added": "2024-01-01",
+                        "first_started_reading_date": null,
+                        "last_read_date": null,
+                        "book": { "title": "Ignored Book" },
+                        "user_book_reads": []
+                    },
+                    {
+                        "book_id": 108,
+                        "status_id": 9,
+                        "rating": null,
+                        "date_added": "2024-01-01",
+                        "first_started_reading_date": null,
+                        "last_read_date": null,
+                        "book": { "title": "Future Status" },
+                        "user_book_reads": []
+                    }
+                ]
+            }
+        ]
+    }
+}

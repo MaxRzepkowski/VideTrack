@@ -328,6 +328,12 @@ return [
     'the_file_is_not_koreader_statistics' => 'The file is not KOReader\'s reading statistics.',
     'skip_koreader_no_title' => 'A book without a title.',
     'skip_koreader_never_read' => ':label: opened, but no page read.',
+    'books_you_read_are_reading_and_want_on_hardcover' => 'Books you read, are reading and want to read on Hardcover, with your ratings.',
+    'import_from_hardcover' => 'Import from Hardcover',
+    'hardcover_did_not_accept_this_instance' => 'Hardcover did not accept this instance. Its client id must belong to an app with the Device Authorization Grant on.',
+    'hardcover_stopped_accepting_this_connection' => 'Hardcover stopped accepting this connection. Connect your account again.',
+    'hardcover_refused_the_library_query' => 'Hardcover answered :status and did not hand over the library.',
+    'skip_hardcover_unknown_status' => ':label: a reading status on Hardcover this import does not know.',
     'service_gave_no_token' => ':service answered without a token.',
     'service_token_refresh_under_way' => ':service: another refresh of this connection is still under way. Try again later.',
 ];

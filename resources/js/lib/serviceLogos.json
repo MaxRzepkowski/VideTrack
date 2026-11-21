@@ -370,6 +370,13 @@
         "source": "apprise-docs",
         "licence": "CC BY 4.0"
     },
+    "hardcover": {
+        "file": "hardcover.svg",
+        "width": 40,
+        "height": 40,
+        "source": "https://github.com/RevelryPlay/hardcover-doc (public/favicon.svg)",
+        "licence": "MIT, Hardcover LLC; trademark of its owner"
+    },
     "hassios": {
         "file": "hassios.svg",
         "width": 1065,

@@ -21,6 +21,7 @@ use App\Integrations\Generic\GenericServiceProvider;
 use App\Integrations\GogGalaxy\GogGalaxyServiceProvider;
 use App\Integrations\Goodreads\GoodreadsServiceProvider;
 use App\Integrations\Grouvee\GrouveeServiceProvider;
+use App\Integrations\Hardcover\HardcoverLibraryServiceProvider;
 use App\Integrations\Hltb\HltbServiceProvider;
 use App\Integrations\ICheckMovies\ICheckMoviesServiceProvider;
 use App\Integrations\Imdb\ImdbServiceProvider;
@@ -79,6 +80,7 @@ return [
     StoryGraphServiceProvider::class,
     BookWyrmServiceProvider::class,
     KOReaderServiceProvider::class,
+    HardcoverLibraryServiceProvider::class,
     LibraryThingServiceProvider::class,
     CalibreServiceProvider::class,
     HltbServiceProvider::class,
