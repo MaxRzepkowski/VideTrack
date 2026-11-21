@@ -629,6 +629,13 @@
         "source": "https://matrix.org/images/matrix-logo-white.svg",
         "licence": "trademark of its owner"
     },
+    "mdblist": {
+        "file": "mdblist.svg",
+        "width": 25,
+        "height": 25,
+        "source": "simple-icons",
+        "licence": "CC0"
+    },
     "misskeys": {
         "file": "misskeys.svg",
         "width": 25,

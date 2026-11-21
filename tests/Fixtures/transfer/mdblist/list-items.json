@@ -1,0 +1,7 @@
+{
+    "movies": [
+        { "id": 272, "rank": 1, "adult": 0, "title": "Batman Begins", "imdb_id": "tt0372784", "tvdb_id": null, "ids": { "mdblist": "a388", "imdb": "tt0372784", "tmdb": 272, "tvdb": null }, "language": "en", "mediatype": "movie", "release_year": 2005, "spoken_language": "en", "country": "us" }
+    ],
+    "shows": [],
+    "pagination": { "next_cursor": null }
+}

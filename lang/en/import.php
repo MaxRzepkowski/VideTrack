@@ -334,6 +334,12 @@ return [
     'hardcover_stopped_accepting_this_connection' => 'Hardcover stopped accepting this connection. Connect your account again.',
     'hardcover_refused_the_library_query' => 'Hardcover answered :status and did not hand over the library.',
     'skip_hardcover_unknown_status' => ':label: a reading status on Hardcover this import does not know.',
+    'movies_and_shows_you_watched_on_mdblist' => 'Movies and shows you watched on MDBList, with your ratings, dropped shows, watchlist and lists.',
+    'import_from_mdblist' => 'Import from MDBList',
+    'mdblist_did_not_accept_this_instance' => 'MDBList did not accept this instance. Its client id must belong to a Device Code App.',
+    'mdblist_stopped_accepting_this_connection' => 'MDBList stopped accepting this connection. Connect your account again.',
+    'skip_mdblist_no_rating' => ':label: no rating on MDBList\'s ten-point scale.',
     'service_gave_no_token' => ':service answered without a token.',
     'service_token_refresh_under_way' => ':service: another refresh of this connection is still under way. Try again later.',
+    'service_asked_to_wait' => ':service asked to wait before more requests. Try again later.',
 ];

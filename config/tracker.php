@@ -327,6 +327,23 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | MDBList (import through a connected account)
+    |--------------------------------------------------------------------------
+    |
+    | The instance owner registers one "Device Code App" at
+    | https://mdblist.com/developer and puts its client id here. Users
+    | connect with a code, so no callback address is needed. Without a client
+    | id the MDBList import is not offered.
+    |
+    */
+
+    'mdblist' => [
+        'client_id' => env('MDBLIST_CLIENT_ID'),
+        'base_url' => env('MDBLIST_BASE_URL', 'https://api.mdblist.com'),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Simkl (import through a connected account)
     |--------------------------------------------------------------------------
     |
