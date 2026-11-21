@@ -3,9 +3,9 @@
 use App\Actions\Library\MarkWatched;
 use App\Enums\TaskRunStatus;
 use App\Integrations\Connections\ConnectionStatus;
+use App\Integrations\Connections\OwnServerUnavailable;
 use App\Integrations\Import\Data\ImportInput;
 use App\Integrations\Import\Data\ImportSelection;
-use App\Integrations\Tracearr\TracearrUnavailable;
 use App\Jobs\RunImport;
 use App\Library\WatchedAt;
 use App\Models\MediaItem;
@@ -228,7 +228,7 @@ test('a revoked key expires the connection and is not retried', function () {
     $run = TaskRun::query()->latest('id')->firstOrFail();
 
     expect($run->status)->toBe(TaskRunStatus::Failure)
-        ->and($run->summary)->toContain('Tracearr stopped accepting this API key.');
+        ->and($run->summary)->toContain('The server stopped accepting this API key.');
 
     expect($connection->refresh()->status)->toBe(ConnectionStatus::Expired)
         ->and(requestsTo('/history'))->toBe(1);
@@ -282,7 +282,7 @@ test('a public address is open to every account, and a redirect it answers with 
     $this->actingAs(User::factory()->create())
         ->postJson(route('settings.connections.verify', ['service' => 'tracearr']), ['values' => ['url' => 'https://tracearr.example.com', 'key' => 'trr_pub_secret']])
         ->assertUnprocessable()
-        ->assertJsonValidationErrors(['connection' => __('import.tracearr_could_not_be_read_at')]);
+        ->assertJsonValidationErrors(['connection' => __('import.service_could_not_be_read_at', ['service' => 'Tracearr'])]);
 
     Http::assertSentCount(1);
 });
@@ -306,6 +306,6 @@ test('a run whose address resolves to nothing this time is tried again, not give
     config(['tracker.integrations.private_hosts' => 'gone.lan']);
     Http::fake();
 
-    expect(fn () => runConnectionImport($connection, 'tracearr'))->toThrow(TracearrUnavailable::class);
+    expect(fn () => runConnectionImport($connection, 'tracearr'))->toThrow(OwnServerUnavailable::class);
     expect($connection->refresh()->status)->toBe(ConnectionStatus::Active);
 });
