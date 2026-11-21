@@ -7,8 +7,10 @@ use App\Models\ServiceConnection;
 use App\Models\User;
 use App\Support\ConnectionFailure;
 use App\Support\HttpRetry;
+use Closure;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\PendingRequest;
+use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
 
 /**
@@ -121,7 +123,22 @@ final readonly class OwnServerClient
      */
     public function read(PendingRequest $request, string $service, string $path, array $query = []): array
     {
-        return $this->get($request, $service, $path, $query, absent: []);
+        return $this->answer($request, $service, $path, fn (PendingRequest $retrying): Response => $retrying->get($path, $query), absent: []);
+    }
+
+    /**
+     * One request of a run that asks with a body, for a server that lists
+     * by POST (a filter, a page). It reads all the same: nothing is written.
+     *
+     * @param  array<string, mixed>  $body
+     * @param  array<string, mixed>  $query
+     * @return array<array-key, mixed>
+     *
+     * @throws OwnServerUnavailable|OwnServerRejected|OwnServerNotFound|ConnectionExpired
+     */
+    public function search(PendingRequest $request, string $service, string $path, array $body, array $query = []): array
+    {
+        return $this->answer($request, $service, $path, fn (PendingRequest $retrying): Response => $retrying->withQueryParameters($query)->post($path, $body), absent: []);
     }
 
     /**
@@ -138,25 +155,23 @@ final readonly class OwnServerClient
     public function find(PendingRequest $request, string $service, string $path, array $query = []): ?array
     {
         try {
-            return $this->get($request, $service, $path, $query, absent: [403]);
+            return $this->answer($request, $service, $path, fn (PendingRequest $retrying): Response => $retrying->get($path, $query), absent: [403]);
         } catch (OwnServerNotFound) {
             return null;
         }
     }
 
     /**
-     * @param  array<string, mixed>  $query
+     * @param  Closure(PendingRequest): Response  $send  the request itself, on the retrying client
      * @param  list<int>  $absent  statuses that mean the thing is not there for this key, beside a 404
      * @return array<array-key, mixed>
      *
      * @throws OwnServerUnavailable|OwnServerRejected|OwnServerNotFound|ConnectionExpired
      */
-    private function get(PendingRequest $request, string $service, string $path, array $query, array $absent): array
+    private function answer(PendingRequest $request, string $service, string $path, Closure $send, array $absent): array
     {
         try {
-            $response = $request
-                ->retry(self::TRIES, fn (int $attempt): int => self::FIRST_RETRY_MS * 2 ** ($attempt - 1), HttpRetry::isTransientOrThrottled(...), throw: false)
-                ->get($path, $query);
+            $response = $send($request->retry(self::TRIES, fn (int $attempt): int => self::FIRST_RETRY_MS * 2 ** ($attempt - 1), HttpRetry::isTransientOrThrottled(...), throw: false));
         } catch (ConnectionException $e) {
             throw new OwnServerUnavailable('import.service_unreachable', ['service' => $service, 'reason' => ConnectionFailure::reason($e)]);
         }

@@ -1,0 +1,19 @@
+{
+  "id": 3,
+  "oidcId": null,
+  "username": "alex",
+  "email": "alex@example.com",
+  "roles": [
+    "Pleb"
+  ],
+  "token": "",
+  "refreshToken": "",
+  "apiKey": "",
+  "preferences": null,
+  "ageRestriction": null,
+  "kavitaVersion": "0.9.1.24",
+  "identityProvider": 0,
+  "created": "2025-01-01T00:00:00",
+  "createdUtc": "2025-01-01T00:00:00",
+  "authKeys": []
+}

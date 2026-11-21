@@ -400,4 +400,10 @@ return [
     'this_storyteller_token_has_no_full_access' => 'Ten token ma dostęp tylko do czytania. Utwórz token z dostępem Full access.',
     'your_storyteller_user_may_not_list' => 'Twój użytkownik Storytellera nie może przeglądać książek.',
     'skip_storyteller_no_title' => 'Książka ze Storytellera bez tytułu.',
+    'auth_key' => 'Klucz uwierzytelniający',
+    'in_kavita_user_settings_manage_auth_keys' => 'W Kavicie: User Settings → Manage Auth Keys.',
+    'manga_comics_and_books_you_read_on_kavita' => 'Mangi, komiksy i książki przeczytane i czytane w Kavicie, każda według typu jej biblioteki, z ocenami.',
+    'import_from_kavita' => 'Import z Kavity',
+    'skip_kavita_no_title' => 'Seria z Kavity bez tytułu.',
+    'skip_kavita_library_of_a_type_off' => 'Biblioteka Kavity „:library” pominięta: ta instancja nie śledzi tego typu.',
 ];
