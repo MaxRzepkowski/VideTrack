@@ -3,28 +3,33 @@
 namespace App\Integrations\Calibre;
 
 use App\Integrations\Calibre\Data\CalibreBook;
+use App\Integrations\Import\UploadedSqlite;
 use App\Support\Numbers;
 use App\Support\Payload;
 use Generator;
 use PDO;
 use Pdo\Sqlite;
-use PDOException;
 use UnexpectedValueException;
 
 /**
- * A Calibre library's `metadata.db`, opened read-only. Calibre keeps its
- * catalog in SQLite with a schema of its own, so this is the one place
- * that knows the tables: a book, its authors in their order, its
- * identifiers by type, its rating. The file comes from the user, so its
- * values are read like any other export's.
+ * A Calibre library's `metadata.db`, opened as any uploaded database is
+ * ({@see UploadedSqlite}). Calibre keeps its catalog in SQLite with a
+ * schema of its own, so this is the one place that knows the tables: a
+ * book, its authors in their order, its identifiers by type, its rating.
+ * The file comes from the user, so its values are read like any other
+ * export's.
  */
 final readonly class CalibreLibrary
 {
-    /** What every SQLite file opens with. */
-    private const SQLITE_HEADER = "SQLite format 3\0";
-
-    /** The tables a Calibre library has and this reads. */
-    private const TABLES = ['books', 'authors', 'books_authors_link', 'identifiers', 'ratings', 'books_ratings_link'];
+    /** The tables a Calibre library has and this reads, with the columns read from each. */
+    private const TABLES = [
+        'books' => ['id', 'title', 'timestamp', 'pubdate'],
+        'authors' => ['id', 'name'],
+        'books_authors_link' => ['id', 'book', 'author'],
+        'identifiers' => ['book', 'type', 'val'],
+        'ratings' => ['id', 'rating'],
+        'books_ratings_link' => ['book', 'rating'],
+    ];
 
     /** The year Calibre writes for a book whose publication date nobody set. */
     private const NO_YEAR = 101;
@@ -44,24 +49,9 @@ final readonly class CalibreLibrary
     /** The library in the file; null when it is no SQLite database or not Calibre's. */
     public static function open(string $path): ?self
     {
-        $head = is_file($path) ? file_get_contents($path, length: strlen(self::SQLITE_HEADER)) : false;
+        $db = UploadedSqlite::open($path, self::TABLES);
 
-        if ($head !== self::SQLITE_HEADER) {
-            return null;
-        }
-
-        try {
-            $db = new Sqlite("sqlite:{$path}", options: [
-                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-                Sqlite::ATTR_OPEN_FLAGS => Sqlite::OPEN_READONLY,
-            ]);
-            $found = $db->query("SELECT name FROM sqlite_master WHERE type = 'table'");
-            $tables = $found === false ? [] : Payload::strings($found->fetchAll(PDO::FETCH_COLUMN));
-        } catch (PDOException) {
-            return null;
-        }
-
-        return array_diff(self::TABLES, $tables) === [] ? new self($db) : null;
+        return $db === null ? null : new self($db);
     }
 
     public function count(): int
