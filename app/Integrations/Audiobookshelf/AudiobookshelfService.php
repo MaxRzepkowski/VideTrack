@@ -4,7 +4,6 @@ namespace App\Integrations\Audiobookshelf;
 
 use App\Integrations\Connections\Contracts\AuthorizesByForm;
 use App\Integrations\Connections\Data\ConnectionGrant;
-use App\Integrations\Connections\UserAddresses;
 use App\Models\User;
 use App\Support\Forms\CredentialField;
 use App\Support\Forms\CredentialFieldType;
@@ -20,7 +19,6 @@ class AudiobookshelfService implements AuthorizesByForm
 
     public function __construct(
         private readonly AudiobookshelfClient $client,
-        private readonly UserAddresses $addresses,
     ) {}
 
     public function code(): string
@@ -64,7 +62,7 @@ class AudiobookshelfService implements AuthorizesByForm
      */
     private function owner(User $owner, array $values): array
     {
-        $address = $this->addresses->pin($this->client->normalizeAddress($values['url']), $owner);
+        $address = $this->client->pin($values['url'], $owner);
 
         return [$address->url, $this->client->owner($address, trim($values['key']))];
     }

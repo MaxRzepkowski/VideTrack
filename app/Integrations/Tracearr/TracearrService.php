@@ -6,7 +6,6 @@ use App\Integrations\Connections\ConnectionRejected;
 use App\Integrations\Connections\Contracts\AuthorizesByForm;
 use App\Integrations\Connections\Data\ConnectionChoice;
 use App\Integrations\Connections\Data\ConnectionGrant;
-use App\Integrations\Connections\UserAddresses;
 use App\Models\User;
 use App\Support\Forms\CredentialField;
 use App\Support\Forms\CredentialFieldType;
@@ -23,7 +22,6 @@ class TracearrService implements AuthorizesByForm
 
     public function __construct(
         private readonly TracearrClient $client,
-        private readonly UserAddresses $addresses,
     ) {}
 
     public function code(): string
@@ -46,7 +44,7 @@ class TracearrService implements AuthorizesByForm
 
     public function verify(User $owner, array $values): array
     {
-        $address = $this->addresses->pin($this->client->normalizeAddress($values['url']), $owner);
+        $address = $this->client->pin($values['url'], $owner);
 
         return array_map(
             fn (array $user): ConnectionChoice => new ConnectionChoice($user['id'], $user['username']),
@@ -56,7 +54,7 @@ class TracearrService implements AuthorizesByForm
 
     public function connect(User $owner, array $values, ?string $choice): ConnectionGrant
     {
-        $address = $this->addresses->pin($this->client->normalizeAddress($values['url']), $owner);
+        $address = $this->client->pin($values['url'], $owner);
         $key = trim($values['key']);
 
         foreach ($this->client->users($address, $key) as $user) {
