@@ -1,6 +1,7 @@
 <?php
 
 use App\Actions\Users\DeleteAccount;
+use App\Enums\TaskRunStatus;
 use App\Integrations\Connections\ConnectionRegistry;
 use App\Integrations\Connections\ConnectionRejected;
 use App\Integrations\Connections\ConnectionStatus;
@@ -17,6 +18,7 @@ use App\Models\ServiceConnection;
 use App\Models\TaskRun;
 use App\Models\User;
 use App\Support\Forms\CredentialFieldType;
+use App\Support\ServiceBusy;
 use App\Support\ServiceUnavailable;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Crypt;
@@ -429,7 +431,7 @@ test('a run through a connection stores where it stopped for the next one', func
     $connection = connectionFor($user, ['state' => ['since' => '2026-01-01T00:00:00Z'], 'last_error' => 'old']);
     FakeConnectionImportSource::$position = ['since' => '2026-09-27T10:00:00Z'];
 
-    $taskRun = TaskRun::queueTask('import-fake-connected', $user->id);
+    $taskRun = TaskRun::queueTask(ImportSourceRegistry::taskName(FakeConnectionImportSource::CODE), $user->id);
     app()->call([
         new RunImport($taskRun, FakeConnectionImportSource::CODE, ImportInput::connection($connection->id), ImportSelection::everything()),
         'handle',
@@ -448,12 +450,61 @@ test('a failed run through a connection leaves its reason on the connection', fu
     $user = User::factory()->create();
     $connection = connectionFor($user);
 
-    $job = new RunImport(TaskRun::queueTask('import-fake-connected', $user->id), FakeConnectionImportSource::CODE, ImportInput::connection($connection->id), ImportSelection::everything());
+    $job = new RunImport(TaskRun::queueTask(ImportSourceRegistry::taskName(FakeConnectionImportSource::CODE), $user->id), FakeConnectionImportSource::CODE, ImportInput::connection($connection->id), ImportSelection::everything());
     $job->failed(new ServiceUnavailable('Simkl is down.'));
 
     expect($connection->refresh()->last_error)->toBe('Simkl is down.')
         ->and($connection->last_imported_at)->toBeNull();
 });
+
+function busyImportJob(User $user, ServiceConnection $connection): RunImport
+{
+    $taskRun = TaskRun::queueTask(ImportSourceRegistry::taskName(FakeConnectionImportSource::CODE), $user->id);
+
+    return new RunImport($taskRun, FakeConnectionImportSource::CODE, ImportInput::connection($connection->id), ImportSelection::everything());
+}
+
+test('a service asking for a pause leaves a fresh run for that long, without spending a try', function () {
+    $user = User::factory()->create();
+    $connection = connectionFor($user);
+    FakeConnectionImportSource::$failWith = new ServiceBusy('import.service_answered_try_later', 120, ['service' => 'Fake', 'status' => 429]);
+
+    $job = busyImportJob($user, $connection)->withFakeQueueInteractions();
+    app()->call([$job, 'handle']);
+
+    $job->assertNotReleased();
+    $later = $job->handOver();
+    expect($later)->toBeInstanceOf(RunImport::class)
+        ->and($later)->not->toBe($job)
+        ->and($later instanceof RunImport ? $later->delay : null)->toBe(120)
+        ->and(TaskRun::query()->sole()->status)->not->toBe(TaskRunStatus::Failure)
+        ->and($connection->refresh()->last_error)->toBeNull();
+});
+
+test('a pause longer than a run waits out, or one pause too many, ends the run with the reason', function (int $seconds, int $waitsBefore) {
+    $user = User::factory()->create();
+    $connection = connectionFor($user);
+    FakeConnectionImportSource::$failWith = new ServiceBusy('import.service_answered_try_later', $seconds, ['service' => 'Fake', 'status' => 429]);
+
+    $job = busyImportJob($user, $connection);
+
+    // Each wait hands on a fresh copy; the last one is the one that gives up.
+    for ($wait = 0; $wait < $waitsBefore; $wait++) {
+        app()->call([$job, 'handle']);
+        $later = $job->handOver();
+        $job = $later instanceof RunImport ? $later : throw new LogicException('A busy run hands on a copy.');
+    }
+
+    app()->call([$job, 'handle']);
+
+    expect($job->handOver())->toBeNull()
+        ->and(TaskRun::query()->sole()->status)->toBe(TaskRunStatus::Failure)
+        ->and(TaskRun::query()->sole()->summary)->toBe('Fake answered 429; try again later.')
+        ->and($connection->refresh()->last_error)->toBe('Fake answered 429; try again later.');
+})->with([
+    'a day\'s wait' => [RunImport::LONGEST_BUSY_WAIT_SECONDS + 1, 0],
+    'one pause too many' => [120, RunImport::MOST_BUSY_WAITS],
+]);
 
 test('every service with an address field keeps an ordinary account out of the server itself', function () {
     Http::fake();

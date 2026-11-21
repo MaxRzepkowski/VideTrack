@@ -9,10 +9,11 @@ use App\Integrations\Import\Data\ImportSelection;
 use App\Integrations\Import\Rows\ImportRow;
 use App\Models\ServiceConnection;
 use Generator;
+use Throwable;
 
 /**
  * Reads through the fake device service. Yields $rows and returns $position
- * as its read position; records the state it started from.
+ * as its read position, or throws $failWith; records the state it started from.
  */
 class FakeConnectionImportSource implements ReadsFromConnection
 {
@@ -26,6 +27,9 @@ class FakeConnectionImportSource implements ReadsFromConnection
 
     /** @var array<string, mixed>|null the connection state the last run started from */
     public static ?array $startedFrom = null;
+
+    /** What the run ends in once its rows are out, when a test wants it to fail. */
+    public static ?Throwable $failWith = null;
 
     public function code(): string
     {
@@ -67,6 +71,10 @@ class FakeConnectionImportSource implements ReadsFromConnection
         self::$startedFrom = ServiceConnection::query()->findOrFail($input->connectionId)->state;
 
         yield from self::$rows;
+
+        if (self::$failWith !== null) {
+            throw self::$failWith;
+        }
 
         return self::$position;
     }
