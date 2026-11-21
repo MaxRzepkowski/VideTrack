@@ -271,7 +271,7 @@ function submit(): void {
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     class="text-brand-soft font-medium hover:underline"
-                                    >{{ displayUrl(note.url) }}</a
+                                    >{{ note.linkText ?? displayUrl(note.url) }}</a
                                 >
                             </p>
                         </div>

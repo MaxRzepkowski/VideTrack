@@ -79,9 +79,14 @@ class HardcoverClient
         return (array) $response->json('data', []);
     }
 
-    /** Hardcover's account page shows the key as a whole header; a key pasted with its "Bearer " still works. */
+    /** Hardcover's account page shows a key as a whole header; a key pasted with its "Bearer " is the same key. */
+    public static function bareKey(string $key): string
+    {
+        return (string) preg_replace('/^Bearer\s+/i', '', trim($key));
+    }
+
     private function apiKey(): string
     {
-        return (string) preg_replace('/^Bearer\s+/i', '', trim($this->credential('tracker.hardcover.api_key', 'HARDCOVER_API_KEY')));
+        return self::bareKey($this->credential('tracker.hardcover.api_key', 'HARDCOVER_API_KEY'));
     }
 }

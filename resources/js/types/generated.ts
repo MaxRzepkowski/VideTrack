@@ -908,6 +908,7 @@ export type SeasonRatings = {
 export type SetupNote = {
     readonly text: string;
     readonly url: string | null;
+    readonly linkText: string | null;
 };
 export type SetupStep = {
     readonly title: string;

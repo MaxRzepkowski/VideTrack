@@ -2,20 +2,22 @@
 
 namespace App\Integrations\Hardcover;
 
-use App\Integrations\Connections\GrantUnavailable;
+use App\Integrations\Connections\ConnectionExpired;
 use App\Integrations\Import\ConnectionSource;
+use App\Integrations\Import\Contracts\ExplainsSetup;
 use App\Integrations\Import\Data\ImportInput;
 use App\Integrations\Import\Data\ImportSelection;
+use App\Integrations\Import\Data\SetupNote;
 use Generator;
 
 /**
- * A Hardcover library read through the reader's connection, page by page;
+ * A Hardcover library read with the reader's own key, page by page;
  * each book becomes a row as HardcoverLibraryRows reads it.
  *
  * Hardcover tells nothing about what changed since a moment, so each run
  * reads the whole library; writing it again adds nothing.
  */
-class HardcoverLibrarySource extends ConnectionSource
+class HardcoverLibrarySource extends ConnectionSource implements ExplainsSetup
 {
     public const CODE = 'hardcover';
 
@@ -44,6 +46,11 @@ class HardcoverLibrarySource extends ConnectionSource
         return __('import.import_from_hardcover');
     }
 
+    public function notes(): array
+    {
+        return [new SetupNote(__('import.make_a_hardcover_key_here'), HardcoverLibraryClient::newKeyUrl(), __('import.new_api_key_on_hardcover'))];
+    }
+
     public function connectionService(): string
     {
         return HardcoverService::CODE;
@@ -59,7 +66,7 @@ class HardcoverLibrarySource extends ConnectionSource
     }
 
     /**
-     * @throws HardcoverUnavailable|HardcoverRejected|GrantUnavailable
+     * @throws HardcoverUnavailable|HardcoverRejected|ConnectionExpired
      */
     public function rows(ImportInput $input, ImportSelection $selection): Generator
     {
