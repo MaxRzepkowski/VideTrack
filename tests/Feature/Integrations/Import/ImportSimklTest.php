@@ -5,14 +5,10 @@ use App\Enums\PlayOutcome;
 use App\Enums\TaskRunStatus;
 use App\Integrations\Connections\ConnectionRegistry;
 use App\Integrations\Connections\ConnectionStatus;
-use App\Integrations\Import\Data\ImportInput;
-use App\Integrations\Import\Data\ImportSelection;
 use App\Integrations\Import\ImportSourceRegistry;
 use App\Integrations\Simkl\SimklUnavailable;
-use App\Jobs\RunImport;
 use App\Models\MediaItem;
 use App\Models\ServiceConnection;
-use App\Models\TaskRun;
 use App\Models\User;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
@@ -36,31 +32,12 @@ beforeEach(function () {
 
 function simklConnection(User $user, array $credentials = [], array $attributes = []): ServiceConnection
 {
-    return ServiceConnection::factory()->create([
-        'user_id' => $user->id,
-        'service' => 'simkl',
-        'credentials' => [
-            'access_token' => 'simkl_at_one',
-            'refresh_token' => 'simkl_rt_one',
-            'expires_at' => now()->addDays(6)->getTimestamp(),
-            ...$credentials,
-        ],
-        'status' => ConnectionStatus::Active,
-        'account_label' => 'jane_doe',
-        ...$attributes,
-    ]);
-}
-
-function runSimklImport(ServiceConnection $connection): TaskRun
-{
-    $taskRun = TaskRun::queueTask('import-simkl', $connection->user_id);
-
-    app()->call([
-        new RunImport($taskRun, 'simkl', ImportInput::connection($connection->id), ImportSelection::everything()),
-        'handle',
-    ]);
-
-    return $taskRun->refresh();
+    return deviceConnection($user, 'simkl', [
+        'access_token' => 'simkl_at_one',
+        'refresh_token' => 'simkl_rt_one',
+        'expires_at' => now()->addDays(6)->getTimestamp(),
+        ...$credentials,
+    ], ['account_label' => 'jane_doe', ...$attributes]);
 }
 
 /**
@@ -112,11 +89,6 @@ function simklLibraryFakes(): array
         'api.simkl.com/sync/all-items/movies*' => Http::response(jsonFixture('transfer/simkl/all-items-movies')),
         'api.simkl.com/sync/all-items/anime*' => Http::response(jsonFixture('transfer/simkl/all-items-anime')),
     ];
-}
-
-function simklRequests(string $path): int
-{
-    return Http::recorded(fn (Request $request) => str_contains(parse_url($request->url(), PHP_URL_PATH) ?? '', $path))->count();
 }
 
 test('without a client id Simkl is not offered at all', function () {
@@ -206,7 +178,7 @@ test('an approved code becomes a connection named after the Simkl account', func
     // slow_down: ten seconds now, not five.
     $this->travel(5)->seconds();
     $this->postJson('/settings/connections/simkl/device/poll')->assertJsonPath('status', 'pending');
-    expect(simklRequests('/oauth2/token'))->toBe(2);
+    expect(requestsTo('/oauth2/token'))->toBe(2);
 
     $this->travel(5)->seconds();
     $this->postJson('/settings/connections/simkl/device/poll')
@@ -240,7 +212,7 @@ test('a V1 client id is turned down once, with the reason', function () {
         ->assertJsonPath('message', 'Simkl did not accept this instance. Its client id must belong to an AUTH V2 app.')
         ->assertJsonValidationErrors(['connection' => 'Simkl did not accept this instance.']);
 
-    expect(simklRequests('/oauth2/device'))->toBe(1);
+    expect(requestsTo('/oauth2/device'))->toBe(1);
 });
 
 test('the first run reads the whole library one type after another', function () {
@@ -249,7 +221,7 @@ test('the first run reads the whole library one type after another', function ()
     $user = User::factory()->create();
     $connection = simklConnection($user);
 
-    $taskRun = runSimklImport($connection);
+    $taskRun = runConnectionImport($connection, 'simkl');
 
     expect($taskRun->status)->toBe(TaskRunStatus::Success);
 
@@ -309,11 +281,11 @@ test('a later run stops at the activities when nothing moved', function () {
     $user = User::factory()->create();
     $connection = simklConnection($user, attributes: ['state' => ['activities_all' => '2026-05-15T00:20:00Z']]);
 
-    $taskRun = runSimklImport($connection);
+    $taskRun = runConnectionImport($connection, 'simkl');
 
     expect($taskRun->status)->toBe(TaskRunStatus::Success)
-        ->and(simklRequests('/sync/activities'))->toBe(1)
-        ->and(simklRequests('/sync/all-items'))->toBe(0)
+        ->and(requestsTo('/sync/activities'))->toBe(1)
+        ->and(requestsTo('/sync/all-items'))->toBe(0)
         ->and($connection->refresh()->state)->toBe(['activities_all' => '2026-05-15T00:20:00Z']);
 });
 
@@ -327,9 +299,9 @@ test('a later run reads only what changed since the saved timestamp', function (
     $user = User::factory()->create();
     $connection = simklConnection($user, attributes: ['state' => ['activities_all' => '2026-05-01T00:00:00Z']]);
 
-    runSimklImport($connection);
+    runConnectionImport($connection, 'simkl');
 
-    expect(simklRequests('/sync/all-items'))->toBe(1);
+    expect(requestsTo('/sync/all-items'))->toBe(1);
 
     Http::assertSent(fn (Request $request) => parse_url($request->url(), PHP_URL_PATH) === '/sync/all-items'
         && $request['date_from'] === '2026-05-01T00:00:00Z'
@@ -359,10 +331,10 @@ test('a token refreshed meanwhile by another worker is picked up, not refreshed 
         ...simklTmdbFakes(),
     ]);
 
-    $taskRun = runSimklImport($connection);
+    $taskRun = runConnectionImport($connection, 'simkl');
 
     expect($taskRun->status)->toBe(TaskRunStatus::Success)
-        ->and(simklRequests('/oauth2/token'))->toBe(0);
+        ->and(requestsTo('/oauth2/token'))->toBe(0);
 });
 
 test('an expired access token is refreshed once and the call repeated', function () {
@@ -377,10 +349,10 @@ test('an expired access token is refreshed once and the call repeated', function
         'api.simkl.com/*' => Http::response([]),
     ]);
 
-    $taskRun = runSimklImport($connection);
+    $taskRun = runConnectionImport($connection, 'simkl');
 
     expect($taskRun->status)->toBe(TaskRunStatus::Success)
-        ->and(simklRequests('/oauth2/token'))->toBe(1)
+        ->and(requestsTo('/oauth2/token'))->toBe(1)
         ->and($connection->refresh()->credential('access_token'))->toBe('simkl_at_two');
 
     Http::assertSent(fn (Request $request) => str_contains($request->url(), '/oauth2/token')
@@ -397,7 +369,7 @@ test('a token close to expiry is refreshed before it is used', function () {
         'api.simkl.com/*' => Http::response(['all' => '2026-05-15T00:20:00Z']),
     ]);
 
-    runSimklImport($connection);
+    runConnectionImport($connection, 'simkl');
 
     Http::assertSent(fn (Request $request) => str_contains($request->url(), '/sync/activities')
         && $request->header('Authorization') === ['Bearer simkl_at_two']);
@@ -413,18 +385,14 @@ test('a grant Simkl no longer honours expires the connection and stops asking', 
         'api.simkl.com/*' => Http::response(['error' => 'invalid_token'], 401),
     ]);
 
-    $job = new RunImport(TaskRun::queueTask('import-simkl', $user->id), 'simkl', ImportInput::connection($connection->id), ImportSelection::everything());
-
-    app()->call([$job, 'handle']);
-
-    $run = TaskRun::query()->latest('id')->firstOrFail();
+    $run = runConnectionImport($connection, 'simkl');
 
     expect($run->status)->toBe(TaskRunStatus::Failure)
         ->and($run->summary)->toContain('Simkl stopped accepting this connection. Connect your account again.');
 
     expect($connection->refresh()->status)->toBe(ConnectionStatus::Expired)
-        ->and(simklRequests('/oauth2/token'))->toBe(1)
-        ->and(simklRequests('/sync/activities'))->toBe(1);
+        ->and(requestsTo('/oauth2/token'))->toBe(1)
+        ->and(requestsTo('/sync/activities'))->toBe(1);
 
     // The next run does not even start: the connection has to be made again.
     $this->actingAs($user)
@@ -444,8 +412,8 @@ test('a 429 is waited out', function () {
         'api.simkl.com/*' => Http::response([]),
     ]);
 
-    expect(runSimklImport($connection)->status)->toBe(TaskRunStatus::Success)
-        ->and(simklRequests('/sync/activities'))->toBe(2);
+    expect(runConnectionImport($connection, 'simkl')->status)->toBe(TaskRunStatus::Success)
+        ->and(requestsTo('/sync/activities'))->toBe(2);
 
     Sleep::assertSleptTimes(1);
 });
@@ -453,14 +421,12 @@ test('a 429 is waited out', function () {
 test('an answered 4xx other than 401 is final: the run ends with it, and the job is not retried', function () {
     Http::fake(['api.simkl.com/*' => Http::response(['error' => 'not_found'], 404)]);
     $second = simklConnection(User::factory()->create());
-    $taskRun = TaskRun::queueTask('import-simkl', $second->user_id);
+    $taskRun = runConnectionImport($second, 'simkl');
 
-    app()->call([new RunImport($taskRun, 'simkl', ImportInput::connection($second->id), ImportSelection::everything()), 'handle']);
-
-    expect($taskRun->refresh()->status)->toBe(TaskRunStatus::Failure)
+    expect($taskRun->status)->toBe(TaskRunStatus::Failure)
         ->and($taskRun->summary)->toBe('Simkl answered 404 to /sync/activities.')
         ->and($second->refresh()->last_error)->toBe('Simkl answered 404 to /sync/activities.')
-        ->and(simklRequests('/sync/activities'))->toBe(1);
+        ->and(requestsTo('/sync/activities'))->toBe(1);
     Sleep::assertNeverSlept();
 });
 
@@ -495,7 +461,7 @@ test('a status on hold or dropped lands on the show, not on its episodes', funct
     $items = simklCatalogue();
     $user = User::factory()->create();
 
-    runSimklImport(simklConnection($user));
+    runConnectionImport(simklConnection($user), 'simkl');
 
     expect($user->plays()->where('media_item_id', $items['got']->id)->sole()->outcome)->toBe(PlayOutcome::Dropped)
         ->and($user->plays()->whereHas('mediaItem', fn ($q) => $q->where('type', 'episode'))->count())->toBe(1)
@@ -513,7 +479,7 @@ test('activities without their moment stop the run and keep the position, rather
     $connection = simklConnection($user, attributes: ['state' => ['activities_all' => '2026-05-15T00:20:00Z']]);
 
     // Unavailable, so the queue tries the run again later.
-    expect(fn () => runSimklImport($connection))->toThrow(SimklUnavailable::class)
-        ->and(simklRequests('/sync/all-items'))->toBe(0)
+    expect(fn () => runConnectionImport($connection, 'simkl'))->toThrow(SimklUnavailable::class)
+        ->and(requestsTo('/sync/all-items'))->toBe(0)
         ->and($connection->refresh()->state)->toBe(['activities_all' => '2026-05-15T00:20:00Z']);
 });

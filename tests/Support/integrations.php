@@ -1,5 +1,7 @@
 <?php
 
+use App\Integrations\Connections\ConnectionStatus;
+use App\Integrations\Connections\DeviceGrantClient;
 use App\Integrations\Import\Data\ImportInput;
 use App\Integrations\Import\Data\ImportSelection;
 use App\Integrations\Import\ImportSourceRegistry;
@@ -7,9 +9,12 @@ use App\Integrations\Import\Rows\ImportRow;
 use App\Integrations\Scrobble\ScrobbleSourceRegistry;
 use App\Integrations\VideTrack\Backup\BackupWriter;
 use App\Jobs\RunImport;
+use App\Models\ServiceConnection;
 use App\Models\TaskRun;
 use App\Models\User;
 use App\Models\WebhookEndpoint;
+use Illuminate\Http\Client\Request;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\Finder\Finder;
 use Tests\Fakes\FakeImportSource;
@@ -61,7 +66,7 @@ function backupOf(User $user): array
  */
 function runImportFile(User $user, string $source, string $path, ?ImportSelection $selection = null): TaskRun
 {
-    $taskRun = TaskRun::queueTask("import-{$source}", $user->id);
+    $taskRun = TaskRun::queueTask(ImportSourceRegistry::taskName($source), $user->id);
 
     app()->call([
         new RunImport($taskRun, $source, ImportInput::file(Storage::disk('local')->path($path)), $selection ?? ImportSelection::everything()),
@@ -135,4 +140,58 @@ function putZipFixture(string $directory): string
     }
 
     return putZip($files);
+}
+
+/**
+ * A working connection of $user to $service, with what the service gave.
+ *
+ * @param  array<string, string|int>  $credentials
+ * @param  array<string, mixed>  $attributes
+ */
+function activeConnection(User $user, string $service, array $credentials, array $attributes = []): ServiceConnection
+{
+    return ServiceConnection::factory()->create([
+        'user_id' => $user->id,
+        'service' => $service,
+        'credentials' => $credentials,
+        'status' => ConnectionStatus::Active,
+        'account_label' => 'alex',
+        ...$attributes,
+    ]);
+}
+
+/**
+ * A connection made through the device flow, its access token well short
+ * of the refresh margin unless $credentials say otherwise.
+ *
+ * @param  array<string, string|int>  $credentials
+ * @param  array<string, mixed>  $attributes
+ */
+function deviceConnection(User $user, string $service, array $credentials = [], array $attributes = []): ServiceConnection
+{
+    return activeConnection($user, $service, [
+        'access_token' => 'access-of-alex-one',
+        'refresh_token' => 'refresh-of-alex-one',
+        'expires_at' => now()->addSeconds(DeviceGrantClient::REFRESH_MARGIN_SECONDS * 2)->getTimestamp(),
+        ...$credentials,
+    ], $attributes);
+}
+
+/** Runs one import through a connection synchronously, the way the queue would; the refreshed task run. */
+function runConnectionImport(ServiceConnection $connection, string $source): TaskRun
+{
+    $taskRun = TaskRun::queueTask(ImportSourceRegistry::taskName($source), $connection->user_id);
+
+    app()->call([
+        new RunImport($taskRun, $source, ImportInput::connection($connection->id), ImportSelection::everything()),
+        'handle',
+    ]);
+
+    return $taskRun->refresh();
+}
+
+/** How many recorded outgoing requests went to a path containing $path. */
+function requestsTo(string $path): int
+{
+    return Http::recorded(fn (Request $request) => str_contains((string) parse_url($request->url(), PHP_URL_PATH), $path))->count();
 }

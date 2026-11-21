@@ -10,9 +10,8 @@ use App\Integrations\Connections\ConnectionExpired;
 use App\Integrations\Connections\Data\PinnedAddress;
 use App\Integrations\Connections\UserAddresses;
 use App\Integrations\EpisodeLabel;
-use App\Integrations\Import\Contracts\ReadsFromConnection;
+use App\Integrations\Import\ConnectionSource;
 use App\Integrations\Import\Data\ImportInput;
-use App\Integrations\Import\Data\ImportManifest;
 use App\Integrations\Import\Data\ImportPlay;
 use App\Integrations\Import\Data\ImportSelection;
 use App\Integrations\Import\Data\MediaSubject;
@@ -41,7 +40,7 @@ use Generator;
  * The read position is `since`: one day before the last run started, so a
  * viewing Tracearr files late is still picked up; re-reading it is harmless.
  */
-class TracearrSource implements ReadsFromConnection
+class TracearrSource extends ConnectionSource
 {
     public const CODE = 'tracearr';
 
@@ -85,17 +84,6 @@ class TracearrSource implements ReadsFromConnection
     public function autoImportMinutes(): int
     {
         return 60;
-    }
-
-    public function analyze(ImportInput $input): ImportManifest
-    {
-        $connection = $this->connection($input);
-
-        if ($connection === null || ! $connection->isActive()) {
-            return ImportManifest::invalid(__('import.connect_your_account_first'));
-        }
-
-        return ImportManifest::whole([]);
     }
 
     /**
@@ -251,11 +239,5 @@ class TracearrSource implements ReadsFromConnection
         $title = is_string($title) && $title !== '' ? $title : 'Tracearr item';
 
         return is_int($year) ? "{$title} ({$year})" : $title;
-    }
-
-    /** The connection the run reads through, while it still exists. */
-    private function connection(ImportInput $input): ?ServiceConnection
-    {
-        return $input->connectionId === null ? null : ServiceConnection::query()->with('user')->find($input->connectionId);
     }
 }

@@ -2,12 +2,9 @@
 
 namespace App\Integrations\Simkl;
 
-use App\Integrations\Connections\Contracts\AuthorizesByDevice;
-use App\Integrations\Connections\Contracts\RevokesAccess;
-use App\Integrations\Connections\Data\ConnectionGrant;
-use App\Integrations\Connections\Data\DeviceAuthorization;
-use App\Integrations\Connections\DevicePoll;
-use App\Models\ServiceConnection;
+use App\Integrations\Connections\Data\DeviceGrant;
+use App\Integrations\Connections\DeviceGrantClient;
+use App\Integrations\Connections\DeviceGrantService;
 
 /**
  * Connecting a Simkl account through AUTH V2's device flow: the user opens
@@ -15,11 +12,16 @@ use App\Models\ServiceConnection;
  * sees a password and needs no callback address. The grant asks for
  * media:read only — nothing is ever written back.
  */
-class SimklService implements AuthorizesByDevice, RevokesAccess
+class SimklService extends DeviceGrantService
 {
     public const CODE = 'simkl';
 
-    public function __construct(private readonly SimklClient $client) {}
+    public const NAME = 'Simkl';
+
+    public function __construct(DeviceGrantClient $grants, private readonly SimklClient $client)
+    {
+        parent::__construct($grants);
+    }
 
     public function code(): string
     {
@@ -28,36 +30,16 @@ class SimklService implements AuthorizesByDevice, RevokesAccess
 
     public function name(): string
     {
-        return 'Simkl';
+        return self::NAME;
     }
 
-    public function beginDeviceAuthorization(): DeviceAuthorization
+    protected function grant(): DeviceGrant
     {
-        $device = $this->client->requestDeviceCode();
-
-        return new DeviceAuthorization(
-            deviceCode: $device['device_code'],
-            userCode: $device['user_code'],
-            verificationUri: $device['verification_uri'],
-            verificationUriComplete: $device['verification_uri_complete'],
-            expiresIn: $device['expires_in'],
-            interval: $device['interval'],
-        );
+        return $this->client->grant();
     }
 
-    public function pollDeviceAuthorization(string $deviceCode): DevicePoll|ConnectionGrant
+    protected function accountName(string $accessToken): ?string
     {
-        $result = $this->client->pollDeviceCode($deviceCode);
-
-        if ($result instanceof DevicePoll) {
-            return $result;
-        }
-
-        return new ConnectionGrant($result, $this->client->accountName($result['access_token']));
-    }
-
-    public function revoke(ServiceConnection $connection): void
-    {
-        $this->client->revoke($connection);
+        return $this->client->accountName($accessToken);
     }
 }

@@ -2,11 +2,9 @@
 
 namespace App\Integrations\Simkl;
 
-use App\Integrations\Import\Contracts\ReadsFromConnection;
+use App\Integrations\Import\ConnectionSource;
 use App\Integrations\Import\Data\ImportInput;
-use App\Integrations\Import\Data\ImportManifest;
 use App\Integrations\Import\Data\ImportSelection;
-use App\Models\ServiceConnection;
 use App\Support\Payload;
 use Generator;
 
@@ -23,7 +21,7 @@ use Generator;
  * The saved `all` is the read position RunImport keeps on the connection.
  * Rewatch sessions are a PRO/VIP extra and are not asked for.
  */
-class SimklSource implements ReadsFromConnection
+class SimklSource extends ConnectionSource
 {
     public const CODE = 'simkl';
 
@@ -48,7 +46,7 @@ class SimklSource implements ReadsFromConnection
 
     public function label(): string
     {
-        return 'Simkl';
+        return SimklService::NAME;
     }
 
     public function description(): string
@@ -73,20 +71,6 @@ class SimklSource implements ReadsFromConnection
     public function autoImportMinutes(): int
     {
         return 1440;
-    }
-
-    /**
-     * Nothing is fetched to look: the library is read once, by the run.
-     */
-    public function analyze(ImportInput $input): ImportManifest
-    {
-        $connection = $this->connection($input);
-
-        if ($connection === null || ! $connection->isActive()) {
-            return ImportManifest::invalid(__('import.connect_your_account_first'));
-        }
-
-        return ImportManifest::whole([]);
     }
 
     /**
@@ -143,11 +127,5 @@ class SimklSource implements ReadsFromConnection
     private function entries(array $library, string $type): array
     {
         return Payload::list($library[$type] ?? null);
-    }
-
-    /** The connection the run reads through, while it still exists. */
-    private function connection(ImportInput $input): ?ServiceConnection
-    {
-        return $input->connectionId === null ? null : ServiceConnection::query()->find($input->connectionId);
     }
 }
