@@ -31,7 +31,7 @@ class TracearrService implements AuthorizesByForm
 
     public function name(): string
     {
-        return 'Tracearr';
+        return $this->client->name();
     }
 
     public function connectionFields(): array
@@ -48,14 +48,14 @@ class TracearrService implements AuthorizesByForm
 
         return array_map(
             fn (array $user): ConnectionChoice => new ConnectionChoice($user['id'], $user['username']),
-            $this->client->users($address, trim($values['key'])),
+            $this->client->users($address, $values['key']),
         );
     }
 
     public function connect(User $owner, array $values, ?string $choice): ConnectionGrant
     {
         $address = $this->client->pin($values['url'], $owner);
-        $key = trim($values['key']);
+        $key = $values['key'];
 
         foreach ($this->client->users($address, $key) as $user) {
             if ($user['id'] === $choice) {

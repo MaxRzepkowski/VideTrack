@@ -2,68 +2,38 @@
 
 namespace App\Integrations\Audiobookshelf;
 
-use App\Integrations\Connections\Contracts\AuthorizesByForm;
-use App\Integrations\Connections\Data\ConnectionGrant;
-use App\Models\User;
-use App\Support\Forms\CredentialField;
-use App\Support\Forms\CredentialFieldType;
-use App\Support\Payload;
+use App\Integrations\Connections\OwnServerKeyService;
 
 /**
  * Connecting an Audiobookshelf server: its address and an API key that acts
- * as this user. The key is the user, so there is nobody to pick.
+ * as this user.
  */
-class AudiobookshelfService implements AuthorizesByForm
+class AudiobookshelfService extends OwnServerKeyService
 {
     public const CODE = 'audiobookshelf';
 
-    public function __construct(
-        private readonly AudiobookshelfClient $client,
-    ) {}
+    public function __construct(AudiobookshelfClient $client)
+    {
+        parent::__construct($client);
+    }
 
     public function code(): string
     {
         return self::CODE;
     }
 
-    public function name(): string
+    protected function exampleAddress(): string
     {
-        return AudiobookshelfClient::NAME;
+        return 'http://192.168.1.10:13378';
     }
 
-    public function connectionFields(): array
+    protected function keyLabel(): string
     {
-        return [
-            new CredentialField('url', __('import.service_address', ['service' => $this->name()]), CredentialFieldType::Url, __('import.the_address_you_open_service_at', ['service' => $this->name(), 'example' => 'http://192.168.1.10:13378'])),
-            new CredentialField('key', __('import.api_key'), CredentialFieldType::Password, __('import.in_audiobookshelf_settings_api_keys')),
-        ];
+        return __('import.api_key');
     }
 
-    public function verify(User $owner, array $values): array
+    protected function keyHelp(): string
     {
-        $this->owner($owner, $values);
-
-        return [];
-    }
-
-    public function connect(User $owner, array $values, ?string $choice): ConnectionGrant
-    {
-        [$url, $me] = $this->owner($owner, $values);
-
-        return new ConnectionGrant(
-            credentials: ['url' => $url, 'key' => trim($values['key'])],
-            accountLabel: Payload::string($me, 'username'),
-        );
-    }
-
-    /**
-     * @param  array<string, string>  $values
-     * @return array{string, array<array-key, mixed>} the base address and the user the key is
-     */
-    private function owner(User $owner, array $values): array
-    {
-        $address = $this->client->pin($values['url'], $owner);
-
-        return [$address->url, $this->client->owner($address, trim($values['key']))];
+        return __('import.in_audiobookshelf_settings_api_keys');
     }
 }
