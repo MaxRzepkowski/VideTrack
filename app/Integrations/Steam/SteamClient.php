@@ -9,7 +9,7 @@ use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
 
 /**
- * The two Steam Web API calls an import needs, with the instance's key:
+ * The two Steam Web API calls an import needs, with the user's own key:
  * ISteamUser/ResolveVanityURL (a profile name to a SteamID64) and
  * IPlayerService/GetOwnedGames (the whole library in one answer).
  * Shapes: partner.steamgames.com/doc/webapi, the Web API pages of the
@@ -21,6 +21,9 @@ use Illuminate\Support\Facades\Http;
  */
 class SteamClient
 {
+    /** Where a user makes their own Steam Web API key. */
+    public const KEY_URL = 'https://steamcommunity.com/dev/apikey';
+
     private const TIMEOUT_SECONDS = 30;
 
     /**
@@ -28,9 +31,9 @@ class SteamClient
      *
      * @throws SteamNotFound|SteamRejected|SteamUnavailable
      */
-    public function resolveVanityName(string $name): string
+    public function resolveVanityName(string $key, string $name): string
     {
-        $response = $this->get('/ISteamUser/ResolveVanityURL/v1/', ['vanityurl' => $name]);
+        $response = $this->get($key, '/ISteamUser/ResolveVanityURL/v1/', ['vanityurl' => $name]);
         $steamId = $response->json('response.steamid');
 
         if ($response->json('response.success') !== 1 || ! is_string($steamId)) {
@@ -48,9 +51,9 @@ class SteamClient
      *
      * @throws SteamRejected|SteamUnavailable
      */
-    public function ownedGames(string $steamId): array
+    public function ownedGames(string $key, string $steamId): array
     {
-        $response = $this->get('/IPlayerService/GetOwnedGames/v1/', [
+        $response = $this->get($key, '/IPlayerService/GetOwnedGames/v1/', [
             'steamid' => $steamId,
             'include_appinfo' => '1',
             'include_played_free_games' => '1',
@@ -70,7 +73,7 @@ class SteamClient
      *
      * @throws SteamRejected|SteamUnavailable
      */
-    private function get(string $path, array $query): Response
+    private function get(string $key, string $path, array $query): Response
     {
         try {
             $response = Http::baseUrl(rtrim(config()->string('tracker.steam.base_url'), '/'))
@@ -78,13 +81,13 @@ class SteamClient
                 ->acceptJson()
                 ->withUserAgent(config()->string('tracker.http.user_agent'))
                 ->retry(3, fn (int $attempt): int => 2000 * 2 ** ($attempt - 1), HttpRetry::isTransientOrThrottled(...), throw: false)
-                ->get($path, [...$query, 'key' => config()->string('tracker.steam.api_key'), 'format' => 'json']);
+                ->get($path, [...$query, 'key' => $key, 'format' => 'json']);
         } catch (ConnectionException) {
             throw new SteamUnavailable('import.steam_could_not_be_reached_try');
         }
 
         return match (true) {
-            in_array($response->status(), [401, 403], true) => throw new SteamRejected('import.steam_did_not_accept_this_instances'),
+            in_array($response->status(), [401, 403], true) => throw new SteamRejected('import.steam_did_not_accept_this_key'),
             $response->status() === 400 => throw new SteamRejected('import.enter_your_steam_profile_address_or'),
             ! $response->successful() => throw new SteamUnavailable('import.steam_could_not_be_reached_try'),
             default => $response,

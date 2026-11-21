@@ -384,15 +384,14 @@ return [
     | Steam (import of a public game library)
     |--------------------------------------------------------------------------
     |
-    | One Steam Web API key for the instance (free, 100,000 calls a day,
-    | https://steamcommunity.com/dev/apikey). A user names their profile; the
-    | library is one request. Games are placed through IGDB, so the source is
-    | offered only when IGDB is configured too.
+    | A user names their profile and pastes their own Steam Web API key
+    | (https://steamcommunity.com/dev/apikey) on the import page; the library
+    | is one request. Games are placed through IGDB, so the source is offered
+    | only when IGDB is configured too.
     |
     */
 
     'steam' => [
-        'api_key' => env('STEAM_API_KEY'),
         'base_url' => env('STEAM_BASE_URL', 'https://api.steampowered.com'),
     ],
 
