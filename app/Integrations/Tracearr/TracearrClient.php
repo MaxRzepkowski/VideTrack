@@ -9,7 +9,9 @@ use App\Integrations\Connections\OwnServerClient;
 use App\Integrations\Connections\OwnServerNotFound;
 use App\Integrations\Connections\OwnServerRejected;
 use App\Integrations\Connections\OwnServerUnavailable;
+use App\Integrations\Connections\UnusableAddress;
 use App\Models\ServiceConnection;
+use App\Models\User;
 use App\Support\Payload;
 use Illuminate\Http\Client\PendingRequest;
 
@@ -22,6 +24,9 @@ use Illuminate\Http\Client\PendingRequest;
  */
 class TracearrClient
 {
+    /** The API's path a user may paste with the address, as a pattern. */
+    private const API_PATH_PATTERN = '/api(/v\\d+(/public)?)?';
+
     public const KEY_PREFIX = 'trr_pub_';
 
     private const NAME = 'Tracearr';
@@ -33,13 +38,13 @@ class TracearrClient
     public function __construct(private readonly OwnServerClient $server) {}
 
     /**
-     * The address as typed, reduced to its base: scheme and host (and a
-     * reverse-proxy path, if any), without a trailing slash or API path.
-     * Whether it is a web address at all is `UserAddresses`' to say.
+     * The address the user typed, at its base and checked for the owner.
+     *
+     * @throws UnusableAddress
      */
-    public function normalizeAddress(string $address): string
+    public function pin(string $typed, User $owner): PinnedAddress
     {
-        return (string) preg_replace('#/api(/v\d+(/public)?)?$#', '', rtrim(trim($address), '/'));
+        return $this->server->pinTyped($typed, self::API_PATH_PATTERN, $owner);
     }
 
     /**

@@ -4,6 +4,7 @@ namespace App\Integrations\Connections;
 
 use App\Integrations\Connections\Data\PinnedAddress;
 use App\Models\ServiceConnection;
+use App\Models\User;
 use App\Support\ConnectionFailure;
 use App\Support\HttpRetry;
 use Illuminate\Http\Client\ConnectionException;
@@ -47,6 +48,22 @@ final readonly class OwnServerClient
         } catch (AddressNotFound) {
             throw new OwnServerUnavailable('import.service_could_not_be_reached_at', ['service' => $service]);
         }
+    }
+
+    /**
+     * The address the user typed, reduced to its base (scheme and host, and
+     * a reverse-proxy path if any: no trailing slash, no API path) and
+     * checked for the owner. Whether it is a web address at all is
+     * `UserAddresses`' to say.
+     *
+     * @param  string  $apiPathPattern  the API's path the user may have pasted with it, as an unanchored
+     *                                  PCRE fragment without `#` (Tracearr's is `/api(/v\d+(/public)?)?`)
+     *
+     * @throws UnusableAddress
+     */
+    public function pinTyped(string $typed, string $apiPathPattern, User $owner): PinnedAddress
+    {
+        return $this->addresses->pin((string) preg_replace('#'.$apiPathPattern.'$#', '', rtrim(trim($typed), '/')), $owner);
     }
 
     /** A request to `$base` (the API's path under the address) at the approved IP. */

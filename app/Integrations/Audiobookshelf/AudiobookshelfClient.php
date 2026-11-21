@@ -9,7 +9,9 @@ use App\Integrations\Connections\OwnServerClient;
 use App\Integrations\Connections\OwnServerNotFound;
 use App\Integrations\Connections\OwnServerRejected;
 use App\Integrations\Connections\OwnServerUnavailable;
+use App\Integrations\Connections\UnusableAddress;
 use App\Models\ServiceConnection;
+use App\Models\User;
 use Illuminate\Http\Client\PendingRequest;
 
 /**
@@ -22,17 +24,23 @@ use Illuminate\Http\Client\PendingRequest;
  */
 class AudiobookshelfClient
 {
+    private const BASE = '/api';
+
+    /** The API's path a user may paste with the address, as a pattern. */
+    private const API_PATH_PATTERN = '/api';
+
     public const NAME = 'Audiobookshelf';
 
     public function __construct(private readonly OwnServerClient $server) {}
 
     /**
-     * The address as typed, without a trailing slash or the API's path.
-     * Whether it is a web address at all is `UserAddresses`' to say.
+     * The address the user typed, at its base and checked for the owner.
+     *
+     * @throws UnusableAddress
      */
-    public function normalizeAddress(string $address): string
+    public function pin(string $typed, User $owner): PinnedAddress
     {
-        return (string) preg_replace('#/api$#', '', rtrim(trim($address), '/'));
+        return $this->server->pinTyped($typed, self::API_PATH_PATTERN, $owner);
     }
 
     /**
@@ -85,6 +93,6 @@ class AudiobookshelfClient
 
     private function http(PinnedAddress $address, string $key): PendingRequest
     {
-        return $this->server->to($address, '/api')->withToken($key);
+        return $this->server->to($address, self::BASE)->withToken($key);
     }
 }
