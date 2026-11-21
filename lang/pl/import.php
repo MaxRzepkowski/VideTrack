@@ -334,6 +334,12 @@ return [
     'hardcover_stopped_accepting_this_connection' => 'Hardcover przestał przyjmować to połączenie. Połącz konto ponownie.',
     'hardcover_refused_the_library_query' => 'Hardcover odpowiedział :status i nie wydał biblioteki.',
     'skip_hardcover_unknown_status' => ':label: status czytania w Hardcoverze, którego ten import nie zna.',
+    'movies_and_shows_you_watched_on_mdblist' => 'Filmy i seriale obejrzane w MDBList, z ocenami, porzuconymi serialami, watchlistą i listami.',
+    'import_from_mdblist' => 'Import z MDBList',
+    'mdblist_did_not_accept_this_instance' => 'MDBList nie przyjął tej instancji. Jej client id musi należeć do aplikacji Device Code App.',
+    'mdblist_stopped_accepting_this_connection' => 'MDBList przestał przyjmować to połączenie. Połącz konto ponownie.',
+    'skip_mdblist_no_rating' => ':label: brak oceny w dziesięciopunktowej skali MDBList.',
     'service_gave_no_token' => ':service odpowiedział bez tokenu.',
     'service_token_refresh_under_way' => ':service: inne odświeżenie tego połączenia jeszcze trwa. Spróbuj później.',
+    'service_asked_to_wait' => ':service poprosił o przerwę przed kolejnymi żądaniami. Spróbuj później.',
 ];

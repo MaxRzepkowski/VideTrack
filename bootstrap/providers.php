@@ -30,6 +30,7 @@ use App\Integrations\KOReader\KOReaderServiceProvider;
 use App\Integrations\Letterboxd\LetterboxdServiceProvider;
 use App\Integrations\LibraryThing\LibraryThingServiceProvider;
 use App\Integrations\Mail\MailServiceProvider;
+use App\Integrations\MdbList\MdbListServiceProvider;
 use App\Integrations\Netflix\NetflixServiceProvider;
 use App\Integrations\OutgoingWebhooks\OutgoingWebhooksServiceProvider;
 use App\Integrations\Playnite\PlayniteServiceProvider;
@@ -92,6 +93,7 @@ return [
     AnimeServiceProvider::class,
     AnimePlanetServiceProvider::class,
     SimklServiceProvider::class,
+    MdbListServiceProvider::class,
     TracearrServiceProvider::class,
     JellyfinServiceProvider::class,
     PlexServiceProvider::class,

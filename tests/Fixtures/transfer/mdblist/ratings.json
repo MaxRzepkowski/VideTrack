@@ -1,0 +1,15 @@
+{
+    "movies": [
+        { "rated_at": "2025-10-21T14:00:00Z", "rating": 9, "rating_precise": 8.5, "movie": { "title": "Batman Begins", "year": 2005, "ids": { "imdb": "tt0372784", "tmdb": 272, "trakt": 228, "mdblist": "a388" } } }
+    ],
+    "shows": [
+        { "rated_at": "2025-10-20T10:00:00Z", "rating": 8, "rating_precise": 8, "show": { "title": "Breaking Bad", "year": 2008, "ids": { "tmdb": 1396, "imdb": "tt0903747", "trakt": 1388, "mdblist": "8plj", "tvdb": 81189 } } }
+    ],
+    "seasons": [
+        { "rated_at": "2025-10-20T10:05:00Z", "rating": 7, "rating_precise": 7, "season": { "number": 1, "show": { "title": "Breaking Bad", "year": 2008, "ids": { "tmdb": 1396, "imdb": "tt0903747", "tvdb": 81189 } } } }
+    ],
+    "episodes": [
+        { "rated_at": "2025-10-15T22:00:00Z", "rating": 10, "rating_precise": 10, "episode": { "season": 1, "number": 1, "name": "Pilot", "ids": { "tmdb": 62085, "tvdb": 349232 }, "show": { "title": "Breaking Bad", "year": 2008, "ids": { "tmdb": 1396, "trakt": 1388, "imdb": "tt0903747", "mdblist": "8plj", "tvdb": 81189 } } } }
+    ],
+    "pagination": { "total": 4, "limit": 1000, "offset": 0, "next_cursor": null }
+}

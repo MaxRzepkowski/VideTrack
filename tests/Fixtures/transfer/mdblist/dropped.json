@@ -1,0 +1,6 @@
+{
+    "shows": [
+        { "show": { "title": "Breaking Bad", "year": 2008, "ids": { "tmdb": 1396, "imdb": "tt0903747", "trakt": 1388, "mdblist": "8plj", "tvdb": 81189 } } }
+    ],
+    "pagination": { "total": 1, "limit": 1000, "offset": 0, "next_cursor": null }
+}
