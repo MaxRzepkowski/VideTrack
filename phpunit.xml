@@ -55,6 +55,8 @@
         <env name="MAL_CLIENT_ID" value=""/>
         <env name="COMICVINE_API_KEY" value=""/>
         <env name="HARDCOVER_CLIENT_ID" value=""/>
+        <env name="MANGABAKA_CLIENT_ID" value=""/>
+        <env name="MANGABAKA_CLIENT_SECRET" value=""/>
         <env name="MDBLIST_CLIENT_ID" value=""/>
         <env name="SIMKL_CLIENT_ID" value=""/>
         <env name="STEAM_API_KEY" value=""/>

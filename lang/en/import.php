@@ -364,4 +364,10 @@ return [
     'skip_tmdb_no_rating' => ':label: no rating on TMDB.',
     'skip_tmdb_list_not_shown' => 'TMDB list ":label": TMDB shows only public lists to other apps. Make it public on TMDB to import it.',
     'skip_tmdb_list_gone' => 'TMDB list ":label": TMDB no longer has it.',
+    'manga_you_read_are_reading_and_want_on_mangabaka' => 'Manga you read, are reading and want to read on MangaBaka, with your ratings and lists.',
+    'import_from_mangabaka' => 'Import from MangaBaka',
+    'mangabaka_did_not_accept_this_instance' => 'MangaBaka did not accept this instance. Its client id and secret must belong to a Web app.',
+    'mangabaka_connection_was_not_approved' => 'The connection was not approved on MangaBaka.',
+    'mangabaka_stopped_accepting_this_connection' => 'MangaBaka stopped accepting this connection. Connect your account again.',
+    'skip_mangabaka_no_title' => 'A MangaBaka series without a title.',
 ];
