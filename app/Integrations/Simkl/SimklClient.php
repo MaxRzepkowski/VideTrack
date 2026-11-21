@@ -4,8 +4,8 @@ namespace App\Integrations\Simkl;
 
 use App\Integrations\Connections\ConnectionExpired;
 use App\Integrations\Connections\Data\DeviceGrant;
-use App\Integrations\Connections\DeviceGrantClient;
 use App\Integrations\Connections\GrantUnavailable;
+use App\Integrations\Connections\TokenGrantClient;
 use App\Models\ServiceConnection;
 use App\Support\ConnectionFailure;
 use App\Support\HttpRetry;
@@ -25,13 +25,13 @@ use Illuminate\Support\Facades\Http;
  *   and nothing else is retried: an answered 4xx is final;
  * - AUTH V2 access tokens live seven days and one grant holds exactly one
  *   live token, so a refresh by anyone cuts off every copy — what
- *   DeviceGrantClient's refresh guards against.
+ *   TokenGrantClient's refresh guards against.
  */
 class SimklClient
 {
     private const TIMEOUT_SECONDS = 60;
 
-    public function __construct(private readonly DeviceGrantClient $grants) {}
+    public function __construct(private readonly TokenGrantClient $tokens) {}
 
     /**
      * The account name, for the card — read with a token straight from the
@@ -60,7 +60,7 @@ class SimklClient
      */
     public function get(ServiceConnection $connection, string $path, array $query = []): array
     {
-        $response = $this->grants->call($this->grant(), $connection, fn (string $token): Response => $this->send($token, $path, $query));
+        $response = $this->tokens->call($this->grant()->tokenGrant(), $connection, fn (string $token): Response => $this->send($token, $path, $query));
 
         if (HttpRetry::isOutage($response)) {
             throw new SimklUnavailable('import.service_answered_try_later', ['service' => SimklService::NAME, 'status' => $response->status()]);

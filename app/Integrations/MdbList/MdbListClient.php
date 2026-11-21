@@ -4,8 +4,8 @@ namespace App\Integrations\MdbList;
 
 use App\Integrations\Connections\ConnectionExpired;
 use App\Integrations\Connections\Data\DeviceGrant;
-use App\Integrations\Connections\DeviceGrantClient;
 use App\Integrations\Connections\GrantUnavailable;
+use App\Integrations\Connections\TokenGrantClient;
 use App\Models\ServiceConnection;
 use App\Support\ConnectionFailure;
 use App\Support\HttpRetry;
@@ -24,7 +24,7 @@ use Illuminate\Support\Facades\Http;
  * - a user connects through the Device Code app the operator registered;
  *   MDBList has one scope, `write`, though nothing here writes;
  * - access tokens live 30 days and are refreshed with the refresh token,
- *   through DeviceGrantClient;
+ *   through TokenGrantClient;
  * - limits are per account: 1,000 requests a day on a free account and
  *   1,000 reads every five minutes. Past either, MDBList answers 429 and
  *   asks to wait its Retry-After rather than retry in a loop: the run is put
@@ -45,7 +45,7 @@ class MdbListClient
     /** MDBList's windows are five minutes long: a 429 without a Retry-After waits one out. */
     private const DEFAULT_WAIT_SECONDS = 300;
 
-    public function __construct(private readonly DeviceGrantClient $grants) {}
+    public function __construct(private readonly TokenGrantClient $tokens) {}
 
     /**
      * The username, for the card — read with a token straight from the
@@ -91,7 +91,7 @@ class MdbListClient
      */
     public function get(ServiceConnection $connection, string $path, array $query = []): mixed
     {
-        $response = $this->grants->call($this->grant(), $connection, fn (string $token): Response => $this->send($token, $path, $query));
+        $response = $this->tokens->call($this->grant()->tokenGrant(), $connection, fn (string $token): Response => $this->send($token, $path, $query));
 
         if ($response->status() === 429) {
             throw new ServiceBusy('import.service_asked_to_wait', HttpRetry::retryAfter($response, self::DEFAULT_WAIT_SECONDS), ['service' => MdbListService::NAME]);

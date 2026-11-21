@@ -3,9 +3,11 @@
 use App\Integrations\Connections\ConnectionExpired;
 use App\Integrations\Connections\ConnectionRejected;
 use App\Integrations\Connections\Data\DeviceGrant;
+use App\Integrations\Connections\Data\TokenGrant;
 use App\Integrations\Connections\DeviceGrantClient;
 use App\Integrations\Connections\DevicePoll;
 use App\Integrations\Connections\GrantUnavailable;
+use App\Integrations\Connections\TokenGrantClient;
 use App\Models\ServiceConnection;
 use App\Models\User;
 use Illuminate\Http\Client\Request;
@@ -38,7 +40,7 @@ function exampleGrant(?string $verificationUri = null): DeviceGrant
     );
 }
 
-function exampleConnection(int $expiresInSeconds = DeviceGrantClient::REFRESH_MARGIN_SECONDS * 2): ServiceConnection
+function exampleConnection(int $expiresInSeconds = TokenGrantClient::REFRESH_MARGIN_SECONDS * 2): ServiceConnection
 {
     return deviceConnection(User::factory()->create(), 'example', [
         'access_token' => 'access-one',
@@ -78,11 +80,11 @@ test('a poll reads pending, slow down, a refusal and an app the service does not
 ]);
 
 test('a busy service at refresh time leaves the grant alone, and the refresh is not sent again', function (int $status) {
-    $connection = exampleConnection(expiresInSeconds: DeviceGrantClient::REFRESH_MARGIN_SECONDS - 3600);
+    $connection = exampleConnection(expiresInSeconds: TokenGrantClient::REFRESH_MARGIN_SECONDS - 3600);
 
     Http::fake(['auth.example.test/token' => Http::response(['error' => 'Too Many Requests'], $status)]);
 
-    expect(fn () => app(DeviceGrantClient::class)->call(exampleGrant(), $connection, fn (string $token): Response => Http::get('https://api.example.test/me')))
+    expect(fn () => app(TokenGrantClient::class)->call(exampleGrant()->tokenGrant(), $connection, fn (string $token): Response => Http::get('https://api.example.test/me')))
         ->toThrow(GrantUnavailable::class, 'import.service_answered_token_refresh');
 
     expect(requestsTo('/token'))->toBe(1)
@@ -90,23 +92,23 @@ test('a busy service at refresh time leaves the grant alone, and the refresh is 
 })->with([429, 503]);
 
 test('a refused refresh means the grant is gone', function () {
-    $connection = exampleConnection(expiresInSeconds: DeviceGrantClient::REFRESH_MARGIN_SECONDS - 3600);
+    $connection = exampleConnection(expiresInSeconds: TokenGrantClient::REFRESH_MARGIN_SECONDS - 3600);
 
     Http::fake(['auth.example.test/token' => Http::response(['error' => 'invalid_grant'], 400)]);
 
-    expect(fn () => app(DeviceGrantClient::class)->call(exampleGrant(), $connection, fn (string $token): Response => Http::get('https://api.example.test/me')))
+    expect(fn () => app(TokenGrantClient::class)->call(exampleGrant()->tokenGrant(), $connection, fn (string $token): Response => Http::get('https://api.example.test/me')))
         ->toThrow(ConnectionExpired::class, 'import.simkl_stopped_accepting_this_connection_connect');
 });
 
 test('a rotated refresh token is kept, and the call goes with the new access token', function () {
-    $connection = exampleConnection(expiresInSeconds: DeviceGrantClient::REFRESH_MARGIN_SECONDS - 3600);
+    $connection = exampleConnection(expiresInSeconds: TokenGrantClient::REFRESH_MARGIN_SECONDS - 3600);
 
     Http::fake([
         'auth.example.test/token' => Http::response(['access_token' => 'access-two', 'refresh_token' => 'refresh-two', 'expires_in' => 604800]),
         'api.example.test/*' => Http::response(['ok' => true]),
     ]);
 
-    $response = app(DeviceGrantClient::class)->call(exampleGrant(), $connection, fn (string $token): Response => Http::withToken($token)->get('https://api.example.test/me'));
+    $response = app(TokenGrantClient::class)->call(exampleGrant()->tokenGrant(), $connection, fn (string $token): Response => Http::withToken($token)->get('https://api.example.test/me'));
 
     expect($response->json('ok'))->toBeTrue()
         ->and($connection->refresh()->credential('refresh_token'))->toBe('refresh-two');
@@ -119,40 +121,40 @@ test('a rotated refresh token is kept, and the call goes with the new access tok
 });
 
 test('a refresh answer without a refresh token keeps the one just used', function () {
-    $connection = exampleConnection(expiresInSeconds: DeviceGrantClient::REFRESH_MARGIN_SECONDS - 3600);
+    $connection = exampleConnection(expiresInSeconds: TokenGrantClient::REFRESH_MARGIN_SECONDS - 3600);
 
     Http::fake([
         'auth.example.test/token' => Http::response(['access_token' => 'access-two', 'expires_in' => 604800]),
         'api.example.test/*' => Http::response(['ok' => true]),
     ]);
 
-    app(DeviceGrantClient::class)->call(exampleGrant(), $connection, fn (string $token): Response => Http::withToken($token)->get('https://api.example.test/me'));
+    app(TokenGrantClient::class)->call(exampleGrant()->tokenGrant(), $connection, fn (string $token): Response => Http::withToken($token)->get('https://api.example.test/me'));
 
     expect($connection->refresh()->credential('access_token'))->toBe('access-two')
         ->and($connection->credential('refresh_token'))->toBe('refresh-one');
 });
 
 test('an answer without an access token stores nothing', function () {
-    $connection = exampleConnection(expiresInSeconds: DeviceGrantClient::REFRESH_MARGIN_SECONDS - 3600);
+    $connection = exampleConnection(expiresInSeconds: TokenGrantClient::REFRESH_MARGIN_SECONDS - 3600);
 
     Http::fake(['auth.example.test/token' => Http::response(['token_type' => 'Bearer'])]);
 
-    expect(fn () => app(DeviceGrantClient::class)->call(exampleGrant(), $connection, fn (string $token): Response => Http::get('https://api.example.test/me')))
+    expect(fn () => app(TokenGrantClient::class)->call(exampleGrant()->tokenGrant(), $connection, fn (string $token): Response => Http::get('https://api.example.test/me')))
         ->toThrow(GrantUnavailable::class, 'import.service_gave_no_token');
 
     expect($connection->refresh()->credential('access_token'))->toBe('access-one');
 });
 
 test('a refresh another worker still holds is waited for, then given up on without a token request', function () {
-    $connection = exampleConnection(expiresInSeconds: DeviceGrantClient::REFRESH_MARGIN_SECONDS - 3600);
+    $connection = exampleConnection(expiresInSeconds: TokenGrantClient::REFRESH_MARGIN_SECONDS - 3600);
     Http::fake();
     // The wait is counted on the clock: a faked sleep moves it.
     Sleep::fake(syncWithCarbon: true);
-    $held = Cache::lock(DeviceGrantClient::refreshLockName($connection), 3600);
+    $held = Cache::lock(TokenGrantClient::refreshLockName($connection), 3600);
     $held->get();
 
     try {
-        expect(fn () => app(DeviceGrantClient::class)->call(exampleGrant(), $connection, fn (string $token): Response => Http::get('https://api.example.test/me')))
+        expect(fn () => app(TokenGrantClient::class)->call(exampleGrant()->tokenGrant(), $connection, fn (string $token): Response => Http::get('https://api.example.test/me')))
             ->toThrow(GrantUnavailable::class, 'import.service_token_refresh_under_way');
     } finally {
         $held->release();
@@ -160,3 +162,22 @@ test('a refresh another worker still holds is waited for, then given up on witho
 
     expect(requestsTo('/token'))->toBe(0);
 });
+
+test('a confidential app signs its refresh with its secret, a public one with its id alone', function (?string $secret) {
+    $connection = exampleConnection(expiresInSeconds: TokenGrantClient::REFRESH_MARGIN_SECONDS - 3600);
+    $grant = new TokenGrant('Example', 'https://auth.example.test', 'example-client', $secret, '/token', '/revoke', 'import.simkl_stopped_accepting_this_connection_connect');
+
+    Http::fake([
+        'auth.example.test/token' => Http::response(['access_token' => 'access-two', 'refresh_token' => 'refresh-two', 'expires_in' => 604800]),
+        'api.example.test/*' => Http::response(['ok' => true]),
+    ]);
+
+    app(TokenGrantClient::class)->call($grant, $connection, fn (string $token): Response => Http::withToken($token)->get('https://api.example.test/me'));
+
+    Http::assertSent(fn (Request $request) => $request->url() === 'https://auth.example.test/token'
+        && $request['client_id'] === 'example-client'
+        && ($secret === null ? ! isset($request['client_secret']) : $request['client_secret'] === $secret));
+})->with([
+    'confidential' => ['secret-of-the-app'],
+    'public' => [null],
+]);

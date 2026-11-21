@@ -5,6 +5,7 @@ namespace App\Integrations\MdbList;
 use App\Integrations\Connections\Data\DeviceGrant;
 use App\Integrations\Connections\DeviceGrantClient;
 use App\Integrations\Connections\DeviceGrantService;
+use App\Integrations\Connections\TokenGrantClient;
 
 /**
  * Connecting an MDBList account through its device code flow: the user
@@ -17,9 +18,9 @@ class MdbListService extends DeviceGrantService
 
     public const NAME = 'MDBList';
 
-    public function __construct(DeviceGrantClient $grants, private readonly MdbListClient $client)
+    public function __construct(DeviceGrantClient $grants, TokenGrantClient $tokens, private readonly MdbListClient $client)
     {
-        parent::__construct($grants);
+        parent::__construct($grants, $tokens);
     }
 
     public function code(): string

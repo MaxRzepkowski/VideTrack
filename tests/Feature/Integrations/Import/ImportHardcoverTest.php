@@ -5,8 +5,8 @@ use App\Enums\PlayOutcome;
 use App\Enums\TaskRunStatus;
 use App\Integrations\Connections\ConnectionRegistry;
 use App\Integrations\Connections\ConnectionStatus;
-use App\Integrations\Connections\DeviceGrantClient;
 use App\Integrations\Connections\GrantUnavailable;
+use App\Integrations\Connections\TokenGrantClient;
 use App\Integrations\Hardcover\HardcoverLibraryClient;
 use App\Integrations\Hardcover\HardcoverLibrarySource;
 use App\Integrations\Hardcover\HardcoverReadingStatus;
@@ -276,7 +276,7 @@ test('a token refreshed meanwhile by another worker is used, never refreshed a s
 
 test('a refresh that fails on Hardcover\'s side is not sent again, and leaves the grant alone', function () {
     $user = User::factory()->create();
-    $connection = deviceConnection($user, HardcoverService::CODE, ['expires_at' => now()->addSeconds(DeviceGrantClient::REFRESH_MARGIN_SECONDS - 3600)->getTimestamp()]);
+    $connection = deviceConnection($user, HardcoverService::CODE, ['expires_at' => now()->addSeconds(TokenGrantClient::REFRESH_MARGIN_SECONDS - 3600)->getTimestamp()]);
 
     Http::fake(['api.hardcover.app/oauth2/token' => Http::response(['error' => 'Service temporarily unavailable'], 503)]);
 
