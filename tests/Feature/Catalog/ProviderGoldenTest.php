@@ -48,7 +48,7 @@ test('TMDB reads its recorded answers the same way', function (string $name, Clo
     'season' => ['season', fn ($tmdb) => $tmdb->details('season', '1399:1', 'en')],
     'specials' => ['specials', fn ($tmdb) => $tmdb->details('season', '1399:0', 'en')],
     'episode' => ['episode', fn ($tmdb) => $tmdb->details('episode', '1399:1:1', 'en')],
-    'person' => ['person', fn ($tmdb) => $tmdb->person('6384', 'en')],
+    'person' => ['person', fn ($tmdb) => $tmdb->person('6384', 'en', MatureContent::Suggestive)],
     'network' => ['network', fn ($tmdb) => $tmdb->network('49', 'en', MatureContent::Suggestive)],
     'company' => ['company', fn ($tmdb) => $tmdb->company('41077', 'en', MatureContent::Suggestive)],
     'trending' => ['trending', fn ($tmdb) => $tmdb->trending('en')],
@@ -150,7 +150,7 @@ test('Hardcover reads its recorded answers the same way', function (string $name
 })->with([
     'search' => ['search', fn ($hardcover) => $hardcover->search('hobbit', 'en', MatureContent::Suggestive)],
     'book' => ['book', fn ($hardcover) => $hardcover->details('book', '2459845', 'en')],
-    'author' => ['author', fn ($hardcover) => $hardcover->person('132049', 'en')],
+    'author' => ['author', fn ($hardcover) => $hardcover->person('132049', 'en', MatureContent::Suggestive)],
     'trending' => ['trending', fn ($hardcover) => $hardcover->trending('en')],
     'genres' => ['genres', fn ($hardcover) => $hardcover->genres('book', 'en')],
 ]);

@@ -13,7 +13,6 @@ use App\Catalog\DiscoverSections;
 use App\Catalog\Discovery;
 use App\Catalog\FilteredDiscovery;
 use App\Catalog\GenreResolver;
-use App\Catalog\MatureContent;
 use App\Catalog\MediaTypeRegistry;
 use App\Catalog\ProviderCalls;
 use App\Catalog\ProviderRegistry;
@@ -71,6 +70,7 @@ final readonly class BuildDiscoverPage
         // The core resolves the region and hands it over, so the provider
         // never has to know there is a user.
         $region = ViewerRegion::resolve($viewer, $locale);
+        $mature = $viewer->preferences->matureContent();
         $props = [];
         // Every card the page shows, whichever mode filled it, the filtered
         // grid too: without them the library states hold nothing for those
@@ -97,7 +97,7 @@ final readonly class BuildDiscoverPage
                 if ($this->dictionaryMissing($filters, $active)) {
                     $calls->markFailed();
                 } else {
-                    $listing = $calls->attempt(fn (): Paginated => $provider->discoverFiltered($type, $active, $locale, $region, MatureContent::Suggestive, $query->page), null);
+                    $listing = $calls->attempt(fn (): Paginated => $provider->discoverFiltered($type, $active, $locale, $region, $mature->for($provider->code()), $query->page), null);
 
                     // Past the last page the URL is lying; rewrite it rather
                     // than show an empty grid. A degraded call has no page
@@ -129,7 +129,7 @@ final readonly class BuildDiscoverPage
                     return DiscoverPage::notFound();
                 }
 
-                $listing = $calls->attempt(fn (): Paginated => $provider->byGenre($type, $genre->ref, $locale, MatureContent::Suggestive, $query->page), null);
+                $listing = $calls->attempt(fn (): Paginated => $provider->byGenre($type, $genre->ref, $locale, $mature->for($provider->code()), $query->page), null);
 
                 $props['genre'] = $genre->ref;
                 $props['genreName'] = $genre->name;
@@ -142,7 +142,7 @@ final readonly class BuildDiscoverPage
         // A dedicated genre page and a filtered grid both replace the browse
         // sections rather than sitting under them — there is no mixed mode.
         if (! isset($props['genre']) && ($props['filterCount'] ?? 0) === 0) {
-            $sections = $this->sections->of($type, $locale, $calls);
+            $sections = $this->sections->of($type, $locale, $mature, $calls);
             $props = [...$props, 'trending' => $sections->trending, 'popular' => $sections->popular, 'upcoming' => $sections->upcoming];
             $cards = [...$cards, ...$sections->cards()];
         }

@@ -288,4 +288,9 @@ return [
     'takes_no_titles_there' => 'Greyed out where this type takes no titles.',
     'own_sources_and_settings_of_each_type' => 'Own sources and settings of each type.',
     'each_also_needs_the_creators_row' => 'Each works while the “New titles from followed creators” row is on in the sources (the defaults or the type\'s own).',
+    'adult_content' => 'Adult content',
+    'adult_content_description' => 'What search, Discover (apart from “:trending”) and creator pages show. Your library, history and imports always keep every title.',
+    'mature_level_safe' => 'Hide suggestive and adult titles',
+    'mature_level_suggestive' => 'Hide adult titles',
+    'mature_level_adult' => 'Show everything',
 ];

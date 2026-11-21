@@ -38,13 +38,13 @@ class SearchController extends Controller
         // provider cache instead would ask a dead provider again and log its
         // failure twice. A provider that cannot answer leaves no results and
         // says so, rather than a "nothing found" that is not true.
-        $answer = fn (): array => once(function () use ($search, $scope, $query): array {
+        $answer = fn (): array => once(function () use ($search, $scope, $query, $viewer): array {
             if ($query === '' || $scope === null) {
                 return ['results' => null, 'unavailable' => false];
             }
 
             try {
-                return ['results' => $search->search($scope, $query, App::getLocale()), 'unavailable' => false];
+                return ['results' => $search->search($scope, $query, App::getLocale(), $viewer->preferences->matureContent()), 'unavailable' => false];
             } catch (ProviderException|ProviderRejected $e) {
                 report($e);
 

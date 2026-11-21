@@ -8,6 +8,7 @@ use App\Catalog\Contracts\SupportsPersonPage;
 use App\Catalog\Data\MediaSummary;
 use App\Catalog\Data\PersonCredit;
 use App\Catalog\ItemNotFoundException;
+use App\Catalog\MatureChoices;
 use App\Catalog\ProviderRegistry;
 use App\Support\ExternalServiceException;
 
@@ -29,7 +30,7 @@ final readonly class SetFetcher
 
         return match ($key->kind) {
             SetKind::Collection => $provider instanceof SupportsCollections ? $this->collection($provider, $key->ref, $locale) : null,
-            SetKind::Filmography => $provider instanceof SupportsPersonPage ? $this->filmography($provider, $key->ref, $locale) : null,
+            SetKind::Filmography => $provider instanceof SupportsPersonPage ? $this->filmography($provider, $key->provider, $key->ref, $locale) : null,
             SetKind::Chart => $provider instanceof SupportsCharts ? $this->chart($provider, $key->ref, $locale) : null,
         };
     }
@@ -45,9 +46,10 @@ final readonly class SetFetcher
         );
     }
 
-    private function filmography(SupportsPersonPage $provider, string $ref, string $locale): FetchedSet
+    private function filmography(SupportsPersonPage $provider, string $code, string $ref, string $locale): FetchedSet
     {
-        $person = $provider->person($ref, $locale);
+        // A set is fetched once for every viewer of the shelf.
+        $person = $provider->person($ref, $locale, MatureChoices::shared()->for($code));
 
         return new FetchedSet(
             $person->name,

@@ -125,7 +125,7 @@ final readonly class TmdbTitles
             // Lets the Wikidata bridge resolve the source book by QID directly
             // (see ResolveSourceBooks).
             wikidataId: Payload::string(Payload::map(data_get($data, 'external_ids')), 'wikidata_id'),
-            adult: ($data['adult'] ?? false) === true,
+            adult: $this->payload->adult($data),
             collection: $this->parts->movieCollection($data),
         );
     }
@@ -240,7 +240,7 @@ final readonly class TmdbTitles
             // Lets the Wikidata bridge resolve the source book by QID directly
             // (see ResolveSourceBooks).
             wikidataId: Payload::string(Payload::map(data_get($data, 'external_ids')), 'wikidata_id'),
-            adult: ($data['adult'] ?? false) === true,
+            adult: $this->payload->adult($data),
             // The most recent and the upcoming airing, mapped as plain
             // episode summaries so the show page renders them like a
             // season's episode card.

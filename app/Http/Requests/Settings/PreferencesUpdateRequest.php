@@ -4,11 +4,13 @@ namespace App\Http\Requests\Settings;
 
 use App\Accounts\Preferences\CompanyFollowScope;
 use App\Accounts\Preferences\EpisodeImage;
+use App\Accounts\Preferences\MatureContentOptions;
 use App\Accounts\Preferences\PersonFollowScope;
 use App\Accounts\Preferences\TimeFormat;
 use App\Accounts\Preferences\UpNextTarget;
 use App\Accounts\Preferences\UserPreferences;
 use App\Accounts\Preferences\WeekStart;
+use App\Catalog\MatureContent;
 use App\Catalog\MediaTypeRegistry;
 use App\Enums\UpNextSort;
 use App\Support\Payload;
@@ -97,9 +99,33 @@ class PreferencesUpdateRequest extends FormRequest
             UserPreferences::TYPE_SOURCES => ['sometimes', 'array:'.implode(',', app(MediaTypeRegistry::class)->rootCodes())],
             UserPreferences::TYPE_SOURCES.'.*' => ['array:'.implode(',', array_column(Surface::cases(), 'value'))],
             ...$this->surfaceRules(),
+            ...$this->matureContentRules(),
             // A row twice in one list reads once; `distinct` would compare every list with every other.
             UserPreferences::TYPE_SOURCES.'.*.*.*' => [Rule::enum(TrackingSource::class)],
         ];
+    }
+
+    /**
+     * A level for each provider that takes one, among the levels it tells
+     * apart; the page sends them together.
+     *
+     * @return array<string, list<mixed>>
+     */
+    private function matureContentRules(): array
+    {
+        $levels = app(MatureContentOptions::class)->levels();
+
+        if ($levels === []) {
+            return [UserPreferences::MATURE_CONTENT => ['prohibited']];
+        }
+
+        $rules = [UserPreferences::MATURE_CONTENT => ['sometimes', 'array:'.implode(',', array_keys($levels))]];
+
+        foreach ($levels as $provider => $taken) {
+            $rules[UserPreferences::MATURE_CONTENT.'.'.$provider] = ['string', Rule::in(array_map(fn (MatureContent $level): string => $level->value, $taken))];
+        }
+
+        return $rules;
     }
 
     /**

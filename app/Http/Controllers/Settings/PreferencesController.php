@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Settings;
 
+use App\Accounts\Preferences\MatureContentOptions;
 use App\Actions\Users\UpdatePreferences;
 use App\Catalog\Contracts\SupportsWatchProviders;
 use App\Catalog\ProviderCalls;
@@ -18,11 +19,12 @@ use Inertia\Response;
 
 class PreferencesController extends Controller
 {
-    public function edit(ProviderRegistry $providers): Response
+    public function edit(#[CurrentUser] User $viewer, ProviderRegistry $providers, MatureContentOptions $mature): Response
     {
         return Inertia::render('settings/Preferences', [
             'regions' => fn (): array => $this->regions($providers),
             'defaultRegion' => ViewerRegion::default(App::getLocale()),
+            'matureContent' => fn (): array => $mature->for($viewer->preferences),
         ]);
     }
 

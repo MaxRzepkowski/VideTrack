@@ -304,7 +304,7 @@ test('the author page maps hardcover fields and books as credits', function () {
     enableBooksModule();
     fakeHardcover(['Author' => 'author']);
 
-    $person = hardcoverProvider()->person('132049', 'en');
+    $person = hardcoverProvider()->person('132049', 'en', MatureContent::Suggestive);
     $creditRefs = array_map(fn ($credit) => $credit->media->ref, $person->credits);
 
     expect($person->ref)->toBe('132049')
@@ -331,7 +331,7 @@ test("an author's page says where they come from, links their own site and Wikip
     enableBooksModule();
     fakeHardcover(['Author' => 'author']);
 
-    $person = hardcoverProvider()->person('132049', 'en');
+    $person = hardcoverProvider()->person('132049', 'en', MatureContent::Suggestive);
 
     expect($person->origin)->toBe('United Kingdom')
         ->and($person->placeOfBirth)->toBeNull()
@@ -359,7 +359,7 @@ test("an author's own site may be titled a bare Website, and a host that only en
     ];
     Http::fake(['api.hardcover.app/*' => Http::response($answer)]);
 
-    expect(hardcoverProvider()->person('132049', 'en')->externalLinks)->toBe([
+    expect(hardcoverProvider()->person('132049', 'en', MatureContent::Suggestive)->externalLinks)->toBe([
         'homepage' => 'http://www.blakecrouch.com/',
         'hardcover' => 'https://hardcover.app/authors/j-r-r-tolkien',
     ]);
@@ -369,7 +369,7 @@ test('an unknown author ref raises the not-found exception', function () {
     enableBooksModule();
     fakeHardcover([]);
 
-    expect(fn () => hardcoverProvider()->person('424242', 'en'))
+    expect(fn () => hardcoverProvider()->person('424242', 'en', MatureContent::Suggestive))
         ->toThrow(ItemNotFoundException::class);
 });
 

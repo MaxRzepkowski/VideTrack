@@ -447,7 +447,7 @@ test('parent refs strip the last path segment and roots have none', function () 
 test('person details sort credits by popularity and retain posterless titles', function () {
     Http::fake(['*/person/6384*' => Http::response(jsonFixture('tmdb/person'))]);
 
-    $person = tmdbProvider()->person('6384', 'en');
+    $person = tmdbProvider()->person('6384', 'en', MatureContent::Suggestive);
 
     expect($person->name)->toBe('Keanu Reeves')
         ->and($person->knownForDepartment)->toBe(Department::Acting)
@@ -475,7 +475,7 @@ test('person photos are sorted by rating and capped', function () {
 
     Http::fake(['*/person/6384*' => Http::response($data)]);
 
-    $person = tmdbProvider()->person('6384', 'en');
+    $person = tmdbProvider()->person('6384', 'en', MatureContent::Suggestive);
 
     expect($person->photos)->toHaveCount(TmdbCreators::PHOTOS_KEPT)
         ->and($person->photos[0])->toBe('/profile-'.(TmdbCreators::PHOTOS_KEPT + 2).'.jpg')

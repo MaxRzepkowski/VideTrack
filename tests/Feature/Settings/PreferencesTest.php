@@ -2,6 +2,7 @@
 
 use App\Accounts\Preferences\UserPreferences;
 use App\Actions\Users\UpdatePreferences;
+use App\Catalog\MatureChoices;
 use App\Enums\UpNextSort;
 use App\Http\Requests\Settings\PreferencesUpdateRequest;
 use App\Models\User;
@@ -397,3 +398,53 @@ test('the timezone report keeps every own source as stored', function (array $ow
     'a kind no module has' => [['boardgame' => ['notifications' => ['backlog']], 'movie' => ['notifications' => ['backlog']]]],
     'a kind of a wrong shape' => [['book' => 'garbage', 'movie' => ['notifications' => ['backlog']]]],
 ]);
+
+test('a level the provider does not tell apart is refused', function () {
+    $this->actingAs(User::factory()->create())
+        ->from(route('settings.preferences.edit'))
+        ->patch(route('settings.preferences.update'), ['mature_content' => ['tmdb' => 'safe']])
+        ->assertSessionHasErrors('mature_content.tmdb');
+});
+
+test('a provider that files no adult material takes no level', function () {
+    $this->actingAs(User::factory()->create())
+        ->from(route('settings.preferences.edit'))
+        ->patch(route('settings.preferences.update'), ['mature_content' => ['somewhere' => 'adult']])
+        ->assertSessionHasErrors('mature_content');
+});
+
+test('the chosen levels are kept, and a switched-off module keeps its own', function () {
+    $user = User::factory()->create(['preferences' => ['mature_content' => ['mal' => 'safe']]]);
+
+    $this->actingAs($user)
+        ->patch(route('settings.preferences.update'), ['mature_content' => ['tmdb' => 'adult']])
+        ->assertSessionHasNoErrors();
+
+    expect($user->refresh()->preferences->toStored()['mature_content'])->toBe(['mal' => 'safe', 'tmdb' => 'adult'])
+        ->and($user->preferences->matureContent()->for('tmdb')->value)->toBe('adult');
+});
+
+test('the settings page lists each provider that files adult material, by the kinds of title it serves', function () {
+    enableMangaModule();
+    Http::fake(providerDictionaryFakes());
+
+    $this->actingAs(User::factory()->create(['preferences' => ['mature_content' => ['tmdb' => 'adult']]]))
+        ->get(route('settings.preferences.edit'))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('matureContent.0.provider', 'tmdb')
+            ->where('matureContent.0.types', ['show', 'movie'])
+            ->where('matureContent.0.levels', ['suggestive', 'adult'])
+            ->where('matureContent.0.level', 'adult')
+            ->where('matureContent.1.provider', 'mal')
+            ->where('matureContent.1.types', ['manga'])
+            ->where('matureContent.1.level', MatureChoices::shared()->for('mal')->value));
+});
+
+test('a stored level the provider no longer tells apart is offered as no choice', function () {
+    Http::fake(providerDictionaryFakes());
+
+    $this->actingAs(User::factory()->create(['preferences' => ['mature_content' => ['tmdb' => 'safe']]]))
+        ->get(route('settings.preferences.edit'))
+        ->assertInertia(fn (Assert $page) => $page->where('matureContent.0.level', MatureChoices::shared()->for('tmdb')->value));
+});

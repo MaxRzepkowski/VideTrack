@@ -3,6 +3,7 @@
 namespace App\Catalog\Contracts;
 
 use App\Catalog\Data\PersonDetails;
+use App\Catalog\MatureContent;
 
 /**
  * Capability: the provider serves a person page (a creator profile with a
@@ -12,5 +13,5 @@ use App\Catalog\Data\PersonDetails;
  */
 interface SupportsPersonPage
 {
-    public function person(string $ref, string $locale): PersonDetails;
+    public function person(string $ref, string $locale, MatureContent $mature): PersonDetails;
 }

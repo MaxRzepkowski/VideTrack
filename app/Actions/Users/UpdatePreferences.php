@@ -28,7 +28,7 @@ final readonly class UpdatePreferences
     {
         $preferences = DB::transaction(function () use ($user, $changes) {
             $stored = User::query()->findOrFail($user->id);
-            $stored->preferences = $stored->preferences->merge($this->keepingAbsentKinds($stored->preferences, $changes));
+            $stored->preferences = $stored->preferences->merge($this->keepingAbsentProviders($stored->preferences, $this->keepingAbsentKinds($stored->preferences, $changes)));
             $stored->save();
 
             return $stored->preferences;
@@ -36,6 +36,25 @@ final readonly class UpdatePreferences
 
         $user->preferences = $preferences;
         $user->syncOriginalAttribute('preferences');
+    }
+
+    /**
+     * Adult content levels come whole for the providers the page offers: one
+     * whose module is off keeps its level, for when it comes back.
+     *
+     * @param  array<string, mixed>  $changes
+     * @return array<string, mixed>
+     */
+    private function keepingAbsentProviders(UserPreferences $stored, array $changes): array
+    {
+        if (! array_key_exists(UserPreferences::MATURE_CONTENT, $changes)) {
+            return $changes;
+        }
+
+        return [...$changes, UserPreferences::MATURE_CONTENT => [
+            ...Payload::named($stored->toStored()[UserPreferences::MATURE_CONTENT] ?? null),
+            ...Payload::named($changes[UserPreferences::MATURE_CONTENT]),
+        ]];
     }
 
     /**

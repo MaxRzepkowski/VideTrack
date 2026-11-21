@@ -539,6 +539,12 @@ export type Marathon = {
     readonly minutes: number;
 };
 export type MatureContent = 'safe' | 'suggestive' | 'adult';
+export type MatureContentOption = {
+    readonly provider: string;
+    readonly types: string[];
+    readonly levels: MatureContent[];
+    readonly level: MatureContent;
+};
 export type MediaDetails = {
     readonly type: string;
     readonly ref: string;

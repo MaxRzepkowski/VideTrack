@@ -34,7 +34,10 @@ only what you rated at least so high), the next
 episode of every show you watch (`up-next`), your lists, the release calendar (from a day, to a day or
 for a number of `days`), every premiere you count down to, years ahead (`countdowns`), your statistics for a year, a range of
 days or the whole history (`statistics`, each section of the statistics page on its own), what is
-trending, popular and coming up in a type (`discover`), suggestions and notifications.
+trending, popular and coming up in a type (`discover`), suggestions and notifications. Search and
+the popular and coming-up lists of `discover` keep to your adult content setting (Settings →
+Preferences), as the pages do; `lookup` names titles you already know, so it finds them whatever
+that setting, as an import does.
 
 With `write`: plays, ratings, status, progress, favorites, list membership (all of a title's lists
 at once, or one list at a time), rewatch cycles, the

@@ -2,10 +2,13 @@
 
 namespace App\Accounts\Preferences;
 
+use App\Catalog\MatureChoices;
+use App\Catalog\MatureContent;
 use App\Catalog\ProgressUnit;
 use App\Catalog\RelatedReleaseKind;
 use App\Enums\ReleaseDateMode;
 use App\Enums\UpNextSort;
+use App\Support\Payload;
 use App\Tracking\Surface;
 use App\Tracking\TrackingSource;
 use BackedEnum;
@@ -31,6 +34,9 @@ final readonly class UserPreferences
      * default rows; its own were copied from them once and stay its own.
      */
     public const TYPE_SOURCES = 'type_sources';
+
+    /** How far each provider's listings go, kept apart from the scalar settings: provider code => MatureContent. */
+    public const MATURE_CONTENT = 'mature_content';
 
     /**
      * Every setting and its default: a flag, a choice (its enum's default
@@ -154,7 +160,7 @@ final readonly class UserPreferences
      * Every setting, the user's choice or its default — what the front reads,
      * so it never keeps defaults of its own.
      *
-     * @return array<string, bool|int|string|array<string, array<string, list<string>>>|stdClass|null>
+     * @return array<string, bool|int|string|array<string, array<string, list<string>>>|array<string, string>|stdClass|null>
      */
     public function resolved(): array
     {
@@ -169,6 +175,11 @@ final readonly class UserPreferences
         $resolved['region'] = $this->region();
 
         $resolved[self::TYPE_SOURCES] = $this->typeSources->toWire();
+
+        // What the user chose, provider by provider; one left out keeps to
+        // MatureChoices' own level, so no default is copied here.
+        $levels = array_map(fn (MatureContent $level): string => $level->value, $this->matureLevels());
+        $resolved[self::MATURE_CONTENT] = $levels === [] ? new stdClass : $levels;
 
         return $resolved;
     }
@@ -196,6 +207,12 @@ final readonly class UserPreferences
         $region = $this->text('region');
 
         return $region !== null && strlen($region) === 2 ? strtoupper($region) : null;
+    }
+
+    /** How far the user lets each provider's listings go. */
+    public function matureContent(): MatureChoices
+    {
+        return new MatureChoices($this->matureLevels());
     }
 
     /** One order for every in-progress section of the dashboard. */
@@ -303,6 +320,28 @@ final readonly class UserPreferences
         $value = $this->value('reading_pace_'.$unit->value);
 
         return is_int($value) ? $value : null;
+    }
+
+    /**
+     * The adult content levels the user chose, by provider code; a level that
+     * no longer means anything reads as no choice.
+     *
+     * @return array<string, MatureContent>
+     */
+    private function matureLevels(): array
+    {
+        $levels = [];
+        $stored = Payload::named($this->stored[self::MATURE_CONTENT] ?? null);
+
+        foreach (array_keys($stored) as $provider) {
+            $chosen = Payload::enum($stored, $provider, MatureContent::class);
+
+            if ($chosen !== null) {
+                $levels[$provider] = $chosen;
+            }
+        }
+
+        return $levels;
     }
 
     /** The user's choice if it still means something, else the default. */

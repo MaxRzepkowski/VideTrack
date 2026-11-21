@@ -47,7 +47,7 @@ class CreatorCreditsController extends Controller
         abort_unless($pages->serves($creator), 404);
 
         try {
-            $chunk = $pages->credits($creator, App::getLocale(), $page);
+            $chunk = $pages->credits($creator, App::getLocale(), $viewer->preferences->matureContent(), $page);
         } catch (ItemNotFoundException|ProviderException|ProviderRejected) {
             // The catalogue simply stops growing — the page keeps what it has
             // and says so once, rather than retrying into a dead provider.

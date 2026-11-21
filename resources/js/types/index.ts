@@ -4,6 +4,7 @@ import type {
     EpisodeImage,
     EventEntry,
     IdentityProviderOption,
+    MatureContent,
     PersonFollowScope,
     ReleaseDateMode,
     Surface,
@@ -148,4 +149,6 @@ export interface UserPreferences {
     reading_pace_issues: number;
     /** The kinds of title with sources of their own: type => surface => its rows. */
     type_sources: Partial<Record<string, Partial<Record<Surface, TrackingSource[]>>>>;
+    /** The adult content level chosen per provider code; a provider left out keeps to the default. */
+    mature_content: Partial<Record<string, MatureContent>>;
 }
