@@ -5,8 +5,6 @@ use App\Enums\PlayOutcome;
 use App\Enums\TaskRunStatus;
 use App\Integrations\Connections\ConnectionStatus;
 use App\Integrations\Connections\ConnectMethod;
-use App\Integrations\Connections\RedirectAttempts;
-use App\Integrations\Connections\TokenGrantClient;
 use App\Integrations\Import\Data\ImportInput;
 use App\Integrations\Import\Data\ImportSelection;
 use App\Integrations\Import\ImportSourceRegistry;
@@ -23,34 +21,19 @@ use Illuminate\Support\Facades\Http;
 use Inertia\Testing\AssertableInertia;
 
 /*
- * MangaBaka is exercised on the shapes of its own API schema and OAuth
- * guide (fixtures in tests/Fixtures/transfer/mangabaka) — never live.
+ * MangaBaka is exercised on the shapes of its own API schema (fixtures in
+ * tests/Fixtures/transfer/mangabaka) — never live.
  */
 
 beforeEach(function () {
-    // Before any registry is resolved: offered only with a registered app
-    // and manga from MyAnimeList.
+    // Before any registry is resolved: offered with manga from MyAnimeList.
     enableMangaModule();
-    config(['tracker.mangabaka.client_id' => 'mangabaka-client', 'tracker.mangabaka.client_secret' => 'secret-of-the-app']);
     Http::preventStrayRequests();
 });
 
-/**
- * Starts a trip to MangaBaka as $user; the authorize address's query.
- *
- * @return array<string, string>
- */
-function mangaBakaTrip(User $user): array
-{
-    $url = (string) test()->actingAs($user)->postJson(route('settings.connections.redirect.begin', MangaBakaService::CODE))->assertOk()->json('url');
-    parse_str((string) parse_url($url, PHP_URL_QUERY), $query);
-
-    return array_filter($query, is_string(...));
-}
-
 function mangaBakaConnection(User $user): ServiceConnection
 {
-    return deviceConnection($user, MangaBakaService::CODE);
+    return activeConnection($user, MangaBakaService::CODE, ['token' => 'mb-token-of-alex']);
 }
 
 function fakeMangaBakaLibrary(): void
@@ -60,79 +43,100 @@ function fakeMangaBakaLibrary(): void
     ))]);
 }
 
-test('without a registered app, or manga from MyAnimeList, MangaBaka is not offered', function (array $config) {
-    config($config);
+/**
+ * The profile MangaBaka gives for a personal token with these scopes.
+ *
+ * @param  list<string>  $scopes
+ * @return array<string, mixed>
+ */
+function mangaBakaProfile(array $scopes): array
+{
+    $profile = jsonFixture('transfer/mangabaka/profile');
+    $profile['data']['scopes'] = $scopes;
+
+    return $profile;
+}
+
+function fakeMangaBakaProfile(): void
+{
+    Http::fake(['api.mangabaka.org/v1/my/profile' => Http::response(mangaBakaProfile(['library.read', 'stack.read']))]);
+}
+
+test('without manga from MyAnimeList, MangaBaka is not offered', function () {
+    config(['tracker.mal.client_id' => '']);
     app()->forgetInstance(ImportSourceRegistry::class);
 
     expect(app(ImportSourceRegistry::class)->has(MangaBakaSource::CODE))->toBeFalse();
-})->with([
-    'no secret' => [['tracker.mangabaka.client_secret' => '']],
-    'no manga' => [['tracker.mal.client_id' => '']],
-]);
+});
 
-test('the import page offers MangaBaka with a trip to mangabaka.org', function () {
+test('the import page offers MangaBaka with a token form, nothing for the operator to set up', function () {
     $this->actingAs(User::factory()->create())
         ->get(route('settings.import.index'))
         ->assertInertia(fn (AssertableInertia $page) => $page
             ->where('sources', fn ($sources) => collect($sources)->contains(fn ($source) => $source['code'] === MangaBakaSource::CODE
-                && $source['connect']['method'] === ConnectMethod::Redirect->value)));
+                && $source['connect']['method'] === ConnectMethod::Form->value
+                && array_column($source['connect']['fields'], 'key') === ['token'])));
 });
 
-test('connecting sends the user to approve the app with the attempt\'s state and a PKCE challenge', function () {
-    $query = mangaBakaTrip(User::factory()->create());
-
-    expect($query)->toMatchArray([
-        'response_type' => 'code',
-        'client_id' => 'mangabaka-client',
-        'redirect_uri' => route('settings.connections.callback', MangaBakaService::CODE),
-        'scope' => 'openid profile library.read offline_access',
-        'code_challenge_method' => 'S256',
-    ])
-        ->and($query['state'] ?? '')->not->toBe('')
-        // S256 of a verifier, base64url without padding.
-        ->and($query['code_challenge'] ?? '')->toMatch('/^[A-Za-z0-9_-]{43}$/');
-});
-
-test('the code that comes back is exchanged with the kept verifier and the app\'s secret, and connects the account', function () {
+test('connecting keeps the token, under the account it belongs to', function () {
+    fakeMangaBakaProfile();
     $user = User::factory()->create();
-    $query = mangaBakaTrip($user);
 
-    Http::fake([
-        'mangabaka.org/auth/oauth2/token' => Http::response(['access_token' => 'access-of-alex', 'token_type' => 'Bearer', 'expires_in' => 604800, 'refresh_token' => 'refresh-of-alex', 'scope' => 'openid profile library.read offline_access']),
-        'mangabaka.org/auth/oauth2/userinfo' => Http::response(['sub' => 'u1', 'preferred_username' => 'alex']),
-    ]);
+    $this->actingAs($user)
+        ->postJson(route('settings.connections.verify', MangaBakaService::CODE), ['values' => ['token' => 'mb-token-of-alex']])
+        ->assertOk()
+        ->assertJsonPath('choices', []);
 
-    $this->get(route('settings.connections.callback', [MangaBakaService::CODE, 'code' => 'code-of-alex', 'state' => $query['state']]))
-        ->assertRedirect(route('settings.import.index', ['source' => MangaBakaSource::CODE]));
+    $this->actingAs($user)
+        ->postJson(route('settings.connections.connect', MangaBakaService::CODE), ['values' => ['token' => ' mb-token-of-alex ']])
+        ->assertOk()
+        ->assertJsonPath('connection.account', 'alex');
 
-    $connection = $user->serviceConnections()->sole();
-
-    expect($connection->credential('access_token'))->toBe('access-of-alex')
-        ->and($connection->credential('refresh_token'))->toBe('refresh-of-alex')
-        ->and($connection->account_label)->toBe('alex');
-
-    $exchange = Http::recorded(fn (Request $request) => str_contains($request->url(), '/oauth2/token'))->sole()[0];
-
-    expect($exchange['grant_type'])->toBe('authorization_code')
-        ->and($exchange['code'])->toBe('code-of-alex')
-        ->and($exchange['redirect_uri'])->toBe(route('settings.connections.callback', MangaBakaService::CODE))
-        ->and($exchange['client_id'])->toBe('mangabaka-client')
-        ->and($exchange['client_secret'])->toBe('secret-of-the-app');
-
-    $verifier = $exchange['code_verifier'];
-
-    // The verifier sent is the one the challenge was made from.
-    expect(rtrim(strtr(base64_encode(hash('sha256', (string) $verifier, true)), '+/', '-_'), '='))->toBe($query['code_challenge']);
+    expect($user->serviceConnections()->sole()->credential('token'))->toBe('mb-token-of-alex');
+    Http::assertSent(fn (Request $request) => $request->url() === 'https://api.mangabaka.org/v1/my/profile'
+        && $request->header('x-api-key') === ['mb-token-of-alex']);
 });
 
-test('a user who said no on MangaBaka comes back to the reason, and no connection', function () {
+test('a token is turned down once, with the reason', function (?int $status, array $scopes, string $token, string $message) {
+    $status === null ? Http::fake() : Http::fake(['api.mangabaka.org/*' => $status === 200
+        ? Http::response(mangaBakaProfile($scopes))
+        : Http::response(['status' => $status, 'message' => 'No.'], $status)]);
+
+    $this->actingAs(User::factory()->create())
+        ->postJson(route('settings.connections.verify', MangaBakaService::CODE), ['values' => ['token' => $token]])
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors(['connection' => $message]);
+
+    expect(requestsTo('/v1/my/profile'))->toBe($status === null ? 0 : 1);
+})->with([
+    'not a MangaBaka token' => [null, [], 'abc123', 'A MangaBaka token starts with mb-.'],
+    'a wrong token' => [401, [], 'mb-wrong', 'MangaBaka did not accept this token.'],
+    'a token without the library' => [200, ['stack.read'], 'mb-stacks-only', 'This token cannot read your library. Make one with library access.'],
+    'a request MangaBaka refuses' => [400, [], 'mb-odd', 'MangaBaka answered 400 to /v1/my/profile.'],
+]);
+
+test('MangaBaka out of reach or failing is said so, not taken for a wrong token', function (?int $status, string $message) {
+    Http::fake(['api.mangabaka.org/*' => $status === null ? Http::failedConnection() : Http::response(['status' => $status], $status)]);
+
+    $this->actingAs(User::factory()->create())
+        ->postJson(route('settings.connections.verify', MangaBakaService::CODE), ['values' => ['token' => 'mb-token-of-alex']])
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors(['connection' => $message]);
+})->with([
+    'unreachable' => [null, 'MangaBaka is unreachable: Could not resolve host: api.mangabaka.org'],
+    'failing' => [503, 'MangaBaka answered 503; try again later.'],
+]);
+
+test('an account without a username is named by its nickname', function () {
+    $profile = mangaBakaProfile(['library.read']);
+    $profile['data']['preferred_username'] = null;
+    Http::fake(['api.mangabaka.org/v1/my/profile' => Http::response($profile)]);
     $user = User::factory()->create();
-    $query = mangaBakaTrip($user);
 
-    $this->get(route('settings.connections.callback', [MangaBakaService::CODE, 'error' => 'access_denied', 'state' => $query['state']]))
-        ->assertSessionHasErrors([RedirectAttempts::errorKey(MangaBakaService::CODE) => 'The connection was not approved on MangaBaka.']);
-
-    expect($user->serviceConnections()->exists())->toBeFalse();
+    $this->actingAs($user)
+        ->postJson(route('settings.connections.connect', MangaBakaService::CODE), ['values' => ['token' => 'mb-token-of-alex']])
+        ->assertOk()
+        ->assertJsonPath('connection.account', 'Alex');
 });
 
 test('the library comes over: reads, reading, on hold, dropped, wanted, ratings and lists', function () {
@@ -162,7 +166,7 @@ test('the library comes over: reads, reading, on hold, dropped, wanted, ratings 
     Http::assertSent(fn (Request $request) => str_contains($request->url(), '/v2/my/library')
         && $request['limit'] === (string) MangaBakaClient::PAGE_SIZE
         && $request['sort_by'] === 'created_at_asc'
-        && $request->header('Authorization') === ['Bearer access-of-alex-one']);
+        && $request->header('x-api-key') === ['mb-token-of-alex']);
 });
 
 test('reading the same library again adds nothing', function () {
@@ -176,57 +180,18 @@ test('reading the same library again adds nothing', function () {
     expect($again->summary)->toContain('plays: 0', 'ratings: 0', 'statuses: 0', 'list items: 0');
 });
 
-test('a refresh is signed with the app\'s secret, and the rotated refresh token kept', function () {
-    $connection = deviceConnection(User::factory()->create(), MangaBakaService::CODE, ['expires_at' => now()->addSeconds(TokenGrantClient::REFRESH_MARGIN_SECONDS - 3600)->getTimestamp()]);
-    Http::fake([
-        'mangabaka.org/auth/oauth2/token' => Http::response(['access_token' => 'access-of-alex-two', 'expires_in' => 604800, 'refresh_token' => 'refresh-of-alex-two']),
-        'api.mangabaka.org/*' => Http::response(['status' => 200, 'pagination' => ['next' => null], 'data' => []]),
-    ]);
-
-    runConnectionImport($connection, MangaBakaSource::CODE);
-
-    expect($connection->refresh()->credential('refresh_token'))->toBe('refresh-of-alex-two');
-    Http::assertSent(fn (Request $request) => str_contains($request->url(), '/oauth2/token')
-        && $request['grant_type'] === 'refresh_token'
-        && $request['refresh_token'] === 'refresh-of-alex-one'
-        && $request['client_secret'] === 'secret-of-the-app');
-});
-
-test('disconnecting revokes the grant at MangaBaka', function () {
-    Http::fake(['mangabaka.org/auth/oauth2/revoke' => Http::response([])]);
-    $user = User::factory()->create();
-    $connection = mangaBakaConnection($user);
-
-    $this->actingAs($user)->delete(route('settings.connections.destroy', $connection))->assertRedirect();
-
-    Http::assertSent(fn (Request $request) => str_contains($request->url(), '/oauth2/revoke')
-        && $request['token'] === 'refresh-of-alex-one'
-        && $request['client_id'] === 'mangabaka-client');
-});
-
-test('an app MangaBaka does not know is said so when the code comes back', function () {
-    $user = User::factory()->create();
-    $query = mangaBakaTrip($user);
-    Http::fake(['mangabaka.org/auth/oauth2/token' => Http::response(['error' => 'invalid_client', 'error_description' => 'Client authentication failed.'], 401)]);
-
-    $this->get(route('settings.connections.callback', [MangaBakaService::CODE, 'code' => 'code-of-alex', 'state' => $query['state']]))
-        ->assertSessionHasErrors([RedirectAttempts::errorKey(MangaBakaService::CODE) => 'MangaBaka did not accept this instance. Its client id and secret must belong to a Web app.']);
-});
-
-test('a library read MangaBaka refuses ends the run once; a grant it no longer honours expires the connection', function (int $status, ConnectionStatus $after) {
+test('a library read MangaBaka refuses ends the run once; a token it no longer honours expires the connection', function (int $status, ConnectionStatus $after) {
     $connection = mangaBakaConnection(User::factory()->create());
-    Http::fake([
-        'mangabaka.org/auth/oauth2/token' => Http::response(['error' => 'invalid_grant'], 400),
-        'api.mangabaka.org/*' => Http::response(['status' => $status, 'message' => 'No.'], $status),
-    ]);
+    Http::fake(['api.mangabaka.org/*' => Http::response(['status' => $status, 'message' => 'No.'], $status)]);
 
     $taskRun = runConnectionImport($connection, MangaBakaSource::CODE);
 
     expect($taskRun->status)->toBe(TaskRunStatus::Failure)
-        ->and($connection->refresh()->status)->toBe($after);
+        ->and($connection->refresh()->status)->toBe($after)
+        ->and(requestsTo('/v2/my/library'))->toBe(1);
 })->with([
     'a token without the library scope' => [403, ConnectionStatus::Active],
-    'a grant gone' => [401, ConnectionStatus::Expired],
+    'a token deleted' => [401, ConnectionStatus::Expired],
 ]);
 
 test('a 429 leaves a fresh run for as long as MangaBaka asks', function () {

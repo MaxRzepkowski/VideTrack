@@ -2,29 +2,22 @@
 
 namespace App\Integrations\MangaBaka;
 
-use App\Integrations\Connections\ConnectionRejected;
-use App\Integrations\Connections\Contracts\AuthorizesByRedirect;
-use App\Integrations\Connections\Contracts\RevokesAccess;
+use App\Integrations\Connections\Contracts\AuthorizesByForm;
 use App\Integrations\Connections\Data\ConnectionGrant;
-use App\Integrations\Connections\Data\RedirectAuthorization;
-use App\Models\ServiceConnection;
-use Illuminate\Support\Str;
+use App\Models\User;
+use App\Support\Forms\CredentialField;
+use App\Support\Forms\CredentialFieldType;
 
 /**
- * Connecting a MangaBaka account through OAuth: the user approves the
- * operator's app on mangabaka.org, which sends them back with a code; the
- * code and the PKCE verifier kept for the attempt make the grant.
- * MangaBaka asks apps acting for other people to use this, never a pasted
- * personal token.
+ * Connecting a MangaBaka account with a personal access token its owner
+ * makes on mangabaka.org and pastes here: nothing for the operator to
+ * register, and the token is the account, so there is nobody to pick.
  */
-class MangaBakaService implements AuthorizesByRedirect, RevokesAccess
+class MangaBakaService implements AuthorizesByForm
 {
     public const CODE = 'mangabaka';
 
     public const NAME = 'MangaBaka';
-
-    /** RFC 7636: a verifier of 43 to 128 unreserved characters. */
-    private const VERIFIER_LENGTH = 64;
 
     public function __construct(private readonly MangaBakaClient $client) {}
 
@@ -38,33 +31,24 @@ class MangaBakaService implements AuthorizesByRedirect, RevokesAccess
         return self::NAME;
     }
 
-    public function beginRedirect(string $callbackUrl, string $state): RedirectAuthorization
+    public function connectionFields(): array
     {
-        $verifier = Str::random(self::VERIFIER_LENGTH);
-        $challenge = rtrim(strtr(base64_encode(hash('sha256', $verifier, true)), '+/', '-_'), '=');
-
-        return new RedirectAuthorization($this->client->authorizationUrl($callbackUrl, $state, $challenge), ['verifier' => $verifier]);
+        return [
+            new CredentialField('token', __('import.mangabaka_token'), CredentialFieldType::Password, __('import.make_a_mangabaka_token_under')),
+        ];
     }
 
-    /**
-     * MangaBaka sends an `error` instead of a code when the user said no.
-     */
-    public function completeRedirect(array $answer, array $kept, string $callbackUrl): ConnectionGrant
+    public function verify(User $owner, array $values): array
     {
-        $verifier = $kept['verifier'] ?? throw new ConnectionRejected('import.the_connection_attempt_expired');
-        $code = $answer['code'] ?? null;
+        $this->client->accept(trim($values['token']));
 
-        if (isset($answer['error']) || $code === null) {
-            throw new ConnectionRejected('import.mangabaka_connection_was_not_approved');
-        }
-
-        $tokens = $this->client->exchange($code, $verifier, $callbackUrl);
-
-        return new ConnectionGrant($tokens, $this->client->username($tokens['access_token']));
+        return [];
     }
 
-    public function revoke(ServiceConnection $connection): void
+    public function connect(User $owner, array $values, ?string $choice): ConnectionGrant
     {
-        $this->client->revoke($connection);
+        $token = trim($values['token']);
+
+        return new ConnectionGrant(credentials: ['token' => $token], accountLabel: $this->client->accept($token));
     }
 }

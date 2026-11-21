@@ -2,7 +2,7 @@
 
 namespace App\Integrations\MangaBaka;
 
-use App\Integrations\Connections\GrantUnavailable;
+use App\Integrations\Connections\ConnectionExpired;
 use App\Integrations\Import\ConnectionSource;
 use App\Integrations\Import\Data\ImportInput;
 use App\Integrations\Import\Data\ImportSelection;
@@ -12,7 +12,7 @@ use App\Support\ServiceBusy;
 use Generator;
 
 /**
- * A MangaBaka library read through the user's connection, each series as
+ * A MangaBaka library read with the user's token, each series as
  * MangaBakaRows reads it, with the lists it is on.
  *
  * MangaBaka can list only what changed since a moment, but an entry saved
@@ -62,7 +62,7 @@ class MangaBakaSource extends ConnectionSource
     }
 
     /**
-     * @throws MangaBakaUnavailable|MangaBakaRejected|ServiceBusy|GrantUnavailable
+     * @throws MangaBakaUnavailable|MangaBakaRejected|ServiceBusy|ConnectionExpired
      */
     public function rows(ImportInput $input, ImportSelection $selection): Generator
     {

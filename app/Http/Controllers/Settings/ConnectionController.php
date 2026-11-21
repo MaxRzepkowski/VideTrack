@@ -90,14 +90,14 @@ class ConnectionController extends Controller
 
     /**
      * Checks what the user typed with one request to the service and lists
-     * the accounts to pick from. A rejection is shown under the form and
-     * never retried.
+     * the accounts to pick from. A rejection, or a service out of reach, is
+     * shown under the form and never retried.
      */
     public function verify(#[CurrentUser] User $viewer, ConnectionFormRequest $request): JsonResponse
     {
         try {
             $choices = $request->connectable()->verify($viewer, $request->values());
-        } catch (ConnectionRejected|UnusableAddress $rejected) {
+        } catch (ConnectionRejected|ServiceUnavailable|UnusableAddress $rejected) {
             throw $this->refused($rejected);
         }
 
@@ -110,7 +110,7 @@ class ConnectionController extends Controller
     {
         try {
             $grant = $request->connectable()->connect($viewer, $request->values(), $request->choice());
-        } catch (ConnectionRejected|UnusableAddress $rejected) {
+        } catch (ConnectionRejected|ServiceUnavailable|UnusableAddress $rejected) {
             throw $this->refused($rejected);
         }
 

@@ -1,0 +1,18 @@
+{
+  "status": 200,
+  "data": {
+    "id": "7f3c2a10-0000-4000-8000-000000000001",
+    "nickname": "Alex",
+    "preferred_username": "alex",
+    "picture": null,
+    "updated_at": "2026-11-01T10:00:00.000Z",
+    "role": "user",
+    "auth_type": "pat",
+    "scopes": [
+      "library.read",
+      "stack.read"
+    ],
+    "client_id": null,
+    "rating_steps": 1
+  }
+}

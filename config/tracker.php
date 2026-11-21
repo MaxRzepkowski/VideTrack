@@ -327,22 +327,16 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | MangaBaka (import through a connected account)
+    | MangaBaka (import with the user's own token)
     |--------------------------------------------------------------------------
     |
-    | The instance owner registers one "Web" app at mangabaka.org (its
-    | developer settings) with the redirect URI
-    | APP_URL/settings/connections/mangabaka/callback and the scopes openid,
-    | profile, library.read and offline_access, and puts its client id and
-    | secret here. Without them, or without manga from MyAnimeList, the
-    | MangaBaka import is not offered.
+    | Each user makes a personal access token on mangabaka.org and pastes it
+    | on the import page: nothing to set up here. Offered with manga from
+    | MyAnimeList, whose ids MangaBaka keeps.
     |
     */
 
     'mangabaka' => [
-        'client_id' => env('MANGABAKA_CLIENT_ID'),
-        'client_secret' => env('MANGABAKA_CLIENT_SECRET'),
-        'auth_url' => env('MANGABAKA_AUTH_URL', 'https://mangabaka.org/auth/oauth2'),
         'api_url' => env('MANGABAKA_API_URL', 'https://api.mangabaka.org'),
     ],
 

@@ -4,10 +4,6 @@ namespace App\Integrations\MangaBaka;
 
 use App\Integrations\Connections\ConnectionExpired;
 use App\Integrations\Connections\ConnectionRejected;
-use App\Integrations\Connections\Data\TokenGrant;
-use App\Integrations\Connections\GrantUnavailable;
-use App\Integrations\Connections\OAuthError;
-use App\Integrations\Connections\TokenGrantClient;
 use App\Models\ServiceConnection;
 use App\Support\ConnectionFailure;
 use App\Support\HttpRetry;
@@ -20,16 +16,11 @@ use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
 
 /**
- * A MangaBaka library read with the token its owner granted the instance
- * (mangabaka.org/developers, OAuth guide and API schema, read 2026-11-21):
+ * A MangaBaka library read with its owner's personal access token
+ * (mangabaka.org/api.json, read 2026-11-21): an `mb-…` token in the
+ * `x-api-key` header, made under Settings → API and apps on mangabaka.org.
  *
- * - the grant comes from the OAuth authorization code flow of a web app the
- *   operator registered, with PKCE (S256) and the app's secret, asking to
- *   read the profile and the library; `openid` is required, or the API
- *   refuses the token;
- * - access tokens live a week; refresh tokens rotate on every use and one
- *   spent twice revokes every token of the app for that user, which
- *   TokenGrantClient's refresh is built for;
+ * - `/v1/my/profile` names the account and the scopes the token carries;
  * - `/v2/my/library` pages by `page` up to a hundred entries, until
  *   `pagination.next` is null; `/my/*` allows 180 requests a minute, and a
  *   429 is waited out by the run. Only a dropped connection or a 5xx is
@@ -39,7 +30,9 @@ class MangaBakaClient
 {
     public const PAGE_SIZE = 100;
 
-    private const SCOPE = 'openid profile library.read offline_access';
+    private const TOKEN_PREFIX = 'mb-';
+
+    private const LIBRARY_SCOPE = 'library.read';
 
     private const TIMEOUT_SECONDS = 30;
 
@@ -50,76 +43,38 @@ class MangaBakaClient
     /** A 429 without a Retry-After waits out a minute's allowance. */
     private const DEFAULT_WAIT_SECONDS = 60;
 
-    public function __construct(private readonly TokenGrantClient $tokens) {}
-
-    /** Where the user approves the app, carrying the attempt's state and the PKCE challenge. */
-    public function authorizationUrl(string $callbackUrl, string $state, string $challenge): string
-    {
-        return $this->authUrl().'/authorize?'.http_build_query([
-            'response_type' => 'code',
-            'client_id' => config()->string('tracker.mangabaka.client_id'),
-            'redirect_uri' => $callbackUrl,
-            'scope' => self::SCOPE,
-            'state' => $state,
-            'code_challenge' => $challenge,
-            'code_challenge_method' => 'S256',
-        ]);
-    }
-
     /**
-     * The tokens an approved code stands for.
+     * Whether MangaBaka takes a token for reading the library, asked with one
+     * request each time the form is checked; a token that cannot read the
+     * library is turned down here, not on the first run.
      *
-     * @return array{access_token: string, refresh_token: string, expires_at: int}
+     * @return string|null the account's name, when MangaBaka gives one
      *
-     * @throws ConnectionRejected|GrantUnavailable
+     * @throws ConnectionRejected|MangaBakaUnavailable
      */
-    public function exchange(string $code, string $verifier, string $callbackUrl): array
+    public function accept(string $token): ?string
     {
-        $response = $this->tokens->post($this->grant(), '/token', [
-            'grant_type' => 'authorization_code',
-            'code' => $code,
-            'redirect_uri' => $callbackUrl,
-            'code_verifier' => $verifier,
-        ]);
-
-        if (HttpRetry::isOutage($response)) {
-            throw new GrantUnavailable('import.service_answered_try_later', ['service' => MangaBakaService::NAME, 'status' => $response->status()]);
+        if (! str_starts_with($token, self::TOKEN_PREFIX)) {
+            throw new ConnectionRejected('import.a_mangabaka_token_starts_with');
         }
 
-        if (Payload::enum(Payload::map($response->json()), 'error', OAuthError::class) === OAuthError::InvalidClient) {
-            throw new ConnectionRejected('import.mangabaka_did_not_accept_this_instance');
-        }
-
-        if (! $response->successful()) {
-            throw new ConnectionRejected('import.mangabaka_connection_was_not_approved');
-        }
-
-        return $this->tokens->readTokens($this->grant(), $response, null);
-    }
-
-    /**
-     * The account's name, for the card — read with a token straight from the
-     * code exchange. Only a label: a dropped connection leaves it unknown.
-     */
-    public function username(string $accessToken): ?string
-    {
         try {
-            $response = $this->http()->withToken($accessToken)->get($this->authUrl().'/userinfo');
-        } catch (ConnectionException) {
-            return null;
+            $response = $this->http($token)->get('/v1/my/profile');
+        } catch (ConnectionException $e) {
+            throw new MangaBakaUnavailable('import.service_unreachable', ['service' => MangaBakaService::NAME, 'reason' => ConnectionFailure::reason($e)]);
         }
 
-        $user = $response->successful() ? Payload::map($response->json()) : [];
+        $profile = Payload::map(Payload::map($response->json())['data'] ?? null);
 
-        return Payload::string($user, 'preferred_username') ?? Payload::string($user, 'name');
-    }
+        match (true) {
+            HttpRetry::isOutage($response) => throw new MangaBakaUnavailable('import.service_answered_try_later', ['service' => MangaBakaService::NAME, 'status' => $response->status()]),
+            $response->status() === 401 => throw new ConnectionRejected('import.mangabaka_did_not_accept_this_token'),
+            ! $response->successful() => throw new ConnectionRejected('import.service_answered_to', ['service' => MangaBakaService::NAME, 'status' => $response->status(), 'path' => '/v1/my/profile']),
+            ! in_array(self::LIBRARY_SCOPE, Payload::strings($profile['scopes'] ?? null), true) => throw new ConnectionRejected('import.this_mangabaka_token_cannot_read_your_library'),
+            default => null,
+        };
 
-    /**
-     * @throws GrantUnavailable
-     */
-    public function revoke(ServiceConnection $connection): void
-    {
-        $this->tokens->revoke($this->grant(), $connection);
+        return Payload::string($profile, 'preferred_username') ?? Payload::string($profile, 'nickname');
     }
 
     /**
@@ -127,16 +82,22 @@ class MangaBakaClient
      *
      * @return Generator<int, list<array<array-key, mixed>>>
      *
-     * @throws MangaBakaUnavailable|MangaBakaRejected|ServiceBusy|ConnectionExpired|GrantUnavailable
+     * @throws MangaBakaUnavailable|MangaBakaRejected|ServiceBusy|ConnectionExpired
      */
     public function libraryPages(ServiceConnection $connection): Generator
     {
+        $token = $connection->credential('token') ?? throw new ConnectionExpired('import.mangabaka_stopped_accepting_this_connection');
         $page = 1;
 
         do {
             // In the order entries were added, so a save during the run moves no entry between pages.
             $query = ['page' => (string) $page++, 'limit' => (string) self::PAGE_SIZE, 'sort_by' => 'created_at_asc'];
-            $response = $this->tokens->call($this->grant(), $connection, fn (string $token): Response => $this->send($token, '/v2/my/library', $query));
+            $response = $this->send($token, '/v2/my/library', $query);
+
+            // The token was deleted on MangaBaka; only a new one fixes it.
+            if ($response->status() === 401) {
+                throw new ConnectionExpired('import.mangabaka_stopped_accepting_this_connection');
+            }
 
             if ($response->status() === 429) {
                 throw new ServiceBusy('import.service_asked_to_wait', HttpRetry::retryAfter($response, self::DEFAULT_WAIT_SECONDS), ['service' => MangaBakaService::NAME]);
@@ -146,8 +107,7 @@ class MangaBakaClient
                 throw new MangaBakaUnavailable('import.service_answered_try_later', ['service' => MangaBakaService::NAME, 'status' => $response->status()]);
             }
 
-            // Answered and refused (a 403 is a token without the library scope):
-            // the same request would be refused again.
+            // Answered and refused: the same request would be refused again.
             if (! $response->successful()) {
                 throw new MangaBakaRejected('import.service_answered_to', ['service' => MangaBakaService::NAME, 'status' => $response->status(), 'path' => '/v2/my/library']);
             }
@@ -158,29 +118,15 @@ class MangaBakaClient
         } while (Payload::string(Payload::map($body['pagination'] ?? null), 'next') !== null);
     }
 
-    /** Where the app's tokens are refreshed and revoked: a web app, so signed with its secret. */
-    public function grant(): TokenGrant
-    {
-        return new TokenGrant(
-            service: MangaBakaService::NAME,
-            baseUrl: $this->authUrl(),
-            clientId: config()->string('tracker.mangabaka.client_id'),
-            clientSecret: config()->string('tracker.mangabaka.client_secret'),
-            tokenPath: '/token',
-            revokePath: '/revoke',
-            expiredKey: 'import.mangabaka_stopped_accepting_this_connection',
-        );
-    }
-
     /**
      * @param  array<string, string>  $query
+     *
+     * @throws MangaBakaUnavailable
      */
     private function send(string $token, string $path, array $query): Response
     {
         try {
-            return $this->http()
-                ->baseUrl(rtrim(config()->string('tracker.mangabaka.api_url'), '/'))
-                ->withToken($token)
+            return $this->http($token)
                 ->retry(self::RETRIES, fn (int $attempt): int => self::FIRST_RETRY_MS * 2 ** ($attempt - 1), HttpRetry::isTransient(...), throw: false)
                 ->get($path, $query);
         } catch (ConnectionException $e) {
@@ -188,15 +134,12 @@ class MangaBakaClient
         }
     }
 
-    private function http(): PendingRequest
+    private function http(string $token): PendingRequest
     {
-        return Http::timeout(self::TIMEOUT_SECONDS)
+        return Http::baseUrl(rtrim(config()->string('tracker.mangabaka.api_url'), '/'))
+            ->timeout(self::TIMEOUT_SECONDS)
             ->acceptJson()
+            ->withHeader('x-api-key', $token)
             ->withUserAgent(config()->string('tracker.http.user_agent'));
-    }
-
-    private function authUrl(): string
-    {
-        return rtrim(config()->string('tracker.mangabaka.auth_url'), '/');
     }
 }
