@@ -87,7 +87,7 @@ test('a busy service at refresh time leaves the grant alone, and the refresh is 
 
     expect(requestsTo('/token'))->toBe(1)
         ->and($connection->refresh()->credential('refresh_token'))->toBe('refresh-one');
-})->with([503]);
+})->with([429, 503]);
 
 test('a refused refresh means the grant is gone', function () {
     $connection = exampleConnection(expiresInSeconds: DeviceGrantClient::REFRESH_MARGIN_SECONDS - 3600);

@@ -212,7 +212,8 @@ class DeviceGrantClient
                     'refresh_token' => $refreshToken,
                 ]);
 
-                if ($response->clientError()) {
+                // A 429 is busy, not refused: the refresh token was not spent.
+                if ($response->clientError() && $response->status() !== 429) {
                     throw new ConnectionExpired($grant->expiredKey);
                 }
 
