@@ -85,6 +85,17 @@ test('a Letterboxd export brings over the diary, ratings, watchlist, likes and a
         ->and($user->lists()->where('title', 'Removed List')->exists())->toBeFalse();
 });
 
+test('a film in the file is looked for among adult titles too, whatever the owner browses', function () {
+    fakeLetterboxdSearch();
+    $user = User::factory()->create();
+    letterboxdFilms();
+
+    runImportFile($user, 'letterboxd', putZipFixture('letterboxd/export'), new ImportSelection(['history'], []));
+
+    Http::assertSent(fn ($request) => str_contains($request->url(), 'search/multi'));
+    Http::assertNotSent(fn ($request) => str_contains($request->url(), 'search/multi') && ($request->data()['include_adult'] ?? null) !== true);
+});
+
 test('importing the same Letterboxd export twice adds nothing', function () {
     fakeLetterboxdSearch();
     $user = User::factory()->create();

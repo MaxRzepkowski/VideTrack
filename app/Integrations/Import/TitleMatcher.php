@@ -127,8 +127,10 @@ final class TitleMatcher
             return $this->searches[$key];
         }
 
+        // A file or a lookup names a title its owner already knows, adult
+        // titles too; how far the owner's browsing goes has no say in finding it.
         try {
-            return $this->searches[$key] = $this->providers->forType($this->types->get($type))->search($title, $locale, MatureContent::Suggestive);
+            return $this->searches[$key] = $this->providers->forType($this->types->get($type))->search($title, $locale, MatureContent::Adult);
         } catch (ItemNotFoundException) {
             return $this->searches[$key] = [];
         }

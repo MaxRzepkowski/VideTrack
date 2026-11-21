@@ -27,7 +27,7 @@ class SearchController extends Controller
     {
         $scopes = $search->scopes();
         $scope = $scopes->resolve($request->scope());
-        $results = $scope === null ? [] : $search->search($scope, $request->term(), App::getLocale());
+        $results = $scope === null ? [] : $search->search($scope, $request->term(), App::getLocale(), $viewer->preferences->matureContent());
 
         // Entities carry no media state — a person is not watched.
         $resources = SearchScopes::isEntity($scope)

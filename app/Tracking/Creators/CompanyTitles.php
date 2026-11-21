@@ -9,6 +9,7 @@ use App\Catalog\Creators\CreatorKind;
 use App\Catalog\Creators\CreatorPages;
 use App\Catalog\Creators\CreatorRef;
 use App\Catalog\Data\CompanyCredit;
+use App\Catalog\MatureChoices;
 use App\Models\User;
 use App\Notifications\MediaEventType;
 use App\Tracking\Data\CreatorTitle;
@@ -33,7 +34,8 @@ final readonly class CompanyTitles implements CreatorTitleSource
             return null;
         }
 
-        $details = $this->pages->company($creator, $locale);
+        // What a followed company announces is the same for every follower.
+        $details = $this->pages->company($creator, $locale, MatureChoices::shared());
 
         // As with people: the sweep gives the row its full set of columns.
         $this->records->fromDetails($creator->provider, $creator->ref, $creator->kind, $details);

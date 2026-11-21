@@ -7,6 +7,7 @@ use App\Catalog\Creators\CreatorPages;
 use App\Catalog\Creators\CreatorRef;
 use App\Catalog\Creators\Creators;
 use App\Catalog\Creators\PersonRecords;
+use App\Catalog\MatureChoices;
 use App\Models\Company;
 use App\Models\Person;
 
@@ -33,7 +34,7 @@ final readonly class RefreshCreator
         match (true) {
             $row instanceof Person => $this->people->refresh($row, $locale),
             $row instanceof Company => $this->companies->refresh($row, $locale),
-            default => $this->pages->page($creator, $locale),
+            default => $this->pages->page($creator, $locale, MatureChoices::shared()),
         };
     }
 }

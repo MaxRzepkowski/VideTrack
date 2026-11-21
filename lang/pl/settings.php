@@ -288,4 +288,9 @@ return [
     'takes_no_titles_there' => 'Wyszarzone tam, gdzie ten typ nie bierze żadnych tytułów.',
     'own_sources_and_settings_of_each_type' => 'Własne źródła i ustawienia każdego typu.',
     'each_also_needs_the_creators_row' => 'Każde działa, gdy w źródłach (domyślnych albo typu) jest włączony wiersz „Nowe tytuły śledzonych twórców”.',
+    'adult_content' => 'Treści dla dorosłych',
+    'adult_content_description' => 'Co pokazują wyszukiwarka, strona Odkrywaj (poza „:trending”) i strony twórców. Biblioteka, historia i importy zawsze zachowują każdy tytuł.',
+    'mature_level_safe' => 'Ukrywaj tytuły sugestywne i dla dorosłych',
+    'mature_level_suggestive' => 'Ukrywaj tytuły dla dorosłych',
+    'mature_level_adult' => 'Pokazuj wszystko',
 ];

@@ -27,7 +27,7 @@ class DiscoverController extends Controller
         abort_unless(in_array($type, $discovery->sectionCodes(), true), 404);
 
         $calls = new ProviderCalls;
-        $found = $sections->of($type, App::getLocale(), $calls);
+        $found = $sections->of($type, App::getLocale(), $viewer->preferences->matureContent(), $calls);
 
         return (new DiscoverSectionsResource($found, $states->resolve($viewer, $found->cards())))
             ->additional(['meta' => ['type' => $type, 'failed' => $calls->failed()]])

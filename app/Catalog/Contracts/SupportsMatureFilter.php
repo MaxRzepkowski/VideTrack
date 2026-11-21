@@ -5,9 +5,9 @@ namespace App\Catalog\Contracts;
 use App\Catalog\MatureContent;
 
 /**
- * Capability: the provider files adult material, and its search, browsing
- * and studio or network catalogues keep to the MatureContent level they are
- * asked for. A provider without it files none and ignores the level.
+ * Capability: the provider files adult material, and its search, browsing,
+ * filmographies and studio or network catalogues keep to the MatureContent
+ * level they are asked for. A provider without it files none and ignores the level.
  */
 interface SupportsMatureFilter
 {

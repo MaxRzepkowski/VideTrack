@@ -8,6 +8,7 @@ use App\Catalog\Creators\Creators;
 use App\Catalog\Creators\CreatorsFromLibrary;
 use App\Catalog\Data\CreatorPage;
 use App\Catalog\ItemNotFoundException;
+use App\Catalog\MatureChoices;
 use App\Catalog\ProviderException;
 use App\Catalog\ProviderRejected;
 use App\Models\Company;
@@ -28,14 +29,14 @@ final readonly class ResolveCreatorPage
         private CreatorsFromLibrary $library,
     ) {}
 
-    public function execute(CreatorRef $creator, string $locale): ?CreatorPage
+    public function execute(CreatorRef $creator, string $locale, MatureChoices $mature): ?CreatorPage
     {
         if (! $this->pages->serves($creator)) {
             return null;
         }
 
         try {
-            return new CreatorPage($this->pages->page($creator, $locale));
+            return new CreatorPage($this->pages->page($creator, $locale, $mature));
         } catch (ItemNotFoundException|ProviderException|ProviderRejected $e) {
             $row = $this->creators->find($creator);
 

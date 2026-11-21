@@ -270,9 +270,9 @@ class TmdbProvider implements MetadataProvider, SupportsChangeFeed, SupportsChar
         return $this->discovery->discoverFiltered($type, $filters, $locale, $region, $mature, $page);
     }
 
-    public function person(string $ref, string $locale): PersonDetails
+    public function person(string $ref, string $locale, MatureContent $mature): PersonDetails
     {
-        return $this->creators->person($ref, $locale);
+        return $this->creators->person($ref, $locale, $mature);
     }
 
     public function network(string $ref, string $locale, MatureContent $mature): CompanyDetails

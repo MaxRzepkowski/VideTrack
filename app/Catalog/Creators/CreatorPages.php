@@ -8,7 +8,7 @@ use App\Catalog\Contracts\SupportsPersonPage;
 use App\Catalog\Data\CompanyDetails;
 use App\Catalog\Data\CreditPage;
 use App\Catalog\Data\PersonDetails;
-use App\Catalog\MatureContent;
+use App\Catalog\MatureChoices;
 use App\Catalog\ProviderRegistry;
 use App\Support\ExternalServiceException;
 
@@ -38,17 +38,17 @@ final readonly class CreatorPages
     /**
      * @throws UnknownCreator|ExternalServiceException
      */
-    public function page(CreatorRef $creator, string $locale): PersonDetails|CompanyDetails
+    public function page(CreatorRef $creator, string $locale, MatureChoices $mature): PersonDetails|CompanyDetails
     {
         return $creator->kind === CreatorKind::Person
-            ? $this->person($creator, $locale)
-            : $this->company($creator, $locale);
+            ? $this->person($creator, $locale, $mature)
+            : $this->company($creator, $locale, $mature);
     }
 
     /**
      * @throws UnknownCreator|ExternalServiceException
      */
-    public function person(CreatorRef $creator, string $locale): PersonDetails
+    public function person(CreatorRef $creator, string $locale, MatureChoices $mature): PersonDetails
     {
         $provider = $this->providers->find($creator->provider);
 
@@ -56,7 +56,7 @@ final readonly class CreatorPages
             throw UnknownCreator::of($creator);
         }
 
-        return $provider->person($creator->ref, $locale);
+        return $provider->person($creator->ref, $locale, $mature->for($creator->provider));
     }
 
     /**
@@ -64,13 +64,13 @@ final readonly class CreatorPages
      *
      * @throws UnknownCreator|ExternalServiceException
      */
-    public function company(CreatorRef $creator, string $locale): CompanyDetails
+    public function company(CreatorRef $creator, string $locale, MatureChoices $mature): CompanyDetails
     {
         $provider = $this->providers->find($creator->provider);
 
         return match (true) {
-            $creator->kind === CreatorKind::Company && $provider instanceof SupportsCompanyPage => $provider->company($creator->ref, $locale, MatureContent::Suggestive),
-            $creator->kind === CreatorKind::Network && $provider instanceof SupportsNetworkPage => $provider->network($creator->ref, $locale, MatureContent::Suggestive),
+            $creator->kind === CreatorKind::Company && $provider instanceof SupportsCompanyPage => $provider->company($creator->ref, $locale, $mature->for($creator->provider)),
+            $creator->kind === CreatorKind::Network && $provider instanceof SupportsNetworkPage => $provider->network($creator->ref, $locale, $mature->for($creator->provider)),
             default => throw UnknownCreator::of($creator),
         };
     }
@@ -80,13 +80,13 @@ final readonly class CreatorPages
      *
      * @throws UnknownCreator|ExternalServiceException
      */
-    public function credits(CreatorRef $creator, string $locale, int $page): CreditPage
+    public function credits(CreatorRef $creator, string $locale, MatureChoices $mature, int $page): CreditPage
     {
         $provider = $this->providers->find($creator->provider);
 
         return match (true) {
-            $creator->kind === CreatorKind::Company && $provider instanceof SupportsCompanyPage => $provider->companyCredits($creator->ref, $locale, MatureContent::Suggestive, $page),
-            $creator->kind === CreatorKind::Network && $provider instanceof SupportsNetworkPage => $provider->networkCredits($creator->ref, $locale, MatureContent::Suggestive, $page),
+            $creator->kind === CreatorKind::Company && $provider instanceof SupportsCompanyPage => $provider->companyCredits($creator->ref, $locale, $mature->for($creator->provider), $page),
+            $creator->kind === CreatorKind::Network && $provider instanceof SupportsNetworkPage => $provider->networkCredits($creator->ref, $locale, $mature->for($creator->provider), $page),
             default => throw UnknownCreator::of($creator),
         };
     }

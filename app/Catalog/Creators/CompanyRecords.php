@@ -3,6 +3,7 @@
 namespace App\Catalog\Creators;
 
 use App\Catalog\Data\CompanyDetails;
+use App\Catalog\MatureChoices;
 use App\Models\Company;
 
 /**
@@ -18,7 +19,7 @@ final readonly class CompanyRecords
     public function ensure(string $provider, string $ref, CreatorKind $kind, string $locale): Company
     {
         return $this->find($provider, $ref, $kind)
-            ?? $this->fromDetails($provider, $ref, $kind, $this->pages->company(new CreatorRef($kind, $provider, $ref), $locale));
+            ?? $this->fromDetails($provider, $ref, $kind, $this->pages->company(new CreatorRef($kind, $provider, $ref), $locale, MatureChoices::shared()));
     }
 
     /**
@@ -34,7 +35,7 @@ final readonly class CompanyRecords
             $company->provider,
             $company->provider_ref,
             $kind,
-            $this->pages->company(new CreatorRef($kind, $company->provider, $company->provider_ref), $locale),
+            $this->pages->company(new CreatorRef($kind, $company->provider, $company->provider_ref), $locale, MatureChoices::shared()),
         );
     }
 

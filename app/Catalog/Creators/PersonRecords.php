@@ -5,6 +5,7 @@ namespace App\Catalog\Creators;
 use App\Catalog\Data\CreditData;
 use App\Catalog\Data\PersonCredit;
 use App\Catalog\Data\PersonDetails;
+use App\Catalog\MatureChoices;
 use App\Models\Person;
 use App\Support\Payload;
 
@@ -21,7 +22,7 @@ final readonly class PersonRecords
     public function ensure(string $provider, string $ref, string $locale): Person
     {
         return $this->find($provider, $ref)
-            ?? $this->fromDetails($provider, $ref, $this->pages->person(new CreatorRef(CreatorKind::Person, $provider, $ref), $locale));
+            ?? $this->fromDetails($provider, $ref, $this->pages->person(new CreatorRef(CreatorKind::Person, $provider, $ref), $locale, MatureChoices::shared()));
     }
 
     /**
@@ -34,7 +35,7 @@ final readonly class PersonRecords
         return $this->fromDetails(
             $person->provider,
             $person->provider_ref,
-            $this->pages->person(new CreatorRef(CreatorKind::Person, $person->provider, $person->provider_ref), $locale),
+            $this->pages->person(new CreatorRef(CreatorKind::Person, $person->provider, $person->provider_ref), $locale, MatureChoices::shared()),
         );
     }
 

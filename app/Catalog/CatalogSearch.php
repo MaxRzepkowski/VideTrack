@@ -40,13 +40,14 @@ final readonly class CatalogSearch
     }
 
     /**
-     * `$scope` is one of scopes(); an empty query finds nothing.
+     * `$scope` is one of scopes(); an empty query finds nothing. The results
+     * go as far as the viewer lets the scope's provider go.
      *
      * @return list<MediaSummary>
      *
      * @throws ProviderException|ProviderRejected the scope's provider could not answer
      */
-    public function search(string $scope, string $query, string $locale): array
+    public function search(string $scope, string $query, string $locale, MatureChoices $mature): array
     {
         if ($query === '') {
             return [];
@@ -56,8 +57,8 @@ final readonly class CatalogSearch
 
         try {
             return $entity === null
-                ? $this->providers->get($scope)->search($query, $locale, MatureContent::Suggestive)
-                : $this->searchEntities($entity, $query, $locale);
+                ? $this->providers->get($scope)->search($query, $locale, $mature->for($scope))
+                : $this->searchEntities($entity, $query, $locale, $mature);
         } catch (ItemNotFoundException) {
             // Nothing by that name at the provider is an answer, not a failure.
             return [];
@@ -67,12 +68,12 @@ final readonly class CatalogSearch
     /**
      * @return list<MediaSummary>
      */
-    private function searchEntities(EntitySearchScope $scope, string $query, string $locale): array
+    private function searchEntities(EntitySearchScope $scope, string $query, string $locale, MatureChoices $mature): array
     {
         $provider = $this->providers->firstSupporting($scope->contract());
 
         return match (true) {
-            $scope === EntitySearchScope::Person && $provider instanceof SupportsPeopleSearch => $provider->searchPeople($query, $locale, MatureContent::Suggestive),
+            $scope === EntitySearchScope::Person && $provider instanceof SupportsPeopleSearch => $provider->searchPeople($query, $locale, $mature->for($provider->code())),
             $scope === EntitySearchScope::Collection && $provider instanceof SupportsCollectionSearch => $provider->searchCollections($query, $locale),
             $scope === EntitySearchScope::Company && $provider instanceof SupportsCompanySearch => $provider->searchCompanies($query, $locale),
             default => [],

@@ -36,7 +36,7 @@ final readonly class TmdbCreators
         private TmdbPayload $payload,
     ) {}
 
-    public function person(string $ref, string $locale): PersonDetails
+    public function person(string $ref, string $locale, MatureContent $mature): PersonDetails
     {
         $data = $this->client->get("person/{$ref}", [
             'language' => $this->payload->language($locale),
@@ -53,7 +53,7 @@ final readonly class TmdbCreators
                     default => null,
                 };
 
-                if ($media === null) {
+                if ($media === null || ($this->payload->adult($entry) && ! $mature->allowsAdult())) {
                     continue;
                 }
 

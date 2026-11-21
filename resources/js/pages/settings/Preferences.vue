@@ -10,9 +10,9 @@ import { usePreferences } from '@/composables/usePreferences';
 import { useUnsavedChanges } from '@/composables/useUnsavedChanges';
 import AppLayout from '@/layouts/AppLayout.vue';
 import SettingsLayout from '@/layouts/settings/Layout.vue';
-import { mediaTypeMeta, typeCountingIn } from '@/lib/mediaTypes';
+import { kindsLabel, mediaTypeMeta, typeCountingIn } from '@/lib/mediaTypes';
 import { SETTINGS_FIELD_CLASS } from '@/lib/ui';
-import type { ProgressUnit, TimeFormat, UpNextSort, UpNextTarget, WeekStart } from '@/types/generated';
+import type { MatureContent, MatureContentOption, ProgressUnit, TimeFormat, UpNextSort, UpNextTarget, WeekStart } from '@/types/generated';
 import { Head, useForm } from '@inertiajs/vue3';
 import { trans } from 'laravel-vue-i18n';
 import { computed } from 'vue';
@@ -21,6 +21,7 @@ import { toast } from 'vue-sonner';
 const props = defineProps<{
     regions: Record<string, string>;
     defaultRegion: string;
+    matureContent: MatureContentOption[];
 }>();
 
 const preferences = usePreferences().value;
@@ -40,6 +41,8 @@ const form = useForm({
     reading_pace_issues: preferences.reading_pace_issues,
     calendar_episode_image: preferences.calendar_episode_image,
     countdown_episode_image: preferences.countdown_episode_image,
+    // Sent whole: a level for every provider the page lists.
+    mature_content: Object.fromEntries(props.matureContent.map((option): [string, MatureContent] => [option.provider, option.level])),
 });
 
 // Which image an episode shows: on the calendar, and on the countdowns.
@@ -118,6 +121,12 @@ const readingPaces = READING_PACES.flatMap((pace) => {
 
     return type === null ? [] : [{ ...pace, type }];
 });
+
+const MATURE_LEVELS: Record<MatureContent, () => string> = {
+    safe: () => trans('settings.mature_level_safe'),
+    suggestive: () => trans('settings.mature_level_suggestive'),
+    adult: () => trans('settings.mature_level_adult'),
+};
 
 const UP_NEXT_SORTS: Choice<UpNextSort>[] = [
     { value: 'activity', label: () => trans('common.last_activity') },
@@ -234,6 +243,28 @@ const UP_NEXT_SORTS: Choice<UpNextSort>[] = [
                             <select :id="image.field" v-model="form[image.field]" :class="[SETTINGS_FIELD_CLASS, 'block w-full']">
                                 <option value="backdrop">{{ trans('settings.show_backdrop') }}</option>
                                 <option value="still">{{ trans('settings.episode_still') }}</option>
+                            </select>
+                        </SettingsRow>
+                    </SettingsCard>
+
+                    <SettingsCard
+                        v-if="matureContent.length > 0"
+                        :title="trans('settings.adult_content')"
+                        :description="trans('settings.adult_content_description', { trending: trans('discover.trending_now') })"
+                    >
+                        <SettingsRow
+                            v-for="option in matureContent"
+                            :key="option.provider"
+                            :title="kindsLabel(option.types)"
+                            :for="`mature-${option.provider}`"
+                            :error="form.errors[`mature_content.${option.provider}`]"
+                        >
+                            <select
+                                :id="`mature-${option.provider}`"
+                                v-model="form.mature_content[option.provider]"
+                                :class="[SETTINGS_FIELD_CLASS, 'block w-full']"
+                            >
+                                <option v-for="level in option.levels" :key="level" :value="level">{{ MATURE_LEVELS[level]() }}</option>
                             </select>
                         </SettingsRow>
                     </SettingsCard>

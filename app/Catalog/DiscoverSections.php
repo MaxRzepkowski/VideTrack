@@ -10,7 +10,8 @@ use App\Catalog\Data\MediaSummary;
  * The browse sections of one type: what is trending, popular and coming up
  * at the type's provider, each cut to a short row. A section the provider
  * cannot fill is empty; one it fails to fill degrades through the caller's
- * ProviderCalls.
+ * ProviderCalls. Trending is shared by every viewer; the other two go as far
+ * as the viewer lets the provider go.
  */
 final readonly class DiscoverSections
 {
@@ -22,7 +23,7 @@ final readonly class DiscoverSections
         private ProviderRegistry $providers,
     ) {}
 
-    public function of(string $type, string $locale, ProviderCalls $calls): BrowseSections
+    public function of(string $type, string $locale, MatureChoices $mature, ProviderCalls $calls): BrowseSections
     {
         $provider = $this->providers->forType($this->types->get($type));
         $trending = $popular = $upcoming = [];
@@ -39,8 +40,9 @@ final readonly class DiscoverSections
         }
 
         if (Discovery::supports($provider, $type)) {
-            $popular = array_slice($calls->attempt(fn (): array => $provider->popular($type, $locale, MatureContent::Suggestive), []), 0, self::SIZE);
-            $upcoming = array_slice($calls->attempt(fn (): array => $provider->upcoming($type, $locale, MatureContent::Suggestive), []), 0, self::SIZE);
+            $level = $mature->for($provider->code());
+            $popular = array_slice($calls->attempt(fn (): array => $provider->popular($type, $locale, $level), []), 0, self::SIZE);
+            $upcoming = array_slice($calls->attempt(fn (): array => $provider->upcoming($type, $locale, $level), []), 0, self::SIZE);
         }
 
         return new BrowseSections($trending, $popular, $upcoming);

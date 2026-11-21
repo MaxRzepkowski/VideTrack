@@ -102,6 +102,17 @@ final readonly class TmdbPayload
     }
 
     /**
+     * Whether TMDB files the title as adult material; a flag it did not send
+     * is not taken for it.
+     *
+     * @param  array<array-key, mixed>  $data
+     */
+    public function adult(array $data): bool
+    {
+        return Payload::bool($data, 'adult') === true;
+    }
+
+    /**
      * The id of a title or a person as a ref. Every entry TMDB serves has one,
      * so an answer without it is not one we can read.
      *

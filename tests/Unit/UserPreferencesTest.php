@@ -4,6 +4,8 @@ use App\Accounts\Preferences\CompanyFollowScope;
 use App\Accounts\Preferences\NotificationEvent;
 use App\Accounts\Preferences\PersonFollowScope;
 use App\Accounts\Preferences\UserPreferences;
+use App\Catalog\MatureChoices;
+use App\Catalog\MatureContent;
 use App\Catalog\ProgressUnit;
 use App\Catalog\RelatedReleaseKind;
 use App\Enums\ReleaseDateMode;
@@ -144,3 +146,17 @@ test('own sources that no longer mean anything read as no say at all', function 
     'the countdowns alone' => [['book' => ['countdowns' => ['backlog']]], '{}'],
     'nothing at all on every surface' => [['book' => ['calendar' => [], 'countdowns' => [], 'notifications' => []]], '{"book":{"calendar":[],"countdowns":[],"notifications":[]}}'],
 ]);
+
+test('the adult content levels read what still means something, and no choice as Suggestive', function () {
+    $preferences = UserPreferences::fromStored(['mature_content' => ['films' => 'adult', 'comics' => 'nsfw', 'books' => 7, 12 => 'safe']]);
+
+    expect($preferences->matureContent()->for('films'))->toBe(MatureContent::Adult)
+        ->and($preferences->matureContent()->for('comics'))->toBe(MatureChoices::shared()->for('comics'))
+        ->and($preferences->matureContent()->for('books'))->toBe(MatureChoices::shared()->for('books'))
+        ->and($preferences->matureContent()->for('games'))->toBe(MatureChoices::shared()->for('games'))
+        ->and($preferences->resolved()['mature_content'])->toBe(['films' => 'adult']);
+});
+
+test('a stored adult content setting that is not a map reads as no choice', function () {
+    expect(json_encode(UserPreferences::fromStored(['mature_content' => 'adult'])->resolved()['mature_content']))->toBe('{}');
+});

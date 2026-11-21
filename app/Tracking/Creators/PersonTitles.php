@@ -8,6 +8,7 @@ use App\Catalog\Creators\CreatorRef;
 use App\Catalog\Creators\PersonRecords;
 use App\Catalog\Data\PersonCredit;
 use App\Catalog\Department;
+use App\Catalog\MatureChoices;
 use App\Models\User;
 use App\Notifications\MediaEventType;
 use App\Tracking\Data\CreatorTitle;
@@ -58,7 +59,8 @@ final readonly class PersonTitles implements CreatorTitleSource
             return null;
         }
 
-        $details = $this->pages->person($creator, $locale);
+        // What a followed person announces is the same for every follower.
+        $details = $this->pages->person($creator, $locale, MatureChoices::shared());
 
         // The daily sweep is where a followed person's row gets its full set
         // of columns, not just the name it was created with; the person page

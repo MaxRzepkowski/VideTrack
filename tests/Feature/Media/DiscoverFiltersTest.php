@@ -132,6 +132,15 @@ test('a filtered url renders the grid, its count and the browse sections gone', 
             ->where('failed', false));
 });
 
+test('a filtered grid keeps to the level the viewer chose for the provider', function () {
+    fakeDiscoverEndpoints();
+    $viewer = User::factory()->create(['preferences' => ['mature_content' => ['tmdb' => 'adult']]]);
+
+    $this->actingAs($viewer)->get(discoverGenreUrl())->assertOk();
+
+    Http::assertSent(fn ($request) => str_contains($request->url(), 'discover/tv') && ($request->data()['include_adult'] ?? null) === true);
+});
+
 test('an aged link is shrugged off rather than turned into a 404', function () {
     fakeDiscoverEndpoints();
 

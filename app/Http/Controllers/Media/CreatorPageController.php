@@ -27,7 +27,7 @@ class CreatorPageController extends Controller
         string $kind,
     ): Response {
         $creator = new CreatorRef(CreatorKind::from($kind), $provider, $ref);
-        $page = $resolve->execute($creator, App::getLocale()) ?? abort(404);
+        $page = $resolve->execute($creator, App::getLocale(), $viewer->preferences->matureContent()) ?? abort(404);
 
         return Inertia::render('media/CreatorPage', [
             'provider' => $provider,

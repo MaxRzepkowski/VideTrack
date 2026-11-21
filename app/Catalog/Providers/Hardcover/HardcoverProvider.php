@@ -152,7 +152,7 @@ class HardcoverProvider implements MetadataProvider, SupportsCollections, Suppor
         return $this->series->collection($ref);
     }
 
-    public function person(string $ref, string $locale): PersonDetails
+    public function person(string $ref, string $locale, MatureContent $mature): PersonDetails
     {
         return $this->authors->person($ref, $locale);
     }
