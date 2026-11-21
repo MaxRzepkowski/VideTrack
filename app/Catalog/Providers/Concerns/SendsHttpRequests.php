@@ -72,20 +72,12 @@ trait SendsHttpRequests
         $message = "{$what} failed with status {$response->status()}.";
 
         if ($response->status() === 429) {
-            return new ProviderBusy($message, $this->retryAfter($response));
+            return new ProviderBusy($message, HttpRetry::retryAfter($response, ProviderBusy::DEFAULT_RETRY_AFTER_SECONDS));
         }
 
         return HttpRetry::isOutage($response) || ! $response->clientError()
             ? new ProviderException($message)
             : new ProviderRejected($message);
-    }
-
-    /** Seconds a 429 asks to be waited out; a date or no header at all gets the default. */
-    private function retryAfter(Response $response): int
-    {
-        $header = $response->header('Retry-After');
-
-        return ctype_digit($header) && (int) $header > 0 ? (int) $header : ProviderBusy::DEFAULT_RETRY_AFTER_SECONDS;
     }
 
     /**

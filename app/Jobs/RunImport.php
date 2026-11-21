@@ -9,6 +9,7 @@ use App\Integrations\Import\Data\ImportSelection;
 use App\Integrations\Import\ImportInputKind;
 use App\Integrations\Import\ImportRunner;
 use App\Integrations\Import\ImportSourceRegistry;
+use App\Jobs\Concerns\HandsOverWork;
 use App\Jobs\Concerns\RunsAsTask;
 use App\Library\MutationContext;
 use App\Library\MutationSource;
@@ -17,6 +18,7 @@ use App\Models\TaskRun;
 use App\Models\User;
 use App\Support\ExternalServiceException;
 use App\Support\NotFoundAtService;
+use App\Support\ServiceBusy;
 use App\Support\ServiceRejected;
 use App\Tasks\ProgressReporter;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -31,7 +33,7 @@ use Throwable;
  * task_runs under import-{code}), the source the run is stamped with, and
  * the uploaded file until the run is over.
  */
-class RunImport implements ShouldQueue
+class RunImport implements HandsOverWork, ShouldQueue
 {
     use Dispatchable, Queueable, RunsAsTask;
 
@@ -50,6 +52,21 @@ class RunImport implements ShouldQueue
      * is idempotent.
      */
     public int $maxExceptions = 2;
+
+    /**
+     * The longest wait a busy service may ask for and still have the run
+     * come back on its own, and how many such waits one run takes; past
+     * either (a daily limit) the run ends and says so.
+     */
+    public const LONGEST_BUSY_WAIT_SECONDS = 900;
+
+    public const MOST_BUSY_WAITS = 6;
+
+    /** How many times this run has already waited for a busy service. */
+    private int $busyWaits = 0;
+
+    /** The copy that carries the run on after a busy service's wait, once this job lets go of the run. */
+    private ?self $following = null;
 
     public function __construct(
         private readonly TaskRun $taskRun,
@@ -88,14 +105,38 @@ class RunImport implements ShouldQueue
             }
 
             $this->discardInput();
+        } catch (ServiceBusy $e) {
+            // Asked to wait: a fresh copy of the run comes back once the
+            // service's window passes and re-reads what it had read (every
+            // insert is idempotent). Not a release: waiting is not failing,
+            // and a release would spend the worker's tries.
+            if ($e->retryAfterSeconds <= self::LONGEST_BUSY_WAIT_SECONDS && $this->busyWaits < self::MOST_BUSY_WAITS) {
+                $later = $this->postponed();
+                $later->busyWaits++;
+                $this->following = $later->delay($e->retryAfterSeconds);
+
+                return;
+            }
+
+            $this->endWith($e->wording($this->locale()));
         } catch (ServiceRejected|NotFoundAtService $e) {
             // Answered as well: asking again would get the same answer, so
             // the run ends here instead of being retried.
-            $reason = $e->wording($this->locale());
-            $this->taskRun->markFailure($reason);
-            $this->connection()?->update(['last_error' => $reason]);
-            $this->discardInput();
+            $this->endWith($e->wording($this->locale()));
         }
+    }
+
+    public function handOver(): ?object
+    {
+        return $this->following;
+    }
+
+    /** The run ends with $reason, shown on the run and on its connection. */
+    private function endWith(string $reason): void
+    {
+        $this->taskRun->markFailure($reason);
+        $this->connection()?->update(['last_error' => $reason]);
+        $this->discardInput();
     }
 
     private function import(ImportSourceRegistry $sources, ImportRunner $runner): void
@@ -116,9 +157,7 @@ class RunImport implements ShouldQueue
         $outcome = $runner->run($user, $sources->get($this->source), $this->input, $this->selection, new ProgressReporter($this->taskRun));
 
         if (! $outcome->finished) {
-            $this->taskRun->markFailure($outcome->summary);
-            $this->connection()?->update(['last_error' => $outcome->summary]);
-            $this->discardInput();
+            $this->endWith($outcome->summary);
 
             return;
         }

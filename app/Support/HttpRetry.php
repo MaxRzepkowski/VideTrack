@@ -48,4 +48,15 @@ final class HttpRetry
         return self::isTransient($exception)
             || ($exception instanceof RequestException && $exception->response->status() === 429);
     }
+
+    /**
+     * Seconds a 429 asks to be waited out (its Retry-After); a date or no
+     * header at all gets $default.
+     */
+    public static function retryAfter(Response $response, int $default): int
+    {
+        $header = $response->header('Retry-After');
+
+        return ctype_digit($header) && (int) $header > 0 ? (int) $header : $default;
+    }
 }
