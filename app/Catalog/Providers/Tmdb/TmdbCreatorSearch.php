@@ -4,6 +4,7 @@ namespace App\Catalog\Providers\Tmdb;
 
 use App\Catalog\Creators\CreatorKind;
 use App\Catalog\Data\MediaSummary;
+use App\Catalog\MatureContent;
 use App\Support\Payload;
 
 /**
@@ -19,12 +20,12 @@ final readonly class TmdbCreatorSearch
     /**
      * @return list<MediaSummary>
      */
-    public function searchPeople(string $query, string $locale): array
+    public function searchPeople(string $query, string $locale, MatureContent $mature): array
     {
         $data = $this->client->get('search/person', [
             'query' => $query,
             'language' => $this->payload->language($locale),
-            'include_adult' => false,
+            'include_adult' => $mature->allowsAdult(),
         ], $this->payload->ttl('search'), 'results');
 
         $results = [];

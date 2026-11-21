@@ -8,6 +8,7 @@ use App\Catalog\Data\GenreOption;
 use App\Catalog\Department;
 use App\Catalog\ExternalIdSource;
 use App\Catalog\ItemNotFoundException;
+use App\Catalog\MatureContent;
 use App\Catalog\MediaTypeRegistry;
 use App\Catalog\ProviderRegistry;
 use App\Catalog\Providers\Hardcover\HardcoverBookKind;
@@ -45,7 +46,7 @@ test('the key goes to Hardcover as a bearer header, a pasted "Bearer " prefix no
     config(['tracker.hardcover.api_key' => $configured]);
     fakeHardcover(['Search' => 'search']);
 
-    hardcoverProvider()->search('hobbit', 'en');
+    hardcoverProvider()->search('hobbit', 'en', MatureContent::Suggestive);
 
     Http::assertSent(fn (Request $request): bool => $request->header('Authorization') === ['Bearer hc_pat_example']);
 })->with([
@@ -57,7 +58,7 @@ test('search maps book summaries including coverless hits', function () {
     enableBooksModule();
     fakeHardcover(['Search' => 'search']);
 
-    $results = hardcoverProvider()->search('hobbit', 'en');
+    $results = hardcoverProvider()->search('hobbit', 'en', MatureContent::Suggestive);
 
     expect($results)->toHaveCount(3)
         ->and($results[0]->type)->toBe('book')
@@ -436,12 +437,12 @@ test('discover listings serve popular, upcoming, genres and genre pages', functi
     $provider = hardcoverProvider();
 
     expect($provider->discoverableTypes())->toBe(['book'])
-        ->and($provider->popular('book', 'en'))->toHaveCount(2)
-        ->and($provider->upcoming('book', 'en'))->toHaveCount(2)
+        ->and($provider->popular('book', 'en', MatureContent::Suggestive))->toHaveCount(2)
+        ->and($provider->upcoming('book', 'en', MatureContent::Suggestive))->toHaveCount(2)
         // Genre refs ARE the display names — the search index filters by name.
         ->and($provider->genres('book', 'en'))->toEqual([new GenreOption('Fantasy', 'Fantasy'), new GenreOption('Fiction', 'Fiction')]);
 
-    $listing = $provider->byGenre('book', 'Fantasy', 'en', 2);
+    $listing = $provider->byGenre('book', 'Fantasy', 'en', MatureContent::Suggestive, 2);
     $listingRefs = array_map(fn ($item) => $item->ref, $listing->items);
 
     expect($listing->page)->toBe(2)

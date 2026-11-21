@@ -8,6 +8,7 @@ use App\Catalog\Data\MediaDetails;
 use App\Catalog\Data\MediaSummary;
 use App\Catalog\ItemNotFoundException;
 use App\Catalog\Matching;
+use App\Catalog\MatureContent;
 use App\Catalog\MediaKind;
 use App\Catalog\MediaTypeRegistry;
 use App\Catalog\ProviderException;
@@ -131,7 +132,7 @@ final readonly class ResolveSourceBooks
     private function search(MetadataProvider $books, string $query, string $locale): array
     {
         try {
-            return $books->search($query, $locale);
+            return $books->search($query, $locale, MatureContent::Suggestive);
         } catch (ItemNotFoundException|ProviderException|ProviderRejected) {
             return [];
         }

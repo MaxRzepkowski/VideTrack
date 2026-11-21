@@ -5,6 +5,7 @@ namespace App\Catalog\Providers\Tmdb;
 use App\Catalog\ChartOrder;
 use App\Catalog\Data\MediaSummary;
 use App\Catalog\Data\Paginated;
+use App\Catalog\MatureContent;
 use App\Support\Locales;
 
 /**
@@ -70,7 +71,7 @@ final readonly class TmdbDiscovery
     /**
      * @return list<MediaSummary>
      */
-    public function upcoming(string $type, string $locale): array
+    public function upcoming(string $type, string $locale, MatureContent $mature): array
     {
         // Movies: TMDB's legacy movie/upcoming endpoint has a loose,
         // region-gated window that leaks already-released films, so a discover
@@ -84,7 +85,7 @@ final readonly class TmdbDiscovery
         if ($type === 'movie') {
             return $this->listing('discover/movie', 'movie', $locale, [
                 'sort_by' => 'popularity.desc',
-                'include_adult' => false,
+                'include_adult' => $mature->allowsAdult(),
                 'include_video' => false,
                 // Theatrical (limited | wide) only — no festival/digital noise.
                 'with_release_type' => '2|3',
@@ -100,13 +101,13 @@ final readonly class TmdbDiscovery
     /**
      * @return Paginated<MediaSummary>
      */
-    public function byGenre(string $type, string $genreRef, string $locale, int $page = 1): Paginated
+    public function byGenre(string $type, string $genreRef, string $locale, MatureContent $mature, int $page): Paginated
     {
         $data = $this->client->get($this->payload->typePath($type, 'discover/movie', 'discover/tv'), [
             'language' => $this->payload->language($locale),
             'with_genres' => $genreRef,
             'sort_by' => 'popularity.desc',
-            'include_adult' => false,
+            'include_adult' => $mature->allowsAdult(),
             'page' => max(1, $page),
         ], $this->payload->ttl('listing'), 'results');
 
@@ -127,6 +128,7 @@ final readonly class TmdbDiscovery
 
         $data = $this->client->get($this->payload->typePath($type, 'discover/movie', 'discover/tv'), [
             'language' => $this->payload->language($locale),
+            // A chart is fetched once for every viewer, so it never goes past Suggestive.
             'include_adult' => false,
             'include_video' => false,
             'page' => min(max(1, $page), TmdbPayload::MAX_PAGES),
@@ -160,7 +162,8 @@ final readonly class TmdbDiscovery
         array $filters,
         string $locale,
         string $region,
-        int $page = 1,
+        MatureContent $mature,
+        int $page,
     ): Paginated {
         $path = $this->payload->typePath($type, 'discover/movie', 'discover/tv');
         // TMDB answers a page past its own 500-page ceiling with an empty
@@ -168,7 +171,7 @@ final readonly class TmdbDiscovery
         // caller learns the real last page from `totalPages`.
         $params = [
             'language' => $this->payload->language($locale),
-            'include_adult' => false,
+            'include_adult' => $mature->allowsAdult(),
             'page' => min(max(1, $page), TmdbPayload::MAX_PAGES),
             ...$this->listParams($filters),
             ...$this->rangeParams($type, $filters),

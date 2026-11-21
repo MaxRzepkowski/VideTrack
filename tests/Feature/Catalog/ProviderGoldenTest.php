@@ -1,5 +1,6 @@
 <?php
 
+use App\Catalog\MatureContent;
 use App\Catalog\ProviderRegistry;
 use Illuminate\Support\Facades\Http;
 
@@ -40,7 +41,7 @@ test('TMDB reads its recorded answers the same way', function (string $name, Clo
 
     expectGolden("tmdb-{$name}", $call(tmdbProvider()));
 })->with([
-    'search' => ['search', fn ($tmdb) => $tmdb->search('matrix', 'en')],
+    'search' => ['search', fn ($tmdb) => $tmdb->search('matrix', 'en', MatureContent::Suggestive)],
     'movie' => ['movie', fn ($tmdb) => $tmdb->details('movie', '603', 'en')],
     'movie-pl' => ['movie-pl', fn ($tmdb) => $tmdb->details('movie', '603', 'pl', 'PL')],
     'show' => ['show', fn ($tmdb) => $tmdb->details('show', '1399', 'en')],
@@ -48,12 +49,12 @@ test('TMDB reads its recorded answers the same way', function (string $name, Clo
     'specials' => ['specials', fn ($tmdb) => $tmdb->details('season', '1399:0', 'en')],
     'episode' => ['episode', fn ($tmdb) => $tmdb->details('episode', '1399:1:1', 'en')],
     'person' => ['person', fn ($tmdb) => $tmdb->person('6384', 'en')],
-    'network' => ['network', fn ($tmdb) => $tmdb->network('49', 'en')],
-    'company' => ['company', fn ($tmdb) => $tmdb->company('41077', 'en')],
+    'network' => ['network', fn ($tmdb) => $tmdb->network('49', 'en', MatureContent::Suggestive)],
+    'company' => ['company', fn ($tmdb) => $tmdb->company('41077', 'en', MatureContent::Suggestive)],
     'trending' => ['trending', fn ($tmdb) => $tmdb->trending('en')],
-    'people' => ['people', fn ($tmdb) => $tmdb->searchPeople('keanu', 'en')],
+    'people' => ['people', fn ($tmdb) => $tmdb->searchPeople('keanu', 'en', MatureContent::Suggestive)],
     'popular-people' => ['popular-people', fn ($tmdb) => $tmdb->popularPeople('en')],
-    'by-genre' => ['by-genre', fn ($tmdb) => $tmdb->byGenre('movie', '28', 'en')],
+    'by-genre' => ['by-genre', fn ($tmdb) => $tmdb->byGenre('movie', '28', 'en', MatureContent::Suggestive)],
     'leaves' => ['leaves', fn ($tmdb) => $tmdb->leaves('show', '1399', 'en')],
     'ratings' => ['ratings', fn ($tmdb) => $tmdb->episodeRatings('1399', 'en')],
 ]);
@@ -98,12 +99,12 @@ test('IGDB reads its recorded answers the same way', function (string $name, Clo
 
     expectGolden("igdb-{$name}", $call(app(ProviderRegistry::class)->get('igdb')));
 })->with([
-    'search' => ['search', fn ($igdb) => $igdb->search('hollow knight', 'en')],
+    'search' => ['search', fn ($igdb) => $igdb->search('hollow knight', 'en', MatureContent::Suggestive)],
     'game' => ['game', fn ($igdb) => $igdb->details('game', '7346', 'en', 'PL')],
-    'company' => ['company', fn ($igdb) => $igdb->company('70', 'en')],
+    'company' => ['company', fn ($igdb) => $igdb->company('70', 'en', MatureContent::Suggestive)],
     'trending' => ['trending', fn ($igdb) => $igdb->trending('en')],
     'genres' => ['genres', fn ($igdb) => $igdb->genres('game', 'en')],
-    'by-genre' => ['by-genre', fn ($igdb) => $igdb->byGenre('game', '31', 'en')],
+    'by-genre' => ['by-genre', fn ($igdb) => $igdb->byGenre('game', '31', 'en', MatureContent::Suggestive)],
 ]);
 
 test('MAL reads its recorded answers the same way', function (string $name, Closure $call) {
@@ -116,7 +117,7 @@ test('MAL reads its recorded answers the same way', function (string $name, Clos
 
     expectGolden("mal-{$name}", $call(app(ProviderRegistry::class)->get('mal')));
 })->with([
-    'search' => ['search', fn ($mal) => $mal->search('berserk', 'en')],
+    'search' => ['search', fn ($mal) => $mal->search('berserk', 'en', MatureContent::Suggestive)],
     'manga' => ['manga', fn ($mal) => $mal->details('manga', '2', 'en')],
     'trending' => ['trending', fn ($mal) => $mal->trending('en')],
 ]);
@@ -130,7 +131,7 @@ test('ComicVine reads its recorded answers the same way', function (string $name
 
     expectGolden("comicvine-{$name}", $call(app(ProviderRegistry::class)->get('comicvine')));
 })->with([
-    'search' => ['search', fn ($comicVine) => $comicVine->search('sandman', 'en')],
+    'search' => ['search', fn ($comicVine) => $comicVine->search('sandman', 'en', MatureContent::Suggestive)],
     'volume' => ['volume', fn ($comicVine) => $comicVine->details('comic', '4207', 'en')],
 ]);
 
@@ -147,7 +148,7 @@ test('Hardcover reads its recorded answers the same way', function (string $name
 
     expectGolden("hardcover-{$name}", $call(app(ProviderRegistry::class)->get('hardcover')));
 })->with([
-    'search' => ['search', fn ($hardcover) => $hardcover->search('hobbit', 'en')],
+    'search' => ['search', fn ($hardcover) => $hardcover->search('hobbit', 'en', MatureContent::Suggestive)],
     'book' => ['book', fn ($hardcover) => $hardcover->details('book', '2459845', 'en')],
     'author' => ['author', fn ($hardcover) => $hardcover->person('132049', 'en')],
     'trending' => ['trending', fn ($hardcover) => $hardcover->trending('en')],

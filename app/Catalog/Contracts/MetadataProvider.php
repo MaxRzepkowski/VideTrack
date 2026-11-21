@@ -4,6 +4,7 @@ namespace App\Catalog\Contracts;
 
 use App\Catalog\Data\MediaDetails;
 use App\Catalog\Data\MediaSummary;
+use App\Catalog\MatureContent;
 
 /**
  * Base contract every metadata provider must implement. The core depends on
@@ -16,11 +17,13 @@ interface MetadataProvider
     public function code(): string;
 
     /**
-     * Free-text search across the provider's searchable types.
+     * Free-text search across the provider's searchable types. `$mature` is
+     * how far the results may go (SupportsMatureFilter); a provider that files
+     * no adult material ignores it.
      *
      * @return list<MediaSummary>
      */
-    public function search(string $query, string $locale): array;
+    public function search(string $query, string $locale, MatureContent $mature): array;
 
     /**
      * Full details of a single position; `$ref` is an opaque reference

@@ -1,6 +1,7 @@
 <?php
 
 use App\Catalog\Data\DiscoverFilter;
+use App\Catalog\MatureContent;
 use App\Catalog\Providers\Tmdb\TmdbProvider;
 use Illuminate\Support\Facades\Http;
 
@@ -213,7 +214,7 @@ test('a dead genre dictionary costs its own filter, not the rest', function () {
 test('several genres are asked for as an OR, not as an intersection', function () {
     fakeTmdbDictionaries();
 
-    app(TmdbProvider::class)->discoverFiltered('movie', ['genres' => ['28', '18']], 'en', 'US');
+    app(TmdbProvider::class)->discoverFiltered('movie', ['genres' => ['28', '18']], 'en', 'US', MatureContent::Suggestive);
 
     $query = tmdbSentQuery('discover/movie');
 
@@ -222,6 +223,14 @@ test('several genres are asked for as an OR, not as an intersection', function (
         ->and($query['page'])->toBe('1')
         ->and($query['sort_by'])->toBe('popularity.desc')
         ->and($query)->not->toHaveKey('vote_count.gte');
+});
+
+test('a viewer who allows adult material gets it asked for', function () {
+    fakeTmdbDictionaries();
+
+    app(TmdbProvider::class)->discoverFiltered('movie', [], 'en', 'US', mature: MatureContent::Adult);
+
+    expect(tmdbSentQuery('discover/movie')['include_adult'])->toBe('1');
 });
 
 test('the new filters map to the exact TMDB parameters', function () {
@@ -236,7 +245,7 @@ test('the new filters map to the exact TMDB parameters', function () {
         'rating' => '7',
         'show_type' => '2',
         'keywords' => ['6091', '9715'],
-    ], 'en', 'PL');
+    ], 'en', 'PL', MatureContent::Suggestive);
 
     expect(tmdbSentQuery('discover/tv'))->toMatchArray([
         'without_genres' => '18|35',
@@ -255,7 +264,7 @@ test('the new filters map to the exact TMDB parameters', function () {
 test('certification is never sent without its country', function () {
     fakeTmdbDictionaries();
 
-    app(TmdbProvider::class)->discoverFiltered('movie', ['certification' => 'R'], 'en', '');
+    app(TmdbProvider::class)->discoverFiltered('movie', ['certification' => 'R'], 'en', '', MatureContent::Suggestive);
 
     expect(tmdbSentQuery('discover/movie'))
         ->not->toHaveKey('certification')
@@ -296,14 +305,14 @@ test('dead configuration dictionaries disable only their own filters', function 
 test('a year span asks each type for its own date field', function () {
     fakeTmdbDictionaries();
 
-    app(TmdbProvider::class)->discoverFiltered('movie', ['year' => ['from' => 1999, 'to' => 2005]], 'en', 'US');
+    app(TmdbProvider::class)->discoverFiltered('movie', ['year' => ['from' => 1999, 'to' => 2005]], 'en', 'US', MatureContent::Suggestive);
 
     expect(tmdbSentQuery('discover/movie'))
         // The film's own debut — a 2027 re-release of a 1999 film must not
         // drag it into a 2027 query.
         ->toMatchArray(['primary_release_date.gte' => '1999-01-01', 'primary_release_date.lte' => '2005-12-31']);
 
-    app(TmdbProvider::class)->discoverFiltered('show', ['year' => ['from' => 1999, 'to' => null]], 'en', 'US');
+    app(TmdbProvider::class)->discoverFiltered('show', ['year' => ['from' => 1999, 'to' => null]], 'en', 'US', MatureContent::Suggestive);
 
     $query = tmdbSentQuery('discover/tv');
 
@@ -321,7 +330,7 @@ test('a value the filter does not offer never reaches TMDB', function () {
         'show_type' => '7',
         'watch_provider' => 'netflix',
         'sort' => 'revenue.desc',
-    ], 'en', 'PL');
+    ], 'en', 'PL', MatureContent::Suggestive);
 
     expect(tmdbSentQuery('discover/tv'))
         ->not->toHaveKeys(['certification', 'vote_average.gte', 'with_status', 'with_type', 'with_watch_providers'])
@@ -331,18 +340,18 @@ test('a value the filter does not offer never reaches TMDB', function () {
 test('show status is asked for only where it exists', function () {
     fakeTmdbDictionaries();
 
-    app(TmdbProvider::class)->discoverFiltered('show', ['status' => '0'], 'en', 'US');
+    app(TmdbProvider::class)->discoverFiltered('show', ['status' => '0'], 'en', 'US', MatureContent::Suggestive);
     expect(tmdbSentQuery('discover/tv')['with_status'])->toBe('0');
 
     // A film has no status filter, so a hand-typed one must not leak through.
-    app(TmdbProvider::class)->discoverFiltered('movie', ['status' => '0'], 'en', 'US');
+    app(TmdbProvider::class)->discoverFiltered('movie', ['status' => '0'], 'en', 'US', MatureContent::Suggestive);
     expect(tmdbSentQuery('discover/movie'))->not->toHaveKey('with_status');
 });
 
 test('a streaming service means "in my subscription"', function () {
     fakeTmdbDictionaries();
 
-    app(TmdbProvider::class)->discoverFiltered('movie', ['watch_provider' => '8'], 'en', 'PL');
+    app(TmdbProvider::class)->discoverFiltered('movie', ['watch_provider' => '8'], 'en', 'PL', MatureContent::Suggestive);
 
     // Without the monetization type, Prime Video answers with its whole
     // rent-and-buy catalogue and the filter means nothing.
@@ -356,12 +365,12 @@ test('a streaming service means "in my subscription"', function () {
 test('sorting by score carries a vote floor, other sorts do not', function () {
     fakeTmdbDictionaries();
 
-    app(TmdbProvider::class)->discoverFiltered('movie', ['sort' => 'vote_average.desc'], 'en', 'US');
+    app(TmdbProvider::class)->discoverFiltered('movie', ['sort' => 'vote_average.desc'], 'en', 'US', MatureContent::Suggestive);
 
     expect(tmdbSentQuery('discover/movie'))
         ->toMatchArray(['sort_by' => 'vote_average.desc', 'vote_count.gte' => '200']);
 
-    app(TmdbProvider::class)->discoverFiltered('movie', ['sort' => 'revenue.desc'], 'en', 'US');
+    app(TmdbProvider::class)->discoverFiltered('movie', ['sort' => 'revenue.desc'], 'en', 'US', MatureContent::Suggestive);
 
     $query = tmdbSentQuery('discover/movie');
 
@@ -373,7 +382,7 @@ test('a sort outside the whitelist falls back to the default', function () {
     fakeTmdbDictionaries();
 
     // Neither a raw TMDB expression nor another type's sort gets through.
-    app(TmdbProvider::class)->discoverFiltered('show', ['sort' => 'revenue.desc'], 'en', 'US');
+    app(TmdbProvider::class)->discoverFiltered('show', ['sort' => 'revenue.desc'], 'en', 'US', MatureContent::Suggestive);
 
     expect(tmdbSentQuery('discover/tv')['sort_by'])->toBe('popularity.desc');
 });
@@ -382,7 +391,7 @@ test('the ascending run of a directional sort is whitelisted too', function () {
     fakeTmdbDictionaries();
 
     // It is offered by no option's `value`, only as one option's twin.
-    app(TmdbProvider::class)->discoverFiltered('show', ['sort' => 'first_air_date.asc'], 'en', 'US');
+    app(TmdbProvider::class)->discoverFiltered('show', ['sort' => 'first_air_date.asc'], 'en', 'US', MatureContent::Suggestive);
 
     expect(tmdbSentQuery('discover/tv')['sort_by'])->toBe('first_air_date.asc');
 });
@@ -395,7 +404,7 @@ test('the page is clamped and the page count capped to TMDB\'s ceiling', functio
         'total_results' => 14860,
     ])]);
 
-    $listing = app(TmdbProvider::class)->discoverFiltered('movie', [], 'en', 'US', 900);
+    $listing = app(TmdbProvider::class)->discoverFiltered('movie', [], 'en', 'US', MatureContent::Suggestive, 900);
 
     expect(tmdbSentQuery('discover/movie')['page'])->toBe('500')
         ->and($listing->page)->toBe(500)
@@ -415,7 +424,7 @@ test('the filtered grid keeps the shared cover policy', function () {
         'total_results' => 2,
     ])]);
 
-    $listing = app(TmdbProvider::class)->discoverFiltered('movie', [], 'en', 'US');
+    $listing = app(TmdbProvider::class)->discoverFiltered('movie', [], 'en', 'US', MatureContent::Suggestive);
 
     // summaries() is shared with collection parts and similar titles, so the
     // posterless entry is dropped here too — deliberately.
@@ -431,8 +440,8 @@ test('an honest empty result is cached, so a dead-end filter is not re-asked', f
         'total_results' => 0,
     ])]);
 
-    app(TmdbProvider::class)->discoverFiltered('movie', ['genres' => ['28', '18']], 'en', 'US');
-    app(TmdbProvider::class)->discoverFiltered('movie', ['genres' => ['28', '18']], 'en', 'US');
+    app(TmdbProvider::class)->discoverFiltered('movie', ['genres' => ['28', '18']], 'en', 'US', MatureContent::Suggestive);
+    app(TmdbProvider::class)->discoverFiltered('movie', ['genres' => ['28', '18']], 'en', 'US', MatureContent::Suggestive);
 
     Http::assertSentCount(1);
 });

@@ -17,6 +17,7 @@ use App\Catalog\Data\MediaSummary;
 use App\Catalog\Data\Paginated;
 use App\Catalog\Data\PersonDetails;
 use App\Catalog\ExternalIdSource;
+use App\Catalog\MatureContent;
 use App\Support\Payload;
 
 /**
@@ -64,7 +65,7 @@ class HardcoverProvider implements MetadataProvider, SupportsCollections, Suppor
         return $this->payload->code();
     }
 
-    public function search(string $query, string $locale): array
+    public function search(string $query, string $locale, MatureContent $mature): array
     {
         $data = $this->client->query(
             'query Search($query: String!) {
@@ -179,7 +180,7 @@ class HardcoverProvider implements MetadataProvider, SupportsCollections, Suppor
         return ['book'];
     }
 
-    public function popular(string $type, string $locale): array
+    public function popular(string $type, string $locale, MatureContent $mature): array
     {
         $this->payload->assertBook($type);
 
@@ -195,7 +196,7 @@ class HardcoverProvider implements MetadataProvider, SupportsCollections, Suppor
         return $this->payload->bookSummaries($data);
     }
 
-    public function upcoming(string $type, string $locale): array
+    public function upcoming(string $type, string $locale, MatureContent $mature): array
     {
         $this->payload->assertBook($type);
 
@@ -249,7 +250,7 @@ class HardcoverProvider implements MetadataProvider, SupportsCollections, Suppor
         return $genres;
     }
 
-    public function byGenre(string $type, string $genreRef, string $locale, int $page = 1): Paginated
+    public function byGenre(string $type, string $genreRef, string $locale, MatureContent $mature, int $page = 1): Paginated
     {
         $this->payload->assertBook($type);
 

@@ -1,5 +1,6 @@
 <?php
 
+use App\Catalog\MatureContent;
 use App\Models\MediaItem;
 use App\Models\Rating;
 use App\Models\User;
@@ -46,19 +47,19 @@ test('a studio filmography streams chunk after chunk until the provider runs out
     ]);
 
     // Five discover pages per endpoint, so the first chunk is pages 1–5 of both.
-    $first = tmdbProvider()->companyCredits('41077', 'en', 1);
+    $first = tmdbProvider()->companyCredits('41077', 'en', MatureContent::Suggestive, 1);
 
     expect($first->credits)->toHaveCount(10)
         ->and($first->hasMore)->toBeTrue();
 
     // The second chunk picks up at page 6 and the catalogue ends at 7.
-    $second = tmdbProvider()->companyCredits('41077', 'en', 2);
+    $second = tmdbProvider()->companyCredits('41077', 'en', MatureContent::Suggestive, 2);
 
     expect($second->credits)->toHaveCount(4)
         ->and($second->hasMore)->toBeFalse();
 
     // The page render carries the first chunk and says more is waiting.
-    $company = tmdbProvider()->company('41077', 'en');
+    $company = tmdbProvider()->company('41077', 'en', MatureContent::Suggestive);
 
     expect($company->credits)->toHaveCount(10)
         ->and($company->hasMoreCredits)->toBeTrue();
@@ -70,7 +71,7 @@ test('a network showography reports the end of the catalogue', function () {
         '*/discover/tv*' => fakeDiscover(3),
     ]);
 
-    $network = tmdbProvider()->network('49', 'en');
+    $network = tmdbProvider()->network('49', 'en', MatureContent::Suggestive);
 
     expect($network->credits)->toHaveCount(3)
         ->and($network->hasMoreCredits)->toBeFalse();

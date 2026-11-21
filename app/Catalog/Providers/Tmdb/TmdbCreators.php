@@ -12,6 +12,7 @@ use App\Catalog\Data\Paginated;
 use App\Catalog\Data\PersonCredit;
 use App\Catalog\Data\PersonDetails;
 use App\Catalog\Department;
+use App\Catalog\MatureContent;
 use App\Support\Payload;
 
 /**
@@ -89,12 +90,12 @@ final readonly class TmdbCreators
      * Reuses CompanyDetails — a network is a followable creator entity like a
      * studio, with a logo and the shows that air on it instead of a filmography.
      */
-    public function network(string $ref, string $locale): CompanyDetails
+    public function network(string $ref, string $locale, MatureContent $mature): CompanyDetails
     {
         $data = $this->client->get("network/{$ref}", [], $this->payload->ttl('details'));
 
         $homepage = Payload::string($data, 'homepage');
-        $first = $this->networkCredits($ref, $locale, 1);
+        $first = $this->networkCredits($ref, $locale, $mature, 1);
 
         return new CompanyDetails(
             ref: Payload::id($data['id'] ?? null) ?? $ref,
@@ -117,7 +118,7 @@ final readonly class TmdbCreators
      * time, so the showography arrives in chunks; the page asks for the next
      * one when the user reaches the end of this one.
      */
-    public function networkCredits(string $ref, string $locale, int $page): CreditPage
+    public function networkCredits(string $ref, string $locale, MatureContent $mature, int $page): CreditPage
     {
         $credits = [];
         $seen = [];
@@ -129,12 +130,12 @@ final readonly class TmdbCreators
             'with_networks' => $ref,
             'sort_by' => 'first_air_date.asc',
             'first_air_date.gte' => now()->format('Y-m-d'),
-        ], 1, 1) : ['rows' => [], 'hasMore' => false];
+        ], $mature, 1, 1) : ['rows' => [], 'hasMore' => false];
 
         $catalogue = $this->discoverRows('tv', $locale, [
             'with_networks' => $ref,
             'sort_by' => 'popularity.desc',
-        ], $page, self::CATALOGUE_PAGES_PER_CHUNK);
+        ], $mature, $page, self::CATALOGUE_PAGES_PER_CHUNK);
 
         foreach ([...$upcoming['rows'], ...$catalogue['rows']] as $show) {
             $id = Payload::id($show['id'] ?? null);
@@ -157,7 +158,7 @@ final readonly class TmdbCreators
      * @param  array<string, bool|int|string>  $params
      * @return array{rows: list<array<array-key, mixed>>, hasMore: bool}
      */
-    private function discoverRows(string $endpoint, string $locale, array $params, int $chunk, int $pagesPerChunk): array
+    private function discoverRows(string $endpoint, string $locale, array $params, MatureContent $mature, int $chunk, int $pagesPerChunk): array
     {
         $rows = [];
         $hasMore = false;
@@ -167,7 +168,7 @@ final readonly class TmdbCreators
             $data = $this->client->get("discover/{$endpoint}", [
                 ...$params,
                 'language' => $this->payload->language($locale),
-                'include_adult' => false,
+                'include_adult' => $mature->allowsAdult(),
                 'page' => $page,
             ], $this->payload->ttl('listing'), 'results');
 
@@ -190,13 +191,13 @@ final readonly class TmdbCreators
      * analogue of an IGDB game company. Reuses CompanyDetails: a logo, a country
      * and a filmography of the movies and shows it produced (role `Studio`).
      */
-    public function company(string $ref, string $locale): CompanyDetails
+    public function company(string $ref, string $locale, MatureContent $mature): CompanyDetails
     {
         $data = $this->client->get("company/{$ref}", [], $this->payload->ttl('details'));
 
         $parent = Payload::map($data['parent_company'] ?? null);
         $homepage = Payload::string($data, 'homepage');
-        $first = $this->companyCredits($ref, $locale, 1);
+        $first = $this->companyCredits($ref, $locale, $mature, 1);
 
         return new CompanyDetails(
             ref: Payload::id($data['id'] ?? null) ?? $ref,
@@ -223,7 +224,7 @@ final readonly class TmdbCreators
      * streams in chunks the same way a network's showography does; the shelf
      * ends when both endpoints run out.
      */
-    public function companyCredits(string $ref, string $locale, int $page): CreditPage
+    public function companyCredits(string $ref, string $locale, MatureContent $mature, int $page): CreditPage
     {
         $credits = [];
         $hasMore = false;
@@ -236,12 +237,12 @@ final readonly class TmdbCreators
                 'with_companies' => $ref,
                 'sort_by' => "{$dateField}.asc",
                 "{$dateField}.gte" => now()->format('Y-m-d'),
-            ], 1, 1) : ['rows' => [], 'hasMore' => false];
+            ], $mature, 1, 1) : ['rows' => [], 'hasMore' => false];
 
             $catalogue = $this->discoverRows($endpoint, $locale, [
                 'with_companies' => $ref,
                 'sort_by' => 'popularity.desc',
-            ], $page, self::CATALOGUE_PAGES_PER_CHUNK);
+            ], $mature, $page, self::CATALOGUE_PAGES_PER_CHUNK);
 
             $hasMore = $hasMore || $catalogue['hasMore'];
             $seen = [];

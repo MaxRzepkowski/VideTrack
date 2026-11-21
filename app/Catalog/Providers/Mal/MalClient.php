@@ -30,7 +30,7 @@ class MalClient
 
     /**
      * Listings ask MAL for adult titles too: what MAL hides by default is its
-     * own call, so the catalog's rule (MangaNsfw::isAdult) decides instead.
+     * own call, so the catalog's rule (MangaNsfw::allowedAt) decides instead.
      */
     public const ALL_RATINGS = ['nsfw' => 'true'];
 

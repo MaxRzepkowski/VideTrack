@@ -7,6 +7,7 @@ use App\Catalog\Data\DiscoverFilterOption;
 use App\Catalog\Data\MediaSummary;
 use App\Catalog\Data\Paginated;
 use App\Catalog\DiscoverFilterKind;
+use App\Catalog\MatureContent;
 use App\Catalog\ProviderException;
 use App\Catalog\ProviderRejected;
 use App\Support\Payload;
@@ -57,7 +58,7 @@ final readonly class MalRankings
      *
      * @throws ProviderException|ProviderRejected
      */
-    public function page(array $filters, string $fields, int $page): Paginated
+    public function page(array $filters, string $fields, MatureContent $mature, int $page): Paginated
     {
         $ranking = Payload::enum($filters, self::FILTER, MangaRankingType::class);
 
@@ -72,7 +73,7 @@ final readonly class MalRankings
             requireKey: 'data',
         );
 
-        $cards = $this->payload->cards(Payload::list($data['data'] ?? null));
+        $cards = $this->payload->cards(Payload::list($data['data'] ?? null), $mature);
         $lastPage = max(1, (int) ceil(count($cards) / self::PAGE_SIZE));
         $page = min(max(1, $page), $lastPage);
 

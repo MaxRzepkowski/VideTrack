@@ -11,6 +11,7 @@ use App\Catalog\Data\MediaSummary;
 use App\Catalog\Data\Paginated;
 use App\Catalog\DiscoverFilterKind;
 use App\Catalog\ItemNotFoundException;
+use App\Catalog\MatureContent;
 
 /**
  * A provider that can filter but cannot browse: no SupportsTrending, no
@@ -25,7 +26,7 @@ class FilteredOnlyProvider implements MetadataProvider, SupportsFilteredDiscover
         return 'tmdb';
     }
 
-    public function search(string $query, string $locale): array
+    public function search(string $query, string $locale, MatureContent $mature): array
     {
         return [];
     }
@@ -54,6 +55,7 @@ class FilteredOnlyProvider implements MetadataProvider, SupportsFilteredDiscover
         array $filters,
         string $locale,
         string $region,
+        MatureContent $mature,
         int $page = 1,
     ): Paginated {
         return new Paginated(

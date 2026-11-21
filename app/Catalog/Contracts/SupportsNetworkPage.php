@@ -4,6 +4,7 @@ namespace App\Catalog\Contracts;
 
 use App\Catalog\Data\CompanyDetails;
 use App\Catalog\Data\CreditPage;
+use App\Catalog\MatureContent;
 
 /**
  * Capability: the provider serves a TV network page — the network analogue of
@@ -14,11 +15,11 @@ use App\Catalog\Data\CreditPage;
  */
 interface SupportsNetworkPage
 {
-    public function network(string $ref, string $locale): CompanyDetails;
+    public function network(string $ref, string $locale, MatureContent $mature): CompanyDetails;
 
     /**
      * One chunk of the network's showography, 1-based — the network analogue
      * of {@see SupportsCompanyPage::companyCredits()}.
      */
-    public function networkCredits(string $ref, string $locale, int $page): CreditPage;
+    public function networkCredits(string $ref, string $locale, MatureContent $mature, int $page): CreditPage;
 }

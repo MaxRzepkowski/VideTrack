@@ -3,6 +3,7 @@
 use App\Catalog\Data\RankingPosition;
 use App\Catalog\DatePrecision;
 use App\Catalog\ItemNotFoundException;
+use App\Catalog\MatureContent;
 use App\Catalog\MediaTypeRegistry;
 use App\Catalog\ProviderRegistry;
 use App\Catalog\ProviderRejected;
@@ -39,7 +40,7 @@ test('search maps manga summaries and drops light novels and coverless hits', fu
     enableMangaModule();
     Http::fake(['api.myanimelist.net/v2/manga?*' => Http::response(jsonFixture('mal/search'))]);
 
-    $results = malProvider()->search('berserk', 'en');
+    $results = malProvider()->search('berserk', 'en', MatureContent::Suggestive);
 
     // 6 hits: a light novel, a coverless entry and an adult one drop out.
     expect($results)->toHaveCount(3)
@@ -59,12 +60,30 @@ test('adult manga stay out of a search, asked of MAL together with the rest; sug
     enableMangaModule();
     Http::fake(['api.myanimelist.net/v2/manga?*' => Http::response(jsonFixture('mal/search'))]);
 
-    $refs = array_map(fn ($manga) => $manga->ref, malProvider()->search('manga', 'en'));
+    $refs = array_map(fn ($manga) => $manga->ref, malProvider()->search('manga', 'en', MatureContent::Suggestive));
 
     expect($refs)->not->toContain('900001')
         ->and($refs)->toContain('900002');
 
     Http::assertSent(fn ($request) => ($request->data()['nsfw'] ?? null) === 'true');
+});
+
+test('a search keeps to the level the viewer allows', function (MatureContent $mature, bool $suggestive, bool $adult) {
+    enableMangaModule();
+    Http::fake(['api.myanimelist.net/v2/manga?*' => Http::response(jsonFixture('mal/search'))]);
+
+    $refs = array_map(fn ($manga) => $manga->ref, malProvider()->search('manga', 'en', $mature));
+
+    expect(in_array('900002', $refs, true))->toBe($suggestive)
+        ->and(in_array('900001', $refs, true))->toBe($adult)
+        ->and($refs)->toContain('2');
+})->with([
+    'safe' => [MatureContent::Safe, false, false],
+    'adult' => [MatureContent::Adult, true, true],
+]);
+
+test('MAL tells apart safe, suggestive and adult manga', function () {
+    expect(malProvider()->matureLevels())->toBe([MatureContent::Safe, MatureContent::Suggestive, MatureContent::Adult]);
 });
 
 test('a manga MAL rates adult is filed as adult, one it rates suggestive is not', function (string $rating, bool $adult) {
@@ -83,7 +102,7 @@ test('a search card carries the English title, the one the manga page shows', fu
     enableMangaModule();
     Http::fake(['api.myanimelist.net/v2/manga?*' => Http::response(jsonFixture('mal/search'))]);
 
-    $results = malProvider()->search('solo leveling', 'pl');
+    $results = malProvider()->search('solo leveling', 'pl', MatureContent::Suggestive);
 
     expect($results[1]->title)->toBe('Solo Leveling')
         ->and($results[1]->alternativeTitles)->toBe(['Na Honjaman Level Up', '나 혼자만 레벨업', 'Only I Level Up'])
@@ -197,8 +216,8 @@ test('a very short search MAL refuses finds nothing, a longer refused one still 
     enableMangaModule();
     Http::fake(['api.myanimelist.net/v2/manga?*' => Http::response(['message' => 'invalid q', 'error' => 'bad_request'], 400)]);
 
-    expect(malProvider()->search('Ao', 'en'))->toBe([])
-        ->and(fn () => malProvider()->search('Ao Haru', 'en'))->toThrow(ProviderRejected::class);
+    expect(malProvider()->search('Ao', 'en', MatureContent::Suggestive))->toBe([])
+        ->and(fn () => malProvider()->search('Ao Haru', 'en', MatureContent::Suggestive))->toThrow(ProviderRejected::class);
 });
 
 test('manga details map MAL fields to the shared shape', function () {
