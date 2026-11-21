@@ -327,6 +327,27 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | MangaBaka (import through a connected account)
+    |--------------------------------------------------------------------------
+    |
+    | The instance owner registers one "Web" app at mangabaka.org (its
+    | developer settings) with the redirect URI
+    | APP_URL/settings/connections/mangabaka/callback and the scopes openid,
+    | profile, library.read and offline_access, and puts its client id and
+    | secret here. Without them, or without manga from MyAnimeList, the
+    | MangaBaka import is not offered.
+    |
+    */
+
+    'mangabaka' => [
+        'client_id' => env('MANGABAKA_CLIENT_ID'),
+        'client_secret' => env('MANGABAKA_CLIENT_SECRET'),
+        'auth_url' => env('MANGABAKA_AUTH_URL', 'https://mangabaka.org/auth/oauth2'),
+        'api_url' => env('MANGABAKA_API_URL', 'https://api.mangabaka.org'),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | MDBList (import through a connected account)
     |--------------------------------------------------------------------------
     |

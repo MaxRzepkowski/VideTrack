@@ -68,11 +68,20 @@ final class RatingScale
     {
         $value = trim($value);
 
-        if (! is_numeric($value) || (float) $value <= 0 || (float) $value > self::PERCENT) {
+        return is_numeric($value) ? self::percent((float) $value) : null;
+    }
+
+    /**
+     * A score out of 100 a service sends as a number; null for none, a zero
+     * (unrated) or anything past 100.
+     */
+    public static function percent(?float $score): ?int
+    {
+        if ($score === null || $score <= 0 || $score > self::PERCENT) {
             return null;
         }
 
-        return max(self::MIN, (int) round((float) $value * self::MAX / self::PERCENT));
+        return max(self::MIN, (int) round($score * self::MAX / self::PERCENT));
     }
 
     /** A score of 1–5 stars on this scale: each star is two points. */

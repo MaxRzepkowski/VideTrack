@@ -1,0 +1,21 @@
+{
+    "status": 200,
+    "pagination": { "count": 6, "page": 2, "limit": 100, "next": null, "previous": "https://api.mangabaka.org/v2/my/library?page=1&limit=100" },
+    "data": [
+        {
+            "entry": { "id": 4, "series_id": 104, "user_id": "u1", "state": "dropped", "rating": 30, "progress_chapter": 12, "start_date": "2021-03-01", "finish_date": "2021-04-10" },
+            "lists": [],
+            "series": { "id": 104, "type": "manga", "titles": [ { "language": "en", "traits": ["official"], "title": "Tokyo Ghoul", "is_primary": true } ], "source": { "my_anime_list": { "id": 33327, "rating": 7.8 } } }
+        },
+        {
+            "entry": { "id": 5, "series_id": 105, "user_id": "u1", "state": "plan_to_read", "rating": null, "created_at": "2025-02-03T09:00:00Z" },
+            "lists": [],
+            "series": { "id": 105, "type": "manga", "titles": [ { "language": "en", "traits": ["official"], "title": "Vagabond", "is_primary": true } ], "source": { "my_anime_list": { "id": 656, "rating": 9.1 } } }
+        },
+        {
+            "entry": { "id": 6, "series_id": 106, "user_id": "u1", "state": "completed", "rating": null, "finish_date": "2020-01-01" },
+            "lists": [],
+            "series": { "id": 106, "type": "other", "titles": [], "source": { "my_anime_list": { "id": null, "rating": null } } }
+        }
+    ]
+}

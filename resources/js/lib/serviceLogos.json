@@ -615,6 +615,13 @@
         "source": "https://commons.wikimedia.org/wiki/File:MyAnimeList_favicon.svg",
         "licence": "public domain on Wikimedia Commons; trademark of its owner"
     },
+    "mangabaka": {
+        "file": "mangabaka.png",
+        "width": 96,
+        "height": 96,
+        "source": "https://mangabaka.org/images/maomao/96x96.png",
+        "licence": "MangaBaka's site icon; trademark and artwork of their owners"
+    },
     "mastodons": {
         "file": "mastodons.svg",
         "width": 25,

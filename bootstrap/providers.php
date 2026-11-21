@@ -30,6 +30,7 @@ use App\Integrations\KOReader\KOReaderServiceProvider;
 use App\Integrations\Letterboxd\LetterboxdServiceProvider;
 use App\Integrations\LibraryThing\LibraryThingServiceProvider;
 use App\Integrations\Mail\MailServiceProvider;
+use App\Integrations\MangaBaka\MangaBakaLibraryServiceProvider;
 use App\Integrations\MdbList\MdbListServiceProvider;
 use App\Integrations\Netflix\NetflixServiceProvider;
 use App\Integrations\OutgoingWebhooks\OutgoingWebhooksServiceProvider;
@@ -96,6 +97,7 @@ return [
     RetroAchievementsServiceProvider::class,
     AnimeServiceProvider::class,
     AnimePlanetServiceProvider::class,
+    MangaBakaLibraryServiceProvider::class,
     SimklServiceProvider::class,
     MdbListServiceProvider::class,
     TracearrServiceProvider::class,
