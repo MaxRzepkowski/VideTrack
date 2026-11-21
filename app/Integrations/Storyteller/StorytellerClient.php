@@ -4,17 +4,15 @@ namespace App\Integrations\Storyteller;
 
 use App\Integrations\Connections\ConnectionExpired;
 use App\Integrations\Connections\ConnectionRejected;
+use App\Integrations\Connections\Contracts\NamesKeyOwner;
 use App\Integrations\Connections\Data\PinnedAddress;
-use App\Integrations\Connections\OwnServerClient;
+use App\Integrations\Connections\OwnServerApi;
 use App\Integrations\Connections\OwnServerNotFound;
 use App\Integrations\Connections\OwnServerRejected;
 use App\Integrations\Connections\OwnServerUnavailable;
-use App\Integrations\Connections\UnusableAddress;
 use App\Models\ServiceConnection;
-use App\Models\User;
 use App\Support\Payload;
 use Illuminate\Http\Client\PendingRequest;
-use LogicException;
 
 /**
  * Storyteller's API as its source defines it (storyteller-platform/storyteller@0d6147a,
@@ -25,7 +23,7 @@ use LogicException;
  * 403. `GET /api/v2/books` is every book with the user's own status and
  * position, in one answer. The way there is `OwnServerClient`'s.
  */
-class StorytellerClient
+class StorytellerClient extends OwnServerApi implements NamesKeyOwner
 {
     public const NAME = 'Storyteller';
 
@@ -33,19 +31,14 @@ class StorytellerClient
 
     private const BASE = '/api/v2';
 
-    /** The API's path a user may paste with the address, as a pattern. */
-    private const API_PATH_PATTERN = '/api(/v\\d+)?';
-
-    public function __construct(private readonly OwnServerClient $server) {}
-
-    /**
-     * The address the user typed, at its base and checked for the owner.
-     *
-     * @throws UnusableAddress
-     */
-    public function pin(string $typed, User $owner): PinnedAddress
+    public function name(): string
     {
-        return $this->server->pinTyped($typed, self::API_PATH_PATTERN, $owner);
+        return self::NAME;
+    }
+
+    protected function apiPathPattern(): string
+    {
+        return '/api(/v\\d+)?';
     }
 
     /**
@@ -56,29 +49,19 @@ class StorytellerClient
      *
      * @throws ConnectionRejected
      */
-    public function owner(PinnedAddress $address, string $token): ?string
+    public function owner(PinnedAddress $address, string $key): ?string
     {
-        if (! str_starts_with($token, self::TOKEN_PREFIX)) {
+        if (! str_starts_with($key, self::TOKEN_PREFIX)) {
             throw new ConnectionRejected('import.a_storyteller_token_starts_with');
         }
 
-        $user = $this->server->check($this->http($address, $token), self::NAME, '/user', refusals: [403 => 'import.this_storyteller_token_has_no_full_access']);
+        $user = $this->server->check($this->http($address, $key), self::NAME, '/user', refusals: [403 => 'import.this_storyteller_token_has_no_full_access']);
 
         if (Payload::bool(Payload::map($user['permissions'] ?? null), 'bookList') !== true) {
             throw new ConnectionRejected('import.your_storyteller_user_may_not_list');
         }
 
         return Payload::string($user, 'username');
-    }
-
-    /**
-     * The connection's address, checked again for this run.
-     *
-     * @throws ConnectionExpired|OwnServerUnavailable
-     */
-    public function address(ServiceConnection $connection): PinnedAddress
-    {
-        return $this->server->address($connection, self::NAME);
     }
 
     /**
@@ -90,9 +73,7 @@ class StorytellerClient
      */
     public function books(ServiceConnection $connection, PinnedAddress $address): array
     {
-        $token = $connection->credential('key') ?? throw new LogicException('A Storyteller connection without its token.');
-
-        return Payload::list($this->server->read($this->http($address, $token), self::NAME, '/books'));
+        return Payload::list($this->server->read($this->http($address, $this->key($connection)), self::NAME, '/books'));
     }
 
     private function http(PinnedAddress $address, string $token): PendingRequest

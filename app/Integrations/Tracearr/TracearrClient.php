@@ -5,13 +5,11 @@ namespace App\Integrations\Tracearr;
 use App\Integrations\Connections\ConnectionExpired;
 use App\Integrations\Connections\ConnectionRejected;
 use App\Integrations\Connections\Data\PinnedAddress;
-use App\Integrations\Connections\OwnServerClient;
+use App\Integrations\Connections\OwnServerApi;
 use App\Integrations\Connections\OwnServerNotFound;
 use App\Integrations\Connections\OwnServerRejected;
 use App\Integrations\Connections\OwnServerUnavailable;
-use App\Integrations\Connections\UnusableAddress;
 use App\Models\ServiceConnection;
-use App\Models\User;
 use App\Support\Payload;
 use Illuminate\Http\Client\PendingRequest;
 
@@ -22,11 +20,8 @@ use Illuminate\Http\Client\PendingRequest;
  * that must belong to the instance owner, 240 requests a minute per key by
  * default, cursor pages of at most 100. The way there is `OwnServerClient`'s.
  */
-class TracearrClient
+class TracearrClient extends OwnServerApi
 {
-    /** The API's path a user may paste with the address, as a pattern. */
-    private const API_PATH_PATTERN = '/api(/v\\d+(/public)?)?';
-
     public const KEY_PREFIX = 'trr_pub_';
 
     private const NAME = 'Tracearr';
@@ -35,16 +30,14 @@ class TracearrClient
 
     private const PAGE_SIZE = 100;
 
-    public function __construct(private readonly OwnServerClient $server) {}
-
-    /**
-     * The address the user typed, at its base and checked for the owner.
-     *
-     * @throws UnusableAddress
-     */
-    public function pin(string $typed, User $owner): PinnedAddress
+    public function name(): string
     {
-        return $this->server->pinTyped($typed, self::API_PATH_PATTERN, $owner);
+        return self::NAME;
+    }
+
+    protected function apiPathPattern(): string
+    {
+        return '/api(/v\\d+(/public)?)?';
     }
 
     /**
@@ -89,16 +82,6 @@ class TracearrClient
     }
 
     /**
-     * The connection's address, checked again for this run.
-     *
-     * @throws ConnectionExpired|OwnServerUnavailable
-     */
-    public function address(ServiceConnection $connection): PinnedAddress
-    {
-        return $this->server->address($connection, self::NAME);
-    }
-
-    /**
      * One page of a list endpoint, with the connection's key.
      *
      * @param  array<string, string|int>  $query
@@ -139,7 +122,7 @@ class TracearrClient
      */
     private function get(ServiceConnection $connection, PinnedAddress $address, string $path, array $query): array
     {
-        return $this->server->read($this->http($address, (string) $connection->credential('key')), self::NAME, $path, $query);
+        return $this->server->read($this->http($address, $this->key($connection)), self::NAME, $path, $query);
     }
 
     private function http(PinnedAddress $address, string $key): PendingRequest
