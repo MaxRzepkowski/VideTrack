@@ -5,10 +5,12 @@ use App\Enums\TaskRunStatus;
 use App\Integrations\Connections\ConnectionRegistry;
 use App\Integrations\Connections\ConnectionRejected;
 use App\Integrations\Connections\ConnectionStatus;
+use App\Integrations\Connections\ConnectMethod;
 use App\Integrations\Connections\Contracts\AuthorizesByForm;
 use App\Integrations\Connections\Data\ConnectionGrant;
 use App\Integrations\Connections\DeviceAttempts;
 use App\Integrations\Connections\DevicePoll;
+use App\Integrations\Connections\RedirectAttempts;
 use App\Integrations\Import\Data\ImportInput;
 use App\Integrations\Import\Data\ImportSelection;
 use App\Integrations\Import\ImportInputKind;
@@ -18,6 +20,7 @@ use App\Models\ServiceConnection;
 use App\Models\TaskRun;
 use App\Models\User;
 use App\Support\Forms\CredentialFieldType;
+use App\Support\PublicUrl;
 use App\Support\ServiceBusy;
 use App\Support\ServiceUnavailable;
 use Illuminate\Support\Facades\Cache;
@@ -29,6 +32,7 @@ use Inertia\Testing\AssertableInertia;
 use Tests\Fakes\FakeConnectionImportSource;
 use Tests\Fakes\FakeDeviceService;
 use Tests\Fakes\FakeFormService;
+use Tests\Fakes\FakeRedirectService;
 
 beforeEach(function () {
     $connections = app(ConnectionRegistry::class);
@@ -384,6 +388,7 @@ test('the import page shows how a connection source connects and what the user h
                 'fields' => [],
                 'autoImportMinutes' => 60,
                 'connection' => null,
+                'errorKey' => RedirectAttempts::errorKey('fake-device'),
             ]));
 
     connectionFor($user);
@@ -532,4 +537,89 @@ test('every service with an address field keeps an ordinary account out of the s
 
     expect($checked)->toBeGreaterThan(0);
     Http::assertNothingSent();
+});
+
+/**
+ * Starts a trip to the fake redirect service as $user; the state the
+ * attempt sent along, read off the address the page was given.
+ */
+function startTrip(User $user): string
+{
+    $url = (string) test()->actingAs($user)->postJson(route('settings.connections.redirect.begin', FakeRedirectService::CODE))->assertOk()->json('url');
+    parse_str((string) parse_url($url, PHP_URL_QUERY), $query);
+
+    return is_string($query['state'] ?? null) ? $query['state'] : throw new LogicException('A trip carries its state.');
+}
+
+test('a service connected by a trip to its site sends the user there, and the way back connects it on the import page', function () {
+    app(ConnectionRegistry::class)->register(FakeRedirectService::CODE, FakeRedirectService::class);
+    FakeConnectionImportSource::$service = FakeRedirectService::CODE;
+    $user = User::factory()->create();
+
+    $state = startTrip($user);
+
+    expect(strlen($state))->toBeGreaterThanOrEqual(32);
+
+    $this->get(route('settings.connections.callback', [FakeRedirectService::CODE, 'state' => $state, 'code' => 'code-1']))
+        ->assertRedirect(route('settings.import.index', ['source' => FakeConnectionImportSource::CODE]));
+
+    $connection = $user->serviceConnections()->sole();
+
+    expect($connection->service)->toBe(FakeRedirectService::CODE)
+        ->and($connection->credential('access_token'))->toBe('token-for-code-1')
+        ->and($connection->account_label)->toBe('alex')
+        // The address the service was told, from APP_URL, both ways.
+        ->and(FakeRedirectService::$callbacks)->toBe([
+            PublicUrl::to(route('settings.connections.callback', FakeRedirectService::CODE, absolute: false)),
+            PublicUrl::to(route('settings.connections.callback', FakeRedirectService::CODE, absolute: false)),
+        ]);
+
+    $this->get(route('settings.import.index', ['source' => FakeConnectionImportSource::CODE]))
+        ->assertInertia(fn (AssertableInertia $page) => $page
+            ->where('selected', FakeConnectionImportSource::CODE)
+            ->where('sources', fn ($sources) => collect($sources)->contains(fn ($source) => $source['code'] === FakeConnectionImportSource::CODE
+                && $source['connect']['method'] === ConnectMethod::Redirect->value)));
+});
+
+test('a way back without the attempt\'s state leaves the attempt standing; the right one connects once', function () {
+    app(ConnectionRegistry::class)->register(FakeRedirectService::CODE, FakeRedirectService::class);
+    $user = User::factory()->create();
+    $state = startTrip($user);
+
+    $this->get(route('settings.connections.callback', [FakeRedirectService::CODE, 'state' => 'someone-elses', 'code' => 'code-1']))
+        ->assertRedirect(route('settings.import.index'))
+        ->assertSessionHasErrors([RedirectAttempts::errorKey(FakeRedirectService::CODE) => 'The connection attempt expired or was already used. Connect again.']);
+
+    expect($user->serviceConnections()->exists())->toBeFalse();
+
+    $this->get(route('settings.connections.callback', [FakeRedirectService::CODE, 'state' => $state, 'code' => 'code-1']))
+        ->assertSessionHasNoErrors();
+
+    // Spent: the same answer again connects nothing more.
+    $this->get(route('settings.connections.callback', [FakeRedirectService::CODE, 'state' => $state, 'code' => 'code-2']))
+        ->assertSessionHasErrors(RedirectAttempts::errorKey(FakeRedirectService::CODE));
+
+    expect($user->serviceConnections()->sole()->credential('access_token'))->toBe('token-for-code-1');
+});
+
+test('the way back is only for services connected by a trip, and only for the one who started it', function () {
+    app(ConnectionRegistry::class)->register(FakeRedirectService::CODE, FakeRedirectService::class);
+
+    $this->actingAs(User::factory()->create())
+        ->get(route('settings.connections.callback', [FakeDeviceService::CODE, 'code' => 'x']))
+        ->assertNotFound();
+
+    $state = startTrip(User::factory()->create());
+
+    $this->actingAs(User::factory()->create())
+        ->get(route('settings.connections.callback', [FakeRedirectService::CODE, 'state' => $state, 'code' => 'code-1']))
+        ->assertSessionHasErrors(RedirectAttempts::errorKey(FakeRedirectService::CODE));
+
+    expect(ServiceConnection::query()->count())->toBe(0);
+});
+
+test('a source the import page does not know is no preselection', function () {
+    $this->actingAs(User::factory()->create())
+        ->get(route('settings.import.index', ['source' => 'nothing-like-it']))
+        ->assertInertia(fn (AssertableInertia $page) => $page->where('selected', null));
 });

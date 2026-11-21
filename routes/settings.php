@@ -5,6 +5,7 @@ use App\Http\Controllers\Settings\CalendarSubscriptionController;
 use App\Http\Controllers\Settings\CalendarTokenController;
 use App\Http\Controllers\Settings\ChannelsController;
 use App\Http\Controllers\Settings\ConnectionController;
+use App\Http\Controllers\Settings\ConnectionRedirectController;
 use App\Http\Controllers\Settings\DangerZoneController;
 use App\Http\Controllers\Settings\DetectedTimezoneController;
 use App\Http\Controllers\Settings\ExportController;
@@ -93,6 +94,10 @@ Route::middleware(['auth', 'throttle:web'])->name('settings.')->group(function (
         Route::delete('settings/connections/{service}/device', [ConnectionController::class, 'cancelDevice'])->name('connections.device.cancel');
         Route::post('settings/connections/{service}/verify', [ConnectionController::class, 'verify'])->name('connections.verify');
         Route::post('settings/connections/{service}', [ConnectionController::class, 'connect'])->name('connections.connect');
+        Route::post('settings/connections/{service}/redirect', [ConnectionRedirectController::class, 'begin'])->name('connections.redirect.begin');
+        // The service sends the browser back with a GET, which connects: the
+        // one way a trip through its site can end.
+        Route::get('settings/connections/{service}/callback', [ConnectionRedirectController::class, 'callback'])->name('connections.callback');
     });
     Route::patch('settings/connections/{connection}', [ConnectionController::class, 'update'])->name('connections.update');
     Route::delete('settings/connections/{connection}', [ConnectionController::class, 'destroy'])->name('connections.destroy');

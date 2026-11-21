@@ -24,5 +24,7 @@ final readonly class ConnectDef
         public array $fields,
         public int $autoImportMinutes,
         public ?ConnectionCard $connection,
+        /** Where the page holds why a trip to the service came back without connecting. */
+        public string $errorKey,
     ) {}
 }

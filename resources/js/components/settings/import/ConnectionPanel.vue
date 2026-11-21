@@ -10,7 +10,7 @@ import { jsonFetch } from '@/lib/http';
 import { SETTINGS_FIELD_CLASS } from '@/lib/ui';
 import type { ConnectAttemptStatus } from '@/types/generated';
 import type { ConnectDef, ConnectionCard } from '@/types/integrations';
-import { router, useForm } from '@inertiajs/vue3';
+import { router, useForm, usePage } from '@inertiajs/vue3';
 import { trans } from 'laravel-vue-i18n';
 import { computed, onBeforeUnmount, ref, watch } from 'vue';
 
@@ -41,7 +41,8 @@ async function call<T>(method: 'GET' | 'POST' | 'DELETE', url: string, body?: un
 }
 
 const needsConnecting = computed(() => connection.value === null || connection.value.status === 'expired');
-const failure = ref<string | null>(null);
+// A trip to the service's site that came back refused says why on the page it lands on.
+const failure = ref<string | null>(props.connect.method === 'redirect' ? (usePage().props.errors?.[props.connect.errorKey] ?? null) : null);
 const busy = ref(false);
 
 // Device flow: the code to type and until when it holds. The page only asks
@@ -145,6 +146,28 @@ async function cancelDevice(): Promise<void> {
 }
 
 onBeforeUnmount(stopDevice);
+
+// A trip to the service's site: what the way back needs stays on the server,
+// the page only follows the address it is given and lands here again.
+async function beginRedirect(): Promise<void> {
+    failure.value = null;
+    busy.value = true;
+
+    const answer = await call<{ url: string }>('POST', route('settings.connections.redirect.begin', { service: props.connect.service })).catch(
+        () => null,
+    );
+
+    if (!answer?.ok) {
+        failure.value = answer
+            ? refusal(answer.data, trans('import.the_service_could_not_start_the'))
+            : trans('import.the_service_could_not_start_the');
+        busy.value = false;
+
+        return;
+    }
+
+    window.location.assign(answer.data.url);
+}
 
 const countdown = computed(() => {
     const minutes = Math.floor(remaining.value / 60);
@@ -329,6 +352,10 @@ function displayUrl(url: string): string {
                     {{ trans('import.connect_service', { service: connect.name }) }}
                 </Button>
             </template>
+
+            <Button v-else-if="connect.method === 'redirect'" type="button" class="h-10 py-2" :disabled="busy" @click="beginRedirect">
+                {{ trans('import.connect_service', { service: connect.name }) }}
+            </Button>
 
             <form v-else class="space-y-4" @submit.prevent="choices ? connectByForm() : verify()">
                 <CredentialFields

@@ -38,7 +38,7 @@ async function analyzed(preselected: [boolean, boolean, boolean]) {
     answer = manifest(preselected);
 
     const wrapper = mount(Import, {
-        props: { sources: [source], maxFileMegabytes: 100 },
+        props: { sources: [source], maxFileMegabytes: 100, selected: null },
         global: { stubs: { AppLayout: { template: '<div><slot /></div>' }, SettingsLayout: { template: '<div><slot /></div>' } } },
     });
 
@@ -90,5 +90,17 @@ describe('Import', () => {
             ['Empty', 'unchecked'],
         ]);
         expect(wrapper.find('button[type="submit"]').attributes('disabled')).toBeDefined();
+    });
+
+    it('opens on the source a trip to a service came back to', () => {
+        const other: ImportSourceDef = { ...source, code: 'letterboxd', label: 'Letterboxd', description: 'Films you logged on Letterboxd.' };
+        const mountWith = (selected: string | null) =>
+            mount(Import, {
+                props: { sources: [source, other], maxFileMegabytes: 100, selected },
+                global: { stubs: { AppLayout: { template: '<div><slot /></div>' }, SettingsLayout: { template: '<div><slot /></div>' } } },
+            });
+
+        expect(mountWith('letterboxd').text()).toContain('Films you logged on Letterboxd.');
+        expect(mountWith(null).text()).not.toContain('Films you logged on Letterboxd.');
     });
 });
