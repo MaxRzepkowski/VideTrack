@@ -10,6 +10,7 @@ use App\Integrations\Import\Data\MediaSubject;
 use App\Integrations\Import\Data\TitleQuery;
 use App\Integrations\Import\Rows\MediaRow;
 use App\Integrations\Import\Rows\SkipRow;
+use App\Integrations\TitleLabel;
 use App\Library\RatingScale;
 use App\Support\Payload;
 use Generator;
@@ -127,7 +128,7 @@ final readonly class TvTimeFilms
         return $build(MediaSubject::external(
             MediaKind::Movie,
             [],
-            $year === null ? $name : "{$name} ({$year})",
+            TitleLabel::of($name, $year),
             byTitle: new TitleQuery($title, $year),
         ));
     }

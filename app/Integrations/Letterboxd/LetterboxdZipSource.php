@@ -22,6 +22,7 @@ use App\Integrations\Import\ImportCategory;
 use App\Integrations\Import\Rows\ListRow;
 use App\Integrations\Import\Rows\MediaRow;
 use App\Integrations\Import\Rows\SkipRow;
+use App\Integrations\TitleLabel;
 use App\Library\PlayDating;
 use App\Library\RatingScale;
 use App\Support\Payload;
@@ -247,7 +248,7 @@ final class LetterboxdZipSource implements ExplainsSetup, ReadsFile
     {
         $year = $this->year($row);
 
-        return $year === null ? Payload::text($row, 'Name') : Payload::text($row, 'Name')." ({$year})";
+        return TitleLabel::of(Payload::text($row, 'Name'), $year);
     }
 
     /**
