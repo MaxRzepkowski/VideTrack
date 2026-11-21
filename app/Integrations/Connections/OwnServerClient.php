@@ -1,0 +1,137 @@
+<?php
+
+namespace App\Integrations\Connections;
+
+use App\Integrations\Connections\Data\PinnedAddress;
+use App\Models\ServiceConnection;
+use App\Support\ConnectionFailure;
+use App\Support\HttpRetry;
+use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Http\Client\PendingRequest;
+use Illuminate\Support\Facades\Http;
+
+/**
+ * The transport to a server the user runs (Tracearr and the like) at an
+ * address they typed. A request goes only to the IP `UserAddresses`
+ * approved and never follows a redirect; the service's client adds its own
+ * way of signing in to the request this hands out.
+ *
+ * Connecting asks once and turns every failure into a reason shown under the
+ * form. A run waits out a dropped connection, a 5xx or a 429 and never asks
+ * again after any other answer: a refused key is final.
+ */
+final readonly class OwnServerClient
+{
+    private const TIMEOUT_SECONDS = 30;
+
+    private const TRIES = 3;
+
+    private const FIRST_RETRY_MS = 1000;
+
+    public function __construct(private UserAddresses $addresses) {}
+
+    /**
+     * The stored address, checked again before every run: the operator's
+     * list may have changed, and the name may now resolve somewhere else. A
+     * refused address needs the user to connect again; a name that resolved
+     * to nothing may resolve on the next attempt.
+     *
+     * @throws ConnectionExpired|OwnServerUnavailable
+     */
+    public function address(ServiceConnection $connection, string $service): PinnedAddress
+    {
+        try {
+            return $this->addresses->pin((string) $connection->credential('url'), $connection->user);
+        } catch (AddressRefused $refused) {
+            throw new ConnectionExpired($refused->key);
+        } catch (AddressNotFound) {
+            throw new OwnServerUnavailable('import.service_could_not_be_reached_at', ['service' => $service]);
+        }
+    }
+
+    /** A request to `$base` (the API's path under the address) at the approved IP. */
+    public function to(PinnedAddress $address, string $base): PendingRequest
+    {
+        return Http::baseUrl($address->url.$base)
+            ->withoutRedirecting()
+            ->withOptions(['curl' => [CURLOPT_RESOLVE => [$address->curlResolve()]]])
+            ->timeout(self::TIMEOUT_SECONDS)
+            ->acceptJson()
+            ->withUserAgent(config()->string('tracker.http.user_agent'));
+    }
+
+    /**
+     * One request while connecting, with what the user typed; never retried.
+     *
+     * @param  array<string, mixed>  $query
+     * @param  array<int, string>  $refusals  status => the reason a service gives it, before the common ones
+     * @return array<array-key, mixed>
+     *
+     * @throws ConnectionRejected
+     */
+    public function check(PendingRequest $request, string $service, string $path, array $query = [], array $refusals = []): array
+    {
+        try {
+            $response = $request->get($path, $query);
+        } catch (ConnectionException) {
+            throw new ConnectionRejected('import.service_could_not_be_reached_at', ['service' => $service]);
+        }
+
+        $body = $response->json();
+        $refusal = $refusals[$response->status()] ?? null;
+
+        if ($refusal !== null) {
+            throw new ConnectionRejected($refusal, ['service' => $service]);
+        }
+
+        match (true) {
+            $response->status() === 401 => throw new ConnectionRejected('import.service_did_not_accept_this_key', ['service' => $service]),
+            $response->status() === 404 => throw new ConnectionRejected('import.there_is_no_service_api_at', ['service' => $service]),
+            ! $response->successful() || ! is_array($body) => throw new ConnectionRejected('import.service_could_not_be_read_at', ['service' => $service]),
+            default => null,
+        };
+
+        return $body;
+    }
+
+    /**
+     * One request of a run, with the stored key.
+     *
+     * @param  array<string, mixed>  $query
+     * @return array<array-key, mixed>
+     *
+     * @throws OwnServerUnavailable|OwnServerRejected|OwnServerNotFound|ConnectionExpired
+     */
+    public function read(PendingRequest $request, string $service, string $path, array $query = []): array
+    {
+        try {
+            $response = $request
+                ->retry(self::TRIES, fn (int $attempt): int => self::FIRST_RETRY_MS * 2 ** ($attempt - 1), HttpRetry::isTransientOrThrottled(...), throw: false)
+                ->get($path, $query);
+        } catch (ConnectionException $e) {
+            throw new OwnServerUnavailable('import.service_unreachable', ['service' => $service, 'reason' => ConnectionFailure::reason($e)]);
+        }
+
+        // The key was revoked or lost its rights; only a new key fixes it.
+        if (in_array($response->status(), [401, 403], true)) {
+            throw new ConnectionExpired('import.the_server_stopped_accepting_this_key');
+        }
+
+        if ($response->status() === 404) {
+            throw new OwnServerNotFound('import.service_knows_nothing_at', ['service' => $service, 'path' => $path]);
+        }
+
+        if (HttpRetry::isOutage($response)) {
+            throw new OwnServerUnavailable('import.service_answered_to', ['service' => $service, 'status' => $response->status(), 'path' => $path]);
+        }
+
+        // Answered and refused: the same request would be refused again.
+        if (! $response->successful()) {
+            throw new OwnServerRejected('import.service_answered_to', ['service' => $service, 'status' => $response->status(), 'path' => $path]);
+        }
+
+        $body = $response->json();
+
+        return is_array($body) ? $body : [];
+    }
+}

@@ -39,7 +39,7 @@ class TracearrService implements AuthorizesByForm
     public function connectionFields(): array
     {
         return [
-            new CredentialField('url', __('import.tracearr_address'), CredentialFieldType::Url, __('import.the_address_you_open_tracearr_at')),
+            new CredentialField('url', __('import.service_address', ['service' => $this->name()]), CredentialFieldType::Url, __('import.the_address_you_open_service_at', ['service' => $this->name(), 'example' => 'http://192.168.1.10:3000'])),
             new CredentialField('key', __('import.api_key'), CredentialFieldType::Password, __('import.in_tracearr_settings_api_it_starts')),
         ];
     }

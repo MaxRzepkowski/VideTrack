@@ -4,11 +4,10 @@ namespace App\Integrations\Tracearr;
 
 use App\Catalog\ExternalIdSource;
 use App\Catalog\MediaKind;
-use App\Integrations\Connections\AddressNotFound;
-use App\Integrations\Connections\AddressRefused;
 use App\Integrations\Connections\ConnectionExpired;
 use App\Integrations\Connections\Data\PinnedAddress;
-use App\Integrations\Connections\UserAddresses;
+use App\Integrations\Connections\OwnServerRejected;
+use App\Integrations\Connections\OwnServerUnavailable;
 use App\Integrations\EpisodeLabel;
 use App\Integrations\Import\ConnectionSource;
 use App\Integrations\Import\Data\ImportInput;
@@ -48,10 +47,7 @@ class TracearrSource extends ConnectionSource
     /** @var array<string, array<string, string>> show media id => the show's ids, per run */
     private array $shows = [];
 
-    public function __construct(
-        private readonly TracearrClient $client,
-        private readonly UserAddresses $addresses,
-    ) {}
+    public function __construct(private readonly TracearrClient $client) {}
 
     public function code(): string
     {
@@ -88,7 +84,7 @@ class TracearrSource extends ConnectionSource
     }
 
     /**
-     * @throws TracearrUnavailable
+     * @throws OwnServerUnavailable|OwnServerRejected|ConnectionExpired
      */
     public function rows(ImportInput $input, ImportSelection $selection): Generator
     {
@@ -98,17 +94,7 @@ class TracearrSource extends ConnectionSource
             return null;
         }
 
-        // Checked again on every run: the operator's list may have changed,
-        // and the name may now resolve somewhere else. A refused address
-        // needs the user to connect again; a name that resolved to nothing
-        // may resolve on the next attempt.
-        try {
-            $address = $this->addresses->pin((string) $connection->credential('url'), $connection->user);
-        } catch (AddressRefused $refused) {
-            throw new ConnectionExpired($refused->key);
-        } catch (AddressNotFound) {
-            throw new TracearrUnavailable('import.tracearr_could_not_be_reached_at');
-        }
+        $address = $this->client->address($connection);
 
         $startedAt = CarbonImmutable::now();
         $query = array_filter([
