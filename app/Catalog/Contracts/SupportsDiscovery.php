@@ -5,6 +5,7 @@ namespace App\Catalog\Contracts;
 use App\Catalog\Data\GenreOption;
 use App\Catalog\Data\MediaSummary;
 use App\Catalog\Data\Paginated;
+use App\Catalog\MatureContent;
 
 /**
  * Capability: the provider can serve the /discover sections — popular,
@@ -24,7 +25,7 @@ interface SupportsDiscovery
     /**
      * @return list<MediaSummary>
      */
-    public function popular(string $type, string $locale): array;
+    public function popular(string $type, string $locale, MatureContent $mature): array;
 
     /**
      * Upcoming releases: theatrical premieres for movies, currently /
@@ -32,7 +33,7 @@ interface SupportsDiscovery
      *
      * @return list<MediaSummary>
      */
-    public function upcoming(string $type, string $locale): array;
+    public function upcoming(string $type, string $locale, MatureContent $mature): array;
 
     /**
      * Genres available for a type, in the order to show them.
@@ -47,5 +48,5 @@ interface SupportsDiscovery
      *
      * @return Paginated<MediaSummary>
      */
-    public function byGenre(string $type, string $genreRef, string $locale, int $page = 1): Paginated;
+    public function byGenre(string $type, string $genreRef, string $locale, MatureContent $mature, int $page = 1): Paginated;
 }

@@ -1,6 +1,7 @@
 <?php
 
 use App\Catalog\ItemNotFoundException;
+use App\Catalog\MatureContent;
 use App\Catalog\MediaTypeRegistry;
 use App\Catalog\ProviderBusy;
 use App\Catalog\ProviderException;
@@ -38,7 +39,7 @@ test('search maps volume summaries and drops coverless hits', function () {
     enableComicsModule();
     Http::fake(['comicvine.gamespot.com/api/search/*' => Http::response(jsonFixture('comicvine/search'))]);
 
-    $results = comicVineProvider()->search('sandman', 'en');
+    $results = comicVineProvider()->search('sandman', 'en', MatureContent::Suggestive);
 
     expect($results)->toHaveCount(2)
         ->and($results[0]->type)->toBe('comic')
@@ -111,7 +112,7 @@ test('a wrong key is a refusal, not an outage', function () {
     enableComicsModule();
     Http::fake(['comicvine.gamespot.com/*' => Http::response(['error' => 'Invalid API Key', 'status_code' => 100, 'results' => []])]);
 
-    expect(fn () => comicVineProvider()->search('sandman', 'en'))
+    expect(fn () => comicVineProvider()->search('sandman', 'en', MatureContent::Suggestive))
         ->toThrow(ProviderRejected::class);
 });
 
@@ -119,7 +120,7 @@ test('an unknown code surfaces as a provider failure', function () {
     enableComicsModule();
     Http::fake(['comicvine.gamespot.com/*' => Http::response(['error' => 'Nope', 'status_code' => 999, 'results' => []])]);
 
-    expect(fn () => comicVineProvider()->search('sandman', 'en'))
+    expect(fn () => comicVineProvider()->search('sandman', 'en', MatureContent::Suggestive))
         ->toThrow(ProviderException::class);
 });
 
@@ -128,7 +129,7 @@ test('the rate limit asks to be waited out for the hour', function () {
     Http::fake(['comicvine.gamespot.com/*' => Http::response(['error' => 'Rate limit exceeded', 'status_code' => 107, 'results' => []])]);
 
     try {
-        comicVineProvider()->search('sandman', 'en');
+        comicVineProvider()->search('sandman', 'en', MatureContent::Suggestive);
         $this->fail('The rate limit went unnoticed.');
     } catch (ProviderBusy $busy) {
         expect($busy->retryAfterSeconds)->toBe(ComicVineClient::BUDGET_WINDOW_SECONDS);
@@ -142,7 +143,7 @@ test('a spent hourly budget names when the next request is welcome', function ()
     $this->travel(20)->minutes();
 
     try {
-        comicVineProvider()->search('sandman', 'en');
+        comicVineProvider()->search('sandman', 'en', MatureContent::Suggestive);
         $this->fail('The spent budget went unnoticed.');
     } catch (ProviderBusy $busy) {
         expect($busy->retryAfterSeconds)->toBe(ComicVineClient::BUDGET_WINDOW_SECONDS - 20 * 60);

@@ -16,6 +16,7 @@ use App\Catalog\Contracts\SupportsEpisodeRatings;
 use App\Catalog\Contracts\SupportsExternalIdLookup;
 use App\Catalog\Contracts\SupportsFilteredDiscovery;
 use App\Catalog\Contracts\SupportsHierarchy;
+use App\Catalog\Contracts\SupportsMatureFilter;
 use App\Catalog\Contracts\SupportsNetworkPage;
 use App\Catalog\Contracts\SupportsPeopleBrowsing;
 use App\Catalog\Contracts\SupportsPeopleSearch;
@@ -34,6 +35,7 @@ use App\Catalog\Data\WatchAvailability;
 use App\Catalog\Department;
 use App\Catalog\ExternalIdSource;
 use App\Catalog\ItemNotFoundException;
+use App\Catalog\MatureContent;
 use App\Support\Locales;
 use App\Support\Payload;
 use Carbon\CarbonImmutable;
@@ -50,7 +52,7 @@ use LogicException;
  *
  * Each method is described where it is implemented, not here.
  */
-class TmdbProvider implements MetadataProvider, SupportsChangeFeed, SupportsCharts, SupportsCollections, SupportsCollectionSearch, SupportsCompanyPage, SupportsCompanySearch, SupportsCrewRoles, SupportsDiscovery, SupportsEpisodeRatings, SupportsExternalIdLookup, SupportsFilteredDiscovery, SupportsHierarchy, SupportsNetworkPage, SupportsPeopleBrowsing, SupportsPeopleSearch, SupportsPersonPage, SupportsTrending, SupportsWatchProviders
+class TmdbProvider implements MetadataProvider, SupportsChangeFeed, SupportsCharts, SupportsCollections, SupportsCollectionSearch, SupportsCompanyPage, SupportsCompanySearch, SupportsCrewRoles, SupportsDiscovery, SupportsEpisodeRatings, SupportsExternalIdLookup, SupportsFilteredDiscovery, SupportsHierarchy, SupportsMatureFilter, SupportsNetworkPage, SupportsPeopleBrowsing, SupportsPeopleSearch, SupportsPersonPage, SupportsTrending, SupportsWatchProviders
 {
     public function __construct(
         private readonly TmdbClient $client,
@@ -71,12 +73,12 @@ class TmdbProvider implements MetadataProvider, SupportsChangeFeed, SupportsChar
         return $this->payload->code();
     }
 
-    public function search(string $query, string $locale): array
+    public function search(string $query, string $locale, MatureContent $mature): array
     {
         $data = $this->client->get('search/multi', [
             'query' => $query,
             'language' => $this->payload->language($locale),
-            'include_adult' => false,
+            'include_adult' => $mature->allowsAdult(),
         ], $this->payload->ttl('search'), 'results');
 
         $results = [];
@@ -221,14 +223,15 @@ class TmdbProvider implements MetadataProvider, SupportsChangeFeed, SupportsChar
         return $this->discovery->discoverableTypes();
     }
 
-    public function popular(string $type, string $locale): array
+    public function popular(string $type, string $locale, MatureContent $mature): array
     {
+        // TMDB's popular lists never carry adult titles.
         return $this->discovery->popular($type, $locale);
     }
 
-    public function upcoming(string $type, string $locale): array
+    public function upcoming(string $type, string $locale, MatureContent $mature): array
     {
-        return $this->discovery->upcoming($type, $locale);
+        return $this->discovery->upcoming($type, $locale, $mature);
     }
 
     public function genres(string $type, string $locale): array
@@ -236,9 +239,14 @@ class TmdbProvider implements MetadataProvider, SupportsChangeFeed, SupportsChar
         return $this->filters->genres($type, $locale);
     }
 
-    public function byGenre(string $type, string $genreRef, string $locale, int $page = 1): Paginated
+    public function byGenre(string $type, string $genreRef, string $locale, MatureContent $mature, int $page = 1): Paginated
     {
-        return $this->discovery->byGenre($type, $genreRef, $locale, $page);
+        return $this->discovery->byGenre($type, $genreRef, $locale, $mature, $page);
+    }
+
+    public function matureLevels(): array
+    {
+        return [MatureContent::Suggestive, MatureContent::Adult];
     }
 
     public function filterableTypes(): array
@@ -256,9 +264,10 @@ class TmdbProvider implements MetadataProvider, SupportsChangeFeed, SupportsChar
         array $filters,
         string $locale,
         string $region,
+        MatureContent $mature,
         int $page = 1,
     ): Paginated {
-        return $this->discovery->discoverFiltered($type, $filters, $locale, $region, $page);
+        return $this->discovery->discoverFiltered($type, $filters, $locale, $region, $mature, $page);
     }
 
     public function person(string $ref, string $locale): PersonDetails
@@ -266,29 +275,29 @@ class TmdbProvider implements MetadataProvider, SupportsChangeFeed, SupportsChar
         return $this->creators->person($ref, $locale);
     }
 
-    public function network(string $ref, string $locale): CompanyDetails
+    public function network(string $ref, string $locale, MatureContent $mature): CompanyDetails
     {
-        return $this->creators->network($ref, $locale);
+        return $this->creators->network($ref, $locale, $mature);
     }
 
-    public function networkCredits(string $ref, string $locale, int $page): CreditPage
+    public function networkCredits(string $ref, string $locale, MatureContent $mature, int $page): CreditPage
     {
-        return $this->creators->networkCredits($ref, $locale, $page);
+        return $this->creators->networkCredits($ref, $locale, $mature, $page);
     }
 
-    public function company(string $ref, string $locale): CompanyDetails
+    public function company(string $ref, string $locale, MatureContent $mature): CompanyDetails
     {
-        return $this->creators->company($ref, $locale);
+        return $this->creators->company($ref, $locale, $mature);
     }
 
-    public function companyCredits(string $ref, string $locale, int $page): CreditPage
+    public function companyCredits(string $ref, string $locale, MatureContent $mature, int $page): CreditPage
     {
-        return $this->creators->companyCredits($ref, $locale, $page);
+        return $this->creators->companyCredits($ref, $locale, $mature, $page);
     }
 
-    public function searchPeople(string $query, string $locale): array
+    public function searchPeople(string $query, string $locale, MatureContent $mature): array
     {
-        return $this->creatorSearch->searchPeople($query, $locale);
+        return $this->creatorSearch->searchPeople($query, $locale, $mature);
     }
 
     public function popularPeople(string $locale, int $page = 1): Paginated

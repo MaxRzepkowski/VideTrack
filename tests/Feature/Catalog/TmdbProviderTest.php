@@ -11,6 +11,7 @@ use App\Catalog\ExternalIdSource;
 use App\Catalog\FilmReleaseType;
 use App\Catalog\ItemMetadata;
 use App\Catalog\ItemNotFoundException;
+use App\Catalog\MatureContent;
 use App\Catalog\ProviderException;
 use App\Catalog\Providers\Tmdb\TmdbCreators;
 use App\Catalog\VideoSite;
@@ -19,7 +20,7 @@ use Illuminate\Support\Facades\Http;
 test('search maps movie and tv results including posterless entries and skips people', function () {
     Http::fake(['*/search/multi*' => Http::response(jsonFixture('tmdb/search'))]);
 
-    $results = tmdbProvider()->search('matrix', 'en');
+    $results = tmdbProvider()->search('matrix', 'en', MatureContent::Suggestive);
 
     expect($results)->toHaveCount(3)
         ->and($results[0]->type)->toBe('movie')
@@ -509,7 +510,7 @@ test('network credits retain shows without posters', function () {
         ]),
     ]);
 
-    $network = tmdbProvider()->network('49', 'en');
+    $network = tmdbProvider()->network('49', 'en', MatureContent::Suggestive);
 
     expect($network->credits)->toHaveCount(2)
         ->and($network->credits[1]->media->title)->toBe('Posterless Show')
@@ -542,7 +543,7 @@ test('company credits retain movies and shows without posters', function () {
         ]),
     ]);
 
-    $company = tmdbProvider()->company('41077', 'en');
+    $company = tmdbProvider()->company('41077', 'en', MatureContent::Suggestive);
 
     expect($company->credits)->toHaveCount(2)
         ->and($company->credits[0]->media->posterPath)->toBeNull()
@@ -695,14 +696,14 @@ test('missing api key raises a provider exception', function () {
     config(['tracker.tmdb.api_key' => null]);
     Http::fake();
 
-    tmdbProvider()->search('matrix', 'en');
+    tmdbProvider()->search('matrix', 'en', MatureContent::Suggestive);
 })->throws(ProviderException::class);
 
 test('a v4 read token goes in the bearer header, a v3 key in the query', function (string $key, bool $bearer) {
     config(['tracker.tmdb.api_key' => $key]);
     Http::fake(['*/search/multi*' => Http::response(['results' => []])]);
 
-    tmdbProvider()->search('matrix', 'en');
+    tmdbProvider()->search('matrix', 'en', MatureContent::Suggestive);
 
     Http::assertSent(fn ($request): bool => $bearer
         ? $request->hasHeader('Authorization', "Bearer {$key}") && ! str_contains($request->url(), 'api_key=')
@@ -719,7 +720,7 @@ test('a search row without an id names no title and is left out, and titles come
         ['media_type' => 'movie', 'id' => 438631, 'title' => ' Dune ', 'release_date' => '2021-09-15'],
     ]])]);
 
-    $results = tmdbProvider()->search('dune', 'en');
+    $results = tmdbProvider()->search('dune', 'en', MatureContent::Suggestive);
 
     expect($results)->toHaveCount(1)
         ->and($results[0]->ref)->toBe('438631')
@@ -733,3 +734,30 @@ test('a title answered without its id is not an answer', function () {
 
     tmdbProvider()->details('movie', '603', 'en');
 })->throws(ProviderException::class, 'TMDB answered an entry without an id.');
+
+test('every viewer-facing listing asks TMDB for adult titles only at the adult level', function (Closure $list, string $path) {
+    Http::fake(['api.themoviedb.org/*' => Http::response(['results' => [], 'page' => 1, 'total_pages' => 1, 'total_results' => 0])]);
+
+    $list(tmdbProvider(), MatureContent::Suggestive);
+    $list(tmdbProvider(), MatureContent::Adult);
+
+    $asked = collect(Http::recorded())
+        ->filter(fn (array $pair): bool => str_contains($pair[0]->url(), $path))
+        ->map(fn (array $pair): mixed => $pair[0]->data()['include_adult'] ?? null)
+        ->unique()
+        ->values()
+        ->all();
+
+    expect($asked)->toBe([false, true]);
+})->with([
+    'search' => [fn ($tmdb, $mature) => $tmdb->search('matrix', 'en', $mature), 'search/multi'],
+    'people' => [fn ($tmdb, $mature) => $tmdb->searchPeople('keanu', 'en', $mature), 'search/person'],
+    'upcoming' => [fn ($tmdb, $mature) => $tmdb->upcoming('movie', 'en', $mature), 'discover/movie'],
+    'by genre' => [fn ($tmdb, $mature) => $tmdb->byGenre('movie', '28', 'en', $mature), 'discover/movie'],
+    'studio' => [fn ($tmdb, $mature) => $tmdb->companyCredits('41077', 'en', $mature, 2), 'discover/movie'],
+    'network' => [fn ($tmdb, $mature) => $tmdb->networkCredits('49', 'en', $mature, 2), 'discover/tv'],
+]);
+
+test('TMDB tells apart only whether adult titles come in', function () {
+    expect(tmdbProvider()->matureLevels())->toBe([MatureContent::Suggestive, MatureContent::Adult]);
+});

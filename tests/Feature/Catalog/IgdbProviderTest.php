@@ -18,6 +18,7 @@ use App\Catalog\DatePrecision;
 use App\Catalog\GameKind;
 use App\Catalog\GameStore;
 use App\Catalog\ItemNotFoundException;
+use App\Catalog\MatureContent;
 use App\Catalog\MediaTypeRegistry;
 use App\Catalog\MultiplayerMode;
 use App\Catalog\ProviderException;
@@ -59,7 +60,7 @@ test('search maps game summaries with absolute cover urls', function () {
     enableGamesModule();
     Http::fake(['*/games' => Http::response(jsonFixture('igdb/search'))]);
 
-    $results = igdbProvider()->search('hollow knight', 'en');
+    $results = igdbProvider()->search('hollow knight', 'en', MatureContent::Suggestive);
 
     expect($results)->toHaveCount(2)
         ->and($results[0]->type)->toBe('game')
@@ -86,7 +87,7 @@ test('a search lifts the games people know above names that only sound closer', 
             'alternative_names' => [['name' => 'VA-11 HALL-A', 'comment' => 'Stylized title'], ['name' => 'Valhalla', 'comment' => 'Alternative title'], ['name' => 'va11halla.exe', 'comment' => 'Windows Executable']]],
     ])]);
 
-    $results = igdbProvider()->search('cyberpunk', 'en');
+    $results = igdbProvider()->search('cyberpunk', 'en', MatureContent::Suggestive);
 
     expect(array_map(fn ($summary): string => $summary->title, $results))->toBe([
         'Cyberpunk 2077', 'VA-11 Hall-A: Cyberpunk Bartender Action', 'Cyberpunk 2', 'Cyberpunk Sex', 'Cyberpunk', 'Cyberpunk Madness',
@@ -264,7 +265,7 @@ test('the company page maps igdb fields and top games per role as credits', func
         },
     ]);
 
-    $company = igdbProvider()->company('70', 'en');
+    $company = igdbProvider()->company('70', 'en', MatureContent::Suggestive);
 
     expect($company->ref)->toBe('70')
         ->and($company->name)->toBe('Nintendo')
@@ -819,7 +820,7 @@ test('genre listings page through the count endpoint', function () {
     ]);
 
     $genres = igdbProvider()->genres('game', 'en');
-    $listing = igdbProvider()->byGenre('game', '12', 'en', 2);
+    $listing = igdbProvider()->byGenre('game', '12', 'en', MatureContent::Suggestive, 2);
 
     expect($genres)->toEqual([new GenreOption('12', 'Role-playing (RPG)')])
         ->and($listing->page)->toBe(2)
@@ -848,9 +849,9 @@ test('the upcoming section is asked once a day, not on every render', function (
     Http::fake(['*/games' => Http::response(jsonFixture('igdb/search'))]);
     $this->travelTo(CarbonImmutable::parse('2026-10-10 15:30:00', 'UTC'));
 
-    igdbProvider()->upcoming('game', 'en');
+    igdbProvider()->upcoming('game', 'en', MatureContent::Suggestive);
     $this->travel(5)->minutes();
-    igdbProvider()->upcoming('game', 'en');
+    igdbProvider()->upcoming('game', 'en', MatureContent::Suggestive);
 
     // The cutoff is the start of the UTC day, so the query (and its cache
     // key) stays the same all day long.
@@ -864,8 +865,8 @@ test('the Twitch token rests encrypted in the cache and is reused from there', f
     enableGamesModule();
     Http::fake(['*/games' => Http::response(jsonFixture('igdb/search'))]);
 
-    igdbProvider()->search('zelda', 'en');
-    igdbProvider()->search('mario', 'en');
+    igdbProvider()->search('zelda', 'en', MatureContent::Suggestive);
+    igdbProvider()->search('mario', 'en', MatureContent::Suggestive);
 
     $stored = Cache::get('igdb:token');
 
@@ -880,7 +881,7 @@ test('a token the cache cannot decrypt is asked for again', function () {
     Http::fake(['*/games' => Http::response(jsonFixture('igdb/search'))]);
     Cache::put('igdb:token', 'plain-token-from-before', 3600);
 
-    igdbProvider()->search('zelda', 'en');
+    igdbProvider()->search('zelda', 'en', MatureContent::Suggestive);
 
     Http::assertSent(fn (Request $request): bool => str_contains($request->url(), 'id.twitch.tv'));
     Http::assertNotSent(fn (Request $request): bool => $request->hasHeader('Authorization', 'Bearer plain-token-from-before'));
@@ -892,5 +893,5 @@ test('a game row without an id is left out of the search', function () {
     unset($games[1]['id']);
     Http::fake(['*/games' => Http::response($games)]);
 
-    expect(igdbProvider()->search('hollow knight', 'en'))->toHaveCount(1);
+    expect(igdbProvider()->search('hollow knight', 'en', MatureContent::Suggestive))->toHaveCount(1);
 });

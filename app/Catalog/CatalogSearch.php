@@ -56,7 +56,7 @@ final readonly class CatalogSearch
 
         try {
             return $entity === null
-                ? $this->providers->get($scope)->search($query, $locale)
+                ? $this->providers->get($scope)->search($query, $locale, MatureContent::Suggestive)
                 : $this->searchEntities($entity, $query, $locale);
         } catch (ItemNotFoundException) {
             // Nothing by that name at the provider is an answer, not a failure.
@@ -72,7 +72,7 @@ final readonly class CatalogSearch
         $provider = $this->providers->firstSupporting($scope->contract());
 
         return match (true) {
-            $scope === EntitySearchScope::Person && $provider instanceof SupportsPeopleSearch => $provider->searchPeople($query, $locale),
+            $scope === EntitySearchScope::Person && $provider instanceof SupportsPeopleSearch => $provider->searchPeople($query, $locale, MatureContent::Suggestive),
             $scope === EntitySearchScope::Collection && $provider instanceof SupportsCollectionSearch => $provider->searchCollections($query, $locale),
             $scope === EntitySearchScope::Company && $provider instanceof SupportsCompanySearch => $provider->searchCompanies($query, $locale),
             default => [],

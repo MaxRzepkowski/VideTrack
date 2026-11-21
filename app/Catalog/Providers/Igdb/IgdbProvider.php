@@ -23,6 +23,7 @@ use App\Catalog\Data\MediaSummary;
 use App\Catalog\Data\Paginated;
 use App\Catalog\Data\PlatformDetails;
 use App\Catalog\ExternalIdSource;
+use App\Catalog\MatureContent;
 use App\Catalog\RelatedReleaseKind;
 use App\Support\Payload;
 use Carbon\CarbonImmutable;
@@ -99,7 +100,7 @@ class IgdbProvider implements MetadataProvider, SupportsCollections, SupportsCom
         return is_int($game) ? (string) $game : null;
     }
 
-    public function search(string $query, string $locale): array
+    public function search(string $query, string $locale, MatureContent $mature): array
     {
         // version_parent filters out re-releases of the same game (they
         // duplicate the parent under the same name).
@@ -163,12 +164,12 @@ class IgdbProvider implements MetadataProvider, SupportsCollections, SupportsCom
         return $this->platforms->platform($ref);
     }
 
-    public function company(string $ref, string $locale): CompanyDetails
+    public function company(string $ref, string $locale, MatureContent $mature): CompanyDetails
     {
         return $this->companies->company($ref, $locale);
     }
 
-    public function companyCredits(string $ref, string $locale, int $page): CreditPage
+    public function companyCredits(string $ref, string $locale, MatureContent $mature, int $page): CreditPage
     {
         return $this->companies->companyCredits($ref, $locale, $page);
     }
@@ -183,12 +184,12 @@ class IgdbProvider implements MetadataProvider, SupportsCollections, SupportsCom
         return $this->discovery->discoverableTypes();
     }
 
-    public function popular(string $type, string $locale): array
+    public function popular(string $type, string $locale, MatureContent $mature): array
     {
         return $this->discovery->popular($type, $locale);
     }
 
-    public function upcoming(string $type, string $locale): array
+    public function upcoming(string $type, string $locale, MatureContent $mature): array
     {
         return $this->discovery->upcoming($type, $locale);
     }
@@ -198,7 +199,7 @@ class IgdbProvider implements MetadataProvider, SupportsCollections, SupportsCom
         return $this->discovery->genres($type, $locale);
     }
 
-    public function byGenre(string $type, string $genreRef, string $locale, int $page = 1): Paginated
+    public function byGenre(string $type, string $genreRef, string $locale, MatureContent $mature, int $page = 1): Paginated
     {
         return $this->discovery->byGenre($type, $genreRef, $locale, $page);
     }
@@ -218,6 +219,7 @@ class IgdbProvider implements MetadataProvider, SupportsCollections, SupportsCom
         array $filters,
         string $locale,
         string $region,
+        MatureContent $mature,
         int $page = 1,
     ): Paginated {
         return $this->discovery->discoverFiltered($type, $filters, $locale, $region, $page);

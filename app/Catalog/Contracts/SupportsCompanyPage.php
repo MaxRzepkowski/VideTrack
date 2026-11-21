@@ -4,6 +4,7 @@ namespace App\Catalog\Contracts;
 
 use App\Catalog\Data\CompanyDetails;
 use App\Catalog\Data\CreditPage;
+use App\Catalog\MatureContent;
 
 /**
  * Capability: the provider serves a company page (a studio / publisher profile
@@ -11,7 +12,7 @@ use App\Catalog\Data\CreditPage;
  */
 interface SupportsCompanyPage
 {
-    public function company(string $ref, string $locale): CompanyDetails;
+    public function company(string $ref, string $locale, MatureContent $mature): CompanyDetails;
 
     /**
      * One chunk of the company's catalogue, 1-based. Page 1 is what
@@ -19,5 +20,5 @@ interface SupportsCompanyPage
      * up — a studio's catalogue runs to thousands of titles and no provider
      * hands them over in one answer.
      */
-    public function companyCredits(string $ref, string $locale, int $page): CreditPage;
+    public function companyCredits(string $ref, string $locale, MatureContent $mature, int $page): CreditPage;
 }

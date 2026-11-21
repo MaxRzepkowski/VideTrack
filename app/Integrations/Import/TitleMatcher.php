@@ -7,6 +7,7 @@ use App\Catalog\Data\ResolvedMedia;
 use App\Catalog\HierarchyPath;
 use App\Catalog\ItemNotFoundException;
 use App\Catalog\Matching;
+use App\Catalog\MatureContent;
 use App\Catalog\MediaKind;
 use App\Catalog\MediaTypeRegistry;
 use App\Catalog\ProviderRegistry;
@@ -127,7 +128,7 @@ final class TitleMatcher
         }
 
         try {
-            return $this->searches[$key] = $this->providers->forType($this->types->get($type))->search($title, $locale);
+            return $this->searches[$key] = $this->providers->forType($this->types->get($type))->search($title, $locale, MatureContent::Suggestive);
         } catch (ItemNotFoundException) {
             return $this->searches[$key] = [];
         }

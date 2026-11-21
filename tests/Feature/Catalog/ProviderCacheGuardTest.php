@@ -1,5 +1,6 @@
 <?php
 
+use App\Catalog\MatureContent;
 use App\Catalog\Providers\ComicVine\ComicVineProvider;
 use App\Catalog\Providers\Hardcover\HardcoverProvider;
 use App\Catalog\Providers\Igdb\IgdbProvider;
@@ -22,8 +23,8 @@ test('IGDB: a degraded (empty) search is not cached, so the next request self-he
 
     $provider = app(IgdbProvider::class);
 
-    expect($provider->search('hollow knight', 'en'))->toBeEmpty();
-    expect($provider->search('hollow knight', 'en'))->toHaveCount(2);
+    expect($provider->search('hollow knight', 'en', MatureContent::Suggestive))->toBeEmpty();
+    expect($provider->search('hollow knight', 'en', MatureContent::Suggestive))->toHaveCount(2);
 });
 
 test('Hardcover: a degraded (empty) search is not cached, so the next request self-heals', function () {
@@ -36,10 +37,10 @@ test('Hardcover: a degraded (empty) search is not cached, so the next request se
 
     $provider = app(HardcoverProvider::class);
 
-    expect($provider->search('hobbit', 'en'))->toBeEmpty();
+    expect($provider->search('hobbit', 'en', MatureContent::Suggestive))->toBeEmpty();
     // All three fixture hits, including the coverless book, prove the empty
     // response was not cached and the complete retry reached the provider.
-    expect($provider->search('hobbit', 'en'))->toHaveCount(3);
+    expect($provider->search('hobbit', 'en', MatureContent::Suggestive))->toHaveCount(3);
 });
 
 test('MAL: a degraded (empty) search is not cached, so the next request self-heals', function () {
@@ -50,8 +51,8 @@ test('MAL: a degraded (empty) search is not cached, so the next request self-hea
 
     $provider = app(MalProvider::class);
 
-    expect($provider->search('berserk', 'en'))->toBeEmpty();
-    expect($provider->search('berserk', 'en'))->not->toBeEmpty();
+    expect($provider->search('berserk', 'en', MatureContent::Suggestive))->toBeEmpty();
+    expect($provider->search('berserk', 'en', MatureContent::Suggestive))->not->toBeEmpty();
 });
 
 test('ComicVine: a degraded (empty) search is not cached, so the next request self-heals', function () {
@@ -68,8 +69,8 @@ test('ComicVine: a degraded (empty) search is not cached, so the next request se
 
     $provider = app(ComicVineProvider::class);
 
-    expect($provider->search('saga', 'en'))->toBeEmpty();
-    expect($provider->search('saga', 'en'))->not->toBeEmpty();
+    expect($provider->search('saga', 'en', MatureContent::Suggestive))->toBeEmpty();
+    expect($provider->search('saga', 'en', MatureContent::Suggestive))->not->toBeEmpty();
 });
 
 test('a non-empty listing is cached — the second identical search hits no provider', function () {
@@ -78,8 +79,8 @@ test('a non-empty listing is cached — the second identical search hits no prov
 
     $provider = app(HardcoverProvider::class);
 
-    $provider->search('hobbit', 'en');
-    $provider->search('hobbit', 'en');
+    $provider->search('hobbit', 'en', MatureContent::Suggestive);
+    $provider->search('hobbit', 'en', MatureContent::Suggestive);
 
     Http::assertSentCount(1);
 });

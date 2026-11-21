@@ -2,6 +2,7 @@
 
 use App\Catalog\Data\DiscoverFilter;
 use App\Catalog\DiscoverFilterKind;
+use App\Catalog\MatureContent;
 use App\Catalog\Providers\Igdb\IgdbProvider;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Http;
@@ -169,7 +170,7 @@ test('the where clause carries every filter and the listing is paged by offset',
         'modes' => ['3', '1'],
         'perspective' => ['2', 'DROP TABLE'],
         'year' => ['from' => 2015, 'to' => 2016],
-    ], 'en', 'US', 3);
+    ], 'en', 'US', MatureContent::Suggestive, 3);
 
     $body = igdbSentBody('/games');
 
@@ -195,13 +196,13 @@ test('the quality floor belongs to the rating sorts only', function () {
 
     fakeIgdbFilterEndpoints();
 
-    app(IgdbProvider::class)->discoverFiltered('game', ['sort' => 'total_rating desc'], 'en', 'US');
+    app(IgdbProvider::class)->discoverFiltered('game', ['sort' => 'total_rating desc'], 'en', 'US', MatureContent::Suggestive);
     expect(igdbSentBody('/games'))
         ->toContain('total_rating_count > 5')
         ->toContain('sort total_rating desc;');
 
     // On "newest first" the floor would hide exactly what is being asked for.
-    app(IgdbProvider::class)->discoverFiltered('game', ['sort' => 'first_release_date desc'], 'en', 'US');
+    app(IgdbProvider::class)->discoverFiltered('game', ['sort' => 'first_release_date desc'], 'en', 'US', MatureContent::Suggestive);
     expect(igdbSentBody('/games'))
         ->not->toContain('total_rating_count >')
         ->toContain('sort first_release_date desc;');
@@ -210,7 +211,7 @@ test('the quality floor belongs to the rating sorts only', function () {
 test('the most anticipated are the games still to come, dated or not', function () {
     fakeIgdbFilterEndpoints();
 
-    app(IgdbProvider::class)->discoverFiltered('game', ['sort' => 'hypes desc'], 'en', 'US');
+    app(IgdbProvider::class)->discoverFiltered('game', ['sort' => 'hypes desc'], 'en', 'US', MatureContent::Suggestive);
 
     $startOfToday = CarbonImmutable::now('UTC')->startOfDay()->getTimestamp();
 
@@ -223,7 +224,7 @@ test('the most anticipated are the games still to come, dated or not', function 
 test('a sort outside the whitelist falls back to the default', function () {
     fakeIgdbFilterEndpoints();
 
-    app(IgdbProvider::class)->discoverFiltered('game', ['sort' => 'name desc; drop'], 'en', 'US');
+    app(IgdbProvider::class)->discoverFiltered('game', ['sort' => 'name desc; drop'], 'en', 'US', MatureContent::Suggestive);
 
     expect(igdbSentBody('/games'))->toContain('sort total_rating_count desc;');
 });
@@ -232,7 +233,7 @@ test('the ascending run of a directional sort is whitelisted too', function () {
     fakeIgdbFilterEndpoints();
 
     // It is offered by no option's `value`, only as one option's twin.
-    app(IgdbProvider::class)->discoverFiltered('game', ['sort' => 'first_release_date asc'], 'en', 'US');
+    app(IgdbProvider::class)->discoverFiltered('game', ['sort' => 'first_release_date asc'], 'en', 'US', MatureContent::Suggestive);
 
     expect(igdbSentBody('/games'))->toContain('sort first_release_date asc;');
 });
@@ -243,7 +244,7 @@ test('non-numeric ids never reach the query', function () {
     app(IgdbProvider::class)->discoverFiltered('game', [
         'genres' => ['31', '1); drop'],
         'platform' => 'six',
-    ], 'en', 'US');
+    ], 'en', 'US', MatureContent::Suggestive);
 
     expect(igdbSentBody('/games'))
         ->toContain('genres = (31)')
@@ -253,7 +254,7 @@ test('non-numeric ids never reach the query', function () {
 test('the total comes from the count sub-resource over the same where clause', function () {
     fakeIgdbFilterEndpoints();
 
-    $listing = app(IgdbProvider::class)->discoverFiltered('game', ['genres' => ['31']], 'en', 'US', 2);
+    $listing = app(IgdbProvider::class)->discoverFiltered('game', ['genres' => ['31']], 'en', 'US', MatureContent::Suggestive, 2);
 
     expect($listing->total)->toBe(42)
         // 42 rows, 20 per page.
@@ -265,10 +266,10 @@ test('the total comes from the count sub-resource over the same where clause', f
 test('an honest empty result is cached, so a dead-end filter is not re-asked', function () {
     fakeIgdbFilterEndpoints();
 
-    app(IgdbProvider::class)->discoverFiltered('game', ['genres' => ['31']], 'en', 'US');
+    app(IgdbProvider::class)->discoverFiltered('game', ['genres' => ['31']], 'en', 'US', MatureContent::Suggestive);
     $first = count(Http::recorded());
 
-    app(IgdbProvider::class)->discoverFiltered('game', ['genres' => ['31']], 'en', 'US');
+    app(IgdbProvider::class)->discoverFiltered('game', ['genres' => ['31']], 'en', 'US', MatureContent::Suggestive);
 
     expect(count(Http::recorded()))->toBe($first);
 });

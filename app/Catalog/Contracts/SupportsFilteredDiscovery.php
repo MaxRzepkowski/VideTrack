@@ -5,6 +5,7 @@ namespace App\Catalog\Contracts;
 use App\Catalog\Data\DiscoverFilter;
 use App\Catalog\Data\MediaSummary;
 use App\Catalog\Data\Paginated;
+use App\Catalog\MatureContent;
 
 /**
  * Capability: the provider can narrow its catalogue by a set of filters it
@@ -61,6 +62,7 @@ interface SupportsFilteredDiscovery
         array $filters,
         string $locale,
         string $region,
+        MatureContent $mature,
         int $page = 1,
     ): Paginated;
 }

@@ -13,6 +13,7 @@ use App\Catalog\DiscoverSections;
 use App\Catalog\Discovery;
 use App\Catalog\FilteredDiscovery;
 use App\Catalog\GenreResolver;
+use App\Catalog\MatureContent;
 use App\Catalog\MediaTypeRegistry;
 use App\Catalog\ProviderCalls;
 use App\Catalog\ProviderRegistry;
@@ -96,7 +97,7 @@ final readonly class BuildDiscoverPage
                 if ($this->dictionaryMissing($filters, $active)) {
                     $calls->markFailed();
                 } else {
-                    $listing = $calls->attempt(fn (): Paginated => $provider->discoverFiltered($type, $active, $locale, $region, $query->page), null);
+                    $listing = $calls->attempt(fn (): Paginated => $provider->discoverFiltered($type, $active, $locale, $region, MatureContent::Suggestive, $query->page), null);
 
                     // Past the last page the URL is lying; rewrite it rather
                     // than show an empty grid. A degraded call has no page
@@ -128,7 +129,7 @@ final readonly class BuildDiscoverPage
                     return DiscoverPage::notFound();
                 }
 
-                $listing = $calls->attempt(fn (): Paginated => $provider->byGenre($type, $genre->ref, $locale, $query->page), null);
+                $listing = $calls->attempt(fn (): Paginated => $provider->byGenre($type, $genre->ref, $locale, MatureContent::Suggestive, $query->page), null);
 
                 $props['genre'] = $genre->ref;
                 $props['genreName'] = $genre->name;

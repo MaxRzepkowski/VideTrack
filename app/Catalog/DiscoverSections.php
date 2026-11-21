@@ -39,8 +39,8 @@ final readonly class DiscoverSections
         }
 
         if (Discovery::supports($provider, $type)) {
-            $popular = array_slice($calls->attempt(fn (): array => $provider->popular($type, $locale), []), 0, self::SIZE);
-            $upcoming = array_slice($calls->attempt(fn (): array => $provider->upcoming($type, $locale), []), 0, self::SIZE);
+            $popular = array_slice($calls->attempt(fn (): array => $provider->popular($type, $locale, MatureContent::Suggestive), []), 0, self::SIZE);
+            $upcoming = array_slice($calls->attempt(fn (): array => $provider->upcoming($type, $locale, MatureContent::Suggestive), []), 0, self::SIZE);
         }
 
         return new BrowseSections($trending, $popular, $upcoming);

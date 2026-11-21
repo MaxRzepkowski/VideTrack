@@ -5,6 +5,7 @@ namespace App\Catalog\Providers\Mal;
 use App\Catalog\Data\MediaSummary;
 use App\Catalog\DatePrecision;
 use App\Catalog\Matching;
+use App\Catalog\MatureContent;
 use App\Catalog\ProviderException;
 use App\Catalog\TitleStatus;
 use App\Support\Payload;
@@ -21,12 +22,13 @@ final readonly class MalPayload
 
     /**
      * Summaries out of the entries of a MAL list (`[].node`): novels drop out
-     * (books module territory), adult titles too, and covers are required.
+     * (books module territory), so do manga rated past `$mature`, and covers
+     * are required.
      *
      * @param  list<array<array-key, mixed>>  $entries
      * @return list<MediaSummary>
      */
-    public function cards(array $entries): array
+    public function cards(array $entries, MatureContent $mature): array
     {
         $summaries = [];
 
@@ -37,7 +39,7 @@ final readonly class MalPayload
                 continue;
             }
 
-            if (in_array($node['media_type'] ?? '', self::NOVEL_TYPES, true) || $this->isAdult($node)) {
+            if (in_array($node['media_type'] ?? '', self::NOVEL_TYPES, true) || ! $this->rating($node)->allowedAt($mature)) {
                 continue;
             }
 
@@ -216,14 +218,24 @@ final readonly class MalPayload
     }
 
     /**
-     * Whether MAL rates the manga adult material. A rating MAL did not send,
-     * or one it adds later, is not taken for it.
+     * Whether MAL rates the manga adult material.
      *
      * @param  array<array-key, mixed>  $data
      */
     public function isAdult(array $data): bool
     {
-        return Payload::enum($data, 'nsfw', MangaNsfw::class)?->isAdult() ?? false;
+        return $this->rating($data)->isAdult();
+    }
+
+    /**
+     * How safe for work MAL rates the manga. A rating MAL did not send, or one
+     * it adds later, is not taken for adult or suggestive material.
+     *
+     * @param  array<array-key, mixed>  $data
+     */
+    private function rating(array $data): MangaNsfw
+    {
+        return Payload::enum($data, 'nsfw', MangaNsfw::class) ?? MangaNsfw::White;
     }
 
     /**

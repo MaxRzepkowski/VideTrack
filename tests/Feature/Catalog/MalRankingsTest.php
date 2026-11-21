@@ -1,5 +1,6 @@
 <?php
 
+use App\Catalog\MatureContent;
 use App\Catalog\Providers\Mal\MalProvider;
 use App\Catalog\Providers\Mal\MalRankings;
 use App\Catalog\Providers\Mal\MangaRankingType;
@@ -51,8 +52,8 @@ test('a ranking is its top in one answer, narrowed here, so every page is full a
     Http::fake(['api.myanimelist.net/v2/manga/ranking*' => Http::response(malRankingTop(MalRankings::RANKING_DEPTH))]);
 
     $kept = keptOfRankingTop(MalRankings::RANKING_DEPTH);
-    $first = app(MalProvider::class)->discoverFiltered('manga', [MalRankings::FILTER => 'manhwa'], 'en', 'US', 1);
-    $second = app(MalProvider::class)->discoverFiltered('manga', [MalRankings::FILTER => 'manhwa'], 'en', 'US', 2);
+    $first = app(MalProvider::class)->discoverFiltered('manga', [MalRankings::FILTER => 'manhwa'], 'en', 'US', MatureContent::Suggestive, 1);
+    $second = app(MalProvider::class)->discoverFiltered('manga', [MalRankings::FILTER => 'manhwa'], 'en', 'US', MatureContent::Suggestive, 2);
 
     expect($first->total)->toBe($kept)
         ->and($first->totalPages)->toBe((int) ceil($kept / MalRankings::PAGE_SIZE))
@@ -76,8 +77,8 @@ test('a ranking shorter than the depth ends where it does, and a ranking not off
     enableMangaModule();
     Http::fake(['api.myanimelist.net/v2/manga/ranking*' => Http::response(malRankingTop(30))]);
 
-    $short = app(MalProvider::class)->discoverFiltered('manga', [MalRankings::FILTER => 'oneshots'], 'en', 'US', 5);
-    $unknown = app(MalProvider::class)->discoverFiltered('manga', [MalRankings::FILTER => 'novels; drop'], 'en', 'US');
+    $short = app(MalProvider::class)->discoverFiltered('manga', [MalRankings::FILTER => 'oneshots'], 'en', 'US', MatureContent::Suggestive, 5);
+    $unknown = app(MalProvider::class)->discoverFiltered('manga', [MalRankings::FILTER => 'novels; drop'], 'en', 'US', MatureContent::Suggestive);
 
     expect($short->total)->toBe(keptOfRankingTop(30))
         ->and($short->totalPages)->toBe(1)

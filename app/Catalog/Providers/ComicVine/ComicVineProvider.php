@@ -8,6 +8,7 @@ use App\Catalog\Data\ChangeReport;
 use App\Catalog\Data\MediaDetails;
 use App\Catalog\Data\MediaSummary;
 use App\Catalog\ItemNotFoundException;
+use App\Catalog\MatureContent;
 use App\Catalog\ProviderException;
 use App\Support\Payload;
 use App\Support\PlainText;
@@ -49,7 +50,7 @@ class ComicVineProvider implements MetadataProvider, SupportsChangeFeed
         return 'comicvine';
     }
 
-    public function search(string $query, string $locale): array
+    public function search(string $query, string $locale, MatureContent $mature): array
     {
         $data = $this->client->get('/search/', [
             'query' => $query,

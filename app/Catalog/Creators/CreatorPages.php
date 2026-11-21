@@ -8,6 +8,7 @@ use App\Catalog\Contracts\SupportsPersonPage;
 use App\Catalog\Data\CompanyDetails;
 use App\Catalog\Data\CreditPage;
 use App\Catalog\Data\PersonDetails;
+use App\Catalog\MatureContent;
 use App\Catalog\ProviderRegistry;
 use App\Support\ExternalServiceException;
 
@@ -68,8 +69,8 @@ final readonly class CreatorPages
         $provider = $this->providers->find($creator->provider);
 
         return match (true) {
-            $creator->kind === CreatorKind::Company && $provider instanceof SupportsCompanyPage => $provider->company($creator->ref, $locale),
-            $creator->kind === CreatorKind::Network && $provider instanceof SupportsNetworkPage => $provider->network($creator->ref, $locale),
+            $creator->kind === CreatorKind::Company && $provider instanceof SupportsCompanyPage => $provider->company($creator->ref, $locale, MatureContent::Suggestive),
+            $creator->kind === CreatorKind::Network && $provider instanceof SupportsNetworkPage => $provider->network($creator->ref, $locale, MatureContent::Suggestive),
             default => throw UnknownCreator::of($creator),
         };
     }
@@ -84,8 +85,8 @@ final readonly class CreatorPages
         $provider = $this->providers->find($creator->provider);
 
         return match (true) {
-            $creator->kind === CreatorKind::Company && $provider instanceof SupportsCompanyPage => $provider->companyCredits($creator->ref, $locale, $page),
-            $creator->kind === CreatorKind::Network && $provider instanceof SupportsNetworkPage => $provider->networkCredits($creator->ref, $locale, $page),
+            $creator->kind === CreatorKind::Company && $provider instanceof SupportsCompanyPage => $provider->companyCredits($creator->ref, $locale, MatureContent::Suggestive, $page),
+            $creator->kind === CreatorKind::Network && $provider instanceof SupportsNetworkPage => $provider->networkCredits($creator->ref, $locale, MatureContent::Suggestive, $page),
             default => throw UnknownCreator::of($creator),
         };
     }

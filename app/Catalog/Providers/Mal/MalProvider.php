@@ -4,6 +4,7 @@ namespace App\Catalog\Providers\Mal;
 
 use App\Catalog\Contracts\MetadataProvider;
 use App\Catalog\Contracts\SupportsFilteredDiscovery;
+use App\Catalog\Contracts\SupportsMatureFilter;
 use App\Catalog\Contracts\SupportsTrending;
 use App\Catalog\Data\MediaDetails;
 use App\Catalog\Data\MediaSummary;
@@ -11,6 +12,7 @@ use App\Catalog\Data\Paginated;
 use App\Catalog\Data\RankingPosition;
 use App\Catalog\ItemNotFoundException;
 use App\Catalog\Matching;
+use App\Catalog\MatureContent;
 use App\Catalog\ProviderRejected;
 use App\Catalog\RankingKind;
 use App\Catalog\Relations\TitleTie;
@@ -26,7 +28,7 @@ use LogicException;
  * and its rankings as the discover page's filtered listing. Covers are
  * absolute MAL CDN URLs (`mediaImage` passes `http…` through).
  */
-class MalProvider implements MetadataProvider, SupportsFilteredDiscovery, SupportsTrending
+class MalProvider implements MetadataProvider, SupportsFilteredDiscovery, SupportsMatureFilter, SupportsTrending
 {
     /** Below this length a refused search is an empty one. */
     private const SHORT_QUERY = 3;
@@ -48,6 +50,12 @@ class MalProvider implements MetadataProvider, SupportsFilteredDiscovery, Suppor
         .'authors{first_name,last_name},serialization{name},pictures,recommendations{'.self::SUMMARY_FIELDS.'},'
         .'related_manga{'.self::SUMMARY_FIELDS.'}';
 
+    /**
+     * How far the listings every viewer shares go (trending, what sits beside
+     * a manga): no further than Suggestive, whatever one viewer allows.
+     */
+    private const SHARED_LEVEL = MatureContent::Suggestive;
+
     /** The provider's code, on every card it makes. */
     public const CODE = 'mal';
 
@@ -62,7 +70,7 @@ class MalProvider implements MetadataProvider, SupportsFilteredDiscovery, Suppor
         return self::CODE;
     }
 
-    public function search(string $query, string $locale): array
+    public function search(string $query, string $locale, MatureContent $mature): array
     {
         try {
             $data = $this->client->get(
@@ -80,7 +88,7 @@ class MalProvider implements MetadataProvider, SupportsFilteredDiscovery, Suppor
             throw $refusal;
         }
 
-        return $this->payload->cards(Payload::list($data['data'] ?? null));
+        return $this->payload->cards(Payload::list($data['data'] ?? null), $mature);
     }
 
     public function details(string $type, string $ref, string $locale, ?string $region = null): MediaDetails
@@ -168,7 +176,12 @@ class MalProvider implements MetadataProvider, SupportsFilteredDiscovery, Suppor
             requireKey: 'data',
         );
 
-        return array_slice($this->payload->cards(Payload::list($data['data'] ?? null)), 0, 20);
+        return array_slice($this->payload->cards(Payload::list($data['data'] ?? null), self::SHARED_LEVEL), 0, 20);
+    }
+
+    public function matureLevels(): array
+    {
+        return [MatureContent::Safe, MatureContent::Suggestive, MatureContent::Adult];
     }
 
     public function filterableTypes(): array
@@ -181,9 +194,9 @@ class MalProvider implements MetadataProvider, SupportsFilteredDiscovery, Suppor
         return $this->rankings->filters();
     }
 
-    public function discoverFiltered(string $type, array $filters, string $locale, string $region, int $page = 1): Paginated
+    public function discoverFiltered(string $type, array $filters, string $locale, string $region, MatureContent $mature, int $page = 1): Paginated
     {
-        return $this->rankings->page($filters, self::SUMMARY_FIELDS, $page);
+        return $this->rankings->page($filters, self::SUMMARY_FIELDS, $mature, $page);
     }
 
     /**
@@ -198,7 +211,7 @@ class MalProvider implements MetadataProvider, SupportsFilteredDiscovery, Suppor
         $entries = Payload::list($data['recommendations'] ?? null);
         usort($entries, fn (array $a, array $b): int => (Payload::int($b, 'num_recommendations') ?? 0) <=> (Payload::int($a, 'num_recommendations') ?? 0));
 
-        return $this->payload->cards($entries);
+        return $this->payload->cards($entries, self::SHARED_LEVEL);
     }
 
     /**
@@ -220,7 +233,7 @@ class MalProvider implements MetadataProvider, SupportsFilteredDiscovery, Suppor
                 continue;
             }
 
-            foreach ($this->payload->cards([$entry]) as $card) {
+            foreach ($this->payload->cards([$entry], self::SHARED_LEVEL) as $card) {
                 $ties[] = new TitleTie($type->relation(), $card);
             }
         }
