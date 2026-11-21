@@ -321,4 +321,11 @@ return [
     'untitled_entry' => 'An entry without a title',
     'skip_wetrakr_season' => ':label: a season, and the export does not say which one.',
     'skip_wetrakr_unknown_place' => ':label: nothing in the export says which title this is.',
+    'koreader_statistics' => 'KOReader reading statistics (statistics.sqlite3)',
+    'import_from_koreader' => 'Import from KOReader',
+    'books_you_read_to_the_end_or' => 'Books you read to the end or are reading, found by title and author.',
+    'koreader_keeps_statistics_sqlite3_in' => 'KOReader keeps statistics.sqlite3 in its settings folder (on a Kobo .adds/koreader/settings, on Android koreader/settings). Copy it from the device and upload it.',
+    'the_file_is_not_koreader_statistics' => 'The file is not KOReader\'s reading statistics.',
+    'skip_koreader_no_title' => 'A book without a title.',
+    'skip_koreader_never_read' => ':label: opened, but no page read.',
 ];

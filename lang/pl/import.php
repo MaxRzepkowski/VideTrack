@@ -321,4 +321,11 @@ return [
     'untitled_entry' => 'Pozycja bez tytułu',
     'skip_wetrakr_season' => ':label: sezon, a eksport nie mówi, który.',
     'skip_wetrakr_unknown_place' => ':label: nic w eksporcie nie mówi, który to tytuł.',
+    'koreader_statistics' => 'Statystyki czytania z KOReadera (statistics.sqlite3)',
+    'import_from_koreader' => 'Import z KOReadera',
+    'books_you_read_to_the_end_or' => 'Książki przeczytane do końca i czytane, dopasowane po tytule i autorze.',
+    'koreader_keeps_statistics_sqlite3_in' => 'KOReader trzyma statistics.sqlite3 w folderze ustawień (na Kobo .adds/koreader/settings, na Androidzie koreader/settings). Skopiuj go z urządzenia i wgraj.',
+    'the_file_is_not_koreader_statistics' => 'Ten plik nie jest statystykami czytania z KOReadera.',
+    'skip_koreader_no_title' => 'Książka bez tytułu.',
+    'skip_koreader_never_read' => ':label: otwarta, ale bez przeczytanej strony.',
 ];
