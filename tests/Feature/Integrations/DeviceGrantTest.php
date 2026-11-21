@@ -33,7 +33,7 @@ function exampleGrant(?string $verificationUri = null): DeviceGrant
         devicePath: '/device',
         tokenPath: '/token',
         revokePath: '/revoke',
-        rejectedKey: 'import.simkl_did_not_accept_this_instance',
+        rejectedKey: 'import.simkl_did_not_accept_this_client_id',
         notStartedKey: 'import.simkl_could_not_start_the_connection',
         expiredKey: 'import.simkl_stopped_accepting_this_connection_connect',
         verificationUri: $verificationUri,

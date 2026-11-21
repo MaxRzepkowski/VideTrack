@@ -20,7 +20,7 @@ final readonly class DeviceGrant
         public string $devicePath,
         public string $tokenPath,
         public string $revokePath,
-        /** The instance's app is unknown to the service or not allowed this grant. */
+        /** The app is unknown to the service or not allowed this grant. */
         public string $rejectedKey,
         /** The service answered the code request with nothing to show. */
         public string $notStartedKey,

@@ -3,9 +3,8 @@
 use App\Enums\MediaUserStatus;
 use App\Enums\PlayOutcome;
 use App\Enums\TaskRunStatus;
-use App\Integrations\Connections\ConnectionRegistry;
 use App\Integrations\Connections\ConnectionStatus;
-use App\Integrations\Import\ImportSourceRegistry;
+use App\Integrations\Simkl\SimklClient;
 use App\Integrations\Simkl\SimklUnavailable;
 use App\Models\MediaItem;
 use App\Models\ServiceConnection;
@@ -21,9 +20,7 @@ use Inertia\Testing\AssertableInertia;
  */
 
 beforeEach(function () {
-    // Before any registry is resolved: the source and the service register
-    // only on an instance with a client id.
-    config(['tracker.simkl.client_id' => 'simkl-client', 'tracker.version' => '1.2.3']);
+    config(['tracker.version' => '1.2.3']);
     Sleep::fake();
     // Nothing here may reach the real Simkl: an unmatched URL fails the test
     // instead of going out.
@@ -36,6 +33,7 @@ function simklConnection(User $user, array $credentials = [], array $attributes 
         'access_token' => 'simkl_at_one',
         'refresh_token' => 'simkl_rt_one',
         'expires_at' => now()->addDays(6)->getTimestamp(),
+        'client_id' => 'simkl-client',
         ...$credentials,
     ], ['account_label' => 'jane_doe', ...$attributes]);
 }
@@ -91,23 +89,27 @@ function simklLibraryFakes(): array
     ];
 }
 
-test('without a client id Simkl is not offered at all', function () {
-    config(['tracker.simkl.client_id' => '']);
-    app()->forgetInstance(ImportSourceRegistry::class);
-    app()->forgetInstance(ConnectionRegistry::class);
-
-    expect(app(ImportSourceRegistry::class)->has('simkl'))->toBeFalse()
-        ->and(app(ConnectionRegistry::class)->has('simkl'))->toBeFalse();
-});
-
-test('the import page offers Simkl with a code to type at simkl.com', function () {
+test('the import page offers Simkl with a field for the user\'s own app and a code to type at simkl.com', function () {
     $this->actingAs(User::factory()->create())
-        ->get('/settings/import')
+        ->get(route('settings.import.index'))
         ->assertInertia(fn (AssertableInertia $page) => $page
             ->where('sources', fn ($sources) => collect($sources)->contains(fn ($source) => $source['code'] === 'simkl'
                 && $source['inputKind'] === 'connection'
                 && $source['connect']['method'] === 'device'
-                && $source['connect']['name'] === 'Simkl')));
+                && $source['connect']['name'] === 'Simkl'
+                && array_column($source['connect']['fields'], 'key') === [SimklClient::CLIENT_ID]
+                && $source['notes'][0]['url'] === SimklClient::DEVELOPER_URL)));
+});
+
+test('a device code is not asked for without the app\'s client id', function () {
+    Http::fake();
+
+    $this->actingAs(User::factory()->create())
+        ->postJson(route('settings.connections.device.begin', 'simkl'), ['values' => []])
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors(['values.client_id']);
+
+    Http::assertNothingSent();
 });
 
 test('connecting asks Simkl for a read-only device code, without a secret', function () {
@@ -121,7 +123,7 @@ test('connecting asks Simkl for a read-only device code, without a secret', func
     ])]);
 
     $this->actingAs(User::factory()->create())
-        ->postJson('/settings/connections/simkl/device')
+        ->postJson(route('settings.connections.device.begin', 'simkl'), ['values' => ['client_id' => 'simkl-client']])
         ->assertOk()
         ->assertJsonPath('userCode', 'BDWP-HQPK')
         ->assertJsonPath('verificationUriComplete', 'https://simkl.com/pin?user_code=BDWP-HQPK')
@@ -143,10 +145,10 @@ test('an approved code is kept when the account name cannot be read', function (
     ]);
 
     $user = User::factory()->create();
-    $this->actingAs($user)->postJson('/settings/connections/simkl/device');
+    $this->actingAs($user)->postJson(route('settings.connections.device.begin', 'simkl'), ['values' => ['client_id' => 'simkl-client']]);
 
     $this->travel(5)->seconds();
-    $this->postJson('/settings/connections/simkl/device/poll')->assertJsonPath('status', 'connected');
+    $this->postJson(route('settings.connections.device.poll', 'simkl'))->assertJsonPath('status', 'connected');
 
     expect($user->serviceConnections()->sole()->credential('access_token'))->toBe('simkl_at_new');
 });
@@ -167,21 +169,21 @@ test('an approved code becomes a connection named after the Simkl account', func
     ]);
 
     $user = User::factory()->create();
-    $this->actingAs($user)->postJson('/settings/connections/simkl/device');
+    $this->actingAs($user)->postJson(route('settings.connections.device.begin', 'simkl'), ['values' => ['client_id' => 'simkl-client']]);
 
     $this->travel(5)->seconds();
-    $this->postJson('/settings/connections/simkl/device/poll')->assertJsonPath('status', 'pending');
+    $this->postJson(route('settings.connections.device.poll', 'simkl'))->assertJsonPath('status', 'pending');
 
     $this->travel(5)->seconds();
-    $this->postJson('/settings/connections/simkl/device/poll')->assertJsonPath('status', 'pending');
+    $this->postJson(route('settings.connections.device.poll', 'simkl'))->assertJsonPath('status', 'pending');
 
     // slow_down: ten seconds now, not five.
     $this->travel(5)->seconds();
-    $this->postJson('/settings/connections/simkl/device/poll')->assertJsonPath('status', 'pending');
+    $this->postJson(route('settings.connections.device.poll', 'simkl'))->assertJsonPath('status', 'pending');
     expect(requestsTo('/oauth2/token'))->toBe(2);
 
     $this->travel(5)->seconds();
-    $this->postJson('/settings/connections/simkl/device/poll')
+    $this->postJson(route('settings.connections.device.poll', 'simkl'))
         ->assertJsonPath('status', 'connected')
         ->assertJsonPath('connection.account', 'jane_doe');
 
@@ -189,6 +191,8 @@ test('an approved code becomes a connection named after the Simkl account', func
 
     expect($connection->credential('access_token'))->toBe('simkl_at_new')
         ->and($connection->credential('refresh_token'))->toBe('simkl_rt_new')
+        // Every later call and refresh goes with the user's own app.
+        ->and($connection->credential('client_id'))->toBe('simkl-client')
         ->and((int) $connection->credential('expires_at'))->toBeGreaterThan(now()->addDays(6)->getTimestamp());
 
     Http::assertSent(fn (Request $request) => str_contains($request->url(), '/oauth2/token')
@@ -203,14 +207,13 @@ test('an approved code becomes a connection named after the Simkl account', func
         && $request->header('Authorization') === ['Bearer simkl_at_new']);
 });
 
-test('a V1 client id is turned down once, with the reason', function () {
+test('a client id Simkl does not take is turned down once, with the reason', function () {
     Http::fake(['api.simkl.com/oauth2/device' => Http::response(['error' => 'invalid_client', 'error_description' => 'This client_id is not enabled for OAuth 2.0'], 401)]);
 
     $this->actingAs(User::factory()->create())
-        ->postJson('/settings/connections/simkl/device')
+        ->postJson(route('settings.connections.device.begin', 'simkl'), ['values' => ['client_id' => 'simkl-client']])
         ->assertUnprocessable()
-        ->assertJsonPath('message', 'Simkl did not accept this instance. Its client id must belong to an AUTH V2 app.')
-        ->assertJsonValidationErrors(['connection' => 'Simkl did not accept this instance.']);
+        ->assertJsonValidationErrors(['connection' => 'Simkl did not accept this Client ID. It must belong to an AUTH V2 app of type “TV, devices & command line”.']);
 
     expect(requestsTo('/oauth2/device'))->toBe(1);
 });

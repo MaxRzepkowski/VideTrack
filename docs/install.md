@@ -134,7 +134,6 @@ Everything is optional except `TMDB_API_KEY`. A media type exists only when its 
 | `HARDCOVER_API_KEY` | | [Hardcover](https://hardcover.app/account/api) API key (`hc_pat_…`, scope `read:catalog`): **books** |
 | `MAL_CLIENT_ID` | | [MyAnimeList](https://myanimelist.net/apiconfig) client id: **manga** |
 | `COMICVINE_API_KEY` | | [ComicVine](https://comicvine.gamespot.com/api) key: **comics** |
-| `SIMKL_CLIENT_ID` | | client id of a Simkl **AUTH V2** app of type *TV, devices & command line* ([developer settings](https://simkl.com/settings/developer/)); users connect with a code, no callback address. Without it the Simkl import is not offered |
 | `VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY` | generated | the key pair browser notifications are signed with; generated on first start into `/data/vapid.json`. Set them only to bring your own pair ([below](#notifications-in-the-browser)) |
 | `VAPID_SUBJECT` | `APP_URL` if it is `https://`, else `SOURCE_URL` | how a push service may reach you about this instance's pushes: an `https://` address or `mailto:` |
 | `APPRISE_API_URL` | `http://apprise:8000` in `compose.yaml` | address of the apprise-api container; empty, its services are not offered as notification channels ([below](#notifications-through-apprise)) |

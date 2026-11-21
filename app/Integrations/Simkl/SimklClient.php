@@ -14,11 +14,13 @@ use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
+use LogicException;
 
 /**
  * Simkl's API as its rules ask to be called (api.simkl.org, read 2026-09-27):
  *
- * - every API call carries client_id, app-name and app-version in the query
+ * - every API call carries the user's own app's client_id (kept with the
+ *   connection's tokens), app-name and app-version in the query
  *   and a User-Agent naming the app; the OAuth endpoints take a form body;
  * - calls go one after another (10 GET/s per client id and token);
  * - 429 and 5xx are waited out — doubling from one second, five attempts —
@@ -29,6 +31,12 @@ use Illuminate\Support\Facades\Http;
  */
 class SimklClient
 {
+    /** Where the connection keeps the id of the user's Simkl app. */
+    public const CLIENT_ID = 'client_id';
+
+    /** Where a user makes their Simkl app. */
+    public const DEVELOPER_URL = 'https://simkl.com/settings/developer/';
+
     private const TIMEOUT_SECONDS = 60;
 
     public function __construct(private readonly TokenGrantClient $tokens) {}
@@ -39,10 +47,10 @@ class SimklClient
      * connection here leaves it unknown rather than losing the grant the
      * user just approved.
      */
-    public function accountName(string $accessToken): ?string
+    public function accountName(string $accessToken, string $clientId): ?string
     {
         try {
-            $response = $this->api($accessToken)->get('/users/settings', $this->appQuery());
+            $response = $this->api($accessToken)->get('/users/settings', $this->appQuery($clientId));
         } catch (ConnectionException) {
             return null;
         }
@@ -60,7 +68,8 @@ class SimklClient
      */
     public function get(ServiceConnection $connection, string $path, array $query = []): array
     {
-        $response = $this->tokens->call($this->grant()->tokenGrant(), $connection, fn (string $token): Response => $this->send($token, $path, $query));
+        $clientId = $connection->credential(self::CLIENT_ID) ?? throw new LogicException('A Simkl connection without the app it was made with.');
+        $response = $this->tokens->call($this->grant($clientId)->tokenGrant(), $connection, fn (string $token): Response => $this->send($token, $clientId, $path, $query));
 
         if (HttpRetry::isOutage($response)) {
             throw new SimklUnavailable('import.service_answered_try_later', ['service' => SimklService::NAME, 'status' => $response->status()]);
@@ -77,29 +86,29 @@ class SimklClient
     /**
      * @param  array<string, string>  $query
      */
-    private function send(string $token, string $path, array $query): Response
+    private function send(string $token, string $clientId, string $path, array $query): Response
     {
         try {
             return $this->api($token)
                 ->retry(5, fn (int $attempt): int => min(60000, 1000 * 2 ** ($attempt - 1)), HttpRetry::isTransientOrThrottled(...), throw: false)
-                ->get($path, [...$query, ...$this->appQuery()]);
+                ->get($path, [...$query, ...$this->appQuery($clientId)]);
         } catch (ConnectionException $e) {
             throw new SimklUnavailable('import.service_unreachable', ['service' => SimklService::NAME, 'reason' => ConnectionFailure::reason($e)]);
         }
     }
 
-    /** Where the service keeps its device grant, for connecting and for every call made with it. */
-    public function grant(): DeviceGrant
+    /** Where the user's app keeps its device grant, for connecting and for every call made with it. */
+    public function grant(string $clientId): DeviceGrant
     {
         return new DeviceGrant(
             service: SimklService::NAME,
             baseUrl: config()->string('tracker.simkl.base_url'),
-            clientId: $this->clientId(),
+            clientId: $clientId,
             scope: 'media:read',
             devicePath: '/oauth2/device',
             tokenPath: '/oauth2/token',
             revokePath: '/oauth2/revoke',
-            rejectedKey: 'import.simkl_did_not_accept_this_instance',
+            rejectedKey: 'import.simkl_did_not_accept_this_client_id',
             notStartedKey: 'import.simkl_could_not_start_the_connection',
             expiredKey: 'import.simkl_stopped_accepting_this_connection_connect',
             verificationUri: 'https://simkl.com/pin',
@@ -118,17 +127,12 @@ class SimklClient
     /**
      * @return array{client_id: string, app-name: string, app-version: string}
      */
-    private function appQuery(): array
+    private function appQuery(string $clientId): array
     {
         return [
-            'client_id' => $this->clientId(),
+            'client_id' => $clientId,
             'app-name' => 'videtrack',
             'app-version' => config()->string('tracker.version'),
         ];
-    }
-
-    private function clientId(): string
-    {
-        return config()->string('tracker.simkl.client_id');
     }
 }

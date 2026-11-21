@@ -69,6 +69,7 @@ function refusal(data: Refusal, fallback: string): string {
 
 async function beginDevice(): Promise<void> {
     failure.value = null;
+    fieldErrors.value = {};
     busy.value = true;
 
     try {
@@ -78,10 +79,11 @@ async function beginDevice(): Promise<void> {
             verificationUriComplete: string | null;
             expiresIn: number;
             interval: number;
-        }>('POST', route('settings.connections.device.begin', { service: props.connect.service }));
+        }>('POST', route('settings.connections.device.begin', { service: props.connect.service }), { values: values.value });
 
         if (!ok) {
-            failure.value = refusal(data, trans('import.the_service_could_not_start_the'));
+            readErrors(data);
+            failure.value ??= Object.keys(fieldErrors.value).length > 0 ? null : refusal(data, trans('import.the_service_could_not_start_the'));
 
             return;
         }
@@ -176,7 +178,8 @@ const countdown = computed(() => {
     return `${minutes}:${seconds}`;
 });
 
-// Pasted address and key: checked once, then the account to be picked.
+// What the card asks for: an address and key checked once, then the account
+// to be picked; or what a device code is asked with.
 const values = ref<Record<string, string>>({});
 const fieldErrors = ref<Record<string, string>>({});
 const choices = ref<{ id: string; label: string }[] | null>(null);
@@ -348,9 +351,18 @@ function displayUrl(url: string): string {
                         {{ trans('common.cancel') }}
                     </button>
                 </div>
-                <Button v-else type="button" class="h-10 py-2" :disabled="busy" @click="beginDevice">
-                    {{ trans('import.connect_service', { service: connect.name }) }}
-                </Button>
+                <form v-else class="space-y-4" @submit.prevent="beginDevice">
+                    <CredentialFields
+                        v-if="connect.fields.length"
+                        v-model="values"
+                        :fields="connect.fields"
+                        :id-prefix="`connect-${connect.service}`"
+                        :error-of="(key) => fieldErrors[key]"
+                    />
+                    <Button type="submit" class="h-10 py-2" :disabled="busy">
+                        {{ trans('import.connect_service', { service: connect.name }) }}
+                    </Button>
+                </form>
             </template>
 
             <Button v-else-if="connect.method === 'redirect'" type="button" class="h-10 py-2" :disabled="busy" @click="beginRedirect">

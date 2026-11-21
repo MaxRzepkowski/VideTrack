@@ -8,12 +8,15 @@ use App\Integrations\Connections\Data\ConnectionGrant;
 use App\Integrations\Connections\Data\DeviceAuthorization;
 use App\Integrations\Connections\Data\DeviceGrant;
 use App\Models\ServiceConnection;
+use LogicException;
 
 /**
  * A service connected through its OAuth device flow: the user approves a
  * code on the service's own site, and the instance never sees a password
  * nor needs a callback address. What differs between services is where the
- * grant lives and how the account is named; the rest is DeviceGrantClient's and TokenGrantClient's.
+ * grant lives, what the card asks for first and how the account is named;
+ * the rest is DeviceGrantClient's and TokenGrantClient's. What was typed is
+ * kept with the tokens, for every later call and refresh.
  */
 abstract class DeviceGrantService implements AuthorizesByDevice, RevokesAccess
 {
@@ -22,29 +25,42 @@ abstract class DeviceGrantService implements AuthorizesByDevice, RevokesAccess
         private readonly TokenGrantClient $tokens,
     ) {}
 
-    /** Where the service keeps its grant. */
-    abstract protected function grant(): DeviceGrant;
+    /**
+     * Where the service keeps its grant, for what the user typed.
+     *
+     * @param  array<string, string>  $values
+     */
+    abstract protected function grant(array $values): DeviceGrant;
 
     /**
      * The account's name for the card, read with a token straight from the
      * device flow; null when it cannot be read, which never loses the grant.
+     *
+     * @param  array<string, string>  $values
      */
-    abstract protected function accountName(string $accessToken): ?string;
+    abstract protected function accountName(string $accessToken, array $values): ?string;
 
-    public function beginDeviceAuthorization(): DeviceAuthorization
+    public function beginDeviceAuthorization(array $values): DeviceAuthorization
     {
-        return $this->grants->begin($this->grant());
+        return $this->grants->begin($this->grant($values));
     }
 
-    public function pollDeviceAuthorization(string $deviceCode): DevicePoll|ConnectionGrant
+    public function pollDeviceAuthorization(string $deviceCode, array $values): DevicePoll|ConnectionGrant
     {
-        $result = $this->grants->poll($this->grant(), $deviceCode);
+        $result = $this->grants->poll($this->grant($values), $deviceCode);
 
-        return $result instanceof DevicePoll ? $result : new ConnectionGrant($result, $this->accountName($result['access_token']));
+        return $result instanceof DevicePoll ? $result : new ConnectionGrant([...$values, ...$result], $this->accountName($result['access_token'], $values));
     }
 
+    /** The grant is revoked with what the connection was made with, kept beside its tokens. */
     public function revoke(ServiceConnection $connection): void
     {
-        $this->tokens->revoke($this->grant()->tokenGrant(), $connection);
+        $values = [];
+
+        foreach ($this->connectionFields() as $field) {
+            $values[$field->key] = $connection->credential($field->key) ?? throw new LogicException("A connection without the {$field->key} it was made with.");
+        }
+
+        $this->tokens->revoke($this->grant($values)->tokenGrant(), $connection);
     }
 }

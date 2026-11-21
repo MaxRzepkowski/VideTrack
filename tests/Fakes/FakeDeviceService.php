@@ -9,6 +9,7 @@ use App\Integrations\Connections\Data\ConnectionGrant;
 use App\Integrations\Connections\Data\DeviceAuthorization;
 use App\Integrations\Connections\DevicePoll;
 use App\Models\ServiceConnection;
+use App\Support\Forms\CredentialField;
 use App\Support\ServiceUnavailable;
 use Closure;
 
@@ -37,6 +38,12 @@ class FakeDeviceService implements AuthorizesByDevice, RevokesAccess
     /** @var list<string> device codes seen, in order */
     public static array $seenDeviceCodes = [];
 
+    /** @var list<CredentialField> what the card asks for before a code */
+    public static array $fields = [];
+
+    /** @var list<array<string, string>> what each poll carried of the typed values */
+    public static array $seenValues = [];
+
     /** @var list<int> ids of the connections revoked */
     public static array $revoked = [];
 
@@ -52,7 +59,12 @@ class FakeDeviceService implements AuthorizesByDevice, RevokesAccess
         return 'Fake Device';
     }
 
-    public function beginDeviceAuthorization(): DeviceAuthorization
+    public function connectionFields(): array
+    {
+        return self::$fields;
+    }
+
+    public function beginDeviceAuthorization(array $values): DeviceAuthorization
     {
         if (self::$beginFails !== null) {
             throw self::$beginFails;
@@ -68,10 +80,11 @@ class FakeDeviceService implements AuthorizesByDevice, RevokesAccess
         );
     }
 
-    public function pollDeviceAuthorization(string $deviceCode): DevicePoll|ConnectionGrant
+    public function pollDeviceAuthorization(string $deviceCode, array $values): DevicePoll|ConnectionGrant
     {
         self::$pollCount++;
         self::$seenDeviceCodes[] = $deviceCode;
+        self::$seenValues[] = $values;
 
         $next = array_shift(self::$polls) ?? DevicePoll::Pending;
 

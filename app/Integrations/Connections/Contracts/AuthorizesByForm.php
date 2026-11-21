@@ -7,7 +7,6 @@ use App\Integrations\Connections\Data\ConnectionChoice;
 use App\Integrations\Connections\Data\ConnectionGrant;
 use App\Integrations\Connections\UnusableAddress;
 use App\Models\User;
-use App\Support\Forms\CredentialField;
 use App\Support\ServiceUnavailable;
 
 /**
@@ -18,13 +17,8 @@ use App\Support\ServiceUnavailable;
  * says so (ServiceUnavailable) instead of passing for a refusal. An address field is
  * called only once `UserAddresses` allows it for the owner.
  */
-interface AuthorizesByForm extends ConnectableService
+interface AuthorizesByForm extends HasConnectionFields
 {
-    /**
-     * @return list<CredentialField>
-     */
-    public function connectionFields(): array;
-
     /**
      * Checks the typed values against the service and lists the accounts to
      * pick from; an empty list means there is nothing to pick.
