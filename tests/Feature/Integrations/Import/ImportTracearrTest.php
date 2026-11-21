@@ -34,27 +34,10 @@ const TRACEARR_ME = '7d9c1b8e-0000-4000-8000-000000000001';
 
 function tracearrConnection(User $user, array $attributes = []): ServiceConnection
 {
-    return ServiceConnection::factory()->create([
-        'user_id' => $user->id,
-        'service' => 'tracearr',
-        'credentials' => ['url' => 'http://tracearr.lan:3000', 'key' => 'trr_pub_secret'],
+    return activeConnection($user, 'tracearr', ['url' => 'http://tracearr.lan:3000', 'key' => 'trr_pub_secret'], [
         'settings' => ['user_id' => TRACEARR_ME],
-        'status' => ConnectionStatus::Active,
-        'account_label' => 'alex',
         ...$attributes,
     ]);
-}
-
-function runTracearrImport(ServiceConnection $connection): TaskRun
-{
-    $taskRun = TaskRun::queueTask('import-tracearr', $connection->user_id);
-
-    app()->call([
-        new RunImport($taskRun, 'tracearr', ImportInput::connection($connection->id), ImportSelection::everything()),
-        'handle',
-    ]);
-
-    return $taskRun->refresh();
 }
 
 /**
@@ -84,11 +67,6 @@ function tracearrHistoryFakes(): array
         'tracearr.lan:3000/api/v2/public/media/*' => Http::response(jsonFixture('transfer/tracearr/media-show')),
         ...providerDictionaryFakes(),
     ];
-}
-
-function tracearrRequests(string $path): int
-{
-    return Http::recorded(fn (Request $request) => str_contains(parse_url($request->url(), PHP_URL_PATH) ?? '', $path))->count();
 }
 
 test('the import page offers Tracearr with an address and key form', function () {
@@ -130,7 +108,7 @@ test('a rejected key is asked about once', function (int $status, string $messag
         ->assertUnprocessable()
         ->assertJsonValidationErrors(['connection' => $message]);
 
-    expect(tracearrRequests('/users'))->toBe(1);
+    expect(requestsTo('/users'))->toBe(1);
 })->with([
     'wrong key' => [401, 'Tracearr did not accept this API key.'],
     'not the owner' => [403, 'This API key does not belong to the Tracearr owner account.'],
@@ -176,7 +154,7 @@ test('a run reads the finished films and episodes of that one person', function 
     $connection = tracearrConnection($user);
 
     $this->freezeTime(function () use ($connection, $user, $matrix) {
-        $taskRun = runTracearrImport($connection);
+        $taskRun = runConnectionImport($connection, 'tracearr');
 
         expect($taskRun->status)->toBe(TaskRunStatus::Success)
             ->and($user->plays()->where('media_item_id', $matrix->id)->sole()->watched_at->toIso8601String())->toBe('2026-09-20T21:16:00+00:00');
@@ -194,8 +172,8 @@ test('a run reads the finished films and episodes of that one person', function 
             && ! isset($request['since']));
 
         // One lookup for the show behind both episodes.
-        expect(tracearrRequests('/media/'))->toBe(1)
-            ->and(tracearrRequests('/history'))->toBe(2)
+        expect(requestsTo('/media/'))->toBe(1)
+            ->and(requestsTo('/history'))->toBe(2)
             ->and($connection->refresh()->state)->toBe(['since' => now()->subDay()->toIso8601ZuluString()]);
     });
 });
@@ -205,7 +183,7 @@ test('the next run starts from the saved position', function () {
     tracearrCatalogue();
     $connection = tracearrConnection(User::factory()->create(), ['state' => ['since' => '2026-09-19T08:00:00Z']]);
 
-    runTracearrImport($connection);
+    runConnectionImport($connection, 'tracearr');
 
     Http::assertSent(fn (Request $request) => str_contains($request->url(), '/history')
         && $request['since'] === '2026-09-19T08:00:00Z');
@@ -219,7 +197,7 @@ test('a viewing a webhook already logged is not logged again', function () {
     // The media server's own webhook saw the same viewing end a few minutes apart.
     app(MarkWatched::class)->execute($user, $matrix, WatchedAt::at(CarbonImmutable::parse('2026-09-20T21:10:00Z')));
 
-    runTracearrImport(tracearrConnection($user));
+    runConnectionImport(tracearrConnection($user), 'tracearr');
 
     expect($user->plays()->where('media_item_id', $matrix->id)->count())->toBe(1);
 });
@@ -230,10 +208,10 @@ test('the same run twice adds nothing', function () {
     $user = User::factory()->create();
     $connection = tracearrConnection($user);
 
-    runTracearrImport($connection);
+    runConnectionImport($connection, 'tracearr');
     $plays = $user->plays()->count();
     $connection->update(['state' => null]);
-    runTracearrImport($connection);
+    runConnectionImport($connection, 'tracearr');
 
     expect($user->plays()->count())->toBe($plays)->and($plays)->toBe(3);
 });
@@ -253,7 +231,7 @@ test('a revoked key expires the connection and is not retried', function () {
         ->and($run->summary)->toContain('Tracearr stopped accepting this API key.');
 
     expect($connection->refresh()->status)->toBe(ConnectionStatus::Expired)
-        ->and(tracearrRequests('/history'))->toBe(1);
+        ->and(requestsTo('/history'))->toBe(1);
 });
 
 test('a busy Tracearr is waited out', function () {
@@ -262,8 +240,8 @@ test('a busy Tracearr is waited out', function () {
         return array_shift($answers);
     }]);
 
-    expect(runTracearrImport(tracearrConnection(User::factory()->create()))->status)->toBe(TaskRunStatus::Success)
-        ->and(tracearrRequests('/history'))->toBe(2);
+    expect(runConnectionImport(tracearrConnection(User::factory()->create()), 'tracearr')->status)->toBe(TaskRunStatus::Success)
+        ->and(requestsTo('/history'))->toBe(2);
 
     Sleep::assertSleptTimes(1);
 });
@@ -314,7 +292,7 @@ test('a run checks the address again, so a host the operator stopped allowing is
     config(['tracker.integrations.private_hosts' => '']);
     Http::fake();
 
-    runTracearrImport($connection);
+    runConnectionImport($connection, 'tracearr');
 
     Http::assertNothingSent();
     // Only connecting again with an allowed address fixes it.
@@ -328,6 +306,6 @@ test('a run whose address resolves to nothing this time is tried again, not give
     config(['tracker.integrations.private_hosts' => 'gone.lan']);
     Http::fake();
 
-    expect(fn () => runTracearrImport($connection))->toThrow(TracearrUnavailable::class);
+    expect(fn () => runConnectionImport($connection, 'tracearr'))->toThrow(TracearrUnavailable::class);
     expect($connection->refresh()->status)->toBe(ConnectionStatus::Active);
 });

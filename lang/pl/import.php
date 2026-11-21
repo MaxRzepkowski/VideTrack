@@ -328,4 +328,6 @@ return [
     'the_file_is_not_koreader_statistics' => 'Ten plik nie jest statystykami czytania z KOReadera.',
     'skip_koreader_no_title' => 'Książka bez tytułu.',
     'skip_koreader_never_read' => ':label: otwarta, ale bez przeczytanej strony.',
+    'service_gave_no_token' => ':service odpowiedział bez tokenu.',
+    'service_token_refresh_under_way' => ':service: inne odświeżenie tego połączenia jeszcze trwa. Spróbuj później.',
 ];
