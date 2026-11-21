@@ -9,10 +9,9 @@ use App\Integrations\Import\ImportSourceRegistry;
 use Illuminate\Support\ServiceProvider;
 
 /**
- * A reader's Hardcover library, connected once and imported from without a
- * file. Offered only when the operator registered the app it authorizes
- * against, and when books come from Hardcover here, so a Hardcover book id
- * is a ref this instance can open.
+ * A reader's Hardcover library, connected once with their own key and
+ * imported from without a file. Offered when books come from Hardcover
+ * here, so a Hardcover book id is a ref this instance can open.
  */
 final class HardcoverLibraryServiceProvider extends ServiceProvider
 {
@@ -34,6 +33,6 @@ final class HardcoverLibraryServiceProvider extends ServiceProvider
     {
         $types = $this->app->make(MediaTypeRegistry::class);
 
-        return filled(config('tracker.hardcover.client_id')) && $types->has(MediaKind::Book->value) && $types->get(MediaKind::Book->value)->provider === 'hardcover';
+        return $types->has(MediaKind::Book->value) && $types->get(MediaKind::Book->value)->provider === 'hardcover';
     }
 }

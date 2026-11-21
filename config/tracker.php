@@ -289,13 +289,6 @@ return [
     'hardcover' => [
         'api_key' => env('HARDCOVER_API_KEY'),
         'endpoint' => env('HARDCOVER_ENDPOINT', 'https://api.hardcover.app/v1/graphql'),
-        // The import of a reader's own library: an OAuth app of type
-        // "Mobile, desktop, or CLI" with the Device Authorization Grant on,
-        // registered at hardcover.app/account/developer-apps. Users connect with a code,
-        // so no callback address is needed. Without it, or without the
-        // key above, the import is not offered.
-        'client_id' => env('HARDCOVER_CLIENT_ID'),
-        'oauth_url' => env('HARDCOVER_OAUTH_URL', 'https://api.hardcover.app'),
         'cache' => [
             'details' => 60 * 60 * 24, // seconds
             'listing' => 60 * 60 * 3, // trending / discover

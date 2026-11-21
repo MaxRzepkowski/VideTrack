@@ -3,9 +3,7 @@
 namespace App\Integrations\Hardcover;
 
 use App\Integrations\Connections\ConnectionExpired;
-use App\Integrations\Connections\Data\DeviceGrant;
-use App\Integrations\Connections\GrantUnavailable;
-use App\Integrations\Connections\TokenGrantClient;
+use App\Integrations\Connections\ConnectionRejected;
 use App\Models\ServiceConnection;
 use App\Support\ConnectionFailure;
 use App\Support\HttpRetry;
@@ -17,16 +15,15 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Sleep;
 
 /**
- * A Hardcover reader's own library, read with the token their account
- * granted this instance (Hardcover's API docs: OAuth, Getting Started →
- * Rate Limits; schema `user_books`):
+ * A Hardcover reader's own library, read with the API key they made for it
+ * (Hardcover's API docs: Getting Started, PAT Link Builder, Actions &
+ * Scopes; schema `user_books`):
  *
- * - the grant comes from the Device Authorization Grant of an app the
- *   operator registered, asking only to read the profile and the library;
- *   the instance's own catalogue key is never used for a library;
- * - access tokens live a week; refresh tokens rotate on every use, and one
- *   spent twice revokes the whole grant — TokenGrantClient's refresh is
- *   built for that;
+ * - the key is the reader's, made on hardcover.app with the scopes to read
+ *   the profile and the library; the instance's own catalogue key is never
+ *   used for a library;
+ * - a key without a scope is answered 403, or a GraphQL error in a 200; a
+ *   key that is no good any more, 401;
  * - limits are per reader, shared with every app they use: 60 requests a
  *   minute and 5,000 a day on a free account. Pages go one a second, and
  *   only a dropped connection, a 5xx or a 429 is asked again;
@@ -63,24 +60,47 @@ class HardcoverLibraryClient
         }
         GRAPHQL;
 
-    public function __construct(private readonly TokenGrantClient $tokens) {}
+    /** The scopes the import needs, for the link that opens Hardcover's new key form with them ticked. */
+    private const SCOPES = 'read:me:content read:library';
+
+    private const NEW_KEY_URL = 'https://hardcover.app/account/api/keys/new';
+
+    private const CHECK_QUERY = '{ me { username user_books(limit: 1) { book_id } } }';
+
+    /** Where the reader makes a key with the scopes the import needs. */
+    public static function newKeyUrl(): string
+    {
+        return self::NEW_KEY_URL.'?'.http_build_query(['scope' => self::SCOPES]);
+    }
 
     /**
-     * The username, for the card — read with a token straight from the
-     * device flow, before any connection row exists. Only a label: a dropped
-     * connection here leaves it unknown rather than losing the grant.
+     * Whether Hardcover takes a key for reading the library, asked with one
+     * request each time the form is checked; a key that cannot read it is
+     * turned down here, not on the first run.
+     *
+     * @return string|null the reader's username, when Hardcover gives one
+     *
+     * @throws ConnectionRejected|HardcoverUnavailable
      */
-    public function username(string $accessToken): ?string
+    public function accept(string $key): ?string
     {
         try {
-            $response = $this->http($accessToken)->post($this->graphqlUrl(), ['query' => '{ me { username } }']);
-        } catch (ConnectionException) {
-            return null;
+            $response = $this->http($key)->post($this->graphqlUrl(), ['query' => self::CHECK_QUERY]);
+        } catch (ConnectionException $e) {
+            throw new HardcoverUnavailable('import.service_unreachable', ['service' => HardcoverService::NAME, 'reason' => ConnectionFailure::reason($e)]);
         }
 
-        $me = Payload::list($response->json('data.me'))[0] ?? null;
+        $me = Payload::list($response->json('data.me'))[0] ?? [];
 
-        return $response->successful() && is_array($me) ? Payload::string($me, 'username') : null;
+        match (true) {
+            HttpRetry::isOutage($response) => throw new HardcoverUnavailable('import.service_answered_try_later', ['service' => HardcoverService::NAME, 'status' => $response->status()]),
+            $response->status() === 401 => throw new ConnectionRejected('import.hardcover_did_not_accept_this_key'),
+            $response->status() === 403, $response->successful() && ($response->json('errors') !== null || ! is_array($me['user_books'] ?? null)) => throw new ConnectionRejected('import.this_hardcover_key_cannot_read_your_library'),
+            ! $response->successful() => throw new ConnectionRejected('import.service_answered_to', ['service' => HardcoverService::NAME, 'status' => $response->status(), 'path' => '/v1/graphql']),
+            default => null,
+        };
+
+        return Payload::string($me, 'username');
     }
 
     /**
@@ -89,16 +109,23 @@ class HardcoverLibraryClient
      *
      * @return list<array<array-key, mixed>>
      *
-     * @throws HardcoverUnavailable|HardcoverRejected|ConnectionExpired|GrantUnavailable
+     * @throws HardcoverUnavailable|HardcoverRejected|ConnectionExpired
      */
     public function libraryPage(ServiceConnection $connection, int $page): array
     {
+        $key = $connection->credential('key') ?? throw new ConnectionExpired('import.hardcover_stopped_accepting_this_connection');
+
         if ($page > 0) {
             Sleep::for(self::PAGE_INTERVAL_SECONDS)->seconds();
         }
 
         $variables = ['limit' => self::PAGE_SIZE, 'offset' => $page * self::PAGE_SIZE];
-        $response = $this->tokens->call($this->grant()->tokenGrant(), $connection, fn (string $token): Response => $this->query($token, $variables));
+        $response = $this->query($key, $variables);
+
+        // The key was deleted on Hardcover, or ran out; only a new one fixes it.
+        if ($response->status() === 401) {
+            throw new ConnectionExpired('import.hardcover_stopped_accepting_this_connection');
+        }
 
         if (HttpRetry::isOutage($response)) {
             throw new HardcoverUnavailable('import.service_answered_try_later', ['service' => HardcoverService::NAME, 'status' => $response->status()]);
@@ -120,10 +147,10 @@ class HardcoverLibraryClient
     /**
      * @param  array<string, int>  $variables
      */
-    private function query(string $token, array $variables): Response
+    private function query(string $key, array $variables): Response
     {
         try {
-            return $this->http($token)
+            return $this->http($key)
                 ->retry(self::RETRIES, fn (int $attempt): int => self::FIRST_RETRY_MS * 2 ** ($attempt - 1), HttpRetry::isTransientOrThrottled(...), throw: false)
                 ->post($this->graphqlUrl(), ['query' => self::LIBRARY_QUERY, 'variables' => $variables]);
         } catch (ConnectionException $e) {
@@ -131,29 +158,12 @@ class HardcoverLibraryClient
         }
     }
 
-    /** Where the service keeps its device grant, for connecting and for every call made with it. */
-    public function grant(): DeviceGrant
-    {
-        return new DeviceGrant(
-            service: HardcoverService::NAME,
-            baseUrl: config()->string('tracker.hardcover.oauth_url'),
-            clientId: config()->string('tracker.hardcover.client_id'),
-            scope: 'read:me:content read:library',
-            devicePath: '/oauth2/device',
-            tokenPath: '/oauth2/token',
-            revokePath: '/oauth2/revoke',
-            rejectedKey: 'import.hardcover_did_not_accept_this_instance',
-            notStartedKey: 'import.the_service_could_not_start_the',
-            expiredKey: 'import.hardcover_stopped_accepting_this_connection',
-        );
-    }
-
-    private function http(string $token): PendingRequest
+    private function http(string $key): PendingRequest
     {
         return Http::timeout(self::TIMEOUT_SECONDS)
             ->acceptJson()
             ->withUserAgent(config()->string('tracker.http.user_agent'))
-            ->withToken($token);
+            ->withToken($key);
     }
 
     private function graphqlUrl(): string

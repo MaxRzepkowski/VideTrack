@@ -103,4 +103,23 @@ describe('Import', () => {
         expect(mountWith('letterboxd').text()).toContain('Films you logged on Letterboxd.');
         expect(mountWith(null).text()).not.toContain('Films you logged on Letterboxd.');
     });
+
+    it('names a setup link by its text when it has one, else by its address', () => {
+        const noted: ImportSourceDef = {
+            ...source,
+            notes: [
+                { text: 'Make a key:', url: 'https://example.com/keys/new?scope=read', linkText: 'New key' },
+                { text: 'Get your export at', url: 'https://example.com/export?go=now', linkText: null },
+            ],
+        };
+        const links = mount(Import, {
+            props: { sources: [noted], maxFileMegabytes: 100, selected: 'tvtime' },
+            global: { stubs: { AppLayout: { template: '<div><slot /></div>' }, SettingsLayout: { template: '<div><slot /></div>' } } },
+        }).findAll('a[target="_blank"]');
+
+        expect(links.map((link) => [link.text(), link.attributes('href')])).toEqual([
+            ['New key', 'https://example.com/keys/new?scope=read'],
+            ['example.com/export?go=now', 'https://example.com/export?go=now'],
+        ]);
+    });
 });

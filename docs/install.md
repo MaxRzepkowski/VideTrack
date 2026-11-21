@@ -134,7 +134,6 @@ Everything is optional except `TMDB_API_KEY`. A media type exists only when its 
 | `HARDCOVER_API_KEY` | | [Hardcover](https://hardcover.app/account/api) API key (`hc_pat_…`, scope `read:catalog`): **books** |
 | `MAL_CLIENT_ID` | | [MyAnimeList](https://myanimelist.net/apiconfig) client id: **manga** |
 | `COMICVINE_API_KEY` | | [ComicVine](https://comicvine.gamespot.com/api) key: **comics** |
-| `HARDCOVER_CLIENT_ID` | | client id of a Hardcover app of type *Mobile, desktop, or CLI* with the *Device Authorization Grant* on and the scopes `read:me:content` and `read:library` ([developer apps](https://hardcover.app/account/developer-apps)); users connect their library with a code, no callback address. Needs `HARDCOVER_API_KEY`; without both the Hardcover import is not offered |
 | `MDBLIST_CLIENT_ID` | | client id of an MDBList *Device Code App* ([developer settings](https://mdblist.com/developer)); users connect with a code, no callback address. Without it the MDBList import is not offered |
 | `SIMKL_CLIENT_ID` | | client id of a Simkl **AUTH V2** app of type *TV, devices & command line* ([developer settings](https://simkl.com/settings/developer/)); users connect with a code, no callback address. Without it the Simkl import is not offered |
 | `STEAM_API_KEY` | | [Steam Web API key](https://steamcommunity.com/dev/apikey); with IGDB, users can import a public Steam library |
