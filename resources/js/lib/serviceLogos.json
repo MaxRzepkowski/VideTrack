@@ -1301,6 +1301,13 @@
         "source": "https://wwcdn.weixin.qq.com/node/ww/wwmng/style/images/index_share_logo$13c64306.png",
         "licence": "trademark of its owner"
     },
+    "wetrakr": {
+        "file": "wetrakr.png",
+        "width": 256,
+        "height": 256,
+        "source": "https://wetrakr.com/assets/images/we.png (scaled down to 256 px)",
+        "licence": "trademark of its owner"
+    },
     "whapi": {
         "file": "whapi.svg",
         "width": 292,

@@ -312,4 +312,13 @@ return [
     'on_bookwyrm_open_settings_export' => 'On your BookWyrm instance, open Settings → Export Book List and choose “Download file”.',
     'the_file_is_not_a_bookwyrm' => 'The file is not a BookWyrm export.',
     'skip_bookwyrm_no_shelf' => ':label: on no shelf.',
+    'wetrakr_export_zip' => 'WeTrakr export (ZIP)',
+    'import_from_wetrakr' => 'Import from WeTrakr',
+    'movies_and_episodes_you_watched_on_wetrakr' => 'Movies and episodes you watched, your watchlist, dropped titles, ratings, favorites and lists.',
+    'on_wetrakr_export_your_data' => 'On WeTrakr, export your data and upload the ZIP as it came; files you switched off before exporting are simply not there.',
+    'the_file_is_not_a_wetrakr' => 'The file is not a WeTrakr export.',
+    'skip_wetrakr_no_rating' => ':label: no rating value.',
+    'untitled_entry' => 'An entry without a title',
+    'skip_wetrakr_season' => ':label: a season, and the export does not say which one.',
+    'skip_wetrakr_unknown_place' => ':label: nothing in the export says which title this is.',
 ];
