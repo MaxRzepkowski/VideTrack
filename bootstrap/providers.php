@@ -41,6 +41,7 @@ use App\Integrations\RetroAchievements\RetroAchievementsServiceProvider;
 use App\Integrations\Simkl\SimklServiceProvider;
 use App\Integrations\Steam\SteamServiceProvider;
 use App\Integrations\StoryGraph\StoryGraphServiceProvider;
+use App\Integrations\Storyteller\StorytellerServiceProvider;
 use App\Integrations\Tautulli\TautulliServiceProvider;
 use App\Integrations\Tmdb\TmdbAccountServiceProvider;
 use App\Integrations\Tracearr\TracearrServiceProvider;
@@ -103,6 +104,7 @@ return [
     MdbListServiceProvider::class,
     TracearrServiceProvider::class,
     AudiobookshelfServiceProvider::class,
+    StorytellerServiceProvider::class,
     JellyfinServiceProvider::class,
     PlexServiceProvider::class,
     TautulliServiceProvider::class,

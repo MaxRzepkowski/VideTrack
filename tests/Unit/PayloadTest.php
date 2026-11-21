@@ -54,6 +54,17 @@ test('an instant is read in any format and blank is not now', function () {
         ->and(Payload::instant(1700000000))->toBeNull();
 });
 
+test('a moment written without a zone is read in the zone its service keeps, whatever the instance\'s', function () {
+    date_default_timezone_set('Europe/Warsaw');
+
+    try {
+        expect(Payload::instant('2025-09-01 18:00:00', 'UTC')?->toIso8601ZuluString())->toBe('2025-09-01T18:00:00Z')
+            ->and(Payload::instant('2025-09-01T18:00:00+02:00', 'UTC')?->toIso8601ZuluString())->toBe('2025-09-01T16:00:00Z');
+    } finally {
+        date_default_timezone_set('UTC');
+    }
+});
+
 test('a moment in epoch milliseconds is read as such, and zero is never', function () {
     expect(Payload::epochMilliseconds(['at' => 1758403200000], 'at')?->toIso8601ZuluString())->toBe('2025-09-20T21:20:00Z')
         ->and(Payload::epochMilliseconds(['at' => '1758403200000'], 'at')?->toIso8601ZuluString())->toBe('2025-09-20T21:20:00Z')

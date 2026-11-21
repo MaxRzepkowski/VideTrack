@@ -1203,6 +1203,13 @@
         "source": "https://raw.githubusercontent.com/selfhst/icons/main/svg/storygraph-light.svg (the light variant)",
         "licence": "CC BY 4.0; trademark of its owner"
     },
+    "storyteller": {
+        "file": "storyteller.png",
+        "width": 200,
+        "height": 200,
+        "source": "https://gitlab.com/storyteller-platform/storyteller/-/raw/main/applications/web/public/Storyteller_Logo_200x200.png",
+        "licence": "MIT; trademark of its owner"
+    },
     "strmlabs": {
         "file": "strmlabs.svg",
         "width": 25,

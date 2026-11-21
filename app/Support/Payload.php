@@ -209,9 +209,11 @@ final class Payload
 
     /**
      * A moment in any format Carbon reads. Blank is absent rather than "now",
-     * which is what Carbon would make of an empty string.
+     * which is what Carbon would make of an empty string. A moment written
+     * without a zone is read in `$zone`: a service that keeps UTC (SQLite's
+     * CURRENT_TIMESTAMP) passes 'UTC', whatever the instance's own zone.
      */
-    public static function instant(mixed $value): ?CarbonImmutable
+    public static function instant(mixed $value, ?string $zone = null): ?CarbonImmutable
     {
         if (! is_string($value) || trim($value) === '') {
             return null;
@@ -225,7 +227,7 @@ final class Payload
         }
 
         try {
-            return CarbonImmutable::parse($value);
+            return CarbonImmutable::parse($value, $zone);
         } catch (InvalidFormatException) {
             return null;
         }

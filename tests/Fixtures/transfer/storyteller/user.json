@@ -1,0 +1,25 @@
+{
+  "id": "u-alex",
+  "name": "Alex",
+  "username": "alex",
+  "email": "alex@example.com",
+  "permissions": {
+    "bookCreate": false,
+    "bookDelete": false,
+    "bookDownload": true,
+    "bookList": true,
+    "bookProcess": false,
+    "bookRead": true,
+    "bookUpdate": false,
+    "collectionCreate": false,
+    "inviteDelete": false,
+    "inviteList": false,
+    "settingsUpdate": false,
+    "userCreate": false,
+    "userDelete": false,
+    "userList": false,
+    "userRead": false,
+    "userUpdate": false,
+    "userPasswordReset": false
+  }
+}
