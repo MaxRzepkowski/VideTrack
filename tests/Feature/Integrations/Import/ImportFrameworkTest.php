@@ -307,7 +307,7 @@ test('each new file source says what it takes and where its export comes from', 
         ->assertInertia(function (AssertableInertia $page) {
             $codes = [
                 'letterboxd', 'tvtime', 'storygraph', 'backloggd', 'jellyfin-playback-reporting', 'playnite', 'gog-galaxy',
-                'librarything', 'calibre', 'criticker', 'icheckmovies', 'grouvee', 'anime-planet', 'netflix', 'bookwyrm',
+                'librarything', 'calibre', 'criticker', 'icheckmovies', 'grouvee', 'anime-planet', 'netflix', 'bookwyrm', 'wetrakr',
             ];
             $files = collect($page->toArray()['props']['sources'])->whereIn('code', $codes);
 
@@ -346,6 +346,7 @@ test('the tasks page names a run of each new file source after it', function (st
     ['anime-planet', 'Import from Anime-Planet'],
     ['netflix', 'Import from Netflix'],
     ['bookwyrm', 'Import from BookWyrm'],
+    ['wetrakr', 'Import from WeTrakr'],
 ]);
 
 test('a row of a file export the source cannot read is reported by its row, the rest still read', function (string $code, string $content) {

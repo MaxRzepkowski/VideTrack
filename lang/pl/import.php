@@ -312,4 +312,13 @@ return [
     'on_bookwyrm_open_settings_export' => 'Na swojej instancji BookWyrm otwórz Ustawienia → Eksportuj listę książek i wybierz „Pobierz plik”.',
     'the_file_is_not_a_bookwyrm' => 'Ten plik nie jest eksportem z BookWyrm.',
     'skip_bookwyrm_no_shelf' => ':label: nie stoi na żadnej półce.',
+    'wetrakr_export_zip' => 'Eksport z WeTrakr (ZIP)',
+    'import_from_wetrakr' => 'Import z WeTrakr',
+    'movies_and_episodes_you_watched_on_wetrakr' => 'Obejrzane filmy i odcinki, lista do obejrzenia, porzucone tytuły, oceny, ulubione i listy.',
+    'on_wetrakr_export_your_data' => 'W WeTrakr wyeksportuj swoje dane i wgraj ZIP w takiej postaci, w jakiej przyszedł; pliki wyłączone przed eksportem po prostu w nim nie wystąpią.',
+    'the_file_is_not_a_wetrakr' => 'Ten plik nie jest eksportem z WeTrakr.',
+    'skip_wetrakr_no_rating' => ':label: brak wartości oceny.',
+    'untitled_entry' => 'Pozycja bez tytułu',
+    'skip_wetrakr_season' => ':label: sezon, a eksport nie mówi, który.',
+    'skip_wetrakr_unknown_place' => ':label: nic w eksporcie nie mówi, który to tytuł.',
 ];

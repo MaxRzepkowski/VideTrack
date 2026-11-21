@@ -41,6 +41,7 @@ use App\Integrations\Trakt\TraktServiceProvider;
 use App\Integrations\TvTime\TvTimeServiceProvider;
 use App\Integrations\VideTrack\VideTrackServiceProvider;
 use App\Integrations\WebPush\WebPushServiceProvider;
+use App\Integrations\WeTrakr\WeTrakrServiceProvider;
 use App\Integrations\Yamtrack\YamtrackServiceProvider;
 use App\Notifications\NotificationsServiceProvider;
 use App\Providers\AppServiceProvider;
@@ -66,6 +67,7 @@ return [
     VideTrackServiceProvider::class,
     YamtrackServiceProvider::class,
     TraktServiceProvider::class,
+    WeTrakrServiceProvider::class,
     LetterboxdServiceProvider::class,
     TvTimeServiceProvider::class,
     NetflixServiceProvider::class,
