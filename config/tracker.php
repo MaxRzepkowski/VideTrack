@@ -362,6 +362,20 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | RetroAchievements (import of a player's games)
+    |--------------------------------------------------------------------------
+    |
+    | Nothing for the instance to set: the player types their own web API
+    | key into the import form. With IGDB, the import is offered.
+    |
+    */
+
+    'retroachievements' => [
+        'base_url' => env('RETROACHIEVEMENTS_BASE_URL', 'https://retroachievements.org/API'),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Steam (import of a public game library)
     |--------------------------------------------------------------------------
     |

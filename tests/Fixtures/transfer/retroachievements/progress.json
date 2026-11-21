@@ -1,0 +1,12 @@
+{
+    "Count": 6,
+    "Total": 6,
+    "Results": [
+        { "GameID": 1446, "Title": "Legend of Zelda, The: A Link to the Past", "ImageIcon": "/Images/045623.png", "ConsoleID": 3, "ConsoleName": "SNES/Super Famicom", "MaxPossible": 60, "NumAwarded": 60, "NumAwardedHardcore": 60, "MostRecentAwardedDate": "2025-03-02T21:10:00+00:00", "HighestAwardKind": "mastered", "HighestAwardDate": "2025-03-02T21:10:00+00:00" },
+        { "GameID": 1, "Title": "Sonic the Hedgehog", "ImageIcon": "/Images/085573.png", "ConsoleID": 1, "ConsoleName": "Mega Drive / Genesis", "MaxPossible": 23, "NumAwarded": 12, "NumAwardedHardcore": 12, "MostRecentAwardedDate": "2025-01-10T18:00:00+00:00", "HighestAwardKind": "beaten-hardcore", "HighestAwardDate": "2025-01-09T20:30:00+00:00" },
+        { "GameID": 12345, "Title": "Castlevania: Dracula X (Japan)", "ImageIcon": "/Images/011111.png", "ConsoleID": 3, "ConsoleName": "SNES/Super Famicom", "MaxPossible": 40, "NumAwarded": 7, "NumAwardedHardcore": 0, "MostRecentAwardedDate": "2026-09-20T19:45:00+00:00", "HighestAwardKind": null, "HighestAwardDate": null },
+        { "GameID": 20246, "Title": "~Hack~ Knuckles the Echidna in Sonic the Hedgehog", "ImageIcon": "/Images/074560.png", "ConsoleID": 1, "ConsoleName": "Mega Drive / Genesis", "MaxPossible": 30, "NumAwarded": 30, "NumAwardedHardcore": 30, "MostRecentAwardedDate": "2023-10-27T02:52:34+00:00", "HighestAwardKind": "beaten-hardcore", "HighestAwardDate": "2023-10-27T02:52:34+00:00" },
+        { "GameID": 29998, "Title": "Mega Man: Powered Up [Subset - 468 Stages]", "ImageIcon": "/Images/066666.png", "ConsoleID": 41, "ConsoleName": "PlayStation Portable", "MaxPossible": 468, "NumAwarded": 4, "NumAwardedHardcore": 4, "MostRecentAwardedDate": "2026-08-01T10:00:00+00:00", "HighestAwardKind": null, "HighestAwardDate": null },
+        { "GameID": 777, "Title": "Tetris", "ImageIcon": "/Images/000777.png", "ConsoleID": 4, "ConsoleName": "Game Boy", "MaxPossible": 20, "NumAwarded": 0, "NumAwardedHardcore": 0, "MostRecentAwardedDate": null, "HighestAwardKind": null, "HighestAwardDate": null }
+    ]
+}
