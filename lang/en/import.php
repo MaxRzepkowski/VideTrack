@@ -392,4 +392,12 @@ return [
     'import_from_audiobookshelf' => 'Import from Audiobookshelf',
     'skip_audiobookshelf_no_title' => 'An Audiobookshelf book without a title.',
     'skip_audiobookshelf_item_unavailable' => 'A book is gone from the Audiobookshelf server, or your user may no longer open it.',
+    'api_token' => 'API token',
+    'in_storyteller_preferences_devices_tokens' => 'In Storyteller, Preferences → Devices & tokens → New API token, with Full access. It starts with st_.',
+    'books_you_read_or_are_reading_on_storyteller' => 'Books you read or are reading on Storyteller, found by Hardcover id, ISBN or title and author.',
+    'import_from_storyteller' => 'Import from Storyteller',
+    'a_storyteller_token_starts_with' => 'A Storyteller API token starts with st_.',
+    'this_storyteller_token_has_no_full_access' => 'This token has reading access only. Make one with Full access.',
+    'your_storyteller_user_may_not_list' => 'Your Storyteller user may not list the books.',
+    'skip_storyteller_no_title' => 'A Storyteller book without a title.',
 ];
