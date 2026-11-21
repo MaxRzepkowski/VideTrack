@@ -3,9 +3,7 @@
 namespace App\Integrations\MdbList;
 
 use App\Integrations\Connections\ConnectionExpired;
-use App\Integrations\Connections\Data\DeviceGrant;
-use App\Integrations\Connections\GrantUnavailable;
-use App\Integrations\Connections\TokenGrantClient;
+use App\Integrations\Connections\ConnectionRejected;
 use App\Models\ServiceConnection;
 use App\Support\ConnectionFailure;
 use App\Support\HttpRetry;
@@ -21,10 +19,9 @@ use Illuminate\Support\Facades\Http;
  * MDBList's API as its reference describes it (api.mdblist.com/docs,
  * schema read 2026-11-21):
  *
- * - a user connects through the Device Code app the operator registered;
- *   MDBList has one scope, `write`, though nothing here writes;
- * - access tokens live 30 days and are refreshed with the refresh token,
- *   through TokenGrantClient;
+ * - a user connects with their own API key (mdblist.com/preferences), sent
+ *   as `?apikey=`; `/user` names the account the key belongs to. A key
+ *   MDBList no longer honours is answered 401;
  * - limits are per account: 1,000 requests a day on a free account and
  *   1,000 reads every five minutes. Past either, MDBList answers 429 and
  *   asks to wait its Retry-After rather than retry in a loop: the run is put
@@ -45,21 +42,32 @@ class MdbListClient
     /** MDBList's windows are five minutes long: a 429 without a Retry-After waits one out. */
     private const DEFAULT_WAIT_SECONDS = 300;
 
-    public function __construct(private readonly TokenGrantClient $tokens) {}
+    public const PREFERENCES_URL = 'https://mdblist.com/preferences/';
 
     /**
-     * The username, for the card — read with a token straight from the
-     * device flow, before any connection row exists. Only a label.
+     * Whether MDBList takes a key, asked with one request each time the
+     * form is checked.
+     *
+     * @return string|null the account's username, when MDBList gives one
+     *
+     * @throws ConnectionRejected|MdbListUnavailable
      */
-    public function username(string $accessToken): ?string
+    public function accept(string $key): ?string
     {
         try {
-            $response = $this->http($accessToken)->get('/user');
-        } catch (ConnectionException) {
-            return null;
+            $response = $this->http()->get('/user', ['apikey' => $key]);
+        } catch (ConnectionException $e) {
+            throw new MdbListUnavailable('import.service_unreachable', ['service' => MdbListService::NAME, 'reason' => ConnectionFailure::reason($e)]);
         }
 
-        return $response->successful() ? Payload::string(Payload::map($response->json()), 'username') : null;
+        match (true) {
+            HttpRetry::isOutage($response) => throw new MdbListUnavailable('import.service_answered_try_later', ['service' => MdbListService::NAME, 'status' => $response->status()]),
+            in_array($response->status(), [401, 403], true) => throw new ConnectionRejected('import.mdblist_did_not_accept_this_key'),
+            ! $response->successful() => throw new ConnectionRejected('import.service_answered_to', ['service' => MdbListService::NAME, 'status' => $response->status(), 'path' => '/user']),
+            default => null,
+        };
+
+        return Payload::string(Payload::map($response->json()), 'username');
     }
 
     /**
@@ -69,7 +77,7 @@ class MdbListClient
      * @param  array<string, string>  $query
      * @return Generator<int, array<array-key, mixed>>
      *
-     * @throws MdbListUnavailable|MdbListRejected|ServiceBusy|ConnectionExpired|GrantUnavailable
+     * @throws MdbListUnavailable|MdbListRejected|ServiceBusy|ConnectionExpired
      */
     public function pages(ServiceConnection $connection, string $path, array $query = []): Generator
     {
@@ -87,11 +95,17 @@ class MdbListClient
     /**
      * @param  array<string, string>  $query
      *
-     * @throws MdbListUnavailable|MdbListRejected|ServiceBusy|ConnectionExpired|GrantUnavailable
+     * @throws MdbListUnavailable|MdbListRejected|ServiceBusy|ConnectionExpired
      */
     public function get(ServiceConnection $connection, string $path, array $query = []): mixed
     {
-        $response = $this->tokens->call($this->grant()->tokenGrant(), $connection, fn (string $token): Response => $this->send($token, $path, $query));
+        $key = $connection->credential('key') ?? throw new ConnectionExpired('import.mdblist_stopped_accepting_this_connection');
+        $response = $this->send($key, $path, $query);
+
+        // The key was regenerated on MDBList; only the new one fixes it.
+        if ($response->status() === 401) {
+            throw new ConnectionExpired('import.mdblist_stopped_accepting_this_connection');
+        }
 
         if ($response->status() === 429) {
             throw new ServiceBusy('import.service_asked_to_wait', HttpRetry::retryAfter($response, self::DEFAULT_WAIT_SECONDS), ['service' => MdbListService::NAME]);
@@ -112,41 +126,24 @@ class MdbListClient
     /**
      * @param  array<string, string>  $query
      */
-    private function send(string $token, string $path, array $query): Response
+    private function send(string $key, string $path, array $query): Response
     {
         try {
-            return $this->http($token)
+            return $this->http()
                 ->retry(self::RETRIES, fn (int $attempt): int => self::FIRST_RETRY_MS * 2 ** ($attempt - 1), HttpRetry::isTransient(...), throw: false)
-                ->get($path, $query);
+                ->get($path, [...$query, 'apikey' => $key]);
         } catch (ConnectionException $e) {
             throw new MdbListUnavailable('import.service_unreachable', ['service' => MdbListService::NAME, 'reason' => ConnectionFailure::reason($e)]);
         }
     }
 
-    /** Where the service keeps its device grant, for connecting and for every call made with it. */
-    public function grant(): DeviceGrant
-    {
-        return new DeviceGrant(
-            service: MdbListService::NAME,
-            baseUrl: $this->baseUrl(),
-            clientId: config()->string('tracker.mdblist.client_id'),
-            scope: 'write',
-            devicePath: '/oauth/device-authorization/',
-            tokenPath: '/oauth/token/',
-            revokePath: '/oauth/revoke_token/',
-            rejectedKey: 'import.mdblist_did_not_accept_this_instance',
-            notStartedKey: 'import.the_service_could_not_start_the',
-            expiredKey: 'import.mdblist_stopped_accepting_this_connection',
-        );
-    }
-
-    private function http(string $token): PendingRequest
+    /** The key rides in each request's query, as MDBList asks; ConnectionFailure keeps it out of every message. */
+    private function http(): PendingRequest
     {
         return Http::baseUrl($this->baseUrl())
             ->timeout(self::TIMEOUT_SECONDS)
             ->acceptJson()
-            ->withUserAgent(config()->string('tracker.http.user_agent'))
-            ->withToken($token);
+            ->withUserAgent(config()->string('tracker.http.user_agent'));
     }
 
     private function baseUrl(): string

@@ -2,16 +2,18 @@
 
 use App\Enums\PlayOutcome;
 use App\Enums\TaskRunStatus;
-use App\Integrations\Connections\ConnectionRegistry;
 use App\Integrations\Connections\ConnectionStatus;
+use App\Integrations\Connections\ConnectMethod;
 use App\Integrations\Import\Data\ImportInput;
 use App\Integrations\Import\Data\ImportSelection;
 use App\Integrations\Import\ImportSourceRegistry;
 use App\Integrations\MdbList\MdbListClient;
 use App\Integrations\MdbList\MdbListService;
 use App\Integrations\MdbList\MdbListSource;
+use App\Integrations\MdbList\MdbListUnavailable;
 use App\Jobs\RunImport;
 use App\Models\MediaItem;
+use App\Models\ServiceConnection;
 use App\Models\TaskRun;
 use App\Models\User;
 use Illuminate\Http\Client\Request;
@@ -24,11 +26,13 @@ use Inertia\Testing\AssertableInertia;
  */
 
 beforeEach(function () {
-    // Before any registry is resolved: the source and the service register
-    // only on an instance with a client id.
-    config(['tracker.mdblist.client_id' => 'mdblist-client']);
     Http::preventStrayRequests();
 });
+
+function mdbListConnection(User $user): ServiceConnection
+{
+    return activeConnection($user, MdbListService::CODE, ['key' => 'mdblist-key-of-alex']);
+}
 
 /**
  * The account of the fixtures, every endpoint answered; the watched
@@ -64,75 +68,61 @@ function mdbListCatalogue(): array
     ];
 }
 
-test('without a client id MDBList is not offered at all', function () {
-    config(['tracker.mdblist.client_id' => '']);
-    app()->forgetInstance(ImportSourceRegistry::class);
-    app()->forgetInstance(ConnectionRegistry::class);
-
-    expect(app(ImportSourceRegistry::class)->has(MdbListSource::CODE))->toBeFalse()
-        ->and(app(ConnectionRegistry::class)->has(MdbListService::CODE))->toBeFalse();
-});
-
-test('the import page offers MDBList with a code to type at mdblist.com', function () {
+test('the import page offers MDBList with a key form and where the key is, nothing for the operator to set up', function () {
     $this->actingAs(User::factory()->create())
         ->get(route('settings.import.index'))
         ->assertInertia(fn (AssertableInertia $page) => $page
             ->where('sources', fn ($sources) => collect($sources)->contains(fn ($source) => $source['code'] === MdbListSource::CODE
                 && $source['inputKind'] === 'connection'
-                && $source['connect']['method'] === 'device'
-                && $source['connect']['name'] === MdbListService::NAME)));
+                && $source['connect']['method'] === ConnectMethod::Form->value
+                && array_column($source['connect']['fields'], 'key') === ['key']
+                && $source['notes'][0]['url'] === MdbListClient::PREFERENCES_URL)));
 });
 
-test('connecting asks MDBList for a device code, and an approved one is named after the account', function () {
-    $polls = 0;
-
-    Http::fake([
-        'api.mdblist.com/oauth/device-authorization/' => Http::response([
-            'device_code' => 'device-code-of-alex',
-            'user_code' => 'WXYZ-9876',
-            'verification_uri' => 'https://mdblist.com/oauth/device/',
-            'verification_uri_complete' => 'https://mdblist.com/oauth/device/?user_code=WXYZ-9876',
-            'expires_in' => 300,
-            'interval' => 5,
-        ]),
-        'api.mdblist.com/oauth/token/' => function () use (&$polls) {
-            return $polls++ === 0
-                ? Http::response(['error' => 'authorization_pending'], 400)
-                : Http::response(['access_token' => 'access-of-alex-new', 'token_type' => 'Bearer', 'expires_in' => 2592000, 'refresh_token' => 'refresh-of-alex-new', 'scope' => 'write']);
-        },
-        'api.mdblist.com/user' => Http::response(['user_id' => 7, 'username' => 'alex']),
-    ]);
-
+test('connecting keeps the key, under the account it belongs to', function () {
+    Http::fake(['api.mdblist.com/user*' => Http::response(['user_id' => 7, 'username' => 'alex', 'plan' => 'free'])]);
     $user = User::factory()->create();
 
     $this->actingAs($user)
-        ->postJson(route('settings.connections.device.begin', MdbListService::CODE))
+        ->postJson(route('settings.connections.verify', MdbListService::CODE), ['values' => ['key' => 'mdblist-key-of-alex']])
         ->assertOk()
-        ->assertJsonPath('userCode', 'WXYZ-9876')
-        ->assertDontSee('device-code-of-alex');
+        ->assertJsonPath('choices', []);
 
-    $this->travel(5)->seconds();
-    $this->postJson(route('settings.connections.device.poll', MdbListService::CODE))->assertJsonPath('status', 'pending');
-
-    $this->travel(5)->seconds();
-    $this->postJson(route('settings.connections.device.poll', MdbListService::CODE))
-        ->assertJsonPath('status', 'connected')
+    $this->actingAs($user)
+        ->postJson(route('settings.connections.connect', MdbListService::CODE), ['values' => ['key' => ' mdblist-key-of-alex ']])
+        ->assertOk()
         ->assertJsonPath('connection.account', 'alex');
 
-    expect($user->serviceConnections()->sole()->credential('refresh_token'))->toBe('refresh-of-alex-new');
-
-    Http::assertSent(fn (Request $request) => $request->url() === 'https://api.mdblist.com/oauth/device-authorization/'
-        && $request['client_id'] === 'mdblist-client'
-        && $request['scope'] === 'write'
+    expect($user->serviceConnections()->sole()->credential('key'))->toBe('mdblist-key-of-alex');
+    Http::assertSent(fn (Request $request) => str_starts_with($request->url(), 'https://api.mdblist.com/user')
+        && $request['apikey'] === 'mdblist-key-of-alex'
         && $request->header('User-Agent') === [config('tracker.http.user_agent')]);
 });
+
+test('a key is turned down once, with the reason; MDBList out of reach is said so', function (?int $status, string $message) {
+    Http::fake(['api.mdblist.com/*' => $status === null ? Http::failedConnection() : Http::response(['error' => 'No.'], $status)]);
+
+    $this->actingAs(User::factory()->create())
+        ->postJson(route('settings.connections.verify', MdbListService::CODE), ['values' => ['key' => 'mdblist-key-of-alex']])
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors(['connection' => $message])
+        ->assertDontSee('mdblist-key-of-alex');
+
+    expect(requestsTo('/user'))->toBe(1);
+})->with([
+    'a wrong key' => [401, 'MDBList did not accept this API key.'],
+    'a key MDBList holds back' => [403, 'MDBList did not accept this API key.'],
+    'a request MDBList refuses' => [400, 'MDBList answered 400 to /user.'],
+    'failing' => [503, 'MDBList answered 503; try again later.'],
+    'unreachable' => [null, 'MDBList is unreachable: Could not resolve host: api.mdblist.com'],
+]);
 
 test('the account comes over: viewings, ratings, a dropped show, the watchlist and the lists', function () {
     $items = mdbListCatalogue();
     $user = User::factory()->create();
     fakeMdbListAccount();
 
-    $taskRun = runConnectionImport(deviceConnection($user, MdbListService::CODE), MdbListSource::CODE);
+    $taskRun = runConnectionImport(mdbListConnection($user), MdbListSource::CODE);
 
     $episodes = MediaItem::query()->where('type', 'episode')->orderBy('episode_number')->pluck('id')->all();
     $season = MediaItem::query()->where('type', 'season')->sole();
@@ -153,13 +143,13 @@ test('the account comes over: viewings, ratings, a dropped show, the watchlist a
     Http::assertSent(fn (Request $request) => str_contains($request->url(), '/sync/watched')
         && data_get($request->data(), 'plays') === 'all'
         && data_get($request->data(), 'limit') === (string) MdbListClient::PAGE_SIZE
-        && $request->header('Authorization') === ['Bearer access-of-alex-one']);
+        && data_get($request->data(), 'apikey') === 'mdblist-key-of-alex');
     expect(requestsTo('/sync/watched'))->toBe(2);
 });
 
 test('reading the same account again adds nothing', function () {
     mdbListCatalogue();
-    $connection = deviceConnection(User::factory()->create(), MdbListService::CODE);
+    $connection = mdbListConnection(User::factory()->create());
     fakeMdbListAccount();
 
     runConnectionImport($connection, MdbListSource::CODE);
@@ -171,7 +161,7 @@ test('reading the same account again adds nothing', function () {
 
 test('a 429 leaves a fresh run for as long as MDBList asks, and nothing is asked again meanwhile', function () {
     Http::fake(['api.mdblist.com/*' => Http::response(['error' => 'API rate limit exceeded!'], 429, ['Retry-After' => '120'])]);
-    $connection = deviceConnection(User::factory()->create(), MdbListService::CODE);
+    $connection = mdbListConnection(User::factory()->create());
     $taskRun = TaskRun::queueTask(ImportSourceRegistry::taskName(MdbListSource::CODE), $connection->user_id);
     $job = new RunImport($taskRun, MdbListSource::CODE, ImportInput::connection($connection->id), ImportSelection::everything());
 
@@ -186,7 +176,7 @@ test('a 429 leaves a fresh run for as long as MDBList asks, and nothing is asked
 test('a wait longer than the run waits out ends it with the reason', function () {
     Http::fake(['api.mdblist.com/*' => Http::response(['error' => 'Daily API limit exceeded!'], 429, ['Retry-After' => (string) (RunImport::LONGEST_BUSY_WAIT_SECONDS + 1)])]);
 
-    $connection = deviceConnection(User::factory()->create(), MdbListService::CODE);
+    $connection = mdbListConnection(User::factory()->create());
     $taskRun = runConnectionImport($connection, MdbListSource::CODE);
 
     expect($taskRun->status)->toBe(TaskRunStatus::Failure)
@@ -198,38 +188,40 @@ test('a wait longer than the run waits out ends it with the reason', function ()
 test('an answered 4xx other than 401 is final', function () {
     Http::fake(['api.mdblist.com/*' => Http::response(['error' => 'Invalid request'], 400)]);
 
-    $taskRun = runConnectionImport(deviceConnection(User::factory()->create(), MdbListService::CODE), MdbListSource::CODE);
+    $taskRun = runConnectionImport(mdbListConnection(User::factory()->create()), MdbListSource::CODE);
 
     expect($taskRun->status)->toBe(TaskRunStatus::Failure)
         ->and($taskRun->summary)->toBe('MDBList answered 400 to /sync/watched.')
         ->and(requestsTo('/sync/watched'))->toBe(1);
 });
 
-test('a grant MDBList no longer honours expires the connection', function () {
-    $connection = deviceConnection(User::factory()->create(), MdbListService::CODE);
-
-    Http::fake([
-        'api.mdblist.com/oauth/token/' => Http::response(['error' => 'invalid_grant'], 400),
-        'api.mdblist.com/*' => Http::response(['error' => 'Invalid token'], 401),
-    ]);
+test('a key MDBList no longer honours expires the connection, without asking again', function () {
+    $connection = mdbListConnection(User::factory()->create());
+    Http::fake(['api.mdblist.com/*' => Http::response(['error' => 'Invalid API key'], 401)]);
 
     $taskRun = runConnectionImport($connection, MdbListSource::CODE);
 
     expect($taskRun->status)->toBe(TaskRunStatus::Failure)
-        ->and($taskRun->summary)->toContain('MDBList stopped accepting this connection. Connect your account again.')
-        ->and($connection->refresh()->status)->toBe(ConnectionStatus::Expired);
+        ->and($taskRun->summary)->toContain('MDBList stopped accepting this API key. Connect again with a current one.')
+        ->and($connection->refresh()->status)->toBe(ConnectionStatus::Expired)
+        ->and(requestsTo('/sync/watched'))->toBe(1);
 });
 
-test('disconnecting revokes the grant at MDBList', function () {
-    Http::fake(['api.mdblist.com/oauth/revoke_token/' => Http::response([])]);
-    $user = User::factory()->create();
-    $connection = deviceConnection($user, MdbListService::CODE);
+test('MDBList out of reach ends the run without the key in the reason', function () {
+    Http::fake(['api.mdblist.com/*' => Http::failedConnection()]);
 
-    $this->actingAs($user)->delete(route('settings.connections.destroy', $connection))->assertRedirect();
+    expect(fn () => runConnectionImport(mdbListConnection(User::factory()->create()), MdbListSource::CODE))
+        ->toThrow(fn (MdbListUnavailable $e) => expect($e->wording())->toBe('MDBList is unreachable: Could not resolve host: api.mdblist.com')->not->toContain('mdblist-key-of-alex'));
+});
 
-    Http::assertSent(fn (Request $request) => str_contains($request->url(), '/oauth/revoke_token/')
-        && $request['token'] === 'refresh-of-alex-one'
-        && $request['client_id'] === 'mdblist-client');
+test('a connection without a key expires without asking MDBList', function () {
+    Http::fake();
+    $connection = deviceConnection(User::factory()->create(), MdbListService::CODE);
+
+    expect(runConnectionImport($connection, MdbListSource::CODE)->status)->toBe(TaskRunStatus::Failure)
+        ->and($connection->refresh()->status)->toBe(ConnectionStatus::Expired);
+
+    Http::assertNothingSent();
 });
 
 test('a run reads as an import from MDBList on the Tasks page', function () {

@@ -335,8 +335,7 @@ return [
     'skip_hardcover_unknown_status' => ':label: status czytania w Hardcoverze, którego ten import nie zna.',
     'movies_and_shows_you_watched_on_mdblist' => 'Filmy i seriale obejrzane w MDBList, z ocenami, porzuconymi serialami, watchlistą i listami.',
     'import_from_mdblist' => 'Import z MDBList',
-    'mdblist_did_not_accept_this_instance' => 'MDBList nie przyjął tej instancji. Jej client id musi należeć do aplikacji Device Code App.',
-    'mdblist_stopped_accepting_this_connection' => 'MDBList przestał przyjmować to połączenie. Połącz konto ponownie.',
+    'mdblist_stopped_accepting_this_connection' => 'MDBList przestał przyjmować ten klucz API. Połącz ponownie z aktualnym kluczem.',
     'skip_mdblist_no_rating' => ':label: brak oceny w dziesięciopunktowej skali MDBList.',
     'service_gave_no_token' => ':service odpowiedział bez tokenu.',
     'service_token_refresh_under_way' => ':service: inne odświeżenie tego połączenia jeszcze trwa. Spróbuj później.',
@@ -378,4 +377,8 @@ return [
     'hardcover_did_not_accept_this_key' => 'Hardcover nie przyjął tego klucza API.',
     'this_hardcover_key_cannot_read_your_library' => 'Ten klucz nie może czytać Twojej biblioteki. Utwórz go przez link powyżej.',
     'new_api_key_on_hardcover' => 'Nowy klucz API w Hardcover',
+    'mdblist_api_key' => 'Klucz API MDBList',
+    'the_key_from_your_mdblist_preferences_linked' => 'Klucz z Twoich preferencji MDBList, link powyżej.',
+    'your_mdblist_api_key_is_in' => 'Klucz API znajdziesz w preferencjach MDBList:',
+    'mdblist_did_not_accept_this_key' => 'MDBList nie przyjął tego klucza API.',
 ];

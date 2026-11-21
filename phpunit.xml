@@ -54,7 +54,6 @@
         <env name="HARDCOVER_API_KEY" value=""/>
         <env name="MAL_CLIENT_ID" value=""/>
         <env name="COMICVINE_API_KEY" value=""/>
-        <env name="MDBLIST_CLIENT_ID" value=""/>
         <env name="SIMKL_CLIENT_ID" value=""/>
         <env name="STEAM_API_KEY" value=""/>
         <!-- Forced, in both places PHP keeps it: the development stack sets
