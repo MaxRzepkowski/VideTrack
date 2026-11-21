@@ -1,0 +1,56 @@
+{
+  "id": "li-dune",
+  "ino": "1234",
+  "oldLibraryItemId": null,
+  "libraryId": "lib-audiobooks",
+  "folderId": "folder-1",
+  "path": "/audiobooks/Dune",
+  "relPath": "Dune",
+  "isFile": false,
+  "mtimeMs": 1748736000000,
+  "ctimeMs": 1748736000000,
+  "birthtimeMs": 0,
+  "addedAt": 1748736000000,
+  "updatedAt": 1748736000000,
+  "lastScan": 1748736000000,
+  "scanVersion": "2.30.0",
+  "isMissing": false,
+  "isInvalid": false,
+  "mediaType": "book",
+  "media": {
+    "id": "book-li-dune",
+    "libraryItemId": "li-dune",
+    "metadata": {
+      "title": "Dune",
+      "subtitle": null,
+      "authors": [
+        {
+          "id": "au-0",
+          "name": "Frank Herbert"
+        }
+      ],
+      "narrators": [
+        "A Narrator"
+      ],
+      "series": [],
+      "genres": [
+        "Fantasy"
+      ],
+      "publishedYear": "2007",
+      "publishedDate": null,
+      "publisher": "A Publisher",
+      "description": null,
+      "isbn": null,
+      "asin": "B000000000",
+      "language": "English",
+      "explicit": false,
+      "abridged": false
+    },
+    "coverPath": null,
+    "tags": [],
+    "audioFiles": [],
+    "chapters": [],
+    "ebookFile": null
+  },
+  "libraryFiles": []
+}

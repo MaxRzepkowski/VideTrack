@@ -232,6 +232,19 @@ final class Payload
     }
 
     /**
+     * A moment sent as milliseconds since the epoch, the way JavaScript
+     * writes a date (`Date.valueOf()`). Zero and below are "never", not 1970.
+     *
+     * @param  array<array-key, mixed>  $data
+     */
+    public static function epochMilliseconds(array $data, string $key): ?CarbonImmutable
+    {
+        $milliseconds = self::positiveInt($data, $key);
+
+        return $milliseconds === null ? null : CarbonImmutable::createFromTimestampMsUTC($milliseconds);
+    }
+
+    /**
      * A yes or no a file writes as text: "true" and "yes" in any case are
      * yes (.NET writes "True", other exporters "yes"); anything else no.
      *

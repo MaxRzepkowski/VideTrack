@@ -41,6 +41,13 @@
         "source": "apprise-docs",
         "licence": "CC BY 4.0"
     },
+    "audiobookshelf": {
+        "file": "audiobookshelf.svg",
+        "width": 1236,
+        "height": 1235,
+        "source": "https://raw.githubusercontent.com/advplyr/audiobookshelf/master/client/static/icon.svg",
+        "licence": "GPL-3.0; trademark of its owner"
+    },
     "azure": {
         "file": "azure.svg",
         "width": 42,

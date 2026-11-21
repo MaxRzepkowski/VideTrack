@@ -11,6 +11,7 @@ class FakeHostResolver extends HostResolver
     public static array $hosts = [
         'localhost' => ['127.0.0.1'],
         'tracearr.lan' => ['192.168.1.20'],
+        'abs.lan' => ['192.168.1.21'],
         'tracearr.example.com' => ['93.184.215.14'],
         'rebound.example.com' => ['93.184.215.14', '10.0.0.5'],
         'push.example.com' => ['93.184.215.14'],

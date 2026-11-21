@@ -104,6 +104,38 @@ final readonly class OwnServerClient
      */
     public function read(PendingRequest $request, string $service, string $path, array $query = []): array
     {
+        return $this->get($request, $service, $path, $query, absent: []);
+    }
+
+    /**
+     * One thing of the user's that the key may not be allowed to see (an
+     * item in a library the user lost access to): a 403 there is about the
+     * thing, not the key, so it answers null as a 404 does. A 401 still
+     * expires the connection.
+     *
+     * @param  array<string, mixed>  $query
+     * @return array<array-key, mixed>|null
+     *
+     * @throws OwnServerUnavailable|OwnServerRejected|ConnectionExpired
+     */
+    public function find(PendingRequest $request, string $service, string $path, array $query = []): ?array
+    {
+        try {
+            return $this->get($request, $service, $path, $query, absent: [403]);
+        } catch (OwnServerNotFound) {
+            return null;
+        }
+    }
+
+    /**
+     * @param  array<string, mixed>  $query
+     * @param  list<int>  $absent  statuses that mean the thing is not there for this key, beside a 404
+     * @return array<array-key, mixed>
+     *
+     * @throws OwnServerUnavailable|OwnServerRejected|OwnServerNotFound|ConnectionExpired
+     */
+    private function get(PendingRequest $request, string $service, string $path, array $query, array $absent): array
+    {
         try {
             $response = $request
                 ->retry(self::TRIES, fn (int $attempt): int => self::FIRST_RETRY_MS * 2 ** ($attempt - 1), HttpRetry::isTransientOrThrottled(...), throw: false)
@@ -112,13 +144,13 @@ final readonly class OwnServerClient
             throw new OwnServerUnavailable('import.service_unreachable', ['service' => $service, 'reason' => ConnectionFailure::reason($e)]);
         }
 
+        if ($response->status() === 404 || in_array($response->status(), $absent, true)) {
+            throw new OwnServerNotFound('import.service_knows_nothing_at', ['service' => $service, 'path' => $path]);
+        }
+
         // The key was revoked or lost its rights; only a new key fixes it.
         if (in_array($response->status(), [401, 403], true)) {
             throw new ConnectionExpired('import.the_server_stopped_accepting_this_key');
-        }
-
-        if ($response->status() === 404) {
-            throw new OwnServerNotFound('import.service_knows_nothing_at', ['service' => $service, 'path' => $path]);
         }
 
         if (HttpRetry::isOutage($response)) {

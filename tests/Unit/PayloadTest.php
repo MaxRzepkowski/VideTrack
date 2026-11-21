@@ -54,6 +54,15 @@ test('an instant is read in any format and blank is not now', function () {
         ->and(Payload::instant(1700000000))->toBeNull();
 });
 
+test('a moment in epoch milliseconds is read as such, and zero is never', function () {
+    expect(Payload::epochMilliseconds(['at' => 1758403200000], 'at')?->toIso8601ZuluString())->toBe('2025-09-20T21:20:00Z')
+        ->and(Payload::epochMilliseconds(['at' => '1758403200000'], 'at')?->toIso8601ZuluString())->toBe('2025-09-20T21:20:00Z')
+        ->and(Payload::epochMilliseconds(['at' => 0], 'at'))->toBeNull()
+        ->and(Payload::epochMilliseconds(['at' => null], 'at'))->toBeNull()
+        ->and(Payload::epochMilliseconds(['at' => '2025-09-20'], 'at'))->toBeNull()
+        ->and(Payload::epochMilliseconds([], 'at'))->toBeNull();
+});
+
 test('a positive int is a count or an id above zero, from a number or a numeric string', function () {
     expect(Payload::positiveInt(['n' => 12], 'n'))->toBe(12)
         ->and(Payload::positiveInt(['n' => '7'], 'n'))->toBe(7)
