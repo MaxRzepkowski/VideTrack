@@ -335,18 +335,15 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | MDBList (import through a connected account)
+    | MDBList (import with the user's own API key)
     |--------------------------------------------------------------------------
     |
-    | The instance owner registers one "Device Code App" at
-    | https://mdblist.com/developer and puts its client id here. Users
-    | connect with a code, so no callback address is needed. Without a client
-    | id the MDBList import is not offered.
+    | Each user pastes the API key from their MDBList preferences on the
+    | import page: nothing to set up here.
     |
     */
 
     'mdblist' => [
-        'client_id' => env('MDBLIST_CLIENT_ID'),
         'base_url' => env('MDBLIST_BASE_URL', 'https://api.mdblist.com'),
     ],
 

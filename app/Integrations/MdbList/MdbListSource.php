@@ -2,11 +2,13 @@
 
 namespace App\Integrations\MdbList;
 
-use App\Integrations\Connections\GrantUnavailable;
+use App\Integrations\Connections\ConnectionExpired;
 use App\Integrations\Import\ConnectionSource;
+use App\Integrations\Import\Contracts\ExplainsSetup;
 use App\Integrations\Import\Data\ImportInput;
 use App\Integrations\Import\Data\ImportListRef;
 use App\Integrations\Import\Data\ImportSelection;
+use App\Integrations\Import\Data\SetupNote;
 use App\Integrations\Import\Rows\ListRow;
 use App\Integrations\Import\Rows\MediaRow;
 use App\Integrations\Import\Rows\SkipRow;
@@ -27,7 +29,7 @@ use Generator;
  * late would be missed; each run reads the whole account instead, and
  * writing it again adds nothing.
  */
-class MdbListSource extends ConnectionSource
+class MdbListSource extends ConnectionSource implements ExplainsSetup
 {
     public const CODE = 'mdblist';
 
@@ -56,6 +58,11 @@ class MdbListSource extends ConnectionSource
         return __('import.import_from_mdblist');
     }
 
+    public function notes(): array
+    {
+        return [new SetupNote(__('import.your_mdblist_api_key_is_in'), MdbListClient::PREFERENCES_URL)];
+    }
+
     public function connectionService(): string
     {
         return MdbListService::CODE;
@@ -71,7 +78,7 @@ class MdbListSource extends ConnectionSource
     }
 
     /**
-     * @throws MdbListUnavailable|MdbListRejected|GrantUnavailable
+     * @throws MdbListUnavailable|MdbListRejected|ConnectionExpired
      */
     public function rows(ImportInput $input, ImportSelection $selection): Generator
     {

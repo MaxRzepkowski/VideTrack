@@ -335,8 +335,7 @@ return [
     'skip_hardcover_unknown_status' => ':label: a reading status on Hardcover this import does not know.',
     'movies_and_shows_you_watched_on_mdblist' => 'Movies and shows you watched on MDBList, with your ratings, dropped shows, watchlist and lists.',
     'import_from_mdblist' => 'Import from MDBList',
-    'mdblist_did_not_accept_this_instance' => 'MDBList did not accept this instance. Its client id must belong to a Device Code App.',
-    'mdblist_stopped_accepting_this_connection' => 'MDBList stopped accepting this connection. Connect your account again.',
+    'mdblist_stopped_accepting_this_connection' => 'MDBList stopped accepting this API key. Connect again with a current one.',
     'skip_mdblist_no_rating' => ':label: no rating on MDBList\'s ten-point scale.',
     'service_gave_no_token' => ':service answered without a token.',
     'service_token_refresh_under_way' => ':service: another refresh of this connection is still under way. Try again later.',
@@ -378,4 +377,8 @@ return [
     'hardcover_did_not_accept_this_key' => 'Hardcover did not accept this API key.',
     'this_hardcover_key_cannot_read_your_library' => 'This key cannot read your library. Make one with the link above.',
     'new_api_key_on_hardcover' => 'New API key on Hardcover',
+    'mdblist_api_key' => 'MDBList API key',
+    'the_key_from_your_mdblist_preferences_linked' => 'The key from your MDBList preferences, linked above.',
+    'your_mdblist_api_key_is_in' => 'Your API key is in your MDBList preferences:',
+    'mdblist_did_not_accept_this_key' => 'MDBList did not accept this API key.',
 ];
