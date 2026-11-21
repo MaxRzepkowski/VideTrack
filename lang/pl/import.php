@@ -355,4 +355,5 @@ return [
     'retroachievements_does_not_take_this_username' => 'RetroAchievements nie przyjmuje tej nazwy użytkownika.',
     'skip_retroachievements_not_in_a_catalogue' => ':label: hack, gra homebrew albo subset osiągnięć, których nie ma w żadnym katalogu gier.',
     'skip_retroachievements_no_title' => 'Gra z RetroAchievements bez tytułu.',
+    'the_connection_attempt_expired' => 'Próba łączenia wygasła albo została już użyta. Połącz ponownie.',
 ];

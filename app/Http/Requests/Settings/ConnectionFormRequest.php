@@ -71,13 +71,9 @@ class ConnectionFormRequest extends FormRequest
     public function connectable(): AuthorizesByForm
     {
         if ($this->connectable === null) {
-            $registry = app(ConnectionRegistry::class);
             $service = $this->route('service');
-            $connectable = is_string($service) && $registry->has($service) ? $registry->get($service) : null;
 
-            abort_unless($connectable instanceof AuthorizesByForm, 404);
-
-            $this->connectable = $connectable;
+            $this->connectable = (is_string($service) ? app(ConnectionRegistry::class)->capable($service, AuthorizesByForm::class) : null) ?? abort(404);
         }
 
         return $this->connectable;

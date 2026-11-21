@@ -9,6 +9,7 @@ use App\Integrations\Connections\ConnectionRegistry;
 use App\Integrations\Connections\ConnectMethod;
 use App\Integrations\Connections\Contracts\AuthorizesByForm;
 use App\Integrations\Connections\Data\ConnectionCard;
+use App\Integrations\Connections\RedirectAttempts;
 use App\Integrations\Import\Contracts\ExplainsSetup;
 use App\Integrations\Import\Contracts\ImportSource;
 use App\Integrations\Import\Contracts\ReadsCredentials;
@@ -24,6 +25,7 @@ use App\Models\User;
 use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -34,7 +36,7 @@ use Inertia\Response;
  */
 class ImportController extends Controller
 {
-    public function index(#[CurrentUser] User $viewer, ImportSourceRegistry $sources, ConnectionRegistry $connections): Response
+    public function index(#[CurrentUser] User $viewer, Request $request, ImportSourceRegistry $sources, ConnectionRegistry $connections): Response
     {
         $held = $viewer->serviceConnections()->get()->keyBy('service');
 
@@ -53,6 +55,8 @@ class ImportController extends Controller
             ), $sources->all()),
             // The upload limit the request enforces, so the page says the same number.
             'maxFileMegabytes' => intdiv(ImportRequest::MAX_FILE_KB, 1024),
+            // A trip to a service's site comes back here naming its source.
+            'selected' => $sources->find($request->string('source')->value())?->code(),
         ]);
     }
 
@@ -90,6 +94,7 @@ class ImportController extends Controller
             fields: $connectable instanceof AuthorizesByForm ? $connectable->connectionFields() : [],
             autoImportMinutes: $source->autoImportMinutes(),
             connection: $held === null ? null : ConnectionCard::of($held),
+            errorKey: RedirectAttempts::errorKey($service),
         );
     }
 }

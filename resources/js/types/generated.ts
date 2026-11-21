@@ -184,8 +184,9 @@ export type ConnectDef = {
     readonly fields: CredentialField[];
     readonly autoImportMinutes: number;
     readonly connection: ConnectionCard | null;
+    readonly errorKey: string;
 };
-export type ConnectMethod = 'device' | 'form';
+export type ConnectMethod = 'device' | 'redirect' | 'form';
 export type ConnectionCard = {
     readonly id: number;
     readonly service: string;

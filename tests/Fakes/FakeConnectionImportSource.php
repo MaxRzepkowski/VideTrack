@@ -28,6 +28,9 @@ class FakeConnectionImportSource implements ReadsFromConnection
     /** @var array<string, mixed>|null the connection state the last run started from */
     public static ?array $startedFrom = null;
 
+    /** The connectable service it reads through. */
+    public static string $service = FakeDeviceService::CODE;
+
     /** What the run ends in once its rows are out, when a test wants it to fail. */
     public static ?Throwable $failWith = null;
 
@@ -53,7 +56,7 @@ class FakeConnectionImportSource implements ReadsFromConnection
 
     public function connectionService(): string
     {
-        return FakeDeviceService::CODE;
+        return self::$service;
     }
 
     public function autoImportMinutes(): int

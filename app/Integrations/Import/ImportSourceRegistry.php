@@ -3,6 +3,7 @@
 namespace App\Integrations\Import;
 
 use App\Integrations\Import\Contracts\ImportSource;
+use App\Integrations\Import\Contracts\ReadsFromConnection;
 use App\Support\ServiceRegistry;
 
 /**
@@ -18,6 +19,18 @@ final class ImportSourceRegistry extends ServiceRegistry
     public static function taskName(string $code): string
     {
         return "import-{$code}";
+    }
+
+    /** The source that reads through a connection to $service, if one does. */
+    public function readingThrough(string $service): ?ReadsFromConnection
+    {
+        foreach ($this->all() as $source) {
+            if ($source instanceof ReadsFromConnection && $source->connectionService() === $service) {
+                return $source;
+            }
+        }
+
+        return null;
     }
 
     protected function kind(): string

@@ -23,6 +23,8 @@ import { computed, nextTick, ref, useTemplateRef, watch } from 'vue';
 const props = defineProps<{
     sources: ImportSourceDef[];
     maxFileMegabytes: number;
+    // The source a trip to a service's site came back to, preselected.
+    selected: string | null;
 }>();
 
 const form = useForm<{
@@ -32,7 +34,7 @@ const form = useForm<{
     categories: string[];
     list_ids: string[];
 }>({
-    source: props.sources[0]?.code ?? '',
+    source: props.sources.find((candidate) => candidate.code === props.selected)?.code ?? props.sources[0]?.code ?? '',
     file: null,
     credentials: {},
     categories: [],

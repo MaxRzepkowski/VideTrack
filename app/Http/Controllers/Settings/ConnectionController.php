@@ -142,11 +142,7 @@ class ConnectionController extends Controller
 
     private function deviceService(ConnectionRegistry $registry, string $service): AuthorizesByDevice
     {
-        $connectable = $registry->has($service) ? $registry->get($service) : null;
-
-        abort_unless($connectable instanceof AuthorizesByDevice, 404);
-
-        return $connectable;
+        return $registry->capable($service, AuthorizesByDevice::class) ?? abort(404);
     }
 
     /** A refusal, or a service out of reach, is said under the form the same way from every door. */
