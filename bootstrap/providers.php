@@ -35,6 +35,7 @@ use App\Integrations\Netflix\NetflixServiceProvider;
 use App\Integrations\OutgoingWebhooks\OutgoingWebhooksServiceProvider;
 use App\Integrations\Playnite\PlayniteServiceProvider;
 use App\Integrations\Plex\PlexServiceProvider;
+use App\Integrations\RetroAchievements\RetroAchievementsServiceProvider;
 use App\Integrations\Simkl\SimklServiceProvider;
 use App\Integrations\Steam\SteamServiceProvider;
 use App\Integrations\StoryGraph\StoryGraphServiceProvider;
@@ -90,6 +91,7 @@ return [
     GogGalaxyServiceProvider::class,
     GrouveeServiceProvider::class,
     SteamServiceProvider::class,
+    RetroAchievementsServiceProvider::class,
     AnimeServiceProvider::class,
     AnimePlanetServiceProvider::class,
     SimklServiceProvider::class,

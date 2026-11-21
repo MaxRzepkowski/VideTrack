@@ -951,6 +951,13 @@
         "source": "https://cdn.resend.com/brand/resend-icon-white.svg",
         "licence": "trademark of its owner"
     },
+    "retroachievements": {
+        "file": "retroachievements.svg",
+        "width": 25,
+        "height": 25,
+        "source": "simple-icons",
+        "licence": "CC0"
+    },
     "revolt": {
         "file": "revolt.svg",
         "width": 25,
