@@ -356,4 +356,12 @@ return [
     'skip_retroachievements_not_in_a_catalogue' => ':label: hack, gra homebrew albo subset osiągnięć, których nie ma w żadnym katalogu gier.',
     'skip_retroachievements_no_title' => 'Gra z RetroAchievements bez tytułu.',
     'the_connection_attempt_expired' => 'Próba łączenia wygasła albo została już użyta. Połącz ponownie.',
+    'your_tmdb_watchlist_favorites_ratings_and_lists' => 'Watchlista, ulubione, oceny filmów, seriali i odcinków oraz publiczne listy z TMDB.',
+    'import_from_tmdb' => 'Import z TMDB',
+    'tmdb_did_not_accept_this_instance' => 'TMDB nie przyjął klucza API tej instancji.',
+    'tmdb_connection_was_not_approved' => 'Połączenie nie zostało zatwierdzone w TMDB.',
+    'tmdb_stopped_accepting_this_connection' => 'TMDB przestał przyjmować to połączenie. Połącz konto ponownie.',
+    'skip_tmdb_no_rating' => ':label: brak oceny w TMDB.',
+    'skip_tmdb_list_not_shown' => 'Lista TMDB „:label”: TMDB pokazuje innym aplikacjom tylko listy publiczne. Ustaw ją w TMDB jako publiczną, żeby ją zaimportować.',
+    'skip_tmdb_list_gone' => 'Lista TMDB „:label”: TMDB już jej nie ma.',
 ];

@@ -127,14 +127,6 @@ class TmdbClient
 
     private function request(): PendingRequest
     {
-        $key = $this->credential('tracker.tmdb.api_key', 'TMDB_API_KEY');
-
-        $request = $this->httpClient(config()->string('tracker.tmdb.base_url'));
-
-        // v4 read access tokens are JWTs (a JSON header, so "eyJ…") sent as a
-        // bearer header; v3 keys go in the query string.
-        return str_starts_with($key, 'eyJ')
-            ? $request->withToken($key)
-            : $request->withQueryParameters(['api_key' => $key]);
+        return TmdbKey::on($this->httpClient(config()->string('tracker.tmdb.base_url')));
     }
 }

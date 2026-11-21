@@ -127,7 +127,7 @@ Everything is optional except `TMDB_API_KEY`. A media type exists only when its 
 
 | Variable | Default | Description |
 |---|---|---|
-| `TMDB_API_KEY` | (required) | TMDB API key (v3) or read token (v4): movies and TV |
+| `TMDB_API_KEY` | (required) | TMDB API key (v3) or read token (v4): movies and TV. Users can also connect their own TMDB account with it to import their watchlist, favorites, ratings and public lists; nothing else to register |
 | `APP_URL` | `http://localhost:8080` | the address people open; links sent to others and the webhook addresses on Settings → Integrations are built from it, so a media server in another container needs an address it can reach |
 | `APP_KEY` | generated | encryption key for stored tokens and sessions; generated on first start into `/data/app.key`. Set it only to bring your own |
 | `IGDB_CLIENT_ID` / `IGDB_CLIENT_SECRET` | | [Twitch Developers](https://dev.twitch.tv/console/apps) app credentials: **games** |

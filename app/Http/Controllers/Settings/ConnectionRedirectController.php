@@ -50,8 +50,15 @@ class ConnectionRedirectController extends Controller
         $connectable = $this->redirectService($registry, $service);
         $back = to_route('settings.import.index', array_filter(['source' => $sources->readingThrough($service)?->code()]));
 
+        $answer = Payload::stringMap($request->query());
+        $state = $request->route('state');
+
+        if (is_string($state)) {
+            $answer['state'] = $state;
+        }
+
         try {
-            $grant = $attempts->complete($viewer, $connectable, $service, Payload::stringMap($request->query()), $this->callbackUrl($service));
+            $grant = $attempts->complete($viewer, $connectable, $service, $answer, $this->callbackUrl($service));
         } catch (ConnectionRejected|ServiceUnavailable $refused) {
             // Under the service's own name: the page holds a card per source.
             return $back->withErrors([RedirectAttempts::errorKey($service) => $refused->wording()]);

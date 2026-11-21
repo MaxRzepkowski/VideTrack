@@ -40,6 +40,7 @@ use App\Integrations\Simkl\SimklServiceProvider;
 use App\Integrations\Steam\SteamServiceProvider;
 use App\Integrations\StoryGraph\StoryGraphServiceProvider;
 use App\Integrations\Tautulli\TautulliServiceProvider;
+use App\Integrations\Tmdb\TmdbAccountServiceProvider;
 use App\Integrations\Tracearr\TracearrServiceProvider;
 use App\Integrations\Trakt\TraktServiceProvider;
 use App\Integrations\TvTime\TvTimeServiceProvider;
@@ -71,6 +72,7 @@ return [
     VideTrackServiceProvider::class,
     YamtrackServiceProvider::class,
     TraktServiceProvider::class,
+    TmdbAccountServiceProvider::class,
     WeTrakrServiceProvider::class,
     LetterboxdServiceProvider::class,
     TvTimeServiceProvider::class,

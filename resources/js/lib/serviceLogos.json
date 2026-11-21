@@ -1238,6 +1238,13 @@
         "source": "simple-icons",
         "licence": "CC0"
     },
+    "tmdb": {
+        "file": "tmdb.svg",
+        "width": 273,
+        "height": 36,
+        "source": "https://www.themoviedb.org/about/logos-attribution",
+        "licence": "TMDB logo, used as its attribution guidelines ask; trademark of its owner"
+    },
     "tracearr": {
         "file": "tracearr.svg",
         "width": 320,

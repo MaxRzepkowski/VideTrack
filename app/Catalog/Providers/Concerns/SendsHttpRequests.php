@@ -3,6 +3,7 @@
 namespace App\Catalog\Providers\Concerns;
 
 use App\Catalog\ProviderBusy;
+use App\Catalog\ProviderCredential;
 use App\Catalog\ProviderException;
 use App\Catalog\ProviderRejected;
 use App\Support\ConnectionFailure;
@@ -45,20 +46,10 @@ trait SendsHttpRequests
         return $baseUrl === null ? $client : $client->baseUrl($baseUrl);
     }
 
-    /**
-     * A credential the service cannot be asked without. A module registers
-     * only when its keys are set, so a gap here is a misconfigured instance
-     * and reads as the service being unavailable.
-     */
+    /** A credential the service cannot be asked without ({@see ProviderCredential}). */
     protected function credential(string $configKey, string $envName): string
     {
-        $value = config($configKey);
-
-        if (! is_string($value) || $value === '') {
-            throw new ProviderException("{$envName} is not configured.");
-        }
-
-        return $value;
+        return ProviderCredential::read($configKey, $envName);
     }
 
     /**
