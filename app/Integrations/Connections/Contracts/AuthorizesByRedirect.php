@@ -16,8 +16,8 @@ use App\Support\ServiceUnavailable;
  *
  * The attempt owns the check that a trip back is the one it started: it
  * hands the service a random state, which the service carries to its site
- * and back (OAuth's `state`, a parameter of the return address), and only
- * an answer carrying it reaches completeRedirect().
+ * and back (OAuth's `state`, or one more segment of the return address's
+ * path), and only an answer carrying it reaches completeRedirect().
  */
 interface AuthorizesByRedirect extends ConnectableService
 {

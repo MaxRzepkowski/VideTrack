@@ -15,4 +15,12 @@ final class EpisodeLabel
     {
         return $season === null || $number === null ? $show : $show.' '.EpisodeCode::of($season, $number);
     }
+
+    /** An episode a source names by its own title only: its place first, then the title. */
+    public static function untitledShow(int $season, int $number, ?string $title): string
+    {
+        $code = EpisodeCode::of($season, $number);
+
+        return $title === null ? $code : "{$code} {$title}";
+    }
 }

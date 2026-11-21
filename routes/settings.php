@@ -97,7 +97,9 @@ Route::middleware(['auth', 'throttle:web'])->name('settings.')->group(function (
         Route::post('settings/connections/{service}/redirect', [ConnectionRedirectController::class, 'begin'])->name('connections.redirect.begin');
         // The service sends the browser back with a GET, which connects: the
         // one way a trip through its site can end.
-        Route::get('settings/connections/{service}/callback', [ConnectionRedirectController::class, 'callback'])->name('connections.callback');
+        // A service that keeps no state of its own carries the attempt's in the
+        // path, which it leaves alone however it adds its own query.
+        Route::get('settings/connections/{service}/callback/{state?}', [ConnectionRedirectController::class, 'callback'])->name('connections.callback');
     });
     Route::patch('settings/connections/{connection}', [ConnectionController::class, 'update'])->name('connections.update');
     Route::delete('settings/connections/{connection}', [ConnectionController::class, 'destroy'])->name('connections.destroy');
