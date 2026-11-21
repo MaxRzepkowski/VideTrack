@@ -517,6 +517,13 @@
         "source": "apprise-docs",
         "licence": "CC BY 4.0"
     },
+    "koreader": {
+        "file": "koreader.svg",
+        "width": 25,
+        "height": 25,
+        "source": "simple-icons",
+        "licence": "CC0"
+    },
     "kumulos": {
         "file": "kumulos.svg",
         "width": 207,

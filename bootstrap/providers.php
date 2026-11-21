@@ -25,6 +25,7 @@ use App\Integrations\Hltb\HltbServiceProvider;
 use App\Integrations\ICheckMovies\ICheckMoviesServiceProvider;
 use App\Integrations\Imdb\ImdbServiceProvider;
 use App\Integrations\Jellyfin\JellyfinServiceProvider;
+use App\Integrations\KOReader\KOReaderServiceProvider;
 use App\Integrations\Letterboxd\LetterboxdServiceProvider;
 use App\Integrations\LibraryThing\LibraryThingServiceProvider;
 use App\Integrations\Mail\MailServiceProvider;
@@ -77,6 +78,7 @@ return [
     GoodreadsServiceProvider::class,
     StoryGraphServiceProvider::class,
     BookWyrmServiceProvider::class,
+    KOReaderServiceProvider::class,
     LibraryThingServiceProvider::class,
     CalibreServiceProvider::class,
     HltbServiceProvider::class,
