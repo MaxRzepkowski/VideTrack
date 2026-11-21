@@ -4,8 +4,9 @@ namespace App\Integrations\Connections\Data;
 
 /**
  * Where one service keeps its OAuth device grant (RFC 8628) and how its
- * refusals read: what a client hands DeviceGrantClient so the code request,
- * the polling and the token refresh run the same way for every service.
+ * refusals read: what a client hands DeviceGrantClient so the code request
+ * and the polling run the same way for every service, and TokenGrantClient
+ * its tokenGrant() so the tokens stay fresh.
  * The messages are translation keys.
  */
 final readonly class DeviceGrant
@@ -28,4 +29,10 @@ final readonly class DeviceGrant
         /** Where to send the user when the service leaves it out of its answer. */
         public ?string $verificationUri = null,
     ) {}
+
+    /** The grant's tokens, as TokenGrantClient keeps them: a device app is public, with no secret. */
+    public function tokenGrant(): TokenGrant
+    {
+        return new TokenGrant($this->service, $this->baseUrl, $this->clientId, null, $this->tokenPath, $this->revokePath, $this->expiredKey);
+    }
 }

@@ -13,11 +13,14 @@ use App\Models\ServiceConnection;
  * A service connected through its OAuth device flow: the user approves a
  * code on the service's own site, and the instance never sees a password
  * nor needs a callback address. What differs between services is where the
- * grant lives and how the account is named; the rest is DeviceGrantClient's.
+ * grant lives and how the account is named; the rest is DeviceGrantClient's and TokenGrantClient's.
  */
 abstract class DeviceGrantService implements AuthorizesByDevice, RevokesAccess
 {
-    public function __construct(private readonly DeviceGrantClient $grants) {}
+    public function __construct(
+        private readonly DeviceGrantClient $grants,
+        private readonly TokenGrantClient $tokens,
+    ) {}
 
     /** Where the service keeps its grant. */
     abstract protected function grant(): DeviceGrant;
@@ -42,6 +45,6 @@ abstract class DeviceGrantService implements AuthorizesByDevice, RevokesAccess
 
     public function revoke(ServiceConnection $connection): void
     {
-        $this->grants->revoke($this->grant(), $connection);
+        $this->tokens->revoke($this->grant()->tokenGrant(), $connection);
     }
 }

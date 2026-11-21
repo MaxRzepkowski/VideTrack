@@ -4,8 +4,8 @@ namespace App\Integrations\Hardcover;
 
 use App\Integrations\Connections\ConnectionExpired;
 use App\Integrations\Connections\Data\DeviceGrant;
-use App\Integrations\Connections\DeviceGrantClient;
 use App\Integrations\Connections\GrantUnavailable;
+use App\Integrations\Connections\TokenGrantClient;
 use App\Models\ServiceConnection;
 use App\Support\ConnectionFailure;
 use App\Support\HttpRetry;
@@ -25,7 +25,7 @@ use Illuminate\Support\Sleep;
  *   operator registered, asking only to read the profile and the library;
  *   the instance's own catalogue key is never used for a library;
  * - access tokens live a week; refresh tokens rotate on every use, and one
- *   spent twice revokes the whole grant — DeviceGrantClient's refresh is
+ *   spent twice revokes the whole grant — TokenGrantClient's refresh is
  *   built for that;
  * - limits are per reader, shared with every app they use: 60 requests a
  *   minute and 5,000 a day on a free account. Pages go one a second, and
@@ -63,7 +63,7 @@ class HardcoverLibraryClient
         }
         GRAPHQL;
 
-    public function __construct(private readonly DeviceGrantClient $grants) {}
+    public function __construct(private readonly TokenGrantClient $tokens) {}
 
     /**
      * The username, for the card — read with a token straight from the
@@ -98,7 +98,7 @@ class HardcoverLibraryClient
         }
 
         $variables = ['limit' => self::PAGE_SIZE, 'offset' => $page * self::PAGE_SIZE];
-        $response = $this->grants->call($this->grant(), $connection, fn (string $token): Response => $this->query($token, $variables));
+        $response = $this->tokens->call($this->grant()->tokenGrant(), $connection, fn (string $token): Response => $this->query($token, $variables));
 
         if (HttpRetry::isOutage($response)) {
             throw new HardcoverUnavailable('import.service_answered_try_later', ['service' => HardcoverService::NAME, 'status' => $response->status()]);
