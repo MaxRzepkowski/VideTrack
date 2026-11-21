@@ -387,4 +387,9 @@ return [
     'the_server_stopped_accepting_this_key' => 'The server stopped accepting this API key. Connect it again with a current key.',
     'service_address' => ':service address',
     'the_address_you_open_service_at' => 'The address you open :service at, for example :example.',
+    'in_audiobookshelf_settings_api_keys' => 'In Audiobookshelf, Settings → API Keys. An administrator makes it to act on behalf of your user.',
+    'audiobooks_and_ebooks_you_finished_or' => 'Audiobooks and e-books you finished or are in the middle of, found by ISBN or by title and author.',
+    'import_from_audiobookshelf' => 'Import from Audiobookshelf',
+    'skip_audiobookshelf_no_title' => 'An Audiobookshelf book without a title.',
+    'skip_audiobookshelf_item_unavailable' => 'A book is gone from the Audiobookshelf server, or your user may no longer open it.',
 ];

@@ -1,0 +1,56 @@
+{
+  "id": "li-hobbit",
+  "ino": "1234",
+  "oldLibraryItemId": null,
+  "libraryId": "lib-audiobooks",
+  "folderId": "folder-1",
+  "path": "/audiobooks/The Hobbit",
+  "relPath": "The Hobbit",
+  "isFile": false,
+  "mtimeMs": 1748736000000,
+  "ctimeMs": 1748736000000,
+  "birthtimeMs": 0,
+  "addedAt": 1748736000000,
+  "updatedAt": 1748736000000,
+  "lastScan": 1748736000000,
+  "scanVersion": "2.30.0",
+  "isMissing": false,
+  "isInvalid": false,
+  "mediaType": "book",
+  "media": {
+    "id": "book-li-hobbit",
+    "libraryItemId": "li-hobbit",
+    "metadata": {
+      "title": "The Hobbit",
+      "subtitle": null,
+      "authors": [
+        {
+          "id": "au-0",
+          "name": "J.R.R. Tolkien"
+        }
+      ],
+      "narrators": [
+        "A Narrator"
+      ],
+      "series": [],
+      "genres": [
+        "Fantasy"
+      ],
+      "publishedYear": "2012",
+      "publishedDate": null,
+      "publisher": "A Publisher",
+      "description": null,
+      "isbn": "978-0-547-92822-7",
+      "asin": "B000000000",
+      "language": "English",
+      "explicit": false,
+      "abridged": false
+    },
+    "coverPath": null,
+    "tags": [],
+    "audioFiles": [],
+    "chapters": [],
+    "ebookFile": null
+  },
+  "libraryFiles": []
+}
