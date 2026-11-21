@@ -199,7 +199,6 @@ return [
     'restore_a_videtrack_backup_or_bring' => 'Restore a VideTrack backup or bring your data over from another service',
     'shows_movies_and_anime_you_watched' => 'Shows, movies and anime you watched on Simkl, with your ratings and watchlist.',
     'simkl_could_not_start_the_connection' => 'Simkl could not start the connection. Try again later.',
-    'simkl_did_not_accept_this_instance' => 'Simkl did not accept this instance. Its client id must belong to an AUTH V2 app.',
     'simkl_stopped_accepting_this_connection_connect' => 'Simkl stopped accepting this connection. Connect your account again.',
     'spreadsheets_csv' => 'Spreadsheets (CSV)',
     'start_import' => 'Start import',
@@ -384,4 +383,8 @@ return [
     'the_key_from_the_steam_page_linked' => 'From the Steam page linked above. Used for this import only, not kept.',
     'make_a_steam_web_api_key' => 'Make your Steam Web API key:',
     'steam_did_not_accept_this_key' => 'Steam did not accept this API key.',
+    'simkl_app_client_id' => 'Client ID of your Simkl app',
+    'the_client_id_of_your_simkl_app' => 'Shown on your app\'s page on Simkl, linked above.',
+    'make_a_simkl_app_of_type' => 'Make a Simkl app of type “TV, devices & command line” (AUTH V2), then copy its Client ID:',
+    'simkl_did_not_accept_this_client_id' => 'Simkl did not accept this Client ID. It must belong to an AUTH V2 app of type “TV, devices & command line”.',
 ];

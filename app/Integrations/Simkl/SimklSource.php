@@ -3,8 +3,10 @@
 namespace App\Integrations\Simkl;
 
 use App\Integrations\Import\ConnectionSource;
+use App\Integrations\Import\Contracts\ExplainsSetup;
 use App\Integrations\Import\Data\ImportInput;
 use App\Integrations\Import\Data\ImportSelection;
+use App\Integrations\Import\Data\SetupNote;
 use App\Support\Payload;
 use Generator;
 
@@ -16,12 +18,12 @@ use Generator;
  * - every later run asks GET /sync/activities first and stops right there
  *   when `all` has not moved; otherwise it pulls only what changed since
  *   (date_from = the `all` saved last time). Pulling the whole library on
- *   a timer gets the instance's client id suspended without warning.
+ *   a timer gets the app's client id suspended without warning.
  *
  * The saved `all` is the read position RunImport keeps on the connection.
  * Rewatch sessions are a PRO/VIP extra and are not asked for.
  */
-class SimklSource extends ConnectionSource
+class SimklSource extends ConnectionSource implements ExplainsSetup
 {
     public const CODE = 'simkl';
 
@@ -57,6 +59,11 @@ class SimklSource extends ConnectionSource
     public function taskLabel(): string
     {
         return __('import.import_from_simkl');
+    }
+
+    public function notes(): array
+    {
+        return [new SetupNote(__('import.make_a_simkl_app_of_type'), SimklClient::DEVELOPER_URL)];
     }
 
     public function connectionService(): string

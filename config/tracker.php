@@ -352,16 +352,14 @@ return [
     | Simkl (import through a connected account)
     |--------------------------------------------------------------------------
     |
-    | The instance owner registers one AUTH V2 app of type "TV, devices &
-    | command line" at https://simkl.com/settings/developer/ and puts its
-    | client id here. The device flow needs no secret and no callback
-    | address, so this works on an instance that answers only on localhost.
-    | Without a client id the Simkl source is not offered.
+    | Each user makes their own Simkl app and types its client id on the
+    | import page: nothing to set up here. The device flow needs no secret
+    | and no callback address, so this works on an instance that answers
+    | only on localhost.
     |
     */
 
     'simkl' => [
-        'client_id' => env('SIMKL_CLIENT_ID'),
         'base_url' => env('SIMKL_BASE_URL', 'https://api.simkl.com'),
     ],
 

@@ -7,7 +7,7 @@ use App\Http\Requests\Settings\AnalyzeImportRequest;
 use App\Http\Requests\Settings\ImportRequest;
 use App\Integrations\Connections\ConnectionRegistry;
 use App\Integrations\Connections\ConnectMethod;
-use App\Integrations\Connections\Contracts\AuthorizesByForm;
+use App\Integrations\Connections\Contracts\HasConnectionFields;
 use App\Integrations\Connections\Data\ConnectionCard;
 use App\Integrations\Connections\RedirectAttempts;
 use App\Integrations\Import\Contracts\ExplainsSetup;
@@ -80,7 +80,8 @@ class ImportController extends Controller
 
     /**
      * How the source's card connects (a code typed at the service, or a
-     * pasted address and key) and what the user already holds there.
+     * pasted address and key), what it asks for first and what the user
+     * already holds there.
      */
     private function connect(ConnectionRegistry $connections, ReadsFromConnection $source, ?ServiceConnection $held): ConnectDef
     {
@@ -91,7 +92,7 @@ class ImportController extends Controller
             service: $service,
             name: $connectable->name(),
             method: ConnectMethod::of($connectable),
-            fields: $connectable instanceof AuthorizesByForm ? $connectable->connectionFields() : [],
+            fields: $connectable instanceof HasConnectionFields ? $connectable->connectionFields() : [],
             autoImportMinutes: $source->autoImportMinutes(),
             connection: $held === null ? null : ConnectionCard::of($held),
             errorKey: RedirectAttempts::errorKey($service),

@@ -114,8 +114,6 @@ test('a task job keeps one run per task and user, and a failure closes its row',
 });
 
 test('the real paces: Simkl daily, Tracearr hourly', function () {
-    config(['tracker.simkl.client_id' => 'simkl-client']);
-    app()->forgetInstance(ImportSourceRegistry::class);
     $sources = app(ImportSourceRegistry::class);
 
     expect($sources->get('simkl')->autoImportMinutes())->toBe(1440)

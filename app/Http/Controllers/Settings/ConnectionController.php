@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Settings;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Settings\ConnectionFormRequest;
+use App\Http\Requests\Settings\DeviceStartRequest;
 use App\Integrations\Connections\ConnectAttemptStatus;
 use App\Integrations\Connections\ConnectionRegistry;
 use App\Integrations\Connections\ConnectionRejected;
@@ -34,11 +35,14 @@ use Illuminate\Validation\ValidationException;
  */
 class ConnectionController extends Controller
 {
-    /** Starts a device flow; the page gets the code to type and where to type it. */
-    public function beginDevice(#[CurrentUser] User $viewer, ConnectionRegistry $registry, DeviceAttempts $attempts, string $service): JsonResponse
+    /**
+     * Starts a device flow with what the card's fields hold; the page gets
+     * the code to type and where to type it.
+     */
+    public function beginDevice(#[CurrentUser] User $viewer, DeviceStartRequest $request, DeviceAttempts $attempts, string $service): JsonResponse
     {
         try {
-            $authorization = $attempts->begin($viewer, $this->deviceService($registry, $service), $service);
+            $authorization = $attempts->begin($viewer, $request->device(), $service, $request->values());
         } catch (ConnectionRejected|ServiceUnavailable $refused) {
             throw $this->refused($refused);
         }
@@ -96,7 +100,7 @@ class ConnectionController extends Controller
     public function verify(#[CurrentUser] User $viewer, ConnectionFormRequest $request): JsonResponse
     {
         try {
-            $choices = $request->connectable()->verify($viewer, $request->values());
+            $choices = $request->form()->verify($viewer, $request->values());
         } catch (ConnectionRejected|ServiceUnavailable|UnusableAddress $rejected) {
             throw $this->refused($rejected);
         }
@@ -109,7 +113,7 @@ class ConnectionController extends Controller
     public function connect(#[CurrentUser] User $viewer, ConnectionFormRequest $request, ConnectService $connect, string $service): JsonResponse
     {
         try {
-            $grant = $request->connectable()->connect($viewer, $request->values(), $request->choice());
+            $grant = $request->form()->connect($viewer, $request->values(), $request->choice());
         } catch (ConnectionRejected|ServiceUnavailable|UnusableAddress $rejected) {
             throw $this->refused($rejected);
         }

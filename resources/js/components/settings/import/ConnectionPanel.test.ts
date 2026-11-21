@@ -76,7 +76,7 @@ describe('ConnectionPanel', () => {
         );
         const panel = mountPanel();
 
-        await panel.find('button').trigger('click');
+        await panel.find('form').trigger('submit');
         await flushPromises();
 
         expect(panel.text()).toContain('Simkl is unreachable: timed out');
@@ -86,7 +86,7 @@ describe('ConnectionPanel', () => {
         fetchMock.mockResolvedValueOnce(started('ABCD-EFGH')).mockResolvedValueOnce(json({ status: 'pending' }));
         const panel = mountPanel();
 
-        await panel.find('button').trigger('click');
+        await panel.find('form').trigger('submit');
         await flushPromises();
         expect(panel.text()).toContain('ABCD-EFGH');
 
@@ -101,21 +101,21 @@ describe('ConnectionPanel', () => {
             .mockResolvedValueOnce(started('ABCD-EFGH'))
             .mockResolvedValueOnce(json({ status: 'expired' }))
             .mockResolvedValueOnce(started('IJKL-MNOP'))
-            .mockResolvedValueOnce(json({ status: 'failed', message: 'Simkl does not accept this instance.' }));
+            .mockResolvedValueOnce(json({ status: 'failed', message: 'Simkl did not accept this Client ID.' }));
         const panel = mountPanel();
 
-        await panel.find('button').trigger('click');
+        await panel.find('form').trigger('submit');
         await flushPromises();
         await vi.advanceTimersByTimeAsync(5000);
 
         expect(panel.text()).toContain('The code expired. Start again.');
         expect(panel.text()).not.toContain('ABCD-EFGH');
 
-        await panel.find('button').trigger('click');
+        await panel.find('form').trigger('submit');
         await flushPromises();
         await vi.advanceTimersByTimeAsync(5000);
 
-        expect(panel.text()).toContain('Simkl does not accept this instance.');
+        expect(panel.text()).toContain('Simkl did not accept this Client ID.');
         expect(panel.text()).not.toContain('IJKL-MNOP');
     });
 
@@ -128,13 +128,13 @@ describe('ConnectionPanel', () => {
             .mockResolvedValueOnce(started('NEW-CODE'));
         const panel = mountPanel();
 
-        await panel.find('button').trigger('click');
+        await panel.find('form').trigger('submit');
         await flushPromises();
         await vi.advanceTimersByTimeAsync(5000);
 
         await panel.find('button').trigger('click'); // Cancel
         await flushPromises();
-        await panel.find('button').trigger('click'); // Connect again
+        await panel.find('form').trigger('submit'); // Connect again
         await flushPromises();
 
         answerOldPoll(json({ status: 'expired' }));
@@ -142,6 +142,30 @@ describe('ConnectionPanel', () => {
 
         expect(panel.text()).toContain('NEW-CODE');
         expect(panel.text()).not.toContain('The code expired. Start again.');
+    });
+
+    it('asks for what a device code needs first, sends it, and names a field the service would not take', async () => {
+        fetchMock
+            .mockResolvedValueOnce(json({ message: 'Required.', errors: { 'values.client_id': ['Enter the Client ID.'] } }, 422))
+            .mockResolvedValueOnce(started('ABCD-EFGH'));
+        const panel = mountPanel({
+            ...simkl,
+            fields: [{ key: 'client_id', label: 'Client ID of your Simkl app', type: 'text', help: null, optional: false, secret: false }],
+        });
+
+        await panel.find('form').trigger('submit');
+        await flushPromises();
+        expect(panel.text()).toContain('Enter the Client ID.');
+
+        await panel.find('input').setValue('client-of-alex');
+        await panel.find('form').trigger('submit');
+        await flushPromises();
+
+        expect(fetchMock).toHaveBeenLastCalledWith('/settings.connections.device.begin/simkl', {
+            method: 'POST',
+            body: { values: { client_id: 'client-of-alex' } },
+        });
+        expect(panel.text()).toContain('ABCD-EFGH');
     });
 
     it('checks a pasted key, names a field the service would not take, and says under the form why connecting failed', async () => {

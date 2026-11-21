@@ -92,8 +92,8 @@ class DeviceGrantClient
     }
 
     /**
-     * The service does not know the instance's app, or does not let it use
-     * this grant: only the operator can change that.
+     * The service does not know the app, or does not let it use this grant:
+     * asking again with the same app will not help.
      */
     private function refusesTheApp(Response $response): bool
     {

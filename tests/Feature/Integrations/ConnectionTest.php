@@ -19,6 +19,7 @@ use App\Jobs\RunImport;
 use App\Models\ServiceConnection;
 use App\Models\TaskRun;
 use App\Models\User;
+use App\Support\Forms\CredentialField;
 use App\Support\Forms\CredentialFieldType;
 use App\Support\PublicUrl;
 use App\Support\ServiceBusy;
@@ -68,6 +69,38 @@ test('starting a device flow shows the code to type and keeps the device code on
         ->assertJsonPath('interval', 5)
         ->assertJsonMissing(['deviceCode' => 'secret-device-code'])
         ->assertDontSee('secret-device-code');
+});
+
+test('what the card asked for rides with every poll, and rests encrypted', function () {
+    FakeDeviceService::$fields = [new CredentialField('client_id', 'App id')];
+    $user = User::factory()->create();
+
+    $this->actingAs($user)->postJson(route('settings.connections.device.begin', FakeDeviceService::CODE), ['values' => []])
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors(['values.client_id']);
+
+    $this->postJson(route('settings.connections.device.begin', FakeDeviceService::CODE), ['values' => ['client_id' => ' app-of-alex ']])->assertOk();
+
+    $stored = Cache::get("connections:device:{$user->id}:".FakeDeviceService::CODE);
+    expect(serialize($stored))->not->toContain('app-of-alex');
+
+    $this->travel(5)->seconds();
+    $this->postJson(route('settings.connections.device.poll', FakeDeviceService::CODE));
+
+    expect(FakeDeviceService::$seenValues)->toBe([['client_id' => 'app-of-alex']]);
+});
+
+test('an attempt kept without what was typed reads as gone', function () {
+    $user = User::factory()->create();
+    Cache::put("connections:device:{$user->id}:".FakeDeviceService::CODE, [
+        'device_code' => Crypt::encryptString('secret-device-code'),
+        'interval' => 5,
+        'next_poll_at' => now()->getTimestamp(),
+        'expires_at' => now()->addMinutes(10)->getTimestamp(),
+    ], 600);
+
+    $this->actingAs($user)->postJson(route('settings.connections.device.poll', FakeDeviceService::CODE))->assertJsonPath('status', 'expired');
+    expect(FakeDeviceService::$pollCount)->toBe(0);
 });
 
 test('the device code rests encrypted in the cache', function () {
@@ -209,7 +242,7 @@ test('a slow poll about an old code neither ends nor replaces the attempt begun 
     // The user starts over while the service is still answering the old code.
     FakeDeviceService::$polls = [function () use ($user, $answer): DevicePoll {
         FakeDeviceService::$deviceCode = 'newer-device-code';
-        app(DeviceAttempts::class)->begin($user, new FakeDeviceService, FakeDeviceService::CODE);
+        app(DeviceAttempts::class)->begin($user, new FakeDeviceService, FakeDeviceService::CODE, []);
 
         return $answer;
     }];

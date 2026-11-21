@@ -199,7 +199,6 @@ return [
     'restore_a_videtrack_backup_or_bring' => 'Przywróć kopię zapasową VideTrack albo przenieś dane z innego serwisu',
     'shows_movies_and_anime_you_watched' => 'Seriale, filmy i anime obejrzane w Simkl, z ocenami i watchlistą.',
     'simkl_could_not_start_the_connection' => 'Simkl nie mógł rozpocząć łączenia. Spróbuj później.',
-    'simkl_did_not_accept_this_instance' => 'Simkl nie przyjął tej instancji. Jej client id musi należeć do aplikacji AUTH V2.',
     'simkl_stopped_accepting_this_connection_connect' => 'Simkl przestał przyjmować to połączenie. Połącz konto ponownie.',
     'spreadsheets_csv' => 'Arkusze kalkulacyjne (CSV)',
     'start_import' => 'Rozpocznij import',
@@ -384,4 +383,8 @@ return [
     'the_key_from_the_steam_page_linked' => 'Ze strony Steam podlinkowanej powyżej. Służy tylko do tego importu i nie jest zapisywany.',
     'make_a_steam_web_api_key' => 'Utwórz swój klucz Steam Web API:',
     'steam_did_not_accept_this_key' => 'Steam nie przyjął tego klucza API.',
+    'simkl_app_client_id' => 'Client ID Twojej aplikacji Simkl',
+    'the_client_id_of_your_simkl_app' => 'Widoczny na stronie Twojej aplikacji w Simkl, link powyżej.',
+    'make_a_simkl_app_of_type' => 'Załóż aplikację Simkl typu „TV, devices & command line” (AUTH V2) i skopiuj jej Client ID:',
+    'simkl_did_not_accept_this_client_id' => 'Simkl nie przyjął tego Client ID. Musi należeć do aplikacji AUTH V2 typu „TV, devices & command line”.',
 ];

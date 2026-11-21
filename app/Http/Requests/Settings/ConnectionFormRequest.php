@@ -2,96 +2,39 @@
 
 namespace App\Http\Requests\Settings;
 
-use App\Http\Requests\Settings\Concerns\ReadsCredentialFields;
-use App\Integrations\Connections\ConnectionRegistry;
 use App\Integrations\Connections\Contracts\AuthorizesByForm;
-use App\Integrations\Connections\UnusableAddress;
-use App\Integrations\Connections\UserAddresses;
-use App\Models\User;
-use App\Support\Forms\CredentialFieldType;
-use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Validator;
+use LogicException;
 
 /**
- * What the user typed into a service's connect form: the service's own
- * fields, all required and validated in one go so every missing one is named
- * at once, plus the account picked from what verifying listed. Every
- * address field is checked by `UserAddresses` here, so a refused address is
- * named under its field before the service is asked. This is the early
- * answer, not the protection: the service's client pins the address it
- * calls and follows no redirect.
+ * What the user typed into a service's connect form (an address and a key)
+ * and the account picked from what verifying listed.
  */
-class ConnectionFormRequest extends FormRequest
+class ConnectionFormRequest extends ConnectionFieldsRequest
 {
-    use ReadsCredentialFields;
-
-    /** A sign-in value may be a long address or token. */
-    private const VALUE_MAX = 2048;
-
-    private ?AuthorizesByForm $connectable = null;
-
     /**
      * @return array<string, list<string>>
      */
     public function rules(): array
     {
-        return [
-            'choice' => ['nullable', 'string', 'max:255'],
-            ...$this->fieldRules($this->connectable()->connectionFields(), 'values', self::VALUE_MAX),
-        ];
+        return ['choice' => ['nullable', 'string', 'max:255'], ...parent::rules()];
     }
 
-    /**
-     * @return list<callable(Validator): void>
-     */
-    public function after(): array
+    /** The service, connected by the form itself. */
+    public function form(): AuthorizesByForm
     {
-        return [function (Validator $validator): void {
-            $owner = $this->user();
+        $connectable = $this->connectable();
 
-            if (! $owner instanceof User || $validator->errors()->isNotEmpty()) {
-                return;
-            }
-
-            foreach ($this->connectable()->connectionFields() as $field) {
-                if ($field->type !== CredentialFieldType::Url) {
-                    continue;
-                }
-
-                try {
-                    app(UserAddresses::class)->pin($this->string("values.{$field->key}")->trim()->value(), $owner);
-                } catch (UnusableAddress $unusable) {
-                    $validator->errors()->add("values.{$field->key}", $unusable->wording());
-                }
-            }
-        }];
-    }
-
-    /** The service the route names; one that connects by no form is no page here. */
-    public function connectable(): AuthorizesByForm
-    {
-        if ($this->connectable === null) {
-            $service = $this->route('service');
-
-            $this->connectable = (is_string($service) ? app(ConnectionRegistry::class)->capable($service, AuthorizesByForm::class) : null) ?? abort(404);
-        }
-
-        return $this->connectable;
-    }
-
-    /**
-     * The form's fields, trimmed.
-     *
-     * @return array<string, string>
-     */
-    public function values(): array
-    {
-        return $this->fieldValues($this->connectable()->connectionFields(), 'values');
+        return $connectable instanceof AuthorizesByForm ? $connectable : throw new LogicException('A connect form for a service that connects no form.');
     }
 
     /** The account picked from the verified list; null where the service lists none. */
     public function choice(): ?string
     {
         return $this->string('choice')->value() ?: null;
+    }
+
+    protected function capability(): string
+    {
+        return AuthorizesByForm::class;
     }
 }

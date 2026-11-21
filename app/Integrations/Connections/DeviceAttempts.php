@@ -6,6 +6,7 @@ use App\Integrations\Connections\Contracts\AuthorizesByDevice;
 use App\Integrations\Connections\Data\ConnectionGrant;
 use App\Integrations\Connections\Data\DeviceAuthorization;
 use App\Models\User;
+use App\Support\Payload;
 use App\Support\ServiceUnavailable;
 use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Support\Facades\Cache;
@@ -13,7 +14,8 @@ use Illuminate\Support\Facades\Crypt;
 
 /**
  * A device flow under way, one per user and service: the device code the
- * instance polls with (a credential, so it stays in the cache), and the pace
+ * instance polls with and what the card's fields held when it began
+ * (credentials, so they rest encrypted in the cache), and the pace
  * the service asked for. The pace is kept here, not trusted to the page: a
  * poll arriving before the interval is up answers "pending" without asking
  * the service, so a busy tab cannot earn the instance a slow_down lockout.
@@ -31,14 +33,17 @@ final readonly class DeviceAttempts
     private const SLOW_DOWN_SECONDS = 5;
 
     /**
+     * @param  array<string, string>  $values  the connection fields, as typed
+     *
      * @throws ConnectionRejected|ServiceUnavailable
      */
-    public function begin(User $user, AuthorizesByDevice $connectable, string $service): DeviceAuthorization
+    public function begin(User $user, AuthorizesByDevice $connectable, string $service, array $values): DeviceAuthorization
     {
-        $authorization = $connectable->beginDeviceAuthorization();
+        $authorization = $connectable->beginDeviceAuthorization($values);
 
         $this->remember($this->key($user, $service), [
             'device_code' => $authorization->deviceCode,
+            'values' => $values,
             'interval' => $authorization->interval,
             'next_poll_at' => now()->addSeconds($authorization->interval)->getTimestamp(),
             'expires_at' => now()->addSeconds($authorization->expiresIn)->getTimestamp(),
@@ -88,12 +93,12 @@ final readonly class DeviceAttempts
     }
 
     /**
-     * @param  array{device_code: string, interval: int, next_poll_at: int, expires_at: int}  $attempt
+     * @param  array{device_code: string, values: array<string, string>, interval: int, next_poll_at: int, expires_at: int}  $attempt
      */
     private function ask(AuthorizesByDevice $connectable, string $key, array $attempt): ConnectionGrant|ConnectAttemptStatus
     {
         try {
-            $result = $connectable->pollDeviceAuthorization($attempt['device_code']);
+            $result = $connectable->pollDeviceAuthorization($attempt['device_code'], $attempt['values']);
         } catch (ServiceUnavailable) {
             return ConnectAttemptStatus::Pending;
         } catch (ConnectionRejected $rejected) {
@@ -145,31 +150,38 @@ final readonly class DeviceAttempts
     }
 
     /**
-     * The attempt, its device code encrypted: once approved, the code is
-     * exchanged for a grant, so it is a credential and rests like one.
+     * The attempt, its device code and typed values encrypted: once
+     * approved, the code is exchanged for a grant, so it is a credential and
+     * rests like one.
      *
-     * @param  array{device_code: string, interval: int, next_poll_at: int, expires_at: int}  $attempt
+     * @param  array{device_code: string, values: array<string, string>, interval: int, next_poll_at: int, expires_at: int}  $attempt
      */
     private function remember(string $key, array $attempt, int $seconds): void
     {
-        Cache::put($key, [...$attempt, 'device_code' => Crypt::encryptString($attempt['device_code'])], $seconds);
+        Cache::put($key, [
+            ...$attempt,
+            'device_code' => Crypt::encryptString($attempt['device_code']),
+            'values' => Crypt::encrypt($attempt['values']),
+        ], $seconds);
     }
 
     /**
-     * @return array{device_code: string, interval: int, next_poll_at: int, expires_at: int}|null
+     * @return array{device_code: string, values: array<string, string>, interval: int, next_poll_at: int, expires_at: int}|null
      */
     private function recall(string $key): ?array
     {
-        /** @var array{device_code: string, interval: int, next_poll_at: int, expires_at: int}|null $stored */
+        /** @var array{device_code: string, values?: string, interval: int, next_poll_at: int, expires_at: int}|null $stored */
         $stored = Cache::get($key);
 
-        if ($stored === null) {
+        // An attempt kept without what was typed cannot be polled for: it
+        // reads as gone, and the user starts again.
+        if ($stored === null || ! isset($stored['values'])) {
             return null;
         }
 
         // One written under another APP_KEY is no attempt to go on with.
         try {
-            return [...$stored, 'device_code' => Crypt::decryptString($stored['device_code'])];
+            return [...$stored, 'device_code' => Crypt::decryptString($stored['device_code']), 'values' => Payload::stringMap(Crypt::decrypt($stored['values']))];
         } catch (DecryptException) {
             return null;
         }
