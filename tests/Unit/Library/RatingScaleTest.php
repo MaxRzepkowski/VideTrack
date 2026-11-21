@@ -64,3 +64,14 @@ test('a score out of 100 lands on the nearest point, a blank, zero or overshoot 
     'past the top' => ['101', null],
     'not a number' => ['--', null],
 ]);
+
+test('stars a service sends as a number read as points, none or off the five as no rating', function (?float $stars, ?int $rating) {
+    expect(RatingScale::stars($stars))->toBe($rating);
+})->with([
+    'half a star' => [0.5, RatingScale::MIN],
+    'four and a half' => [4.5, 9],
+    'all five' => [(float) RatingScale::STARS, RatingScale::MAX],
+    'none' => [null, null],
+    'zero' => [0.0, null],
+    'past five' => [5.5, null],
+]);
