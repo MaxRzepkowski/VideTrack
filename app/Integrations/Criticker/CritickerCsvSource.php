@@ -21,6 +21,7 @@ use App\Integrations\Import\Data\TitleQuery;
 use App\Integrations\Import\ImportCategory;
 use App\Integrations\Import\Rows\MediaRow;
 use App\Integrations\Import\Rows\SkipRow;
+use App\Integrations\TitleLabel;
 use App\Library\RatingScale;
 use App\Support\Payload;
 use Generator;
@@ -177,7 +178,7 @@ final class CritickerCsvSource implements ExplainsSetup, ReadsFile
         return MediaSubject::external(
             $this->kind($row),
             $imdb === null ? [] : [ExternalIdSource::Imdb->value => $imdb],
-            $year === null ? $title : "{$title} ({$year})",
+            TitleLabel::of($title, $year),
             byTitle: new TitleQuery($title, $year),
         );
     }

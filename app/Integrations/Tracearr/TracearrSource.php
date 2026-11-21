@@ -17,6 +17,7 @@ use App\Integrations\Import\Data\ImportSelection;
 use App\Integrations\Import\Data\MediaSubject;
 use App\Integrations\Import\Rows\MediaRow;
 use App\Integrations\Import\Rows\SkipRow;
+use App\Integrations\TitleLabel;
 use App\Models\ServiceConnection;
 use App\Support\Payload;
 use Carbon\CarbonImmutable;
@@ -238,6 +239,6 @@ class TracearrSource extends ConnectionSource
     {
         $title = is_string($title) && $title !== '' ? $title : 'Tracearr item';
 
-        return is_int($year) ? "{$title} ({$year})" : $title;
+        return TitleLabel::of($title, is_int($year) ? $year : null);
     }
 }

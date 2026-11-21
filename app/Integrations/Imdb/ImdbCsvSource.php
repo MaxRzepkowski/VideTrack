@@ -19,6 +19,7 @@ use App\Integrations\Import\Data\TitleQuery;
 use App\Integrations\Import\ImportCategory;
 use App\Integrations\Import\Rows\MediaRow;
 use App\Integrations\Import\Rows\SkipRow;
+use App\Integrations\TitleLabel;
 use App\Library\RatingScale;
 use App\Support\Payload;
 use Generator;
@@ -136,7 +137,7 @@ final class ImdbCsvSource implements ExplainsSetup, ReadsFile
     {
         $title = trim($row['title'] ?? '');
         $year = $this->year($row);
-        $label = $title === '' ? trim($row['const']) : ($year === null ? $title : "{$title} ({$year})");
+        $label = $title === '' ? trim($row['const']) : TitleLabel::of($title, $year);
 
         // Older exports drop the tt prefix; TMDB's find needs it.
         $id = ImdbId::read($row['const']);

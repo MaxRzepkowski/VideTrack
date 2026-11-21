@@ -23,6 +23,7 @@ use App\Integrations\Import\ImportCategory;
 use App\Integrations\Import\Rows\ListRow;
 use App\Integrations\Import\Rows\MediaRow;
 use App\Integrations\Import\Rows\SkipRow;
+use App\Integrations\TitleLabel;
 use App\Library\PlayDating;
 use App\Support\Payload;
 use Carbon\CarbonImmutable;
@@ -180,7 +181,7 @@ final class ICheckMoviesCsvSource implements ExplainsSetup, ReadsFile
         return MediaSubject::external(
             MediaKind::Movie,
             $imdb === null ? [] : [ExternalIdSource::Imdb->value => $imdb],
-            $year === null ? $title : "{$title} ({$year})",
+            TitleLabel::of($title, $year),
             byTitle: new TitleQuery($title, $year),
         );
     }
