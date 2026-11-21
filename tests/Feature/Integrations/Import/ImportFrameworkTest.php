@@ -307,7 +307,7 @@ test('each new file source says what it takes and where its export comes from', 
         ->assertInertia(function (AssertableInertia $page) {
             $codes = [
                 'letterboxd', 'tvtime', 'storygraph', 'backloggd', 'jellyfin-playback-reporting', 'playnite', 'gog-galaxy',
-                'librarything', 'calibre', 'criticker', 'icheckmovies', 'grouvee', 'anime-planet', 'netflix',
+                'librarything', 'calibre', 'criticker', 'icheckmovies', 'grouvee', 'anime-planet', 'netflix', 'bookwyrm',
             ];
             $files = collect($page->toArray()['props']['sources'])->whereIn('code', $codes);
 
@@ -345,6 +345,7 @@ test('the tasks page names a run of each new file source after it', function (st
     ['grouvee', 'Import from Grouvee'],
     ['anime-planet', 'Import from Anime-Planet'],
     ['netflix', 'Import from Netflix'],
+    ['bookwyrm', 'Import from BookWyrm'],
 ]);
 
 test('a row of a file export the source cannot read is reported by its row, the rest still read', function (string $code, string $content) {
@@ -370,4 +371,5 @@ test('a row of a file export the source cannot read is reported by its row, the 
     'iCheckMovies' => ['icheckmovies', "title;year;imdburl;checked\nRoma;2018;;2020-01-01 10:00:00\nBroken\n"],
     'Grouvee' => ['grouvee', "name,shelves,dates\nHades,\"{\"\"Played\"\": {}}\",[]\nBroken\n"],
     'Netflix' => ['netflix', "Profile Name,Start Time,Duration,Title,Supplemental Video Type\nAlex,2024-03-09 21:15:02,01:00:00,Roma,\nBroken\n"],
+    'BookWyrm' => ['bookwyrm', "title,author_text,shelf\nDune,Frank Herbert,read\nBroken\n"],
 ]);

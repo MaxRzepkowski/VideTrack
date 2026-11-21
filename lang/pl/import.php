@@ -306,4 +306,10 @@ return [
     'watch_history' => 'Historia oglądania',
     'library_on_a_list' => 'Twoja biblioteka, na liście :source',
     'where_your_data_comes_from' => 'Skąd przenosisz dane',
+    'bookwyrm_export_csv' => 'Eksport z BookWyrm (CSV)',
+    'import_from_bookwyrm' => 'Import z BookWyrm',
+    'books_you_read_are_reading_want_to' => 'Książki przeczytane, czytane, do przeczytania i przerwane, z ocenami i własnymi półkami.',
+    'on_bookwyrm_open_settings_export' => 'Na swojej instancji BookWyrm otwórz Ustawienia → Eksportuj listę książek i wybierz „Pobierz plik”.',
+    'the_file_is_not_a_bookwyrm' => 'Ten plik nie jest eksportem z BookWyrm.',
+    'skip_bookwyrm_no_shelf' => ':label: nie stoi na żadnej półce.',
 ];
