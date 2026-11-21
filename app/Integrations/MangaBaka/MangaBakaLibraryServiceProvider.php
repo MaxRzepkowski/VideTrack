@@ -9,9 +9,9 @@ use App\Integrations\Import\ImportSourceRegistry;
 use Illuminate\Support\ServiceProvider;
 
 /**
- * A MangaBaka library, connected once and imported from without a file.
- * Offered when the operator registered the web app it authorizes against,
- * and when manga come from MyAnimeList here, whose ids MangaBaka keeps.
+ * A MangaBaka library, connected once with the user's own token and
+ * imported from without a file. Offered when manga come from MyAnimeList
+ * here, whose ids MangaBaka keeps.
  */
 final class MangaBakaLibraryServiceProvider extends ServiceProvider
 {
@@ -33,9 +33,7 @@ final class MangaBakaLibraryServiceProvider extends ServiceProvider
     {
         $types = $this->app->make(MediaTypeRegistry::class);
 
-        return filled(config('tracker.mangabaka.client_id'))
-            && filled(config('tracker.mangabaka.client_secret'))
-            && $types->has(MediaKind::Manga->value)
+        return $types->has(MediaKind::Manga->value)
             && $types->get(MediaKind::Manga->value)->provider === 'mal';
     }
 }

@@ -8,12 +8,14 @@ use App\Integrations\Connections\Data\ConnectionGrant;
 use App\Integrations\Connections\UnusableAddress;
 use App\Models\User;
 use App\Support\Forms\CredentialField;
+use App\Support\ServiceUnavailable;
 
 /**
  * The user pastes what the service gave them (an address and an API key)
  * and, when the service holds several accounts, picks theirs. verify()
  * makes one request with what was typed; a rejection is final — it is
- * never retried, a wrong key is asked about once. An address field is
+ * never retried, a wrong key is asked about once; a service out of reach
+ * says so (ServiceUnavailable) instead of passing for a refusal. An address field is
  * called only once `UserAddresses` allows it for the owner.
  */
 interface AuthorizesByForm extends ConnectableService
@@ -30,14 +32,14 @@ interface AuthorizesByForm extends ConnectableService
      * @param  array<string, string>  $values
      * @return list<ConnectionChoice>
      *
-     * @throws ConnectionRejected|UnusableAddress
+     * @throws ConnectionRejected|ServiceUnavailable|UnusableAddress
      */
     public function verify(User $owner, array $values): array;
 
     /**
      * @param  array<string, string>  $values
      *
-     * @throws ConnectionRejected|UnusableAddress
+     * @throws ConnectionRejected|ServiceUnavailable|UnusableAddress
      */
     public function connect(User $owner, array $values, ?string $choice): ConnectionGrant;
 }
