@@ -8,6 +8,8 @@ use App\Catalog\DatePrecision;
 use App\Catalog\MediaItemSummaries;
 use App\Models\MediaItem;
 use App\Notifications\Copy\CopyFormat;
+use App\Notifications\Data\EventLine;
+use App\Notifications\Data\ValueChange;
 use App\Notifications\MediaEventPayload;
 use App\Notifications\MediaEventType;
 use InvalidArgumentException;
@@ -42,22 +44,29 @@ final readonly class DateChanged implements EventKind
 
     public function detail(MediaEventPayload $event, string $locale): array
     {
-        $related = $this->format->relatedFacts($event, $locale);
+        return [...$this->format->relatedFacts($event, $locale), ...$this->format->change($this->change($event, $locale))];
+    }
+
+    /** The day it moved to, from the one before when there was one; null when the new date says nothing. */
+    private function change(MediaEventPayload $event, string $locale): ?ValueChange
+    {
         $next = $this->format->date($event->date, $event->datePrecision(), $locale);
 
         if ($next === null) {
-            return $related;
+            return null;
         }
 
-        $previous = $this->format->date($event->oldDate, $event->oldDatePrecision ?? DatePrecision::Day, $locale);
-
-        // An arrow, not a separator: a date MOVED is one fact.
-        return [...$related, $previous !== null ? "{$previous} → {$next}" : $next];
+        return new ValueChange(from: $this->format->date($event->oldDate, $event->oldDatePrecision ?? DatePrecision::Day, $locale), to: $next);
     }
 
-    public function digest(MediaEventPayload $event, string $locale, string $timezone): array
+    public function line(MediaEventPayload $event, string $locale): EventLine
     {
-        return ['subject' => $event->title(), 'label' => __('notifications.new_release_date', [], $locale), 'meta' => $this->format->plain($this->detail($event, $locale))];
+        return new EventLine(
+            subject: $event->title(),
+            label: __('notifications.new_release_date', [], $locale),
+            facts: $this->format->relatedFacts($event, $locale),
+            change: $this->change($event, $locale),
+        );
     }
 
     private static function moved(MediaSummary $card, string $date, DatePrecision $precision, ?string $oldDate, DatePrecision $oldPrecision): MediaEventPayload

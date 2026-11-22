@@ -5,6 +5,7 @@ namespace App\Notifications\Events;
 use App\Catalog\MediaItemSummaries;
 use App\Models\MediaItem;
 use App\Notifications\Copy\CopyFormat;
+use App\Notifications\Data\EventLine;
 use App\Notifications\MediaEventPayload;
 use App\Notifications\MediaEventType;
 use InvalidArgumentException;
@@ -46,8 +47,8 @@ final readonly class TitlesRemoved implements EventKind
         return $this->format->titlesPreview($event, $locale);
     }
 
-    public function digest(MediaEventPayload $event, string $locale, string $timezone): array
+    public function line(MediaEventPayload $event, string $locale): EventLine
     {
-        return ['subject' => $this->title($event, $locale), 'label' => '', 'meta' => $this->format->plain($this->detail($event, $locale))];
+        return new EventLine(subject: $this->title($event, $locale), label: '', facts: $this->detail($event, $locale));
     }
 }

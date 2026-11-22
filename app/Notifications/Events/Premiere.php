@@ -3,6 +3,7 @@
 namespace App\Notifications\Events;
 
 use App\Notifications\Copy\CopyFormat;
+use App\Notifications\Data\EventLine;
 use App\Notifications\MediaEventPayload;
 use App\Notifications\MediaEventType;
 use App\Support\Payload;
@@ -31,8 +32,8 @@ final readonly class Premiere implements EventKind
         return [...$this->format->relatedFacts($event, $locale), ...($platform === null ? [] : [$platform])];
     }
 
-    public function digest(MediaEventPayload $event, string $locale, string $timezone): array
+    public function line(MediaEventPayload $event, string $locale): EventLine
     {
-        return ['subject' => $event->title(), 'label' => __('notifications.out_today', [], $locale), 'meta' => $this->format->plain($this->detail($event, $locale))];
+        return new EventLine(subject: $event->title(), label: __('notifications.out_today', [], $locale), facts: $this->detail($event, $locale));
     }
 }

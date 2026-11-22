@@ -6,6 +6,7 @@ use App\Catalog\ImageUrls;
 use App\Catalog\MediaTypeRegistry;
 use App\Http\CardPages;
 use App\Notifications\Copy\CopyFormat;
+use App\Notifications\Data\EventLine;
 use App\Notifications\Data\NotificationEntry;
 use App\Notifications\Events\EventKinds;
 use App\Support\Payload;
@@ -136,8 +137,21 @@ final readonly class NotificationCopy
      */
     public function digestParts(MediaEventPayload $event, string $locale, string $timezone): array
     {
-        return $this->kinds->of($event->type)?->digest($event, $locale, $timezone)
-            ?? ['subject' => $event->title(), 'label' => '', 'meta' => $this->plainDetail($event, $locale)];
+        $line = $this->line($event, $locale);
+        $facts = [...$line->facts, ...$this->format->change($line->change)];
+
+        return [
+            'subject' => $line->subject,
+            'label' => $line->label,
+            'meta' => $line->atAirTime ? $this->format->timed($facts, $event, $locale, $timezone) : $this->format->plain($facts),
+        ];
+    }
+
+    /** The event as a line of a list; a stored event of a kind this version does not know is its title alone. */
+    private function line(MediaEventPayload $event, string $locale): EventLine
+    {
+        return $this->kinds->of($event->type)?->line($event, $locale)
+            ?? new EventLine(subject: $event->title(), label: '');
     }
 
     /** The title type's palette colour as an RGB int; a part takes its root's. */

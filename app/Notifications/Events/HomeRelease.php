@@ -2,6 +2,7 @@
 
 namespace App\Notifications\Events;
 
+use App\Notifications\Data\EventLine;
 use App\Notifications\MediaEventPayload;
 use App\Notifications\MediaEventType;
 use App\Tracking\Releases\ReleaseEntry;
@@ -33,8 +34,8 @@ final readonly class HomeRelease implements EventKind
         return [];
     }
 
-    public function digest(MediaEventPayload $event, string $locale, string $timezone): array
+    public function line(MediaEventPayload $event, string $locale): EventLine
     {
-        return ['subject' => $event->title(), 'label' => __('common.outside_cinemas', [], $locale), 'meta' => null];
+        return new EventLine(subject: $event->title(), label: __('common.outside_cinemas', [], $locale));
     }
 }

@@ -4,7 +4,7 @@ namespace App\Notifications\Events;
 
 use App\Catalog\EpisodeBadge;
 use App\Catalog\EpisodeCode;
-use App\Notifications\Copy\CopyFormat;
+use App\Notifications\Data\EventLine;
 use App\Notifications\MediaEventPayload;
 use App\Notifications\MediaEventType;
 use App\Support\Payload;
@@ -14,8 +14,6 @@ use InvalidArgumentException;
 /** A show's episodes out today: one, or several as one piece of news, and the one opening a season premieres it. */
 final readonly class EpisodesReleased implements EventKind
 {
-    public function __construct(private CopyFormat $format) {}
-
     /** One episode out today. */
     public static function one(ReleaseEntry $entry, string $today): MediaEventPayload
     {
@@ -89,16 +87,17 @@ final readonly class EpisodesReleased implements EventKind
         return $event->title() !== '' ? [$code, $event->title()] : [$code];
     }
 
-    public function digest(MediaEventPayload $event, string $locale, string $timezone): array
+    public function line(MediaEventPayload $event, string $locale): EventLine
     {
-        return [
-            'subject' => $event->showTitle ?? $event->title(),
-            'label' => match (true) {
+        return new EventLine(
+            subject: $event->showTitle ?? $event->title(),
+            label: match (true) {
                 $event->type === MediaEventType::SeasonPremiere => __('notifications.season_premiere', [], $locale),
                 $event->listsSeveral() => trans_choice('notifications.count_new_episodes', count($event->titles()), [], $locale),
                 default => __('notifications.new_episode', [], $locale),
             },
-            'meta' => $this->format->timed($this->detail($event, $locale), $event, $locale, $timezone),
-        ];
+            facts: $this->detail($event, $locale),
+            atAirTime: true,
+        );
     }
 }

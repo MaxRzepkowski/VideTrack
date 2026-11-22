@@ -6,6 +6,7 @@ use App\Catalog\MediaItemSummaries;
 use App\Models\MediaItem;
 use App\Models\MediaList;
 use App\Notifications\Copy\CopyFormat;
+use App\Notifications\Data\EventLine;
 use App\Notifications\MediaEventPayload;
 use App\Notifications\MediaEventType;
 use InvalidArgumentException;
@@ -61,16 +62,12 @@ final readonly class CollectionParts implements EventKind
         return $this->format->newTitles($event, $locale);
     }
 
-    public function digest(MediaEventPayload $event, string $locale, string $timezone): array
+    public function line(MediaEventPayload $event, string $locale): EventLine
     {
         if ($event->listsSeveral()) {
-            return ['subject' => $this->title($event, $locale), 'label' => '', 'meta' => $this->format->plain($this->detail($event, $locale))];
+            return new EventLine(subject: $this->title($event, $locale), label: '', facts: $this->detail($event, $locale));
         }
 
-        return [
-            'subject' => $event->title(),
-            'label' => $this->title($event, $locale),
-            'meta' => $this->format->date($event->date, $event->datePrecision(), $locale),
-        ];
+        return new EventLine(subject: $event->title(), label: $this->title($event, $locale), facts: $this->format->dateFact($event, $locale));
     }
 }

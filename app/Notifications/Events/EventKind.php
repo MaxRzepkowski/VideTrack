@@ -2,6 +2,7 @@
 
 namespace App\Notifications\Events;
 
+use App\Notifications\Data\EventLine;
 use App\Notifications\MediaEventPayload;
 use App\Notifications\NotificationsServiceProvider;
 
@@ -25,12 +26,10 @@ interface EventKind
     public function detail(MediaEventPayload $event, string $locale): array;
 
     /**
-     * One digest line in parts: `subject` (the linked title), `label` (the
-     * event spelled out: "New episode", "Out today"…) and `meta` (episode
-     * code with air time, moved dates, platform…). Each row says what it
-     * means, unlike the bell, where the icon and grouping carry that.
-     *
-     * @return array{subject: string, label: string, meta: string|null}
+     * The event as a line of a list, in parts: the title it is about, the
+     * event spelled out ("New episode", "Out today"…), the facts it adds
+     * (episode code, platform…) and the value it moved. Each line says what it
+     * means on its own, as a digest reads.
      */
-    public function digest(MediaEventPayload $event, string $locale, string $timezone): array;
+    public function line(MediaEventPayload $event, string $locale): EventLine;
 }

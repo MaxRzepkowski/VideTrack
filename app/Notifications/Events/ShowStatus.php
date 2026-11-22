@@ -6,6 +6,8 @@ use App\Catalog\MediaItemSummaries;
 use App\Catalog\TitleStatus;
 use App\Models\MediaItem;
 use App\Notifications\Copy\CopyFormat;
+use App\Notifications\Data\EventLine;
+use App\Notifications\Data\ValueChange;
 use App\Notifications\MediaEventPayload;
 use App\Notifications\MediaEventType;
 
@@ -34,19 +36,23 @@ final readonly class ShowStatus implements EventKind
 
     public function detail(MediaEventPayload $event, string $locale): array
     {
+        return $this->format->change($this->change($event, $locale));
+    }
+
+    public function line(MediaEventPayload $event, string $locale): EventLine
+    {
+        return new EventLine(subject: $event->title(), label: __('notifications.status_change', [], $locale), change: $this->change($event, $locale));
+    }
+
+    /** The status it moved to, from the one before when there was one. */
+    private function change(MediaEventPayload $event, string $locale): ?ValueChange
+    {
         $status = TitleStatus::tryFrom((string) $event->status);
 
         if ($status === null) {
-            return [];
+            return null;
         }
 
-        $old = TitleStatus::tryFrom((string) $event->oldStatus);
-
-        return [$old === null ? $status->label($locale) : "{$old->label($locale)} → {$status->label($locale)}"];
-    }
-
-    public function digest(MediaEventPayload $event, string $locale, string $timezone): array
-    {
-        return ['subject' => $event->title(), 'label' => __('notifications.status_change', [], $locale), 'meta' => $this->format->plain($this->detail($event, $locale))];
+        return new ValueChange(from: TitleStatus::tryFrom((string) $event->oldStatus)?->label($locale), to: $status->label($locale));
     }
 }
