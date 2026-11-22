@@ -33,6 +33,19 @@ test('guests are redirected to login', function () {
     $this->get(listPage($list))->assertRedirect(route('login'));
 });
 
+test('every page tells the lists dialog how much each list holds, of every kind together', function () {
+    $user = User::factory()->create();
+    $list = makeList($user, [], 2);
+    ListItem::factory()->for($list, 'list')->create(['media_item_id' => null, 'person_id' => Person::factory(), 'position' => 3]);
+
+    $this->actingAs($user)
+        ->get(route('dashboard'))
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('userLists.0.itemCount', 0)
+            ->where('userLists.1.id', $list->id)
+            ->where('userLists.1.itemCount', 3));
+});
+
 test('the backlog address leads to the signed-in user\'s own backlog', function () {
     $user = User::factory()->create();
     User::factory()->create();

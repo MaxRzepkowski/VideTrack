@@ -63,12 +63,13 @@ export function useCreatorActions() {
     };
 
     /** Puts the creator on one list or takes it off; its other memberships stay. */
+    // The lists' counts move with every tick, and only the server knows them, so a tick reloads them too.
     const toggleList = (creator: Creator, listId: number): Promise<boolean> =>
         writeCreator(creator, () => {
             const ids = creatorState(creator).listIds;
 
             return listsRequest(creator, ids.includes(listId) ? ids.filter((id) => id !== listId) : [...ids, listId]);
-        });
+        }, ['userLists']);
 
     /** Quick-create from the lists modal: the list, then the creator on it. */
     const createListWith = (creator: Creator, title: string): Promise<boolean> =>

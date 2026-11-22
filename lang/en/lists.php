@@ -59,4 +59,6 @@ return [
     'part_of_series' => 'Part of the series',
     'subseries' => 'Subseries',
     'spin_off_series' => 'Spin-off series',
+    'count_items' => ':count item|:count items',
+    'create_list_button' => 'Create',
 ];

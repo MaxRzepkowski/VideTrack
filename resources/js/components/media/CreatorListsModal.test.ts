@@ -41,8 +41,8 @@ beforeEach(() => {
     membership = [];
     setPageProps({
         userLists: [
-            { id: 4, title: 'Directors', systemKey: null },
-            { id: 7, title: 'Actors', systemKey: null },
+            { id: 4, title: 'Directors', systemKey: null, itemCount: 0 },
+            { id: 7, title: 'Actors', systemKey: null, itemCount: 0 },
         ],
     });
     wrapper = mount(CreatorListsModal, { global: { directives: { tooltip: vTooltip } } });
@@ -91,7 +91,7 @@ describe('CreatorListsModal', () => {
 
         const actors = screen()
             .findAll('button')
-            .find((button) => button.text() === 'Actors');
+            .find((button) => button.text().startsWith('Actors'));
         await actors?.trigger('click');
         await flushPromises();
 
@@ -99,8 +99,8 @@ describe('CreatorListsModal', () => {
         // Both rows checked, from the answer.
         expect(
             screen()
-                .findAll('button.border-action-watchlist')
-                .map((button) => button.text()),
+                .findAll('button[aria-pressed="true"]')
+                .map((button) => button.find('.truncate').text()),
         ).toEqual(['Directors', 'Actors']);
     });
 
@@ -113,7 +113,7 @@ describe('CreatorListsModal', () => {
 
         await screen()
             .findAll('button')
-            .find((button) => button.text() === 'Actors')
+            .find((button) => button.text().startsWith('Actors'))
             ?.trigger('click');
         await flushPromises();
 
@@ -122,7 +122,7 @@ describe('CreatorListsModal', () => {
         await answerMembership(200, [4]);
         await screen()
             .findAll('button')
-            .find((button) => button.text() === 'Actors')
+            .find((button) => button.text().startsWith('Actors'))
             ?.trigger('click');
         await flushPromises();
 

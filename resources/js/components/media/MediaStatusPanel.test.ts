@@ -10,7 +10,7 @@ beforeEach(() => useMediaTypes());
 
 /** The first row's words, for a title of this type in this state. */
 function statusRow(type: string, state: Partial<UserMediaState>): string {
-    setPageProps({ userLists: [{ id: 5, systemKey: 'watchlist' }], userStates: { [`${type}:1`]: userState(state) } });
+    setPageProps({ userLists: [{ id: 5, systemKey: 'watchlist', itemCount: 0 }], userStates: { [`${type}:1`]: userState(state) } });
 
     return mount(MediaStatusPanel, { props: { media: mediaSummary({ type, ref: '1' }) }, global: { directives: { tooltip: vTooltip } } })
         .find('button')

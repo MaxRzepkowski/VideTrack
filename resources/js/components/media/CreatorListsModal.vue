@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
+import ListPicker from '@/components/lists/ListPicker.vue';
+import AppModal from '@/components/modal/AppModal.vue';
 import { useCreatorActions, type Creator } from '@/composables/useCreatorActions';
 import { useMediaModals } from '@/composables/useMediaModals';
 import { creatorState } from '@/stores/library';
@@ -7,7 +8,6 @@ import type { SharedData } from '@/types';
 import type { UserList } from '@/types/media';
 import { usePage } from '@inertiajs/vue3';
 import { trans } from 'laravel-vue-i18n';
-import { Check, Plus } from '@lucide/vue';
 import { computed, ref, watch } from 'vue';
 
 const { modals, close } = useMediaModals();
@@ -30,7 +30,6 @@ const creator = computed<Creator | null>(() => target.value?.creator ?? null);
 // this one, so it leaves the modal locked.
 const loaded = ref(false);
 const loading = ref(false);
-const newTitle = ref('');
 
 const listIds = computed(() => (creator.value ? creatorState(creator.value).listIds : []));
 
@@ -40,7 +39,6 @@ watch(target, async (value, _, onCleanup) => {
     onCleanup(() => (current = false));
     loaded.value = false;
     loading.value = false;
-    newTitle.value = '';
 
     if (!value) {
         return;
@@ -63,15 +61,10 @@ watch(target, async (value, _, onCleanup) => {
 
 // Create a new list with this creator already on it; the answer brings the
 // creator's lists with the fresh one checked.
-function create(): void {
-    const title = newTitle.value.trim();
-
-    if (!creator.value || !loaded.value || title === '') {
-        return;
+function create(title: string): void {
+    if (creator.value && loaded.value) {
+        void createListWith(creator.value, title);
     }
-
-    newTitle.value = '';
-    void createListWith(creator.value, title);
 }
 
 function toggle(list: UserList): void {
@@ -82,64 +75,16 @@ function toggle(list: UserList): void {
 </script>
 
 <template>
-    <Dialog :open="target !== null" @update:open="(open: boolean) => !open && close()">
-        <DialogContent v-if="target" class="border-line-subtle bg-surface max-w-md overflow-x-hidden rounded-2xl p-5 sm:p-7">
-            <DialogTitle class="min-w-0 truncate text-2xl font-semibold">{{ trans('media.add_to_lists') }}</DialogTitle>
+    <AppModal :open="target !== null" :title="trans('media.add_to_lists')" @update:open="(open: boolean) => !open && close()">
+        <template v-if="target" #meta>
+            <span class="text-ink-muted truncate">{{ target.name }}</span>
+        </template>
 
-            <div class="flex min-w-0 flex-col gap-5">
-                <!-- Cap at ~5 rows; the rest scrolls (see ListsModal). -->
-                <div
-                    class="flex max-h-72 max-w-full min-w-0 flex-col gap-2.5 overflow-x-hidden overflow-y-auto pr-1"
-                    :class="{ 'pointer-events-none opacity-60': loading || !loaded }"
-                >
-                    <p v-if="customLists.length === 0" class="text-ink-muted text-base">
-                        {{ trans('media.no_custom_lists_yet_create_your') }}
-                    </p>
-                    <!-- Row without `overflow-hidden`, see ListsModal. -->
-                    <button
-                        v-for="list in customLists"
-                        :key="list.id"
-                        type="button"
-                        class="flex h-12 w-full max-w-full min-w-0 shrink-0 items-center gap-3 rounded-xl border px-4 text-left transition-colors duration-150"
-                        :class="
-                            listIds.includes(list.id)
-                                ? 'border-action-watchlist bg-action-watchlist/10'
-                                : 'border-line bg-surface-raised hover:border-line-strong'
-                        "
-                        @click="toggle(list)"
-                    >
-                        <span
-                            class="flex size-5.5 shrink-0 items-center justify-center rounded-md border transition-colors duration-150"
-                            :class="listIds.includes(list.id) ? 'border-action-watchlist bg-action-watchlist' : 'border-line-strong'"
-                        >
-                            <Check v-if="listIds.includes(list.id)" class="text-surface-base size-3.5" :stroke-width="3" />
-                        </span>
-                        <span class="text-ink w-0 min-w-0 flex-1 truncate text-base font-semibold">{{ list.title }}</span>
-                    </button>
-                </div>
-
-                <div class="bg-surface-overlay h-px"></div>
-
-                <form class="flex items-center gap-2" @submit.prevent="create">
-                    <label for="creator-new-list" class="sr-only">{{ trans('common.new_list_name') }}</label>
-                    <input
-                        id="creator-new-list"
-                        v-model="newTitle"
-                        type="text"
-                        maxlength="100"
-                        :placeholder="trans('common.new_list_name')"
-                        class="border-line bg-surface-raised text-ink placeholder:text-ink-faint focus:border-action-watchlist h-12 min-w-0 flex-1 rounded-xl border px-4 text-base font-semibold focus:outline-none"
-                    />
-                    <button
-                        v-tooltip="trans('common.create_list')"
-                        type="submit"
-                        :disabled="newTitle.trim() === '' || !loaded"
-                        class="bg-action-watchlist text-surface-base flex size-12 shrink-0 items-center justify-center rounded-xl transition-opacity duration-150 hover:opacity-90 disabled:opacity-40"
-                    >
-                        <Plus class="size-5" :stroke-width="2.5" />
-                    </button>
-                </form>
-            </div>
-        </DialogContent>
-    </Dialog>
+        <!-- The membership is read when the dialog opens; until it lands nothing can be ticked. -->
+        <ListPicker v-if="target" :lists="customLists" :on="listIds" :waiting="loading || !loaded" @toggle="toggle" @create="create">
+            <template v-if="customLists.length === 0" #empty>
+                <p class="text-ink-muted px-5 py-2 text-base">{{ trans('media.no_custom_lists_yet_create_your') }}</p>
+            </template>
+        </ListPicker>
+    </AppModal>
 </template>

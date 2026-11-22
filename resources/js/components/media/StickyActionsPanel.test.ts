@@ -70,7 +70,7 @@ describe('the bell', () => {
 
 describe('the other rows', () => {
     function panel() {
-        setPageProps({ userLists: [{ id: 5, systemKey: 'watchlist' }], userStates: { 'show:s1': userState() } });
+        setPageProps({ userLists: [{ id: 5, systemKey: 'watchlist', itemCount: 0 }], userStates: { 'show:s1': userState() } });
 
         return mount(StickyActionsPanel, { props: { media: show } }).findAll('button');
     }

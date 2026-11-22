@@ -59,4 +59,6 @@ return [
     'part_of_series' => 'Część serii',
     'subseries' => 'Podserie',
     'spin_off_series' => 'Serie poboczne',
+    'count_items' => ':count element|:count elementy|:count elementów',
+    'create_list_button' => 'Utwórz',
 ];

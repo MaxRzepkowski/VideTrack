@@ -15,5 +15,7 @@ final readonly class UserList
         /** As the reader sees it: the watchlist named in their language. */
         public string $title,
         public ?string $systemKey,
+        /** How many things it holds, of every kind together: titles, people, companies, collections… */
+        public int $itemCount,
     ) {}
 }

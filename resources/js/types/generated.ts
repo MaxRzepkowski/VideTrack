@@ -1129,6 +1129,7 @@ export type UserList = {
     readonly id: number;
     readonly title: string;
     readonly systemKey: string | null;
+    readonly itemCount: number;
 };
 export type UserMediaState = {
     readonly watched: boolean;
