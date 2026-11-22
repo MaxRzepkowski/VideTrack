@@ -374,13 +374,12 @@ test('a provider with only the filtered contract is a first-class citizen', func
 
     $user = User::factory()->create();
 
-    // The type select and the header mega-menu both offer the type…
+    // The type select offers the type…
     $this->actingAs($user)
         ->get(route('discover', ['type' => 'show']))
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->where('availableTypes', fn (Collection $types): bool => $types->contains('show'))
-            ->where('discoverTypes', fn (Collection $types): bool => $types->contains('show'))
             ->where('filters.0.key', 'genres')
             // …with no browse sections behind it, because it has none.
             ->where('trending', [])

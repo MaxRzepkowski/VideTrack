@@ -1,4 +1,4 @@
-import { MAIN_NAV, navHref, OTHER_PLACES, settingsNav, USER_PANELS, type NavEntry } from '@/lib/navigation';
+import { menuPlaces, navHref, OTHER_PLACES, settingsNav, USER_PANELS, type NavEntry } from '@/lib/navigation';
 import { viewerUsername } from '@/lib/pageContext';
 import { router } from '@inertiajs/vue3';
 import { LogOut, type LucideIcon } from '@lucide/vue';
@@ -47,7 +47,7 @@ function goTo(id: string, entry: NavEntry, label: () => string = entry.label, us
  */
 export function allCommands(): Command[] {
     return [
-        ...[...MAIN_NAV, ...OTHER_PLACES].map((entry) => goTo(`nav.${entry.id}`, entry)),
+        ...[...menuPlaces(), ...OTHER_PLACES].map((entry) => goTo(`nav.${entry.id}`, entry)),
         // Your profile's lists panel is not the Lists manager, and both would
         // otherwise read "Lists".
         ...USER_PANELS.map((panel) =>

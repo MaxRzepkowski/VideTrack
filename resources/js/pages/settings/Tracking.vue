@@ -23,7 +23,7 @@ import {
     type OwnSources,
     type TypeTab,
 } from '@/lib/tracking';
-import { SETTINGS_FIELD_CLASS } from '@/lib/ui';
+import { NAV_WORD_CLASS, navWordState, SETTINGS_FIELD_CLASS } from '@/lib/ui';
 import type { Surface, TrackingSource, TypePanel } from '@/types/generated';
 import { Head, useForm, usePage } from '@inertiajs/vue3';
 import { trans } from 'laravel-vue-i18n';
@@ -231,7 +231,7 @@ const inGroup = (group: string, setting: string): string => trans('settings.sett
             <form class="space-y-6" @submit.prevent="submit">
                 <HeadingSmall :title="trans('common.tracking')" :description="trans('settings.what_feeds_your_calendar_countdowns_and')" />
 
-                <div role="tablist" class="scroll-subtle -mx-4 flex flex-nowrap items-center gap-1 overflow-x-auto px-4 md:mx-0 md:px-0">
+                <div role="tablist" class="scroll-subtle -mx-4 flex flex-nowrap items-center gap-2 overflow-x-auto px-4 md:mx-0 md:px-0">
                     <button
                         v-for="name in TRACKING_TABS"
                         :id="`tracking-tab-${name}`"
@@ -241,12 +241,11 @@ const inGroup = (group: string, setting: string): string => trans('settings.sett
                         :aria-selected="tab === name"
                         :aria-controls="`tracking-panel-${name}`"
                         :tabindex="tab === name ? 0 : -1"
-                        class="flex shrink-0 items-center gap-2 rounded-lg px-4 py-2.5 text-base font-semibold transition-colors duration-150"
-                        :class="tab === name ? 'bg-brand text-on-accent' : 'text-ink-muted hover:bg-surface-raised hover:text-ink'"
+                        :class="[NAV_WORD_CLASS, 'cursor-pointer', navWordState(tab === name)]"
                         @click="openTab(name)"
                         @keydown="onTabKey($event, name)"
                     >
-                        <component :is="TAB_ICONS[name]" class="size-4" aria-hidden="true" />
+                        <component :is="TAB_ICONS[name]" class="size-4.5" :class="tab === name ? 'text-ink' : 'text-ink-muted'" aria-hidden="true" />
                         {{ tabLabels[name] }}
                     </button>
                 </div>

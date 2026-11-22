@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Models\MediaList;
 use App\Models\User;
 use Illuminate\Container\Attributes\CurrentUser;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -24,6 +25,12 @@ class ListController extends Controller
             'lists' => $summaries->execute($viewer, includePrivate: true),
             'owner' => $viewer->username,
         ]);
+    }
+
+    /** The signed-in user's Backlog, which every account has from the start. */
+    public function backlog(#[CurrentUser] User $viewer): RedirectResponse
+    {
+        return to_route('users.lists.show', ['user' => $viewer->username, 'list' => $viewer->watchlist()]);
     }
 
     /** A user's list under its owner; the route binds only the owner's own. */

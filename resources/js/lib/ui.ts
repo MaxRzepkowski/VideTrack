@@ -8,6 +8,19 @@ import type { NonEmpty } from '@/types';
  */
 
 /**
+ * A word of a menu row: the main bar, the profile's panels and the tabs of the
+ * tracking settings read alike, as one kind of control. Quiet on a dark tile
+ * until it is the page (or tab) you are on.
+ */
+export const NAV_WORD_CLASS =
+    'flex h-10 shrink-0 items-center gap-2 rounded-[10px] px-3.5 text-base font-semibold transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-ink';
+
+/** The tile and text of a menu word: lit for the page you are on. */
+export function navWordState(current: boolean): string {
+    return current ? 'bg-surface-raised text-ink' : 'bg-surface-toolbar text-ink-muted hover:bg-surface hover:text-ink';
+}
+
+/**
  * Filter / sort select, standing on the page background. `h-10` is the shared
  * toolbar control height — the search box, the Filters button, the sort toggle
  * and the view switch all stand at 40px, so a row of them lines up.

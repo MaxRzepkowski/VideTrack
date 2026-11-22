@@ -31,8 +31,6 @@ export interface MediaTypeMeta {
     release?: () => string;
     /** What a company making titles of this type is called on its card; absent where no company page exists. */
     maker?: { label: () => string; icon: LucideIcon };
-    /** A line on what the type holds, under its name in the Discover menu; absent for parts of a series. */
-    description?: () => string;
     /** The statistics page's length card, for a type watched whole: its title and what its two figures are. */
     length?: { title: () => string; longest: () => string; average: () => string };
 }
@@ -48,7 +46,6 @@ export const MEDIA_TYPE_META: Record<string, MediaTypeMeta | undefined> = {
         color: 'var(--color-media-movie)',
         release: () => trans('calendar.movie_release'),
         maker: { label: () => trans('media.studio'), icon: Building2 },
-        description: () => trans('app.films_cinema'),
         length: {
             title: () => trans('statistics.movie_length'),
             longest: () => trans('statistics.longest_movie'),
@@ -63,7 +60,6 @@ export const MEDIA_TYPE_META: Record<string, MediaTypeMeta | undefined> = {
         icon: Tv,
         background: 'bg-media-tv',
         color: 'var(--color-media-tv)',
-        description: () => trans('app.tv_series_episodes'),
     },
     season: {
         label: () => trans('media.season'),
@@ -91,7 +87,6 @@ export const MEDIA_TYPE_META: Record<string, MediaTypeMeta | undefined> = {
         color: 'var(--color-media-game)',
         release: () => trans('calendar.game_release'),
         maker: { label: () => trans('media.developer_publisher'), icon: Gamepad2 },
-        description: () => trans('app.video_games'),
     },
     book: {
         label: () => trans('media.book'),
@@ -102,7 +97,6 @@ export const MEDIA_TYPE_META: Record<string, MediaTypeMeta | undefined> = {
         background: 'bg-media-book',
         color: 'var(--color-media-book)',
         release: () => trans('calendar.book_release'),
-        description: () => trans('app.novels_non_fiction'),
     },
     manga: {
         label: () => trans('common.manga'),
@@ -113,7 +107,6 @@ export const MEDIA_TYPE_META: Record<string, MediaTypeMeta | undefined> = {
         background: 'bg-media-manga',
         color: 'var(--color-media-manga)',
         release: () => trans('calendar.manga_release'),
-        description: () => trans('app.japanese_comics'),
     },
     comic: {
         label: () => trans('media.comic'),
@@ -124,7 +117,6 @@ export const MEDIA_TYPE_META: Record<string, MediaTypeMeta | undefined> = {
         background: 'bg-media-comic',
         color: 'var(--color-media-comic)',
         release: () => trans('calendar.comic_release'),
-        description: () => trans('app.comic_books'),
     },
 };
 

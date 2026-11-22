@@ -1,9 +1,12 @@
+import { TRENDING_SHELF } from '@/lib/discover';
 import { identityProviders, passwordLoginEnabled } from '@/lib/pageContext';
 import type { NonEmpty } from '@/types';
 import {
     Bell,
+    Bookmark,
     Braces,
     Calendar,
+    CalendarClock,
     CalendarDays,
     ChartNoAxesColumn,
     CirclePlay,
@@ -14,7 +17,9 @@ import {
     History,
     Info,
     KeyRound,
+    Layers,
     LayoutGrid,
+    Library,
     Link2,
     List,
     ListChecks,
@@ -25,6 +30,7 @@ import {
     Sparkles,
     Star,
     Timer,
+    TrendingUp,
     TriangleAlert,
     Upload,
     UserRound,
@@ -46,70 +52,97 @@ export interface NavEntry {
     /** A thunk, so `trans()` stays a literal call yet re-runs per locale. */
     label: () => string;
     icon: LucideIcon;
+    /** What is there, in a few words: the line under the label in the main menu. */
+    description?: () => string;
+    /** A section of the page to land on, its element id. */
+    fragment?: string;
     /**
      * Extra palette match terms, comma-separated, never rendered. Each
      * language lists what its speakers type, the English words a Polish UI is
      * searched with too ("watchlist", "dashboard").
      */
     keywords: () => string;
-    /** Also lit on its subpages and on itself with a query. */
-    prefix?: string;
     /** Whether this instance has the place at all; absent, it always does. */
     exists?: () => boolean;
     /** A place whose actions cannot be undone reads in the danger colour, quietly. */
     destructive?: boolean;
 }
 
-/** The main menu, in its order. */
-export const MAIN_NAV: NonEmpty<NavEntry> = [
-    {
-        id: 'dashboard',
-        route: 'dashboard',
-        label: () => trans('common.dashboard'),
-        icon: LayoutGrid,
-        keywords: () => trans('palette.keywords_dashboard'),
-    },
-    {
-        id: 'discover',
-        route: 'discover',
-        label: () => trans('common.discover'),
-        icon: Compass,
-        keywords: () => trans('palette.keywords_discover'),
-        prefix: '/discover',
-    },
-    {
-        id: 'suggestions',
-        route: 'suggestions.index',
-        label: () => trans('suggestions.suggestions'),
-        icon: Sparkles,
-        keywords: () => trans('palette.keywords_suggestions'),
-        prefix: '/suggestions',
-    },
-    {
-        id: 'calendar',
-        route: 'calendar',
-        label: () => trans('common.calendar'),
-        icon: CalendarDays,
-        keywords: () => trans('palette.keywords_calendar'),
-        prefix: '/calendar',
-    },
-    {
-        id: 'countdowns',
-        route: 'countdowns',
-        label: () => trans('common.countdowns'),
-        icon: Timer,
-        keywords: () => trans('palette.keywords_countdowns'),
-        prefix: '/countdowns',
-    },
-    {
-        id: 'statistics',
-        route: 'statistics',
-        label: () => trans('statistics.title'),
-        icon: ChartNoAxesColumn,
-        keywords: () => trans('palette.keywords_statistics'),
-        prefix: '/statistics',
-    },
-];
+/** The first word of the main menu, a place of its own rather than a group. */
+export const DASHBOARD: NavEntry = {
+    id: 'dashboard',
+    route: 'dashboard',
+    label: () => trans('common.dashboard'),
+    icon: LayoutGrid,
+    keywords: () => trans('palette.keywords_dashboard'),
+};
+
+const DISCOVER: NavEntry = {
+    id: 'discover',
+    route: 'discover',
+    label: () => trans('common.discover'),
+    icon: Layers,
+    description: () => trans('app.nav_discover_description'),
+    keywords: () => trans('palette.keywords_discover'),
+};
+
+const SUGGESTIONS: NavEntry = {
+    id: 'suggestions',
+    route: 'suggestions.index',
+    label: () => trans('suggestions.suggestions'),
+    icon: Sparkles,
+    description: () => trans('app.nav_suggestions_description'),
+    keywords: () => trans('palette.keywords_suggestions'),
+};
+
+// The trending shelf of the discover page, which opens on its first type; the
+// reader switches the type there.
+const TRENDING: NavEntry = {
+    id: 'trending',
+    route: 'discover',
+    fragment: TRENDING_SHELF,
+    label: () => trans('app.nav_trending'),
+    icon: TrendingUp,
+    description: () => trans('app.nav_trending_description'),
+    keywords: () => trans('palette.keywords_trending'),
+};
+
+const CALENDAR: NavEntry = {
+    id: 'calendar',
+    route: 'calendar',
+    label: () => trans('common.calendar'),
+    icon: CalendarDays,
+    description: () => trans('app.nav_calendar_description'),
+    keywords: () => trans('palette.keywords_calendar'),
+};
+
+const COUNTDOWNS: NavEntry = {
+    id: 'countdowns',
+    route: 'countdowns',
+    label: () => trans('common.countdowns'),
+    icon: Timer,
+    description: () => trans('app.nav_countdowns_description'),
+    keywords: () => trans('palette.keywords_countdowns'),
+};
+
+const STATISTICS: NavEntry = {
+    id: 'statistics',
+    route: 'statistics',
+    label: () => trans('statistics.title'),
+    icon: ChartNoAxesColumn,
+    description: () => trans('app.nav_statistics_description'),
+    keywords: () => trans('palette.keywords_statistics'),
+};
+
+// A list has an address by its id; the menu needs one that is the same for every account.
+const BACKLOG: NavEntry = {
+    id: 'backlog',
+    route: 'lists.backlog',
+    label: () => trans('common.backlog'),
+    icon: Bookmark,
+    description: () => trans('app.nav_backlog_description'),
+    keywords: () => trans('palette.keywords_backlog'),
+};
 
 /** Places reached from elsewhere than a menu: the header's own buttons, the footer, the palette. */
 export const OTHER_PLACES: NavEntry[] = [
@@ -152,6 +185,7 @@ export const USER_PANELS: (NavEntry & { id: UserPanel; ownerOnly?: boolean })[] 
         route: 'users.show',
         label: () => trans('common.profile'),
         icon: UserRound,
+        description: () => trans('app.nav_profile_description'),
         keywords: () => trans('palette.keywords_profile'),
     },
     {
@@ -159,6 +193,7 @@ export const USER_PANELS: (NavEntry & { id: UserPanel; ownerOnly?: boolean })[] 
         route: 'users.history',
         label: () => trans('common.history'),
         icon: History,
+        description: () => trans('app.nav_history_description'),
         keywords: () => trans('palette.keywords_history'),
     },
     {
@@ -166,6 +201,7 @@ export const USER_PANELS: (NavEntry & { id: UserPanel; ownerOnly?: boolean })[] 
         route: 'users.ratings',
         label: () => trans('common.ratings'),
         icon: Star,
+        description: () => trans('app.nav_ratings_description'),
         keywords: () => trans('palette.keywords_ratings'),
     },
     {
@@ -173,6 +209,7 @@ export const USER_PANELS: (NavEntry & { id: UserPanel; ownerOnly?: boolean })[] 
         route: 'users.favorites',
         label: () => trans('common.favorites'),
         icon: Heart,
+        description: () => trans('app.nav_favorites_description'),
         keywords: () => trans('palette.keywords_favorites'),
     },
     {
@@ -180,6 +217,7 @@ export const USER_PANELS: (NavEntry & { id: UserPanel; ownerOnly?: boolean })[] 
         route: 'users.progress',
         label: () => trans('common.in_progress_2'),
         icon: CirclePlay,
+        description: () => trans('app.nav_in_progress_description'),
         keywords: () => trans('palette.keywords_in_progress'),
     },
     {
@@ -187,6 +225,7 @@ export const USER_PANELS: (NavEntry & { id: UserPanel; ownerOnly?: boolean })[] 
         route: 'users.lists',
         label: () => trans('common.lists'),
         icon: List,
+        description: () => trans('app.nav_lists_description'),
         keywords: () => trans('palette.keywords_profile_lists'),
     },
     {
@@ -314,10 +353,133 @@ export function settingsNav(): NavEntry[] {
 
 /** The address of a place, as a path; a user panel needs whose. */
 export function navHref(entry: NavEntry, username?: string): string {
-    return route(entry.route, username === undefined ? {} : { user: username }, false);
+    const path = route(entry.route, username === undefined ? {} : { user: username }, false);
+
+    return entry.fragment === undefined ? path : `${path}#${entry.fragment}`;
 }
 
 /** One user panel by id. */
 export function userPanel(id: UserPanel): NavEntry {
     return USER_PANELS.find((panel) => panel.id === id)!;
+}
+
+export type NavGroupId = 'library' | 'discover' | 'releases';
+
+/**
+ * A row of a main-menu group: a place of the app, or a panel of the signed-in
+ * user's own profile, which needs their username for its address.
+ */
+export type NavGroupItem = { kind: 'place'; entry: NavEntry } | { kind: 'own-panel'; entry: NavEntry };
+
+export interface NavGroup {
+    id: NavGroupId;
+    label: () => string;
+    icon: LucideIcon;
+    items: NonEmpty<NavGroupItem>;
+}
+
+const place = (entry: NavEntry): NavGroupItem => ({ kind: 'place', entry });
+const ownPanel = (id: UserPanel): NavGroupItem => ({ kind: 'own-panel', entry: userPanel(id) });
+
+/**
+ * The main menu after Dashboard: what you have, what to find, what is coming.
+ * A place sits in one group only, so the word lit in the bar always names the
+ * group of the page you are on.
+ */
+export const NAV_GROUPS: NonEmpty<NavGroup> = [
+    {
+        id: 'library',
+        label: () => trans('app.nav_library'),
+        icon: Library,
+        items: [
+            ownPanel('progress'),
+            place(BACKLOG),
+            ownPanel('lists'),
+            ownPanel('favorites'),
+            ownPanel('history'),
+            ownPanel('ratings'),
+            place(STATISTICS),
+        ],
+    },
+    {
+        id: 'discover',
+        label: () => trans('common.discover'),
+        icon: Compass,
+        items: [place(DISCOVER), place(SUGGESTIONS), place(TRENDING)],
+    },
+    {
+        id: 'releases',
+        label: () => trans('app.nav_releases'),
+        icon: CalendarClock,
+        items: [place(CALENDAR), place(COUNTDOWNS)],
+    },
+];
+
+/** The colours a menu row can wear: its group's, or the danger colour for a row that is not a place. */
+export type MenuTint = NavGroupId | 'danger';
+
+// Tokens of the glyph, of the square under a pointed row, and of the glyph on that square.
+const TINT_TOKENS: Record<MenuTint, readonly [string, string, string]> = {
+    library: ['nav-library', 'nav-library-fill', 'nav-library-ink'],
+    discover: ['nav-discover', 'nav-discover-fill', 'nav-discover-ink'],
+    releases: ['nav-releases', 'nav-releases-fill', 'nav-releases-ink'],
+    danger: ['danger', 'danger-strong', 'on-accent'],
+};
+
+/** A tint as the custom properties a menu row (`MenuRow`) reads from an ancestor. */
+export function navTint(tint: MenuTint): Record<'--tint' | '--tint-fill' | '--tint-ink', string> {
+    const [glyph, fill, ink] = TINT_TOKENS[tint];
+
+    return { '--tint': `var(--color-${glyph})`, '--tint-fill': `var(--color-${fill})`, '--tint-ink': `var(--color-${ink})` };
+}
+
+/** Where a menu row leads, for the user signed in as `username`. */
+export function groupItemHref(item: NavGroupItem, username: string): string {
+    return item.kind === 'own-panel' ? navHref(item.entry, username) : navHref(item.entry);
+}
+
+/** Places of the main menu that are not someone's profile panel: Dashboard, then the groups' own places in order. */
+export function menuPlaces(): NavEntry[] {
+    return [DASHBOARD, ...NAV_GROUPS.flatMap((group) => group.items.flatMap((item) => (item.kind === 'place' ? [item.entry] : [])))];
+}
+
+const withoutQuery = (url: string): string => url.replace(/[?#].*$/, '');
+
+/** Whether `url` is the page at `href` or one under it, whatever its query or fragment. */
+export function isAtOrUnder(url: string, href: string): boolean {
+    const path = withoutQuery(url);
+    const target = withoutQuery(href);
+
+    return path === target || path.startsWith(`${target}/`);
+}
+
+/**
+ * The word of the main menu the page at `url` belongs to: Dashboard, a group,
+ * or nothing (settings, a title, someone else's profile).
+ */
+export function activeMenuWord(url: string, username: string): 'dashboard' | NavGroupId | null {
+    if (isAtOrUnder(url, navHref(DASHBOARD))) {
+        return 'dashboard';
+    }
+
+    const group = NAV_GROUPS.find((candidate) => candidate.items.some((item) => isAtOrUnder(url, groupItemHref(item, username))));
+
+    return group?.id ?? null;
+}
+
+/**
+ * The one row of the menu drawer the page at `url` is: Dashboard or a group's
+ * place, by its entry id. A row leading to a section of a page shares the page
+ * with another row, which is the one lit there; null off the menu.
+ */
+export function currentMenuRow(url: string, username: string): string | null {
+    if (isAtOrUnder(url, navHref(DASHBOARD))) {
+        return DASHBOARD.id;
+    }
+
+    const row = NAV_GROUPS.flatMap((group) => group.items).find(
+        (item) => item.entry.fragment === undefined && isAtOrUnder(url, groupItemHref(item, username)),
+    );
+
+    return row?.entry.id ?? null;
 }

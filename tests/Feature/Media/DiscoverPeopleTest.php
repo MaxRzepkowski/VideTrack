@@ -56,10 +56,8 @@ test('the people mode maps popular people and carries list membership, not media
         ->assertInertia(fn (Assert $page) => $page
             ->component('media/Discover')
             ->where('type', 'person')
-            // Same gate as every other value of the select, shared with the
-            // header's mega-menu.
+            // Same gate as every other value of the select.
             ->where('availableTypes', fn (Collection $types): bool => $types->contains('person'))
-            ->where('discoverTypes', fn (Collection $types): bool => $types->contains('person'))
             ->has('people', 1)
             ->where('people.0.type', 'person')
             ->where('people.0.ref', '6384')
@@ -126,8 +124,7 @@ test('without a people-capable provider the value is neither offered nor reachab
         ->get(route('discover', ['type' => 'show']))
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            ->where('availableTypes', fn (Collection $types): bool => ! $types->contains('person'))
-            ->where('discoverTypes', fn (Collection $types): bool => ! $types->contains('person')));
+            ->where('availableTypes', fn (Collection $types): bool => ! $types->contains('person')));
 
     $this->actingAs($user)->get(route('discover', ['type' => 'person']))->assertNotFound();
 });

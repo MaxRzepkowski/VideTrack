@@ -1,7 +1,13 @@
-import { POSTER_GRID_STEPS, posterGridClass, SELECT_CLASS, SELECT_CLASS_ON_CARD } from '@/lib/ui';
+import { navWordState, POSTER_GRID_STEPS, posterGridClass, SELECT_CLASS, SELECT_CLASS_ON_CARD } from '@/lib/ui';
 import { describe, expect, it } from 'vitest';
 
 describe('ui classes', () => {
+    it('lights the menu word of the page you are on, and only it', () => {
+        expect(navWordState(true)).toBe('bg-surface-raised text-ink');
+        expect(navWordState(false)).not.toContain('bg-surface-raised');
+        expect(navWordState(false)).toContain('hover:');
+    });
+
     it('raises the select one step on a card and changes nothing else', () => {
         expect(SELECT_CLASS_ON_CARD).toContain('bg-surface-raised');
         expect(SELECT_CLASS_ON_CARD.replace('bg-surface-raised', 'bg-surface')).toBe(SELECT_CLASS);

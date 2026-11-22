@@ -2,6 +2,7 @@
 import PageHeader from '@/components/PageHeader.vue';
 import { getInitials } from '@/lib/format';
 import { navHref, USER_PANELS, userPanel, type UserPanel } from '@/lib/navigation';
+import { NAV_WORD_CLASS, navWordState } from '@/lib/ui';
 import type { ProfileData } from '@/types/media';
 import { Link } from '@inertiajs/vue3';
 import { trans } from 'laravel-vue-i18n';
@@ -85,20 +86,18 @@ watch(() => props.active, revealActiveTab);
             </span>
         </template>
 
-        <!-- Panels of this user. Only the open one is drawn; the rest are bare
-             labels, so nothing here reads as the filter chips a panel may
-             show below. -->
+        <!-- Panels of this user, in the main menu's words: they are places to go,
+             not the filter chips a panel may show below. -->
         <template #nav>
-            <nav ref="nav" class="scroll-subtle -mx-4 flex flex-nowrap items-center gap-1 overflow-x-auto px-4 md:mx-0 md:px-0">
+            <nav ref="nav" class="scroll-subtle -mx-4 flex flex-nowrap items-center gap-2 overflow-x-auto px-4 md:mx-0 md:px-0">
                 <Link
                     v-for="tab in tabs"
                     :key="tab.key"
                     :href="tab.href"
                     :aria-current="active === tab.key ? 'page' : undefined"
-                    class="flex shrink-0 items-center gap-2 rounded-lg px-4 py-2.5 text-base font-semibold transition-colors duration-150"
-                    :class="active === tab.key ? 'bg-brand text-on-accent' : 'text-ink-muted hover:bg-surface-raised hover:text-ink'"
+                    :class="[NAV_WORD_CLASS, navWordState(active === tab.key)]"
                 >
-                    <component :is="tab.icon" class="size-4" />
+                    <component :is="tab.icon" class="size-4.5" :class="active === tab.key ? 'text-ink' : 'text-ink-muted'" />
                     {{ tab.label }}
                 </Link>
             </nav>

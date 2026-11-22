@@ -84,10 +84,6 @@ class HandleInertiaRequests extends Middleware
                 'ownPage' => TitlePages::hasOwnPage($type->code),
                 'genreBrowsable' => $this->discovery->browsesGenresOf($type->code),
             ], $this->types->all())),
-            // Types the Discover mega-menu can offer — the very list the page
-            // itself offers, from the one helper both read. Cheap: registry
-            // lookups and instanceof checks, no provider calls.
-            'discoverTypes' => fn (): array => $this->discovery->browsableCodes(),
             // The header bell: unread counter + the latest few for the
             // dropdown. Only the state at render time — an open tab keeps it
             // current by polling notifications.feed, which answers with the
