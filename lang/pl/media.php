@@ -416,4 +416,7 @@ return [
     'rank_position' => '#:position',
     'background' => 'Tło',
     'recommended_manga' => 'Polecane mangi',
+    'search_titles_and_people' => 'Szukaj tytułów i osób',
+    'clear_search' => 'Wyczyść wyszukiwanie',
+    'search_escape_key' => 'Esc',
 ];

@@ -416,4 +416,7 @@ return [
     'rank_position' => '#:position',
     'background' => 'Background',
     'recommended_manga' => 'Recommended manga',
+    'search_titles_and_people' => 'Search titles and people',
+    'clear_search' => 'Clear search',
+    'search_escape_key' => 'Esc',
 ];

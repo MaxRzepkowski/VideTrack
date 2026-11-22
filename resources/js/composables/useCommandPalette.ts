@@ -1,11 +1,8 @@
 import { onMounted, onUnmounted, ref, type Ref } from 'vue';
 
-/** The palette's shortcut as `aria-keyshortcuts` names it: Ctrl or Cmd with K, on any system. */
-export const PALETTE_SHORTCUT = 'Control+K Meta+K';
-
-// One open state for the whole app: the palette is mounted in the layout, and
-// anything may ask for it (a header button, a keyboard shortcut) without
-// owning it.
+// One open state for the whole app, outside any component: the layout (and the
+// palette with it) re-mounts on every page visit, and a shortcut pressed during
+// one must still find the state it toggled.
 const open = ref(false);
 
 // The layout re-mounts on every page visit, so the listener is counted rather

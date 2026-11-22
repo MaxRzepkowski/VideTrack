@@ -2,6 +2,7 @@ import {
     hasUserStatus,
     inPersonPageOrder,
     inRegistryOrder,
+    kindGlyph,
     kindPlural,
     kindsLabel,
     MEDIA_TYPE_META,
@@ -81,5 +82,11 @@ describe('naming kinds', () => {
     it('names a group of kinds in the registry order, with the language conjunction', () => {
         expect(kindsLabel(['movie', 'show'])).toBe('Shows and movies');
         expect(kindsLabel(['company'])).toBe('Companies');
+    });
+
+    it('draws a media type with its own glyph and colour, and people in the app colour', () => {
+        expect(kindGlyph('game')).toEqual({ icon: MEDIA_TYPE_META.game?.icon, color: MEDIA_TYPE_META.game?.color });
+        expect(kindGlyph('person').color).toBe('var(--color-brand-soft)');
+        expect(kindGlyph('person').icon).not.toBe(kindGlyph('company').icon);
     });
 });
