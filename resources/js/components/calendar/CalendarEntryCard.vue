@@ -130,8 +130,7 @@ const followedVia = computed(() => compactFollowedVia(props.entry.media));
         :is="batch === null ? Link : 'div'"
         :href="batch === null ? href : undefined"
         data-tooltip-group
-        class="border-line-subtle bg-surface flex flex-col overflow-hidden rounded-lg border transition-colors duration-150"
-        :class="batch === null ? 'hover:border-brand' : 'hover:border-line-strong'"
+        class="border-line-subtle bg-surface hover:border-brand flex flex-col overflow-hidden rounded-lg border transition-colors duration-150"
     >
         <div v-if="!noImage" class="relative aspect-video w-full overflow-hidden">
             <img v-if="image" :src="image" alt="" width="342" height="192" loading="lazy" class="absolute inset-0 h-full w-full object-cover" />
