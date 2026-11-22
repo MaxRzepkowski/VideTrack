@@ -260,12 +260,13 @@ final class Payload
     /**
      * The calendar day a value opens with, written year first ("2024-04-25",
      * "2024/4/25", "2024-04-25T06:54:47Z"), as {@see day()} reads it. Null
-     * for anything else, a year or a month alone and a placeholder ("None")
+     * for anything else, a year or a month alone, a placeholder ("None") and
+     * a day before the common era (PostgreSQL writes "0701-01-01 BC")
      * included: unlike {@see instant()} it never guesses at a value.
      */
     public static function calendarDay(mixed $value): ?CarbonImmutable
     {
-        if (! is_string($value) || preg_match('#^\s*(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})(?!\d)#', $value, $parts) !== 1) {
+        if (! is_string($value) || preg_match('#^\s*(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})(?!\d)#', $value, $parts) !== 1 || preg_match('/\bBC\b/i', $value) === 1) {
             return null;
         }
 

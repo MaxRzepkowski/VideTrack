@@ -8,6 +8,7 @@ use App\Catalog\Data\CreatorLink;
 use App\Catalog\Data\MediaSummary;
 use App\Catalog\Department;
 use App\Support\Payload;
+use Carbon\CarbonImmutable;
 use LogicException;
 
 /**
@@ -109,8 +110,6 @@ final readonly class HardcoverPayload
      */
     public function summary(array $data): MediaSummary
     {
-        $releaseDate = Payload::string($data, 'release_date');
-
         return new MediaSummary(
             type: 'book',
             ref: (string) (Payload::positiveInt($data, 'id') ?? 0),
@@ -119,7 +118,7 @@ final readonly class HardcoverPayload
             year: $this->year($data),
             posterPath: $this->coverUrl($data),
             communityRating: $this->rating($data),
-            releaseDate: $releaseDate,
+            releaseDate: $this->releaseDay($data)?->toDateString(),
             // Asked for by the book's own page, not by listings.
             votes: Payload::positiveInt($data, 'ratings_count'),
             progressTotal: Payload::positiveInt($data, 'pages'),
@@ -136,7 +135,19 @@ final readonly class HardcoverPayload
      */
     public function year(array $data): ?int
     {
-        return Payload::positiveInt($data, 'release_year') ?? Payload::yearOf(Payload::string($data, 'release_date'));
+        return Payload::positiveInt($data, 'release_year') ?? $this->releaseDay($data)?->year;
+    }
+
+    /**
+     * Hardcover's release date as a calendar day. Ancient works come dated
+     * before the common era ("0701-01-01 BC"), which no card can show as a
+     * day or a year: no date at all.
+     *
+     * @param  array<array-key, mixed>  $data
+     */
+    private function releaseDay(array $data): ?CarbonImmutable
+    {
+        return Payload::calendarDay($data['release_date'] ?? null);
     }
 
     /**
