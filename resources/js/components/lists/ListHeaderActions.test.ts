@@ -67,7 +67,7 @@ describe('the collection bell', () => {
     });
 });
 
-describe('the list as a text file', () => {
+describe('the list menu', () => {
     // The menu as plain markup: what is in it, not how reka-ui opens it.
     const menuStubs = {
         DropdownMenu: { template: '<div><slot /></div>' },
@@ -152,5 +152,12 @@ describe('the list as a text file', () => {
         expect(menuItem(wrapper, 'Duplicate list')).toBeDefined();
         expect(menuItem(wrapper, 'Download as .txt')).toBeUndefined();
         expect(menuItem(wrapper, 'Download as .csv')).toBeUndefined();
+    });
+
+    it("leaves a collection's refresh to its details window", () => {
+        const wrapper = openMenu();
+
+        expect(menuItem(wrapper, 'Duplicate list')).toBeDefined();
+        expect(menuItem(wrapper, 'Refresh from provider')).toBeUndefined();
     });
 });
