@@ -6,6 +6,7 @@ import MediaTitleHeader from '@/components/media/MediaTitleHeader.vue';
 import OverviewSection from '@/components/media/OverviewSection.vue';
 import RecentlyViewed from '@/components/media/RecentlyViewed.vue';
 import RecommendationsBand from '@/components/media/RecommendationsBand.vue';
+import RelatedTitles from '@/components/media/RelatedTitles.vue';
 import StickyActionsPanel from '@/components/media/StickyActionsPanel.vue';
 import TitlePageLayout from '@/components/media/TitlePageLayout.vue';
 import { useDeferredUserStates } from '@/composables/useMediaActions';
@@ -13,7 +14,7 @@ import { bookKindLabel } from '@/lib/badges';
 import { bookContributors } from '@/lib/credits';
 import { formatCalendarDate, formatCountOrNull } from '@/lib/format';
 import type { BookExtra } from '@/types/extras';
-import type { CollectionBannerData, DetailRow, MediaDetails, MediaSummary, UserStatesMap } from '@/types/media';
+import type { CollectionBannerData, DetailRow, MediaDetails, MediaSummary, TitleTie, UserStatesMap } from '@/types/media';
 import { Head } from '@inertiajs/vue3';
 import { trans, transChoice } from 'laravel-vue-i18n';
 import { computed } from 'vue';
@@ -23,6 +24,7 @@ const props = defineProps<{
     recentlyViewed?: MediaSummary[];
     fromLibrary?: boolean;
     removedAtSource?: boolean;
+    otherMedia?: TitleTie[];
     /** The series the book has a numbered place in. */
     collection?: CollectionBannerData | null;
     /** Deferred: the books Hardcover finds most like this one. */
@@ -120,6 +122,7 @@ const detailRows = computed<DetailRow[]>(() => [
         <OverviewSection :overview="book.overview" :people="people" />
 
         <template #below>
+            <RelatedTitles :titles="otherMedia ?? []" :heading="trans('media.in_other_media')" />
             <CollectionBanner v-if="collection" :collection="collection" />
         </template>
 

@@ -12,7 +12,7 @@ final readonly class RelationRefreshResult
      * @param  int  $asked  of those, asked about
      * @param  int  $ties  ties kept for them
      * @param  int  $listed  titles kept from the franchises they named
-     * @param  list<string>  $errors  what a service that stopped answering said, worded for a reader
+     * @param  list<string>  $errors  what a service said of each title set aside, and of what ended the run, worded for a reader
      */
     public function __construct(
         public int $due,

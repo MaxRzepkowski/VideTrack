@@ -66,6 +66,8 @@ final readonly class MalPayload
             posterPath: $this->pictureUrl(Payload::map($data['main_picture'] ?? null)),
             communityRating: (($mean = Payload::float($data, 'mean') ?? 0.0) > 0) ? round($mean, 1) : null,
             releaseDate: $releaseDate,
+            // Asked for by the manga's own page, not by listings.
+            votes: Payload::positiveInt($data, 'num_scoring_users'),
             releasePrecision: $this->datePrecision($data, 'start_date'),
             extra: array_filter(['chapters' => Payload::positiveInt($data, 'num_chapters')]),
             progressTotal: Payload::positiveInt($data, 'num_chapters'),

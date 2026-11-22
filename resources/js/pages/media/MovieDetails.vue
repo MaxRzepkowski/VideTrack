@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import AdaptationSources from '@/components/media/AdaptationSources.vue';
 import CastSection from '@/components/media/CastSection.vue';
 import CollectionBanner from '@/components/media/CollectionBanner.vue';
 import MediaHero from '@/components/media/MediaHero.vue';
@@ -15,14 +14,13 @@ import StickyActionsPanel from '@/components/media/StickyActionsPanel.vue';
 import TitlePageLayout from '@/components/media/TitlePageLayout.vue';
 import VideosSection from '@/components/media/VideosSection.vue';
 import WatchProvidersSection from '@/components/media/WatchProvidersSection.vue';
-import { useDeferredUserStates } from '@/composables/useMediaActions';
 import { isDirector, keyCrew, wroteScreenplay } from '@/lib/credits';
 import { alternativeTitlesLine, countryName, formatCalendarDate, formatMoney, formatRuntime } from '@/lib/format';
 import { titleStatusLabel } from '@/lib/titleStatus';
 import type { MovieExtra } from '@/types/extras';
-import type { Chip, CollectionBannerData, DetailRow, MediaDetails, MediaSummary, TitleTie, UserStatesMap, WatchAvailability } from '@/types/media';
+import type { Chip, CollectionBannerData, DetailRow, MediaDetails, MediaSummary, TitleTie, WatchAvailability } from '@/types/media';
 import { Head } from '@inertiajs/vue3';
-import { trans, transChoice } from 'laravel-vue-i18n';
+import { trans } from 'laravel-vue-i18n';
 import { computed } from 'vue';
 
 const props = defineProps<{
@@ -31,18 +29,13 @@ const props = defineProps<{
     watchProviders: WatchAvailability | null;
     /** Countries with a JustWatch offer, worldwide — a dateless second source. */
     offerRegions?: string[];
-    /** Deferred (Wikidata bridge): source books resolved via our book provider. */
-    sourceBooks?: MediaSummary[] | null;
     relatedTitles: TitleTie[];
-    /** Deferred with the sources: the viewer's state for their cards. */
-    deferredUserStates?: UserStatesMap;
+    otherMedia: TitleTie[];
     recentlyViewed?: MediaSummary[];
     /** The provider did not answer; this page was rebuilt from the local library. */
     fromLibrary?: boolean;
     removedAtSource?: boolean;
 }>();
-
-useDeferredUserStates(() => props.deferredUserStates);
 
 const certificationChip = computed<Chip | null>(() => {
     if (props.movie.certification === null) {
@@ -128,10 +121,9 @@ const detailRows = computed<DetailRow[]>(() => [
 
         <template #below>
             <RelatedTitles :titles="relatedTitles" />
+            <RelatedTitles :titles="otherMedia" :heading="trans('media.in_other_media')" />
 
             <CollectionBanner v-if="collection" :collection="collection" :fallback-backdrop="movie.backdropPath" />
-
-            <AdaptationSources data="sourceBooks" :sources="sourceBooks" :title="transChoice('media.based_on_the_book', sourceBooks?.length ?? 0)" />
         </template>
 
         <template #after>

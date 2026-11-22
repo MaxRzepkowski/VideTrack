@@ -2,9 +2,7 @@
 
 namespace App\Catalog\Relations;
 
-use App\Catalog\ItemMetadata;
 use App\Catalog\MediaKind;
-use App\Models\MediaItem;
 
 /**
  * What of the stored ties a title's page and the shelves actually show. The
@@ -24,6 +22,11 @@ use App\Models\MediaItem;
  *    also holds its shorts, specials and shop-floor tie-ins.
  *  - A fellow title of the franchise that is a part of this film's own
  *    provider collection is left to the collection, which already shows it.
+ *  - Across media, the work a title is based on is always shown; what was
+ *    made of it or of its source only when known widely enough, since one
+ *    novel or comic may have dozens of minor games and tie-in books. Where
+ *    the source files a work both as this title's source and as made of it
+ *    (an illustrated edition of a novel beside the novel), it is the source.
  */
 final readonly class TieRules
 {
@@ -31,24 +34,29 @@ final readonly class TieRules
     private const CLOSENESS = [
         TitleRelation::SpinOff->value => 0,
         TitleRelation::SpinOffOf->value => 0,
-        TitleRelation::SameUniverse->value => 1,
-        TitleRelation::Next->value => 2,
-        TitleRelation::Previous->value => 2,
+        TitleRelation::BasedOn->value => 1,
+        TitleRelation::Adaptation->value => 2,
+        TitleRelation::SameSource->value => 3,
+        TitleRelation::SameUniverse->value => 4,
+        TitleRelation::Next->value => 5,
+        TitleRelation::Previous->value => 5,
     ];
 
     /**
+     * @param  string  $type  the title's type
+     * @param  string|null  $releaseDate  when the title came out
+     * @param  string|null  $ownCollection  the provider collection the title is a part of
      * @param  list<TitleTie>  $ties  as stored, from this title's side
      * @return list<TitleTie> each other title once; the named ties first, then the franchise by release
      */
-    public function settle(MediaItem $title, array $ties): array
+    public function settle(string $type, ?string $releaseDate, ?string $ownCollection, array $ties): array
     {
-        $ownCollection = ItemMetadata::fromStored($title->metadata)->collection?->ref;
         $settled = [];
 
         foreach ($ties as $tie) {
             $continuation = in_array($tie->relation, [TitleRelation::Next, TitleRelation::Previous], true);
 
-            if ($continuation && $title->type === MediaKind::Movie->value && $tie->media->type === MediaKind::Movie->value) {
+            if ($continuation && $type === MediaKind::Movie->value && $tie->media->type === MediaKind::Movie->value) {
                 continue;
             }
 
@@ -57,12 +65,12 @@ final readonly class TieRules
             }
 
             // No count means the title is stored here: the user's own, whatever its reach.
-            if ($tie->relation === TitleRelation::SameUniverse && $tie->media->votes !== null && $tie->media->votes < $this->minVotes($tie)) {
+            if ($this->mustBeKnown($tie->relation) && $tie->media->votes !== null && $tie->media->votes < $this->minVotes($tie)) {
                 continue;
             }
 
             if ($continuation) {
-                $tie = new TitleTie($this->direction($title, $tie), $tie->media, $tie->collectionRef);
+                $tie = new TitleTie($this->direction($releaseDate, $tie), $tie->media, $tie->collectionRef);
             }
 
             $this->keepClosest($settled, $tie);
@@ -106,7 +114,8 @@ final readonly class TieRules
     /**
      * The order a page lists ties in: by how the other title stands to this
      * one, as TitleRelation lists them (spin-offs, the original, what follows
-     * it, what it follows, then the rest of the universe), each kind by release.
+     * it, what it follows, the rest of the universe, then what it is based on,
+     * what was made of it and what shares its source), each kind by release.
      *
      * @param  list<TitleTie>  $ties
      * @return list<TitleTie>
@@ -121,6 +130,12 @@ final readonly class TieRules
         return $ties;
     }
 
+    /** Whether a title tied this way is shown only when known widely enough. */
+    private function mustBeKnown(TitleRelation $relation): bool
+    {
+        return in_array($relation, [TitleRelation::SameUniverse, TitleRelation::Adaptation, TitleRelation::SameSource], true);
+    }
+
     private function minVotes(TitleTie $tie): int
     {
         $key = "tracker.widely_known_votes.{$tie->media->type}";
@@ -129,9 +144,8 @@ final readonly class TieRules
     }
 
     /** The later release continues the earlier one; without both dates, the source's word stands. */
-    private function direction(MediaItem $title, TitleTie $tie): TitleRelation
+    private function direction(?string $own, TitleTie $tie): TitleRelation
     {
-        $own = $title->release_date?->toDateString();
         $other = $tie->media->releaseDate;
 
         if ($own === null || $other === null || $own === $other) {

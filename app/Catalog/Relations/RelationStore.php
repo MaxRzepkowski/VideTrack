@@ -3,6 +3,7 @@
 namespace App\Catalog\Relations;
 
 use App\Catalog\CardSnapshot;
+use App\Catalog\Data\MediaDetails;
 use App\Catalog\Data\MediaSummary;
 use App\Catalog\ItemMetadata;
 use App\Catalog\MediaItemSummaries;
@@ -29,17 +30,47 @@ final readonly class RelationStore
     public const FRESH_DAYS = 90;
 
     /** Rows read or written in one statement. */
-    private const CHUNK = 500;
+    public const CHUNK = 500;
 
     /**
-     * Stored roots an outside source can be asked about (they carry its id)
-     * that were never asked, or long enough ago; the never asked first.
+     * Stored roots an outside source can be asked about that were never
+     * asked, or long enough ago; the never asked first.
      *
+     * @param  list<string>  $types  the types the source can find a title of
      * @return Collection<int, MediaItem>
      */
-    public function due(CarbonInterface $now, int $limit): Collection
+    public function due(CarbonInterface $now, int $limit, array $types): Collection
     {
-        return $this->dueTitles($now)
+        return $this->dueAmong($now, $limit, $types, null);
+    }
+
+    /**
+     * Of these titles, the ones due, as due() orders them: some titles are
+     * asked about before the rest.
+     *
+     * @param  list<string>  $types
+     * @param  list<int>  $ids  a window of at most CHUNK titles
+     * @return Collection<int, MediaItem>
+     */
+    public function dueOf(CarbonInterface $now, int $limit, array $types, array $ids): Collection
+    {
+        return $this->dueAmong($now, $limit, $types, $ids);
+    }
+
+    /**
+     * @param  list<string>  $types
+     * @param  list<int>|null  $ids  null: any title
+     * @return Collection<int, MediaItem>
+     */
+    private function dueAmong(CarbonInterface $now, int $limit, array $types, ?array $ids): Collection
+    {
+        $titles = $this->dueTitles($now, $types);
+
+        if ($ids !== null) {
+            $titles->whereIn('media_items.id', $ids);
+        }
+
+        return $titles
             ->orderByRaw('title_relation_checks.checked_at is not null')
             ->orderBy('title_relation_checks.checked_at')
             ->orderBy('media_items.id')
@@ -47,17 +78,22 @@ final readonly class RelationStore
             ->get('media_items.*');
     }
 
-    public function countDue(CarbonInterface $now): int
+    /**
+     * @param  list<string>  $types  the types the source can find a title of
+     */
+    public function countDue(CarbonInterface $now, array $types): int
     {
-        return $this->dueTitles($now)->count();
+        return $this->dueTitles($now, $types)->count();
     }
 
     /**
+     * @param  list<string>  $types
      * @return Builder<MediaItem>
      */
-    private function dueTitles(CarbonInterface $now): Builder
+    private function dueTitles(CarbonInterface $now, array $types): Builder
     {
-        return ItemMetadata::having(MediaItem::query(), 'wikidataId')
+        return MediaItem::query()
+            ->whereIn('media_items.type', $types)
             ->whereNull('media_items.parent_id')
             ->whereNull('media_items.gone_at')
             ->leftJoin('title_relation_checks', 'title_relation_checks.media_item_id', '=', 'media_items.id')
@@ -66,17 +102,11 @@ final readonly class RelationStore
                 ->orWhere('title_relation_checks.checked_at', '<', $now->copy()->subDays(self::FRESH_DAYS)));
     }
 
-    /** The id the outside source knows the title by. */
-    public function sourceIdOf(MediaItem $item): ?string
-    {
-        return ItemMetadata::fromStored($item->metadata)->wikidataId;
-    }
-
     /**
      * What the title is tied to as of now, replacing what was stored, and
      * the note that it was asked about (also when the answer is nothing).
      *
-     * @param  list<array{TitleRelation, MediaSummary}>  $ties
+     * @param  list<array{TitleRelation, MediaSummary, int|null}>  $ties  each with how many rated the title at its provider, null where it is stored here
      */
     public function replace(MediaItem $item, array $ties): void
     {
@@ -85,9 +115,9 @@ final readonly class RelationStore
 
             $rows = [];
 
-            foreach ($ties as [$relation, $summary]) {
+            foreach ($ties as [$relation, $summary, $votes]) {
                 $columns = CardSnapshot::columns($summary);
-                $rows["{$relation->value}:{$summary->key()}"] = [...$columns, 'card' => json_encode($columns['card'], JSON_THROW_ON_ERROR), 'media_item_id' => $item->id, 'relation' => $relation->value];
+                $rows["{$relation->value}:{$summary->key()}"] = [...$columns, 'card' => json_encode($columns['card'], JSON_THROW_ON_ERROR), 'media_item_id' => $item->id, 'relation' => $relation->value, 'votes' => $votes];
             }
 
             if ($rows !== []) {
@@ -100,6 +130,19 @@ final readonly class RelationStore
                 ['checked_at'],
             );
         });
+    }
+
+    /**
+     * Asks about the title again only from then on, keeping what is stored
+     * of it: one the source failed to answer about stops holding up the rest.
+     */
+    public function postpone(MediaItem $item, CarbonInterface $until): void
+    {
+        DB::table('title_relation_checks')->upsert(
+            [['media_item_id' => $item->id, 'checked_at' => $until->copy()->subDays(self::FRESH_DAYS)]],
+            ['media_item_id'],
+            ['checked_at'],
+        );
     }
 
     /**
@@ -223,16 +266,8 @@ final readonly class RelationStore
 
         foreach ($idsByRef as $type => $ids) {
             foreach (array_chunk(array_map(strval(...), array_keys($ids)), self::CHUNK) as $chunk) {
-                $naming = RelatedTitle::query()
-                    ->where('type', $type)
-                    ->whereIn('ref', $chunk)
-                    ->whereHas('mediaItem', fn ($source) => $source->whereNull('gone_at'))
-                    ->with('mediaItem')
-                    ->orderBy('id')
-                    ->get();
-
-                foreach ($naming as $stored) {
-                    $ties[$ids[$stored->ref]][] = new TitleTie($stored->relation->inverse(), MediaItemSummaries::summary($stored->mediaItem));
+                foreach ($this->naming($type, $chunk) as [$ref, $tie]) {
+                    $ties[$ids[$ref]][] = $tie;
                 }
             }
         }
@@ -244,7 +279,8 @@ final readonly class RelationStore
         $settled = [];
 
         foreach ($ties as $id => $ofTitle) {
-            $shown = $this->rules->settle($byId[$id], $ofTitle);
+            $title = $byId[$id];
+            $shown = $this->rules->settle($title->type, $title->release_date?->toDateString(), ItemMetadata::fromStored($title->metadata)->collection?->ref, $ofTitle);
 
             if ($shown !== []) {
                 $settled[$id] = $shown;
@@ -252,6 +288,38 @@ final readonly class RelationStore
         }
 
         return $settled;
+    }
+
+    /**
+     * The ties of a title not stored here, which only other titles can name:
+     * the anime of a manga nobody keeps still names the manga as its source.
+     *
+     * @return list<TitleTie>
+     */
+    public function ofUnstored(MediaDetails $title): array
+    {
+        $ties = array_map(fn (array $naming): TitleTie => $naming[1], $this->naming($title->summary->type, [$title->summary->ref]));
+
+        return $this->rules->settle($title->summary->type, $title->summary->releaseDate, $title->collection?->ref, $ties);
+    }
+
+    /**
+     * The ties other stored titles name these by, from these titles' side.
+     *
+     * @param  list<string>  $refs
+     * @return list<array{string, TitleTie}> each with the ref of the title it is a tie of
+     */
+    private function naming(string $type, array $refs): array
+    {
+        $naming = RelatedTitle::query()
+            ->where('type', $type)
+            ->whereIn('ref', $refs)
+            ->whereHas('mediaItem', fn ($source) => $source->whereNull('gone_at'))
+            ->with('mediaItem')
+            ->orderBy('id')
+            ->get();
+
+        return array_values($naming->map(fn (RelatedTitle $stored): array => [$stored->ref, new TitleTie($stored->relation->inverse(), MediaItemSummaries::summary($stored->mediaItem))])->all());
     }
 
     /**

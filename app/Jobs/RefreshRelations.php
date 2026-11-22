@@ -13,8 +13,8 @@ use Illuminate\Foundation\Queue\Queueable;
 
 /**
  * Asks the outside source which titles the stored ones are tied to
- * (spin-offs, what follows, the rest of a franchise) for as long as the run
- * may work. A title is asked about again only after months. Reports to
+ * (spin-offs, what follows, the rest of a franchise, works in other media)
+ * for as long as the run may work. A title is asked about again only after months. Reports to
  * `task_runs`.
  */
 class RefreshRelations implements ShouldQueue

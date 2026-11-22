@@ -5,6 +5,8 @@ use App\Catalog\ExternalIdSource;
 use App\Catalog\MediaKind;
 use App\Catalog\ProviderException;
 use App\Models\ExternalIdMapping;
+use App\Models\MediaItem;
+use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
 
 function resolver(): ExternalIdResolver
@@ -195,6 +197,45 @@ test('an id that could leave its place in a provider address is never asked abou
 
     expect(resolver()->resolve(['tmdb' => '603/../account'], MediaKind::Movie, 'en'))->toBeNull()
         ->and(resolver()->resolve(['imdb' => 'tt0133093?api_key=x'], MediaKind::Movie, 'en'))->toBeNull();
+
+    Http::assertNothingSent();
+});
+
+test('the Goodreads ids of many books are asked about together, then each resolves without a request', function () {
+    enableBooksModule();
+    Http::fake(['api.hardcover.app/*' => Http::response(['data' => ['book_mappings' => [['external_id' => '3686567', 'book_id' => 2459845]]]])]);
+
+    // A book already named by our own provider's id needs no asking.
+    resolver()->prefetch([['goodreads' => '3686567'], ['goodreads' => '1'], ['hardcover' => '312460', 'goodreads' => '2']], MediaKind::Book);
+
+    Http::assertSentCount(1);
+    Http::assertSent(fn (Request $request) => data_get($request->data(), 'variables.ids') === ['3686567', '1']);
+    expect(resolver()->resolve(['goodreads' => '3686567'], MediaKind::Book, 'en')?->ref)->toBe('2459845')
+        ->and(resolver()->resolve(['goodreads' => '1'], MediaKind::Book, 'en'))->toBeNull();
+    Http::assertSentCount(1);
+});
+
+test('a Goodreads id asked about together and not known still leaves the book to its ISBN', function () {
+    enableBooksModule();
+    Http::fake(['api.hardcover.app/*' => fn (Request $request) => str_contains((string) data_get($request->data(), 'query'), 'query ByIsbn')
+        ? Http::response(jsonFixture('hardcover/by_isbn'))
+        : Http::response(['data' => ['book_mappings' => []]])]);
+    $ids = ['goodreads' => '1', 'isbn' => '9780261103344'];
+
+    resolver()->prefetch([$ids], MediaKind::Book);
+    Http::assertSentCount(1);
+
+    expect(resolver()->resolve($ids, MediaKind::Book, 'en')?->ref)->toBe('2459845');
+    // The Goodreads id is not asked about again; only the ISBN is.
+    Http::assertSentCount(2);
+});
+
+test('ids answered for already are not asked about together again', function () {
+    enableBooksModule();
+    ExternalIdMapping::factory()->forItem(MediaItem::factory()->book()->create(), ExternalIdSource::Goodreads, '3686567')->create();
+    Http::fake();
+
+    resolver()->prefetch([['goodreads' => '3686567']], MediaKind::Book);
 
     Http::assertNothingSent();
 });

@@ -26,6 +26,15 @@ enum TitleRelation: string
     /** Another film or show of the same franchise, with nothing closer known. */
     case SameUniverse = 'same_universe';
 
+    /** The work in another medium this title is based on: the novel behind a film. */
+    case BasedOn = 'based_on';
+
+    /** A work in another medium based on this title: the anime of a manga. */
+    case Adaptation = 'adaptation';
+
+    /** A work in another medium based on what this title is based on: the anime beside the manga of one game. */
+    case SameSource = 'same_source';
+
     /** The same tie named from the other title's side. */
     public function inverse(): self
     {
@@ -35,7 +44,16 @@ enum TitleRelation: string
             self::Next => self::Previous,
             self::Previous => self::Next,
             self::SameUniverse => self::SameUniverse,
+            self::BasedOn => self::Adaptation,
+            self::Adaptation => self::BasedOn,
+            self::SameSource => self::SameSource,
         };
+    }
+
+    /** Whether the tie runs to another medium, which its own section on a page lists. */
+    public function acrossMedia(): bool
+    {
+        return in_array($this, [self::BasedOn, self::Adaptation, self::SameSource], true);
     }
 
     /**
@@ -54,6 +72,9 @@ enum TitleRelation: string
             self::SpinOffOf => __('media.relation_spin_off_of'),
             self::Next => __('media.relation_next'),
             self::Previous => __('media.relation_previous'),
+            self::BasedOn => __('media.relation_based_on'),
+            self::Adaptation => __('media.relation_adaptation'),
+            self::SameSource => __('media.relation_same_source'),
         };
     }
 }

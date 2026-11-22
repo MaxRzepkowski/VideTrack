@@ -68,7 +68,7 @@ test('a manual refresh also asks for the show\'s air times and the title\'s ties
     Bus::assertDispatched(RefreshTitleTies::class);
 });
 
-test('a title the outside source cannot be asked about queues no pass for its ties', function () {
+test('a title the outside source finds by its provider id queues a pass for its ties, though its provider names no item', function () {
     $title = 'A Show';
     fakeShowTitled($title);
     app(TitleStore::class)->persist('show', '1399', 'en');
@@ -76,7 +76,7 @@ test('a title the outside source cannot be asked about queues no pass for its ti
 
     $this->actingAs(User::factory()->create())->from('/show/1399')->post('/media/refresh', ['type' => 'show', 'ref' => '1399']);
 
-    Bus::assertNotDispatched(RefreshTitleTies::class);
+    Bus::assertDispatched(RefreshTitleTies::class);
 });
 
 test('the queued pass asks the source afresh about the one title and lists its franchise again', function () {
@@ -86,7 +86,12 @@ test('the queued pass asks the source afresh about the one title and lists its f
     $asked = [];
     Http::fake(function ($request) use (&$asked) {
         $query = (string) ($request->data()['query'] ?? '');
-        $asked[] = str_contains($query, 'VALUES ?s { wd:Q17738 }') ? 'title' : (str_contains($query, 'VALUES ?s { wd:Q462 }') ? 'franchise' : 'other');
+        $asked[] = match (true) {
+            str_contains($query, 'wdt:P4969') => 'other media',
+            str_contains($query, 'VALUES ?s { wd:Q17738 }') => 'title',
+            str_contains($query, 'VALUES ?s { wd:Q462 }') => 'franchise',
+            default => 'other',
+        };
 
         return Http::response(['results' => ['bindings' => str_contains($query, 'wd:Q17738') ? [[
             's' => ['type' => 'uri', 'value' => 'http://www.wikidata.org/entity/Q17738'],
@@ -99,7 +104,7 @@ test('the queued pass asks the source afresh about the one title and lists its f
     app(RelatedWorks::class)->of(['Q17738']);
     RefreshTitleTies::dispatchSync($film->id);
 
-    expect($asked)->toBe(['title', 'title', 'franchise'])
+    expect($asked)->toBe(['title', 'title', 'other media', 'franchise'])
         ->and(app(RelationStore::class)->franchisesOf($film))->toBe(['Q462'])
         ->and(RelatedTitle::query()->where('media_item_id', $film->id)->count())->toBe(0);
 });

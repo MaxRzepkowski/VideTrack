@@ -288,10 +288,35 @@ test('a stored book reads in each language as its reader knows it, whichever lan
         ->and($book->posterIn('en'))->toBe('https://assets.hardcover.app/edition/17456445/hobbit.jpg');
 });
 
+test('many Goodreads ids are asked about in one request, an unmapped one left out', function () {
+    enableBooksModule();
+    Http::fake(['api.hardcover.app/*' => Http::response(['data' => ['book_mappings' => [
+        ['external_id' => '3686567', 'book_id' => 2459845],
+        ['external_id' => '44767458', 'book_id' => 312460],
+    ]]])]);
+
+    expect(hardcoverProvider()->refsForExternalIds('book', ExternalIdSource::Goodreads, ['3686567', '44767458', '1']))
+        ->toEqual(['3686567' => '2459845', '44767458' => '312460']);
+    Http::assertSentCount(1);
+});
+
+test('the cards of many books come in one request, in the reader\'s edition and with their reach', function () {
+    enableBooksModule();
+    Http::fake(['api.hardcover.app/*' => Http::response(['data' => ['books' => [jsonFixture('hardcover/book')['data']['books_by_pk']]]])]);
+
+    $cards = hardcoverProvider()->summaries('book', ['2459845', 'not-a-book'], 'pl');
+
+    expect($cards)->toHaveCount(1)->toHaveKey('2459845')
+        ->and($cards['2459845']->title)->toBe('Hobbit, czyli tam i z powrotem')
+        ->and($cards['2459845']->votes)->toBe(6898);
+    Http::assertSentCount(1);
+    Http::assertSent(fn (Request $request) => data_get($request->data(), 'variables.ids') === [2459845]);
+});
+
 test('a Goodreads id leads to the book Hardcover maps it to, and an unmapped one to none', function () {
     enableBooksModule();
     Http::fake(['api.hardcover.app/*' => fn (Request $request) => Http::response(['data' => [
-        'book_mappings' => data_get($request->data(), 'variables.id') === '3686567' ? [['book_id' => 2459845]] : [],
+        'book_mappings' => in_array('3686567', (array) data_get($request->data(), 'variables.ids'), true) ? [['external_id' => '3686567', 'book_id' => 2459845]] : [],
     ]])]);
 
     expect(hardcoverProvider()->externalIdSources())->toBe([ExternalIdSource::Goodreads])

@@ -63,6 +63,10 @@ final readonly class LibraryStates
             $keys[$summary->key()] = [$summary->type, $summary->ref];
         }
 
+        if ($keys === []) {
+            return [];
+        }
+
         $items = $this->findItems($keys);
         $history = $this->history($user, collect($items)->keyBy(fn (MediaItem $item): int => $item->id));
         $marks = $this->marks->of($user, collect($items)->values());

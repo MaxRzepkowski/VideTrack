@@ -122,8 +122,8 @@ final readonly class TmdbTitles
             related: $this->parts->mapRelated($data),
             similar: $this->parts->mapSimilar($data, 'movie'),
             localizedTitles: $localized,
-            // Lets the Wikidata bridge resolve the source book by QID directly
-            // (see ResolveSourceBooks).
+            // Wikidata is asked about the title by this item without first
+            // having to find it (see TitleItems).
             wikidataId: Payload::string(Payload::map(data_get($data, 'external_ids')), 'wikidata_id'),
             adult: $this->payload->adult($data),
             collection: $this->parts->movieCollection($data),
@@ -237,8 +237,8 @@ final readonly class TmdbTitles
             related: $this->parts->mapRelated($data),
             similar: $this->parts->mapSimilar($data, 'show'),
             localizedTitles: $localized,
-            // Lets the Wikidata bridge resolve the source book by QID directly
-            // (see ResolveSourceBooks).
+            // Wikidata is asked about the title by this item without first
+            // having to find it (see TitleItems).
             wikidataId: Payload::string(Payload::map(data_get($data, 'external_ids')), 'wikidata_id'),
             adult: $this->payload->adult($data),
             // The most recent and the upcoming airing, mapped as plain

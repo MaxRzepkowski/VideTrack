@@ -22,3 +22,10 @@ test('anything of another length is not an ISBN', function () {
         ->and(Isbn::thirteen('97802611033441'))->toBeNull()
         ->and(Isbn::thirteen('X316769487'))->toBeNull();
 });
+
+test('an ISBN-13 of the English-language groups is told from one of another language', function () {
+    expect(Isbn::isEnglish('9780261103344'))->toBeTrue()
+        ->and(Isbn::isEnglish('9781250301697'))->toBeTrue()
+        ->and(Isbn::isEnglish('9798888888888'))->toBeTrue()
+        ->and(Isbn::isEnglish('9788376382550'))->toBeFalse();
+});

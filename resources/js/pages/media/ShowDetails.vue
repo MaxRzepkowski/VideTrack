@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import AdaptationSources from '@/components/media/AdaptationSources.vue';
 import AiringEpisodesSection from '@/components/media/AiringEpisodesSection.vue';
 import CastSection from '@/components/media/CastSection.vue';
 import EpisodeRatingsSection from '@/components/media/EpisodeRatingsSection.vue';
@@ -19,13 +18,12 @@ import VideosSection from '@/components/media/VideosSection.vue';
 import WatchNextPanel from '@/components/media/WatchNextPanel.vue';
 import WatchProvidersSection from '@/components/media/WatchProvidersSection.vue';
 import SectionHeading from '@/components/SectionHeading.vue';
-import { useDeferredUserStates } from '@/composables/useMediaActions';
 import { useReloadAfterWrites } from '@/composables/useReloadAfterWrites';
 import { alternativeTitlesLine, countryName, episodeCode, formatCalendarDate, formatRuntime, formatTotalRuntime } from '@/lib/format';
 import { showTypeLabel } from '@/lib/showTypes';
 import { titleStatusLabel } from '@/lib/titleStatus';
 import type { ShowExtra } from '@/types/extras';
-import type { Chip, DetailRow, MediaDetails, MediaSummary, SeasonRatings, TitleTie, UserStatesMap, WatchAvailability } from '@/types/media';
+import type { Chip, DetailRow, MediaDetails, MediaSummary, SeasonRatings, TitleTie, WatchAvailability } from '@/types/media';
 import { Deferred, Head } from '@inertiajs/vue3';
 import { trans, transChoice } from 'laravel-vue-i18n';
 import { computed } from 'vue';
@@ -37,13 +35,8 @@ const props = defineProps<{
     totalRuntime?: number | null;
     /** Deferred: absent until the follow-up request lands. */
     episodeRatings?: SeasonRatings[];
-    /** Deferred (Wikidata bridge): source books resolved via our book provider. */
-    sourceBooks?: MediaSummary[] | null;
     relatedTitles: TitleTie[];
-    /** Deferred (Wikidata bridge): source manga (for anime) via our manga provider. */
-    sourceManga?: MediaSummary[] | null;
-    /** Deferred with the sources: the viewer's state for their cards. */
-    deferredUserStates?: UserStatesMap;
+    otherMedia: TitleTie[];
     /** Deferred TVmaze broadcast times for the next/last aired cards, keyed by episode ref. */
     episodeTimes?: Record<string, string>;
     recentlyViewed?: MediaSummary[];
@@ -54,8 +47,6 @@ const props = defineProps<{
 
 // Marking the show or a season reaches every season and episode on the page.
 useReloadAfterWrites(['userStates']);
-
-useDeferredUserStates(() => props.deferredUserStates);
 
 const seasonCount = computed(() => props.show.extra.seasonCount ?? props.show.children.length);
 
@@ -180,10 +171,7 @@ function episodeCountOf(season: MediaSummary): string {
             </section>
 
             <RelatedTitles :titles="relatedTitles" />
-
-            <AdaptationSources data="sourceBooks" :sources="sourceBooks" :title="transChoice('media.based_on_the_book', sourceBooks?.length ?? 0)" />
-
-            <AdaptationSources data="sourceManga" :sources="sourceManga" :title="transChoice('media.based_on_the_manga', sourceManga?.length ?? 0)" />
+            <RelatedTitles :titles="otherMedia" :heading="trans('media.in_other_media')" />
 
             <Deferred data="episodeRatings">
                 <template #fallback>

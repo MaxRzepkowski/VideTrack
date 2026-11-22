@@ -518,16 +518,21 @@ return [
     |--------------------------------------------------------------------------
     |
     | Ratings a title needs at its provider, by type, to be shown beside
-    | another one merely for sharing its franchise: a universe also holds its
-    | shorts, specials and shop-floor tie-ins. The scale is the provider's
-    | own (a show gathers far fewer ratings than a film); a type not listed
-    | has no bar.
+    | another one merely for sharing its franchise or for being made of it or
+    | of its source: a universe also holds its shorts, specials and shop-floor
+    | tie-ins, a novel its role-playing supplements and essays, a manga its
+    | four-panel parodies. The scale is the provider's own (a show gathers far
+    | fewer ratings than a film, a game at IGDB fewer still); a type not
+    | listed (comics: Comic Vine counts no ratings) has no bar.
     |
     */
 
     'widely_known_votes' => [
         'movie' => 600,
         'show' => 200,
+        'game' => 30,
+        'book' => 50,
+        'manga' => 1000,
     ],
 
     /*

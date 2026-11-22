@@ -3,12 +3,13 @@
 namespace App\Catalog\Providers\Hardcover;
 
 use App\Catalog\Contracts\MetadataProvider;
+use App\Catalog\Contracts\SupportsBulkExternalIdLookup;
 use App\Catalog\Contracts\SupportsCollections;
 use App\Catalog\Contracts\SupportsDiscovery;
-use App\Catalog\Contracts\SupportsExternalIdLookup;
 use App\Catalog\Contracts\SupportsIsbnLookup;
 use App\Catalog\Contracts\SupportsPersonPage;
 use App\Catalog\Contracts\SupportsSimilarTitles;
+use App\Catalog\Contracts\SupportsSummaryLookup;
 use App\Catalog\Contracts\SupportsTrending;
 use App\Catalog\Data\CollectionDetails;
 use App\Catalog\Data\GenreOption;
@@ -33,7 +34,7 @@ use App\Support\Payload;
  * author's page in HardcoverAuthors, a series in HardcoverSeries, the reading
  * of both answer shapes in HardcoverPayload.
  */
-class HardcoverProvider implements MetadataProvider, SupportsCollections, SupportsDiscovery, SupportsExternalIdLookup, SupportsIsbnLookup, SupportsPersonPage, SupportsSimilarTitles, SupportsTrending
+class HardcoverProvider implements MetadataProvider, SupportsBulkExternalIdLookup, SupportsCollections, SupportsDiscovery, SupportsIsbnLookup, SupportsPersonPage, SupportsSimilarTitles, SupportsSummaryLookup, SupportsTrending
 {
     /** Pages of one genre offered: more than anyone browses. */
     private const MAX_GENRE_PAGES = 100;
@@ -58,6 +59,7 @@ class HardcoverProvider implements MetadataProvider, SupportsCollections, Suppor
         private readonly HardcoverAuthors $authors,
         private readonly HardcoverSeries $series,
         private readonly HardcoverBookPage $bookPage,
+        private readonly HardcoverLookups $lookups,
     ) {}
 
     public function code(): string
@@ -129,22 +131,17 @@ class HardcoverProvider implements MetadataProvider, SupportsCollections, Suppor
 
     public function refForExternalId(string $type, ExternalIdSource $source, string $id): ?string
     {
-        if ($type !== 'book' || $source !== ExternalIdSource::Goodreads) {
-            return null;
-        }
+        return $this->refsForExternalIds($type, $source, [$id])[$id] ?? null;
+    }
 
-        // A Goodreads id names one edition; every edition of a work maps to the same book.
-        $data = $this->client->query(
-            'query ByGoodreads($id: String!) {
-                book_mappings(where: {platform_id: {_eq: '.HardcoverPayload::GOODREADS_PLATFORM.'}, external_id: {_eq: $id}}, limit: 1) { book_id }
-            }',
-            ['id' => $id],
-            $this->payload->ttl('details'),
-        );
+    public function refsForExternalIds(string $type, ExternalIdSource $source, array $ids): array
+    {
+        return $type === 'book' && $source === ExternalIdSource::Goodreads && $ids !== [] ? $this->lookups->byGoodreads($ids) : [];
+    }
 
-        $bookId = Payload::positiveInt(Payload::list($data['book_mappings'] ?? null)[0] ?? [], 'book_id');
-
-        return $bookId === null ? null : (string) $bookId;
+    public function summaries(string $type, array $refs, string $locale): array
+    {
+        return $type === 'book' && $refs !== [] ? $this->lookups->summaries($refs, $locale) : [];
     }
 
     public function collection(string $ref, string $locale): CollectionDetails

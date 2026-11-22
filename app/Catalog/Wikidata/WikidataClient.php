@@ -23,6 +23,12 @@ class WikidataClient
 
     public function __construct(private readonly ProviderCacheContext $cacheContext) {}
 
+    /** Whether the id names a Wikidata item, and so is safe to paste into a query. */
+    public static function isItem(string $qid): bool
+    {
+        return preg_match('/^Q\d+$/', $qid) === 1;
+    }
+
     /**
      * Run a SPARQL query and return its bindings. The default timeout is the
      * render path's; a background job that can afford to wait says how long.

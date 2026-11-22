@@ -2,6 +2,7 @@
 
 namespace App\Catalog;
 
+use App\Catalog\Contracts\SupportsBulkExternalIdLookup;
 use App\Catalog\Contracts\SupportsExternalIdLookup;
 
 /**
@@ -58,6 +59,45 @@ final class ExternalRefLookup
         }
 
         return $this->memo[$key] = $provider->refForExternalId($type, $source, $id);
+    }
+
+    /**
+     * The provider's own refs for many foreign ids at once, where its
+     * provider can be asked about them together: id => ref, or null for an
+     * id it knows nothing about. Null instead when it can only be asked one
+     * id at a time, which refFor() does.
+     *
+     * @param  list<string>  $ids
+     * @return array<array-key, string|null>|null
+     */
+    public function refsFor(string $type, ExternalIdSource $source, array $ids): ?array
+    {
+        $provider = $this->lookupFor($type);
+
+        if (! $provider instanceof SupportsBulkExternalIdLookup) {
+            return null;
+        }
+
+        $refs = [];
+        $asked = [];
+
+        foreach ($ids as $id) {
+            $key = "{$type}:{$source->value}:{$id}";
+
+            if (array_key_exists($key, $this->memo)) {
+                $refs[$id] = $this->memo[$key];
+            } else {
+                $asked[] = $id;
+            }
+        }
+
+        $found = $asked === [] ? [] : $provider->refsForExternalIds($type, $source, $asked);
+
+        foreach ($asked as $id) {
+            $refs[$id] = $this->memo["{$type}:{$source->value}:{$id}"] = $found[$id] ?? null;
+        }
+
+        return $refs;
     }
 
     private function lookupFor(string $type): ?SupportsExternalIdLookup
