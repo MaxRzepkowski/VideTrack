@@ -18,6 +18,10 @@ final readonly class NotificationEntry implements JsonSerializable
     /**
      * @param  MediaEventType|null  $event  null for an event this version does not know (an old row)
      * @param  list<string>  $detail  the facts under the headline, each its own part: the views set them apart with the hairline rule
+     * @param  string  $subject  the title the event is about, as a line of a list names it
+     * @param  string  $label  the event spelled out ("Out today"); empty where the subject says it
+     * @param  list<string>  $facts  what the event adds, beside the value it moved
+     * @param  ValueChange|null  $change  the value it moved, old and new apart
      * @param  string  $href  the title's page, or the notification's own page when it lists several titles
      * @param  string|null  $imagePath  a provider image path
      * @param  string  $mediaTitle  the title the notification is about: its picture's alt text
@@ -26,10 +30,14 @@ final readonly class NotificationEntry implements JsonSerializable
     public function __construct(
         public string $id,
         public ?string $readAt,
-        public ?string $createdAt,
+        public string $createdAt,
         public ?MediaEventType $event,
         public string $title,
         public array $detail,
+        public string $subject,
+        public string $label,
+        public array $facts,
+        public ?ValueChange $change,
         public string $href,
         public ?string $imagePath,
         public string $mediaTitle,
@@ -40,10 +48,14 @@ final readonly class NotificationEntry implements JsonSerializable
      * @return array{
      *     id: string,
      *     readAt: string|null,
-     *     createdAt: string|null,
+     *     createdAt: string,
      *     event: value-of<MediaEventType>|null,
      *     title: string,
      *     detail: list<string>,
+     *     subject: string,
+     *     label: string,
+     *     facts: list<string>,
+     *     change: ValueChange|null,
      *     href: string,
      *     imagePath: string|null,
      *     mediaTitle: string,
@@ -59,6 +71,10 @@ final readonly class NotificationEntry implements JsonSerializable
             'event' => $this->event?->value,
             'title' => $this->title,
             'detail' => $this->detail,
+            'subject' => $this->subject,
+            'label' => $this->label,
+            'facts' => $this->facts,
+            'change' => $this->change,
             'href' => $this->href,
             'imagePath' => $this->imagePath,
             'mediaTitle' => $this->mediaTitle,

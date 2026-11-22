@@ -140,7 +140,6 @@ return [
     'today' => 'Dziś',
     'total_runtime' => 'Łączny czas trwania',
     'tracking' => 'Śledzenie',
-    'unread' => 'Nieprzeczytane',
     'upcoming_releases_from_the_titles_you' => 'Nadchodzące premiery śledzonych tytułów.',
     'username' => 'Nazwa użytkownika',
     'video' => 'Wideo',
@@ -158,4 +157,5 @@ return [
     'zoom_out' => 'Oddal',
     'zoom_reset' => 'Pokaż całość',
     'webhooks' => 'Webhooki',
+    'yesterday' => 'Wczoraj',
 ];

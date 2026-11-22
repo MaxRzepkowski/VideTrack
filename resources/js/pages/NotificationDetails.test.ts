@@ -1,21 +1,20 @@
 import NotificationDetails from '@/pages/NotificationDetails.vue';
-import { mediaSummary } from '@/test/factories';
+import { mediaSummary, notificationEntry } from '@/test/factories';
 import type { NotificationEntry } from '@/types/notifications';
 import { mount } from '@vue/test-utils';
 import { describe, expect, it } from 'vitest';
 
-const removed: NotificationEntry = {
-    id: 'n1',
-    readAt: null,
-    createdAt: '2026-10-10T12:00:00+00:00',
+const removed = notificationEntry({
     event: 'titles_removed',
     title: '2 titles from your library are no longer available at their data source',
     detail: ['Dune', 'Arrival'],
+    subject: '2 titles from your library are no longer available',
+    label: '',
+    facts: ['Dune', 'Arrival'],
     href: '/notifications.show/n1',
     imagePath: null,
     mediaTitle: 'Dune',
-    data: {},
-};
+});
 
 function details(notification: NotificationEntry, available: boolean[]) {
     return mount(NotificationDetails, {

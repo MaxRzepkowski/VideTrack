@@ -1,16 +1,14 @@
 <script setup lang="ts">
 import EmptyState from '@/components/EmptyState.vue';
-import MetaLine from '@/components/MetaLine.vue';
+import NotificationRow from '@/components/notifications/NotificationRow.vue';
 import PageHeading from '@/components/PageHeading.vue';
 import PageMasthead from '@/components/PageMasthead.vue';
 import PageToolbar from '@/components/PageToolbar.vue';
 import Pagination from '@/components/Pagination.vue';
 import { confirm } from '@/composables/useConfirm';
 import AppLayout from '@/layouts/AppLayout.vue';
-import { formatTimestampDate } from '@/lib/format';
 import { jsonFetch } from '@/lib/http';
-import { mediaImage } from '@/lib/images';
-import { clickTarget, markRead } from '@/lib/notifications';
+import { clickTarget, markRead, notificationDays } from '@/lib/notifications';
 import type { NotificationEntry } from '@/types/notifications';
 import type { PageInfo } from '@/types/pagination';
 import { Head, router } from '@inertiajs/vue3';
@@ -24,6 +22,7 @@ const props = defineProps<{
 }>();
 
 const hasUnread = computed(() => props.notifications.some((item) => item.readAt === null));
+const days = computed(() => notificationDays(props.notifications));
 
 function markAllRead(): void {
     void jsonFetch(route('ui.notifications.read-all'), { method: 'POST' })
@@ -106,52 +105,25 @@ function goto(page: number): void {
         </PageToolbar>
 
         <div class="max-w-content mx-auto w-full flex-1 px-4 pb-20 md:px-10">
-            <div v-if="notifications.length" class="border-line-subtle bg-surface divide-line-subtle divide-y rounded-2xl border">
-                <!-- The title link opens the notification and its ::after
-                     stretches over the whole row, so the row clicks as one;
-                     delete is a button of its own beside it, never inside. -->
-                <div
-                    v-for="item in notifications"
-                    :key="item.id"
-                    class="hover:bg-surface-raised relative flex w-full cursor-pointer items-start gap-4 px-4 py-4 text-left transition-colors duration-150 first:rounded-t-2xl last:rounded-b-2xl"
-                    :class="{ 'bg-surface-raised': !item.readAt }"
-                >
-                    <img
-                        v-if="mediaImage(item.imagePath, 'w342')"
-                        :src="mediaImage(item.imagePath, 'w342') ?? undefined"
-                        :alt="item.mediaTitle"
-                        width="48"
-                        height="72"
-                        loading="lazy"
-                        class="bg-surface-overlay aspect-poster w-12 shrink-0 rounded-md object-cover"
-                    />
-                    <span v-else class="bg-surface-overlay aspect-poster w-12 shrink-0 rounded-md" aria-hidden="true" />
-                    <span class="min-w-0 flex-1">
-                        <a
-                            :href="item.href"
-                            class="text-ink line-clamp-2 block cursor-pointer text-left text-base font-semibold after:absolute after:inset-0"
-                            @click="open(item, $event)"
-                            @auxclick="open(item, $event)"
-                        >
-                            <template v-if="!item.readAt"
-                                ><span class="sr-only">{{ trans('notifications.unread_title', { title: item.title }) }}</span
-                                ><span aria-hidden="true">{{ item.title }}</span></template
-                            ><template v-else>{{ item.title }}</template>
-                        </a>
-                        <MetaLine v-if="item.detail.length" :parts="item.detail" class="text-ink-muted text-sm" />
-                        <span class="text-ink-faint mt-0.5 block text-sm">{{ formatTimestampDate(item.createdAt) }}</span>
-                    </span>
-                    <span v-if="!item.readAt" class="bg-brand mt-2 size-2 shrink-0 rounded-full" aria-hidden="true" />
-                    <button
-                        v-tooltip="trans('notifications.delete_notification')"
-                        type="button"
-                        :aria-label="trans('notifications.delete_notification')"
-                        class="text-ink-faint hover:text-ink hover:bg-surface-raised relative z-10 mt-0.5 flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-lg transition-colors duration-150"
-                        @click="destroy(item)"
-                    >
-                        <X class="size-4" :stroke-width="2.2" />
-                    </button>
-                </div>
+            <!-- The bell's list at full length: the same rows by day, each with
+                 its own delete beside the link. -->
+            <div v-if="notifications.length" class="border-line bg-surface max-w-3xl overflow-hidden rounded-xl border pb-2">
+                <section v-for="day in days" :key="day.key" :aria-label="day.heading">
+                    <h2 class="text-ink-muted px-5 pt-4 pb-0.5 text-sm font-medium">{{ day.heading }}</h2>
+                    <NotificationRow v-for="item in day.items" :key="item.id" :item="item" @open="open(item, $event)">
+                        <template #actions>
+                            <button
+                                v-tooltip="trans('notifications.delete_notification')"
+                                type="button"
+                                :aria-label="trans('notifications.delete_notification')"
+                                class="text-ink-faint hover:text-ink hover:bg-surface-raised relative z-10 flex size-8 shrink-0 cursor-pointer items-center justify-center self-center rounded-lg transition-colors duration-150"
+                                @click="destroy(item)"
+                            >
+                                <X class="size-4" :stroke-width="2.2" />
+                            </button>
+                        </template>
+                    </NotificationRow>
+                </section>
             </div>
 
             <EmptyState v-else :message="trans('common.no_notifications_yet')" />
