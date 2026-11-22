@@ -30,7 +30,8 @@ const TINT_TOKENS: Record<RowTint, readonly [string, string, string]> = {
     rating: ['action-rating', 'action-rating', 'on-bright'],
     watchlist: ['action-watchlist', 'action-watchlist', 'on-bright'],
     favorite: ['action-favorite', 'action-favorite', 'on-bright'],
-    neutral: ['ink-secondary', 'ink-secondary', 'on-bright'],
+    // Grey has no hue to tell the glyph from the fill half-way through the fade, so the square darkens under a lighter glyph instead.
+    neutral: ['ink-secondary', 'line-strong', 'ink'],
 };
 
 /** A tint as the custom properties a menu row (`MenuRow`) reads from an ancestor. */

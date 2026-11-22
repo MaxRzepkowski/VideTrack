@@ -1,35 +1,24 @@
 <script setup lang="ts">
+import MenuRow from '@/components/MenuRow.vue';
+import { rowTint } from '@/lib/ui';
 import { router } from '@inertiajs/vue3';
 import { trans } from 'laravel-vue-i18n';
 import { RefreshCw } from '@lucide/vue';
-import { computed, ref } from 'vue';
+import { ref } from 'vue';
 import { toast } from 'vue-sonner';
 
-// On-demand "refresh this entity" — POSTs to a refresh endpoint that re-fetches
-// from the provider with the cache bypassed, then back() reloads the page with
-// fresh data. Errors-only toast, matching the rest of the app.
-const props = withDefaults(
-    defineProps<{
-        url: string;
-        data?: Record<string, string>;
-        label?: string;
-        // 'block' fills its container (modal footer); 'inline' matches the
-        // compact header action buttons (collection header).
-        variant?: 'block' | 'inline';
-    }>(),
-    { variant: 'block' },
-);
+// On-demand "refresh this entity", a row of the details dialog: POSTs to a
+// refresh endpoint that re-fetches from the provider with the cache bypassed,
+// then back() reloads the page with fresh data. Errors-only toast, matching
+// the rest of the app.
+const props = defineProps<{
+    url: string;
+    data?: Record<string, string>;
+}>();
 
 const emit = defineEmits<{ success: [] }>();
 
 const loading = ref(false);
-const text = computed(() => props.label ?? trans('common.refresh_from_provider'));
-
-const classes = computed(() =>
-    props.variant === 'inline'
-        ? 'border-line bg-surface text-ink hover:border-line-strong rounded-xl px-4 py-2.5'
-        : 'border-line hover:border-brand hover:text-ink text-ink-secondary bg-surface-raised w-full rounded-lg px-4 py-2.5',
-);
 
 function refresh(): void {
     if (loading.value) {
@@ -48,14 +37,15 @@ function refresh(): void {
 </script>
 
 <template>
-    <button
-        type="button"
-        class="inline-flex items-center justify-center gap-2 border text-sm font-semibold transition-colors duration-150 disabled:opacity-50"
-        :class="classes"
+    <MenuRow
+        inset="dialog"
+        :icon="RefreshCw"
+        :label="trans('common.refresh_from_provider')"
+        :description="loading ? trans('common.refreshing') : trans('media.fetch_the_latest_data_from_the')"
+        :style="rowTint('neutral')"
         :disabled="loading"
+        :aria-busy="loading"
+        class="disabled:cursor-default"
         @click="refresh"
-    >
-        <RefreshCw class="size-4" :class="{ 'animate-spin': loading }" />
-        <span>{{ loading ? trans('common.refreshing') : text }}</span>
-    </button>
+    />
 </template>
