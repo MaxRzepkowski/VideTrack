@@ -3,6 +3,7 @@
 namespace App\Notifications\Copy;
 
 use App\Catalog\DatePrecision;
+use App\Notifications\Data\ValueChange;
 use App\Notifications\MediaEventPayload;
 use App\Support\Payload;
 use Illuminate\Support\Carbon;
@@ -10,8 +11,8 @@ use Illuminate\Support\Carbon;
 /**
  * The pieces of a notification's words every kind of event writes alike: a
  * date as far as it is known, the first few of a list of titles, the facts as
- * one line of plain text, the hour an episode airs, and what a game's DLC or
- * remake is and whose.
+ * one line of plain text, a moved value as "old → new", the hour an episode
+ * airs, and what a game's DLC or remake is and whose.
  */
 final readonly class CopyFormat
 {
@@ -20,6 +21,35 @@ final readonly class CopyFormat
 
     /** A channel carries plain text, so the facts a screen sets apart with a hairline are joined by a dash. */
     private const PLAIN_SEPARATOR = ' – ';
+
+    /**
+     * A moved value as a fact of plain text: "old → new", or the new one alone
+     * when there was none before. An arrow, not a separator: a value moved is
+     * one fact.
+     *
+     * @return list<string>
+     */
+    public function change(?ValueChange $change): array
+    {
+        if ($change === null) {
+            return [];
+        }
+
+        return [$change->from === null ? $change->to : "{$change->from} → {$change->to}"];
+    }
+
+    /**
+     * The event's date as its one fact, as far as it is known; none when it
+     * has no date.
+     *
+     * @return list<string>
+     */
+    public function dateFact(MediaEventPayload $event, string $locale): array
+    {
+        $date = $this->date($event->date, $event->datePrecision(), $locale);
+
+        return $date === null ? [] : [$date];
+    }
 
     /**
      * The facts as one line of plain text; null when there are none.
@@ -88,9 +118,7 @@ final readonly class CopyFormat
             return $this->titlesPreview($event, $locale);
         }
 
-        $date = $this->date($event->date, $event->datePrecision(), $locale);
-
-        return $date !== null ? [$event->title(), $date] : [$event->title()];
+        return [$event->title(), ...$this->dateFact($event, $locale)];
     }
 
     /**

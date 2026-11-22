@@ -6,6 +6,7 @@ use App\Catalog\Data\RelatedRelease;
 use App\Catalog\MediaItemSummaries;
 use App\Models\MediaItem;
 use App\Notifications\Copy\CopyFormat;
+use App\Notifications\Data\EventLine;
 use App\Notifications\MediaEventPayload;
 use App\Notifications\MediaEventType;
 
@@ -32,13 +33,11 @@ final readonly class RelatedAnnounced implements EventKind
     /** What it is and whose, then when. */
     public function detail(MediaEventPayload $event, string $locale): array
     {
-        $date = $this->format->date($event->date, $event->datePrecision(), $locale);
-
-        return [...$this->format->relatedFacts($event, $locale), ...($date === null ? [] : [$date])];
+        return [...$this->format->relatedFacts($event, $locale), ...$this->format->dateFact($event, $locale)];
     }
 
-    public function digest(MediaEventPayload $event, string $locale, string $timezone): array
+    public function line(MediaEventPayload $event, string $locale): EventLine
     {
-        return ['subject' => $event->title(), 'label' => __('notifications.announced', [], $locale), 'meta' => $this->format->plain($this->detail($event, $locale))];
+        return new EventLine(subject: $event->title(), label: __('notifications.announced', [], $locale), facts: $this->detail($event, $locale));
     }
 }

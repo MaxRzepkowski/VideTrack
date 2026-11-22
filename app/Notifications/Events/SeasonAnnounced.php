@@ -4,6 +4,7 @@ namespace App\Notifications\Events;
 
 use App\Catalog\MediaItemSummaries;
 use App\Models\MediaItem;
+use App\Notifications\Data\EventLine;
 use App\Notifications\MediaEventPayload;
 use App\Notifications\MediaEventType;
 
@@ -30,12 +31,8 @@ final readonly class SeasonAnnounced implements EventKind
         return [__('common.season_number', ['number' => (string) $event->season], $locale)];
     }
 
-    public function digest(MediaEventPayload $event, string $locale, string $timezone): array
+    public function line(MediaEventPayload $event, string $locale): EventLine
     {
-        return [
-            'subject' => $event->title(),
-            'label' => __('notifications.season_number_announced', ['number' => (string) $event->season], $locale),
-            'meta' => null,
-        ];
+        return new EventLine(subject: $event->title(), label: __('notifications.season_number_announced', ['number' => (string) $event->season], $locale));
     }
 }
