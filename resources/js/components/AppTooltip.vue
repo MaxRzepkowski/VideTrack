@@ -96,7 +96,7 @@ onBeforeUnmount(() => {
                 ref="bubble"
                 role="tooltip"
                 class="border-line bg-surface-base text-ink pointer-events-none fixed z-[100] rounded-md border px-2.5 py-1.5 text-sm shadow-lg"
-                :class="typeof tooltip.content === 'string' ? 'max-w-64' : 'max-w-72'"
+                :class="typeof tooltip.content === 'string' ? 'max-w-64 whitespace-pre-line' : 'max-w-72'"
                 :style="{ left: `${left}px`, top: `${top}px` }"
             >
                 <template v-if="typeof tooltip.content === 'string'">{{ tooltip.content }}</template>

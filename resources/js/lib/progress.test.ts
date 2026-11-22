@@ -4,6 +4,7 @@ import {
     counterView,
     episodeProgressRows,
     episodeShare,
+    finishedOn,
     formatProgress,
     formatUnitAmount,
     hasProgress,
@@ -18,7 +19,7 @@ import {
     progressToInput,
     statCounts,
 } from '@/lib/progress';
-import { mediaSummary, useMediaTypes } from '@/test/factories';
+import { mediaSummary, useMediaTypes, userState } from '@/test/factories';
 import type { ProgressEntry } from '@/types/media';
 import { beforeEach, describe, expect, it } from 'vitest';
 
@@ -212,5 +213,25 @@ describe('episodeShare', () => {
         expect(episodeShare(13, 19)).toBe(68);
         expect(episodeShare(12, 10)).toBe(100);
         expect(episodeShare(0, 0)).toBe(0);
+    });
+});
+
+describe('finishedOn', () => {
+    const at = '2026-03-12T20:00:00+00:00';
+
+    it("says when a title was finished, in its type's word, and how often once it is more than one", () => {
+        expect(finishedOn(game(), userState({ watched: true, watchedAt: at, plays: 1 }))).toBe('Completed March 12, 2026');
+        expect(finishedOn(game(), userState({ watched: true, watchedAt: at, plays: 3 }))).toBe('Completed March 12, 2026 – 3×');
+        expect(finishedOn(book(), userState({ watched: true, watchedAt: at, plays: 1 }))).toBe('Read March 12, 2026');
+    });
+
+    it('counts a show by its finished runs, not by the episodes in them', () => {
+        expect(finishedOn(show(), userState({ watched: true, watchedAt: at, plays: 10, completedCycles: 1 }))).toBe('Watched March 12, 2026');
+        expect(finishedOn(show(), userState({ watched: true, watchedAt: at, plays: 20, completedCycles: 2 }))).toBe('Watched March 12, 2026 – 2×');
+    });
+
+    it('says nothing of a title not finished, or finished on no known day', () => {
+        expect(finishedOn(show(), userState({ watched: false, watchedAt: at }))).toBeNull();
+        expect(finishedOn(show(), userState({ watched: true, watchedAt: null }))).toBeNull();
     });
 });

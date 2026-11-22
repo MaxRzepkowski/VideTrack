@@ -5,7 +5,7 @@ import { useMediaActions } from '@/composables/useMediaActions';
 import { useMediaModals } from '@/composables/useMediaModals';
 import { formatDateTime } from '@/lib/format';
 import { backlogOf } from '@/lib/lists';
-import { episodeShare, formatProgress, hasProgress, isPositionCounter, playActionLabels } from '@/lib/progress';
+import { episodeShare, formatProgress, hasProgress, isPositionCounter, playActionLabels, timesFinished } from '@/lib/progress';
 import { shownStatus, shownStatusVisual, STATUS_VISUALS } from '@/lib/status';
 import type { SharedData } from '@/types';
 import type { MediaSummary } from '@/types/media';
@@ -121,15 +121,16 @@ const hoverLabel = computed(() => (status.value.plain ? null : trans('media.chan
 // dropped, and pairs the count with that date when completions also exist.
 const statusValue = computed<(string | null)[]>(() => {
     const playable = isPlayable(props.media);
+    const times = timesFinished(props.media, state.value);
 
-    // A container counts finished cycles instead of plays: "2×" is the fact a
-    // show watched twice carries, and the dates of each run live in the modal.
+    // A container counts finished runs: "2×" is the fact a show watched twice
+    // carries, and the dates of each run live in the modal.
     const count = playable
-        ? state.value.plays > 0 && (state.value.plays > 1 || state.value.status !== null)
-            ? transChoice('media.count_play', state.value.plays, { count: String(state.value.plays) })
+        ? times > 0 && (times > 1 || state.value.status !== null)
+            ? transChoice('media.count_play', times, { count: String(times) })
             : null
-        : state.value.completedCycles > 1
-          ? trans('media.count', { count: String(state.value.completedCycles) })
+        : times > 1
+          ? trans('media.count', { count: String(times) })
           : null;
 
     // A live game or reading counter is the right-hand value of the status

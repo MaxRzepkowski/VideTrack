@@ -63,4 +63,14 @@ describe('MediaActionBar', () => {
     it('leaves an untouched game uncoloured', () => {
         expect(statusCell({})?.attributes('style')).toBeUndefined();
     });
+
+    it('says when a finished game was finished, above what a click does', () => {
+        expect(statusCell({ watched: true, watchedAt: '2026-03-12T20:00:00+00:00', plays: 2 })?.attributes('aria-label')).toBe(
+            'Completed March 12, 2026 – 2×\nChange status',
+        );
+        // Started again: the status speaks, not the last finish.
+        expect(statusCell({ watched: true, watchedAt: '2026-03-12T20:00:00+00:00', plays: 2, status: 'in_progress' })?.attributes('aria-label')).toBe(
+            'Change status',
+        );
+    });
 });
