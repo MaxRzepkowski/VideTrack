@@ -4,6 +4,7 @@ use App\Http\Controllers\AboutController;
 use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\CountdownController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\FollowingController;
 use App\Http\Controllers\Lists\ListController;
 use App\Http\Controllers\Media\ArchivedTitlesController;
 use App\Http\Controllers\Media\CollectionController;
@@ -25,7 +26,6 @@ use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\StatisticsController;
 use App\Http\Controllers\SuggestionsController;
 use App\Http\Controllers\Users\UserFavoritesController;
-use App\Http\Controllers\Users\UserFollowingController;
 use App\Http\Controllers\Users\UserHistoryController;
 use App\Http\Controllers\Users\UserListsController;
 use App\Http\Controllers\Users\UserProfileController;
@@ -97,8 +97,7 @@ Route::middleware(['auth', 'throttle:web'])->group(function () {
             ->defaults('kind', 'network')->whereAlphaNumeric('provider')->whereNumber('ref')->name('network.refresh');
     });
 
-    // The bell's shortcut; the page itself lives under the profile.
-    Route::get('following', [UserFollowingController::class, 'mine'])->name('follows.index');
+    Route::get('following', FollowingController::class)->name('follows.index');
     Route::get('notifications', [NotificationsController::class, 'index'])->name('notifications.index');
     Route::get('notifications/feed', [NotificationsController::class, 'feed'])->name('notifications.feed');
     Route::delete('notifications/all', [NotificationsController::class, 'destroyAll'])->name('notifications.destroy-all');
@@ -119,7 +118,6 @@ Route::middleware(['auth', 'throttle:web'])->group(function () {
     Route::get('user/{user:username}/ratings', UserRatingsController::class)->name('users.ratings');
     Route::get('user/{user:username}/favorites', UserFavoritesController::class)->name('users.favorites');
     Route::get('user/{user:username}/progress', UserProgressController::class)->name('users.progress');
-    Route::get('user/{user:username}/following', UserFollowingController::class)->name('users.following');
     Route::get('user/{user:username}/lists', UserListsController::class)->name('users.lists');
     // A list lives under its owner: another user's list here is not there at
     // all. A collection has no owner and its own address (`collections.show`).

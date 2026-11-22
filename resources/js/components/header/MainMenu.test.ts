@@ -43,7 +43,7 @@ describe('MainMenu', () => {
 
         const rows = wrapper.findAll('li li a');
 
-        expect(rows.map((row) => row.attributes('href'))).toEqual(['/calendar', '/countdowns']);
+        expect(rows.map((row) => row.attributes('href'))).toEqual(['/calendar', '/countdowns', '/follows.index']);
         expect(rows[0]!.text()).toContain('Episodes and releases day by day');
 
         wrapper.unmount();
@@ -64,7 +64,7 @@ describe('MainMenu', () => {
         await flushPromises();
 
         expect(visit).not.toHaveBeenCalled();
-        expect(wrapper.findAll('li li a')).toHaveLength(2);
+        expect(wrapper.findAll('li li a')).toHaveLength(3);
 
         visit.mockRestore();
         wrapper.unmount();

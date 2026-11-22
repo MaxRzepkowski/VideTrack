@@ -105,7 +105,7 @@ async function remove(entry: ActivityEntry): Promise<void> {
         <h1 class="sr-only">{{ config.heading() }}</h1>
 
         <PageMasthead class="pb-4">
-            <UserHeader :profile="profile" :is-owner="isOwner" :active="panel" identity="link" />
+            <UserHeader :profile="profile" :active="panel" identity="link" />
         </PageMasthead>
 
         <!-- The panel brings its own band and results container. -->

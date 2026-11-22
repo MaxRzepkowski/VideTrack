@@ -24,7 +24,6 @@ import { computed } from 'vue';
 
 const props = defineProps<{
     profile: ProfileData;
-    isOwner: boolean;
     entries: ProgressEntry[];
     types: TypeCount[];
     filters: { type: string | null; status: MediaUserStatus | null; q: string | null; sort: ProgressSort; dir: SortDirection };
@@ -115,7 +114,7 @@ function nextEpisodeLabel(entry: ProgressEntry): string[] {
         <h1 class="sr-only">{{ trans('common.in_progress_2') }}</h1>
 
         <PageMasthead class="pb-4">
-            <UserHeader :profile="profile" :is-owner="isOwner" active="progress" identity="link" />
+            <UserHeader :profile="profile" active="progress" identity="link" />
         </PageMasthead>
 
         <PageToolbar

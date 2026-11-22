@@ -184,10 +184,10 @@ test('a followed collection shows up on the followed page and can be dropped fro
     followCollection($user, $list, FollowMode::Follow);
 
     $this->actingAs($user)
-        ->get(route('users.following', ['user' => $user->username]))
+        ->get(route('follows.index'))
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            ->component('users/UserFollowing')
+            ->component('Following')
             // The saga itself, plus the one part still to be released.
             ->has('entries', 2)
             ->where('entries.1.kind', 'collection')
@@ -205,7 +205,7 @@ test('a followed collection shows up on the followed page and can be dropped fro
         ->putJson(route('ui.collections.follow.update', ['provider' => 'tmdb', 'ref' => '2344']), ['mode' => null]);
 
     $this->actingAs($user)
-        ->get(route('users.following', ['user' => $user->username]))
+        ->get(route('follows.index'))
         ->assertInertia(fn (Assert $page) => $page->has('entries', 0));
 });
 
@@ -318,7 +318,7 @@ test('a muted collection stays listed as muted', function () {
     followCollection($user, $list, FollowMode::Mute);
 
     $this->actingAs($user)
-        ->get(route('users.following', ['user' => $user->username]))
+        ->get(route('follows.index'))
         ->assertInertia(fn (Assert $page) => $page
             ->has('entries', 1)
             ->where('entries.0.kind', 'muted')

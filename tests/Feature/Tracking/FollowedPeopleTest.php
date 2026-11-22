@@ -756,9 +756,9 @@ test('the following page serves one newest-first grid with kinds and a type filt
     Follow::factory()->create(['user_id' => $user->id, 'media_item_id' => $mutedTitle->id, 'mode' => FollowMode::Mute]);
 
     $this->actingAs($user)
-        ->get(route('users.following', ['user' => $user->username]))
+        ->get(route('follows.index'))
         ->assertInertia(fn ($page) => $page
-            ->component('users/UserFollowing')
+            ->component('Following')
             ->has('entries', 4)
             ->where('pagination.total', 4)
             // Newest bell first.
@@ -771,7 +771,7 @@ test('the following page serves one newest-first grid with kinds and a type filt
 
     // The type filter narrows server-side; counts keep every type visible.
     $this->actingAs($user)
-        ->get(route('users.following', ['user' => $user->username, 'type' => 'person']))
+        ->get(route('follows.index', ['type' => 'person']))
         ->assertInertia(fn ($page) => $page
             ->has('entries', 1)
             ->where('entries.0.kind', 'person')
@@ -780,7 +780,7 @@ test('the following page serves one newest-first grid with kinds and a type filt
 
     // The kind filter isolates e.g. the muted set ("what did I silence?").
     $this->actingAs($user)
-        ->get(route('users.following', ['user' => $user->username, 'kind' => 'muted']))
+        ->get(route('follows.index', ['kind' => 'muted']))
         ->assertInertia(fn ($page) => $page
             ->has('entries', 1)
             ->where('entries.0.kind', 'muted')
@@ -788,13 +788,14 @@ test('the following page serves one newest-first grid with kinds and a type filt
             ->has('kinds', 4));
 });
 
-test("another user's bell list is not found, an admin's view included", function () {
+test("the bell list is the viewer's own: nobody else's bells show on it, an admin's included", function () {
     $owner = User::factory()->create();
+    Follow::factory()->create(['user_id' => $owner->id, 'media_item_id' => MediaItem::factory()->show()->create()->id, 'mode' => FollowMode::Follow]);
 
     foreach ([User::factory()->create(), User::factory()->admin()->create()] as $viewer) {
         $this->actingAs($viewer)
-            ->get(route('users.following', ['user' => $owner->username]))
-            ->assertNotFound();
+            ->get(route('follows.index'))
+            ->assertInertia(fn ($page) => $page->component('Following')->has('entries', 0));
     }
 });
 

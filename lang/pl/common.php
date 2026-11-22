@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'following_subtitle' => 'Tytuły, osoby, firmy i kolekcje, których premiery śledzisz.',
     'about' => 'O aplikacji',
     'date_quarter' => ':quarter. kwartał :year',
     'all' => 'Wszystko',

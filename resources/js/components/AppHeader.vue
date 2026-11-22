@@ -8,6 +8,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '@/compon
 import UserMenuContent from '@/components/UserMenuContent.vue';
 import { useNotificationFeed } from '@/composables/useNotificationFeed';
 import { getInitials } from '@/lib/format';
+import { FOLLOWING, navHref } from '@/lib/navigation';
 import { jsonFetch } from '@/lib/http';
 import { clickTarget, markRead } from '@/lib/notifications';
 import { signedInUser } from '@/lib/pageContext';
@@ -41,7 +42,7 @@ const bellLabel = computed(() =>
         ? trans('common.notifications_unread', { count: String(notifications.value.unread) })
         : trans('common.notifications'),
 );
-const followingHref = computed(() => route('users.following', { user: viewer.value.username }));
+const followingHref = navHref(FOLLOWING);
 
 const BELL =
     'bg-surface hover:bg-surface-raised data-[state=open]:bg-surface-overlay relative size-10 cursor-pointer items-center justify-center rounded-[10px] transition-colors duration-150 flex';

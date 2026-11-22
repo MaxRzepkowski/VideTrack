@@ -125,6 +125,15 @@ export const COUNTDOWNS: NavEntry = {
     keywords: () => trans('palette.keywords_countdowns'),
 };
 
+export const FOLLOWING: NavEntry = {
+    id: 'following',
+    route: 'follows.index',
+    label: () => trans('common.following'),
+    icon: Bell,
+    description: () => trans('app.nav_following_description'),
+    keywords: () => trans('palette.keywords_following'),
+};
+
 export const STATISTICS: NavEntry = {
     id: 'statistics',
     route: 'statistics',
@@ -176,10 +185,10 @@ export const OTHER_PLACES: NavEntry[] = [
     },
 ];
 
-export type UserPanel = 'show' | 'history' | 'ratings' | 'favorites' | 'progress' | 'lists' | 'following';
+export type UserPanel = 'show' | 'history' | 'ratings' | 'favorites' | 'progress' | 'lists';
 
 /** The panels of a user, in tab order; the id is the route name without `users.`. */
-export const USER_PANELS: (NavEntry & { id: UserPanel; ownerOnly?: boolean })[] = [
+export const USER_PANELS: (NavEntry & { id: UserPanel })[] = [
     {
         id: 'show',
         route: 'users.show',
@@ -227,16 +236,6 @@ export const USER_PANELS: (NavEntry & { id: UserPanel; ownerOnly?: boolean })[] 
         icon: CirclePlay,
         description: () => trans('app.nav_in_progress_description'),
         keywords: () => trans('palette.keywords_in_progress'),
-    },
-    {
-        // The bell of "Follow releases": what you follow is personal, so the
-        // tab shows on your own profile only.
-        id: 'following',
-        route: 'users.following',
-        label: () => trans('common.following'),
-        icon: Bell,
-        keywords: () => trans('palette.keywords_following'),
-        ownerOnly: true,
     },
 ];
 
@@ -411,7 +410,7 @@ export const NAV_GROUPS: NonEmpty<NavGroup> = [
         id: 'releases',
         label: () => trans('app.nav_releases'),
         icon: CalendarClock,
-        items: [place(CALENDAR), place(COUNTDOWNS)],
+        items: [place(CALENDAR), place(COUNTDOWNS), place(FOLLOWING)],
     },
 ];
 

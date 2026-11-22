@@ -20,7 +20,6 @@ return [
     'mute' => 'Wycisz',
     'name_favorites' => ':name: ulubione',
     'name_history' => ':name: historia',
-    'name_following' => ':name: śledzone',
     'name_in_progress' => ':name: w trakcie',
     'name_ratings' => ':name: oceny',
     'nothing_followed_yet_use_the_bell' => 'Niczego jeszcze nie śledzisz. Użyj dzwonka na stronie tytułu lub osoby.',

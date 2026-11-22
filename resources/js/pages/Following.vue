@@ -4,31 +4,30 @@ import CollectionCard from '@/components/media/CollectionCard.vue';
 import CreatorCard from '@/components/media/CreatorCard.vue';
 import MediaCard from '@/components/media/MediaCard.vue';
 import MediaGrid from '@/components/media/MediaGrid.vue';
+import PageHeading from '@/components/PageHeading.vue';
 import PageMasthead from '@/components/PageMasthead.vue';
 import PageToolbar from '@/components/PageToolbar.vue';
 import Pagination from '@/components/Pagination.vue';
 import TypeFilter from '@/components/TypeFilter.vue';
-import UserHeader from '@/components/users/UserHeader.vue';
 import { useCreatorActions } from '@/composables/useCreatorActions';
 import { useMediaActions } from '@/composables/useMediaActions';
 import { useReloadAfterWrites } from '@/composables/useReloadAfterWrites';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { creatorOf, type CreatorStatesMap, isCollection } from '@/lib/creators';
 import { kindPlural, MEDIA_TYPE_META } from '@/lib/mediaTypes';
+import { FOLLOWING, groupOf } from '@/lib/navigation';
 import { SELECT_CLASS } from '@/lib/ui';
 import type { FollowEntry, TypeCount } from '@/types/generated';
-import type { ProfileData, UserStatesMap } from '@/types/media';
+import type { UserStatesMap } from '@/types/media';
 import type { PageInfo } from '@/types/pagination';
 import { Head, router } from '@inertiajs/vue3';
 import { trans, transChoice } from 'laravel-vue-i18n';
-import { X } from '@lucide/vue';
+import { Bell, X } from '@lucide/vue';
 import { computed } from 'vue';
 
 // MediaCard and the creator cards read userStates and creatorStates from the
 // page props themselves — declaring them here is what puts them there.
 const props = defineProps<{
-    profile: ProfileData;
-    isOwner: boolean;
     entries: FollowEntry[];
     types: TypeCount[];
     activeType: string | null;
@@ -67,7 +66,7 @@ function visit(params: { type?: string | null; kind?: string | null; page?: numb
     const page = params.page ?? 1;
 
     router.get(
-        route('users.following', { user: props.profile.username }),
+        route('follows.index'),
         { ...(type ? { type } : {}), ...(kind ? { kind } : {}), ...(page > 1 ? { page } : {}) },
         { preserveScroll: false, preserveState: false },
     );
@@ -128,15 +127,14 @@ function act(entry: FollowEntry): void {
 
 <template>
     <AppLayout>
-        <Head :title="trans('users.name_following', { name: profile.name })" />
+        <Head :title="trans('common.following')" />
 
-        <!-- The lit tab is this page's title, so no line repeats it in words.
-             What it cannot carry — a heading for a screen reader — stays, out
-             of sight; the count in the strip below says the rest. -->
-        <h1 class="sr-only">{{ trans('common.following') }}</h1>
-
-        <PageMasthead class="pb-4">
-            <UserHeader :profile="profile" :is-owner="isOwner" active="following" identity="link" />
+        <PageMasthead>
+            <div class="max-w-content mx-auto w-full px-4 pt-8 pb-6 md:px-10">
+                <PageHeading :group="groupOf(FOLLOWING)" :title="trans('common.following')" :subtitle="trans('common.following_subtitle')">
+                    <template #icon><Bell class="size-6" /></template>
+                </PageHeading>
+            </div>
         </PageMasthead>
 
         <PageToolbar

@@ -8,7 +8,7 @@ describe('allCommands', () => {
         const ids = allCommands().map((command) => command.id);
 
         expect(ids[0]).toBe('nav.dashboard');
-        expect(ids).toContain('nav.profile.following');
+        expect(ids).toContain('nav.following');
         expect(ids).toContain('nav.settings.integrations');
         expect(ids.at(-1)).toBe('action.logout');
         expect(new Set(ids).size).toBe(ids.length);

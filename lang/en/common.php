@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'following_subtitle' => 'Titles, people, companies and collections whose releases you follow.',
     'about' => 'About',
     'date_quarter' => 'Q:quarter :year',
     'all' => 'All',

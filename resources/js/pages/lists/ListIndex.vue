@@ -168,7 +168,7 @@ async function create(): Promise<void> {
         <h1 v-if="profile" class="sr-only">{{ trans('common.lists') }}</h1>
 
         <PageMasthead :class="profile && 'pb-4'">
-            <UserHeader v-if="profile" :profile="profile" :is-owner="isOwner" active="lists" identity="link" />
+            <UserHeader v-if="profile" :profile="profile" active="lists" identity="link" />
 
             <div v-else class="max-w-content mx-auto w-full px-4 pt-8 pb-6 md:px-10">
                 <PageHeading :group="groupOf(userPanel('lists'))" :title="heading" :subtitle="trans('lists.create_and_organize_lists_for_the')">
