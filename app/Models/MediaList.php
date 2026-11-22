@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\LikePattern;
 use Database\Factories\MediaListFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -69,6 +70,21 @@ class MediaList extends Model
     public function scopeCollections(Builder $query): Builder
     {
         return $query->whereNull('user_id')->where('system_key', 'like', self::COLLECTION_PREFIX.'%');
+    }
+
+    /**
+     * Lists a typed term names by the title they show: their own, or the
+     * Backlog's, which has none and shows a translated name instead
+     * ({@see displayTitle()}).
+     *
+     * @param  Builder<MediaList>  $query
+     * @return Builder<MediaList>
+     */
+    public function scopeNamed(Builder $query, string $term): Builder
+    {
+        return $query->where(fn (Builder $named) => $named
+            ->whereRaw('title like ? escape ?', [LikePattern::containing($term), LikePattern::ESCAPE])
+            ->when(mb_stripos(__('common.backlog'), $term) !== false, fn (Builder $backlog) => $backlog->orWhere('system_key', self::SYSTEM_WATCHLIST)));
     }
 
     /**
