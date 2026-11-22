@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Support\LangCheck;
+use App\Support\LangFiles;
 use Illuminate\Console\Command;
 
 final class LangCheckCommand extends Command
@@ -13,7 +14,7 @@ final class LangCheckCommand extends Command
 
     public function handle(): int
     {
-        $problems = (new LangCheck(lang_path(), [app_path(), resource_path('js'), resource_path('views')]))->problems();
+        $problems = (new LangCheck(new LangFiles(lang_path()), [app_path(), resource_path('js'), resource_path('views')]))->problems();
 
         foreach ($problems as $problem) {
             $this->line($problem);
