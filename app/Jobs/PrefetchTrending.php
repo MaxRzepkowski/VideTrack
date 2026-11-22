@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Accounts\LocalesInUse;
 use App\Catalog\Contracts\SupportsTrending;
 use App\Catalog\ProviderRegistry;
 use App\Jobs\Concerns\RunsAsTask;
@@ -15,7 +16,7 @@ use Illuminate\Foundation\Queue\Queueable;
 /**
  * Warms the provider cache behind the /discover trending sections
  * so first paint after cache expiry never waits on the
- * provider. One fetch per supported locale.
+ * provider. One fetch per language somebody reads in.
  */
 class PrefetchTrending implements ShouldQueue
 {
@@ -33,7 +34,7 @@ class PrefetchTrending implements ShouldQueue
         self::dispatch(TaskRun::queueTask(TaskName::PrefetchTrending->value));
     }
 
-    public function handle(ProviderRegistry $providers): void
+    public function handle(ProviderRegistry $providers, LocalesInUse $localesInUse): void
     {
         $this->taskRun->markStarted();
 
@@ -46,8 +47,8 @@ class PrefetchTrending implements ShouldQueue
             return;
         }
 
-        /** @var list<string> $locales */
-        $locales = (array) config('tracker.supported_locales');
+        // The languages somebody reads in; a page in another fetches its shelf when asked.
+        $locales = $localesInUse->all();
         $fetched = 0;
         $errors = [];
 
