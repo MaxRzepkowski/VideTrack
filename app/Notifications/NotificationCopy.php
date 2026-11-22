@@ -12,6 +12,7 @@ use App\Notifications\Events\EventKinds;
 use App\Support\Payload;
 use App\Support\PublicUrl;
 use Illuminate\Notifications\DatabaseNotification;
+use LogicException;
 
 /**
  * What a media event says, in the recipient's language, and where it leads:
@@ -39,14 +40,19 @@ final readonly class NotificationCopy
     public function entry(DatabaseNotification $notification, string $locale): NotificationEntry
     {
         $event = MediaEventPayload::fromStored($notification->data);
+        $line = $this->line($event, $locale);
 
         return new NotificationEntry(
             id: $notification->id,
             readAt: $notification->read_at?->toIso8601String(),
-            createdAt: $notification->created_at?->toIso8601String(),
+            createdAt: ($notification->created_at ?? throw new LogicException('A stored notification has the time it came.'))->toIso8601String(),
             event: $event->type,
             title: $this->title($event, $locale),
             detail: $this->detail($event, $locale),
+            subject: $line->subject,
+            label: $line->label,
+            facts: $line->facts,
+            change: $line->change,
             href: $this->href($notification->id, $event),
             imagePath: $this->imagePath($event),
             mediaTitle: $event->title(),

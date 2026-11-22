@@ -112,6 +112,10 @@
     --color-nav-releases-fill: #51a0ff;
     --color-nav-releases-ink: #0b3577;
 
+    /* Events of the notifications: what is out now, and a date moved or announced. */
+    --color-event-out: #6aff5c;
+    --color-event-dated: #51a0ff;
+
     /* Media-type colors. */
     --color-media-movie: #2e90fa;
     --color-media-tv: #8136ff;

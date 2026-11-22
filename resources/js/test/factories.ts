@@ -12,6 +12,7 @@ import type {
     WebhookGroupOption,
 } from '@/types/generated';
 import type { MediaSummary } from '@/types/media';
+import type { NotificationEntry } from '@/types/notifications';
 import { trans } from 'laravel-vue-i18n';
 import ALL_MODULES_TYPES from '../../../tests/Fixtures/media-types/all-modules.json';
 import DEFAULT_PREFERENCES from '../../../tests/Fixtures/preferences/defaults.json';
@@ -170,6 +171,27 @@ export function outgoingWebhookData(overrides: Partial<OutgoingWebhookData> = {}
         lastFailure: null,
         // The form only puts it in; what makes a secret is the server's to check.
         newSecret: 'whsec_made-by-the-server',
+        ...overrides,
+    };
+}
+
+/** A notification as the bell and its page receive it: a new episode, unread, this morning. */
+export function notificationEntry(overrides: Partial<NotificationEntry> = {}): NotificationEntry {
+    return {
+        id: 'n1',
+        readAt: null,
+        createdAt: '2026-10-10T09:00:00+00:00',
+        event: 'episode_aired',
+        title: 'New episode of Severance',
+        detail: ['S02E05', 'The Return'],
+        subject: 'Severance',
+        label: 'New episode',
+        facts: ['S02E05', 'The Return'],
+        change: null,
+        href: '/episode/1/2/5',
+        imagePath: '/still.jpg',
+        mediaTitle: 'The Return',
+        data: {},
         ...overrides,
     };
 }

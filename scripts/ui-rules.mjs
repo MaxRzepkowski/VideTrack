@@ -34,8 +34,8 @@ const RULES = [
     },
     {
         // A small filled circle as a type or status marker. Allowed in two
-        // places, where a dot is the established sign: the unread mark of a notification, and the red
-        // "live" mark of an event on the air (`bg-live`).
+        // places, where a dot is the established sign: the unread mark of a notification (on its row,
+        // and on the bell as `UNREAD_MARK`), and the red "live" mark of an event on the air (`bg-live`).
         id: 'coloured-dot',
         why: 'a coloured dot as a marker — a type takes its glyph from mediaTypeMeta(), a separator is the hairline',
         test: (line) =>
@@ -43,6 +43,7 @@ const RULES = [
             (/\bsize-(1|1\.5|2|2\.5)\b/.test(line) || (/\bh-(1|1\.5|2|2\.5)\b/.test(line) && /\bw-(1|1\.5|2|2\.5)\b/.test(line))) &&
             /\bbg-(?!line\b|transparent\b)/.test(line) &&
             !line.includes('!item.readAt') &&
+            !/\bUNREAD_MARK\b/.test(line) &&
             !/\bbg-live\b/.test(line),
     },
     {

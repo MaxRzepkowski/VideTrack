@@ -55,10 +55,11 @@ describe('AppHeader', () => {
         wrapper.unmount();
     });
 
-    it('counts the unread and marks them all read, then asks for the bell again', async () => {
+    it('names how many are unread and marks them all read, then asks for the bell again', async () => {
         const wrapper = header(3);
 
-        expect(wrapper.text()).toContain('3');
+        // The bell shows a dot; how many is in its name.
+        expect(wrapper.find('[aria-label="Notifications, 3 unread"]').exists()).toBe(true);
 
         await wrapper
             .findAll('button')

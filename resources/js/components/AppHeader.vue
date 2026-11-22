@@ -1,20 +1,21 @@
 <script setup lang="ts">
 import AppLogo from '@/components/AppLogo.vue';
+import BottomSheet from '@/components/BottomSheet.vue';
 import MainMenu from '@/components/header/MainMenu.vue';
 import MenuDrawer from '@/components/header/MenuDrawer.vue';
-import MetaLine from '@/components/MetaLine.vue';
+import NotificationPanel from '@/components/notifications/NotificationPanel.vue';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import UserMenuContent from '@/components/UserMenuContent.vue';
 import { useNotificationFeed } from '@/composables/useNotificationFeed';
-import { formatTimestampDate, getInitials } from '@/lib/format';
+import { getInitials } from '@/lib/format';
 import { jsonFetch } from '@/lib/http';
-import { mediaImage } from '@/lib/images';
 import { clickTarget, markRead } from '@/lib/notifications';
 import { signedInUser } from '@/lib/pageContext';
 import type { NotificationEntry } from '@/types/notifications';
 import { Link, router } from '@inertiajs/vue3';
 import { trans } from 'laravel-vue-i18n';
-import { Bell, Search } from '@lucide/vue';
+import { Bell, Search, X } from '@lucide/vue';
+import { DialogClose } from 'radix-vue';
 import { computed, ref, watch } from 'vue';
 
 // The header is part of the app layout, which only a signed-in user sees.
@@ -23,7 +24,9 @@ const viewer = computed(() => signedInUser());
 // Header bell: unread counter + latest notifications (null for guests). Kept
 // current while the tab stays open — the shared prop alone would age until the
 // next navigation.
-const notificationsOpen = ref(false);
+const bellOpen = ref(false);
+const sheetOpen = ref(false);
+const notificationsOpen = computed(() => bellOpen.value || sheetOpen.value);
 const { feed: notifications, refresh: refreshNotifications } = useNotificationFeed(notificationsOpen);
 
 // Opening is the one moment the list is read closely; ask for it fresh.
@@ -33,6 +36,18 @@ watch(notificationsOpen, (open) => {
     }
 });
 
+const bellLabel = computed(() =>
+    notifications.value && notifications.value.unread > 0
+        ? trans('common.notifications_unread', { count: String(notifications.value.unread) })
+        : trans('common.notifications'),
+);
+const followingHref = computed(() => route('users.following', { user: viewer.value.username }));
+
+const BELL =
+    'bg-surface hover:bg-surface-raised data-[state=open]:bg-surface-overlay relative size-10 cursor-pointer items-center justify-center rounded-[10px] transition-colors duration-150 flex';
+// Something unread is a dot, not a count; the bell's name still says how many.
+const UNREAD_MARK = 'bg-brand-soft absolute top-2 right-2 size-2.25 rounded-full';
+
 /**
  * Every route out of the dropdown closes it first. Left open, an Inertia visit
  * tears the whole header down mid-animation, and radix never gets to undo the
@@ -40,7 +55,8 @@ watch(notificationsOpen, (open) => {
  * frozen. The visit is async, so closing here always lands first.
  */
 function leaveDropdown(): void {
-    notificationsOpen.value = false;
+    bellOpen.value = false;
+    sheetOpen.value = false;
 }
 
 // Read marks go through the JSON endpoints: a POST answered with `back()`
@@ -109,97 +125,59 @@ async function openNotification(item: NotificationEntry, event: MouseEvent): Pro
                     <Search class="text-ink size-4.5" />
                 </Link>
 
-                <DropdownMenu v-if="notifications" v-model:open="notificationsOpen">
-                    <DropdownMenuTrigger
-                        v-tooltip="trans('common.notifications')"
-                        :aria-label="
-                            notifications.unread > 0
-                                ? trans('common.notifications_unread', { count: String(notifications.unread) })
-                                : trans('common.notifications')
-                        "
-                        class="bg-surface hover:bg-surface-raised relative flex size-10 cursor-pointer items-center justify-center rounded-[10px] transition-colors duration-150"
-                    >
-                        <Bell class="text-ink size-4.5" />
-                        <span
-                            v-if="notifications.unread > 0"
-                            aria-hidden="true"
-                            class="bg-danger-strong text-on-accent absolute -right-1.5 -bottom-1.5 flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-sm font-semibold"
+                <template v-if="notifications">
+                    <!-- One bell, two holders: a panel dropping from it on a desktop,
+                         a sheet rising from the bottom on a phone. -->
+                    <DropdownMenu v-model:open="bellOpen">
+                        <DropdownMenuTrigger v-tooltip="trans('common.notifications')" :aria-label="bellLabel" :class="[BELL, 'hidden md:flex']">
+                            <Bell class="text-ink size-4.5" />
+                            <span v-if="notifications.unread > 0" :class="UNREAD_MARK" aria-hidden="true" />
+                        </DropdownMenuTrigger>
+                        <!-- Right edge in line with the avatar; the arrow points back up at the bell. -->
+                        <DropdownMenuContent
+                            align="end"
+                            :align-offset="-50"
+                            :side-offset="10"
+                            :collision-padding="12"
+                            class="border-line-strong bg-surface text-ink shadow-float w-110 max-w-[calc(100vw-1.5rem)] overflow-visible rounded-xl p-0"
                         >
-                            {{ notifications.unread > 9 ? '9+' : notifications.unread }}
-                        </span>
-                    </DropdownMenuTrigger>
-                    <!-- 360px of panel does not fit a 360px phone: it keeps its
-                         width where there is room and shrinks to the viewport
-                         where there is not. -->
-                    <DropdownMenuContent
-                        align="end"
-                        :collision-padding="12"
-                        class="border-line-subtle bg-surface text-ink w-90 max-w-[calc(100vw-1.5rem)] rounded-xl p-2 shadow-xl"
-                    >
-                        <div class="flex items-baseline justify-between gap-3 px-2 pt-1 pb-2">
-                            <span class="text-ink text-sm font-semibold">{{ trans('common.notifications') }}</span>
-                            <button
-                                v-if="notifications.unread > 0"
-                                type="button"
-                                class="text-brand-soft hover:text-ink cursor-pointer text-sm font-semibold transition-colors duration-150"
-                                @click="markAllRead"
-                            >
-                                {{ trans('common.mark_all_as_read') }}
-                            </button>
-                        </div>
+                            <span
+                                class="border-line-strong bg-surface absolute -top-1.5 right-16 size-3 rotate-45 border-t border-l"
+                                aria-hidden="true"
+                            />
+                            <NotificationPanel
+                                :feed="notifications"
+                                :following-href="followingHref"
+                                @mark-all-read="markAllRead"
+                                @open="openNotification"
+                                @leave="leaveDropdown"
+                            />
+                        </DropdownMenuContent>
+                    </DropdownMenu>
 
-                        <!-- Taller than the bell's few rows: the list scrolls
-                             inside the menu, header and footer stay put. -->
-                        <div v-if="notifications.recent.length" class="scroll-subtle flex max-h-96 flex-col overflow-y-auto overscroll-contain">
-                            <a
-                                v-for="item in notifications.recent"
-                                :key="item.id"
-                                :href="item.href"
-                                class="hover:bg-surface flex w-full cursor-pointer items-start gap-3 rounded-lg px-2 py-2 text-left transition-colors duration-150"
-                                @click="openNotification(item, $event)"
-                                @auxclick="openNotification(item, $event)"
-                            >
-                                <img
-                                    v-if="mediaImage(item.imagePath, 'w342')"
-                                    :src="mediaImage(item.imagePath, 'w342') ?? undefined"
-                                    :alt="item.mediaTitle"
-                                    width="36"
-                                    height="54"
-                                    loading="lazy"
-                                    class="bg-surface-overlay aspect-poster w-9 shrink-0 rounded-md object-cover"
-                                />
-                                <span v-else class="bg-surface-overlay aspect-poster w-9 shrink-0 rounded-md" aria-hidden="true" />
-                                <span class="min-w-0 flex-1">
-                                    <span class="text-ink line-clamp-2 block text-sm font-semibold"
-                                        ><span v-if="!item.readAt" class="sr-only">{{ trans('common.unread') }}, </span>{{ item.title }}</span
-                                    >
-                                    <MetaLine v-if="item.detail.length" :parts="item.detail" class="text-ink-muted text-sm" />
-                                    <span class="text-ink-faint block text-sm">{{ formatTimestampDate(item.createdAt) }}</span>
-                                </span>
-                                <span v-if="!item.readAt" class="bg-brand mt-1.5 size-2 shrink-0 rounded-full" aria-hidden="true" />
-                            </a>
-                        </div>
-
-                        <p v-else class="text-ink-muted px-4 py-8 text-center text-sm">{{ trans('common.no_notifications_yet') }}</p>
-
-                        <div class="border-line-subtle mt-1 flex items-center justify-between border-t pt-1">
-                            <Link
-                                :href="route('notifications.index')"
-                                class="text-brand-soft hover:bg-surface hover:text-ink block rounded-lg px-2 py-2 text-center text-sm font-semibold transition-colors duration-150"
-                                @click="leaveDropdown"
-                            >
-                                {{ trans('app.view_all_notifications') }}
-                            </Link>
-                            <Link
-                                :href="route('users.following', { user: viewer.username })"
-                                class="text-brand-soft hover:bg-surface hover:text-ink block rounded-lg px-2 py-2 text-center text-sm font-semibold transition-colors duration-150"
-                                @click="leaveDropdown"
-                            >
-                                {{ trans('common.followed') }}
-                            </Link>
-                        </div>
-                    </DropdownMenuContent>
-                </DropdownMenu>
+                    <button type="button" :aria-label="bellLabel" :class="[BELL, 'md:hidden']" @click="sheetOpen = true">
+                        <Bell class="text-ink size-4.5" />
+                        <span v-if="notifications.unread > 0" :class="UNREAD_MARK" aria-hidden="true" />
+                    </button>
+                    <BottomSheet v-model:open="sheetOpen" :title="trans('common.notifications')">
+                        <NotificationPanel
+                            :feed="notifications"
+                            :following-href="followingHref"
+                            @mark-all-read="markAllRead"
+                            @open="openNotification"
+                            @leave="leaveDropdown"
+                        >
+                            <template #close>
+                                <DialogClose
+                                    :aria-label="trans('common.close')"
+                                    class="bg-surface-raised text-ink-muted hover:text-ink flex size-8 cursor-pointer items-center justify-center rounded-lg"
+                                >
+                                    <X class="size-4.5" />
+                                </DialogClose>
+                            </template>
+                        </NotificationPanel>
+                    </BottomSheet>
+                </template>
 
                 <DropdownMenu>
                     <DropdownMenuTrigger

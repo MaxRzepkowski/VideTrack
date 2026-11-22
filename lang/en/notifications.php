@@ -31,9 +31,10 @@ return [
     'count_new_parts_of_collection' => ':count new part of :collection|:count new parts of :collection',
     'other_titles' => 'Other',
     'count_notification' => ':count notification|:count notifications',
-    'unread_title' => 'Unread: :title',
     'count_new_episodes_of_title' => ':count new episode of :title|:count new episodes of :title',
     'count_new_episodes' => ':count new episode|:count new episodes',
     'detail_at_time' => ':detail (:time)',
     'at_time' => '(:time)',
+    'unread_title' => 'Unread: :title',
+    'changed_from_to' => 'Changed from :from to :to',
 ];

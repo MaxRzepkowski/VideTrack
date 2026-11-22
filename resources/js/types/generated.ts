@@ -686,10 +686,14 @@ export type MultiplayerSupport = {
 export type NotificationEntry = {
     readonly id: string;
     readonly readAt: string | null;
-    readonly createdAt: string | null;
+    readonly createdAt: string;
     readonly event: MediaEventType | null;
     readonly title: string;
     readonly detail: string[];
+    readonly subject: string;
+    readonly label: string;
+    readonly facts: string[];
+    readonly change: ValueChange | null;
     readonly href: string;
     readonly imagePath: string | null;
     readonly mediaTitle: string;
@@ -1156,6 +1160,10 @@ export type UserMediaState = {
     readonly nextEpisode: EpisodePointer | null;
     readonly inProgress: boolean;
     readonly progression: boolean;
+};
+export type ValueChange = {
+    readonly from: string | null;
+    readonly to: string;
 };
 export type VideoData = {
     readonly key: string;

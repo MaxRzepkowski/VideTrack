@@ -3,6 +3,7 @@
 use App\Actions\Library\MarkWatched;
 use App\Actions\Library\RateItem;
 use App\Actions\Library\SetFavorite;
+use App\Catalog\DatePrecision;
 use App\Http\Requests\Api\V1\CalendarRequest;
 use App\Http\Requests\Api\V1\LookupTitlesRequest;
 use App\Library\RatingScale;
@@ -12,6 +13,7 @@ use App\Models\Follow;
 use App\Models\MediaItem;
 use App\Models\Play;
 use App\Models\User;
+use App\Notifications\Events\DateChanged;
 use App\Notifications\MediaEvent;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Http;
@@ -366,6 +368,20 @@ test('notifications page newest first', function () {
         ->assertJsonPath('data.0.data.key', 'released:movie:603:2026-10-10')
         ->assertJsonPath('data.0.readAt', null)
         ->assertJsonPath('meta.total', 1);
+});
+
+test('a notification names its title, the event and the value it moved, each apart', function () {
+    $user = apiUser();
+    $film = MediaItem::factory()->movie()->create(['title' => 'Dune', 'release_date' => '2026-12-18']);
+
+    $user->notify(new MediaEvent(DateChanged::of($film, '2026-11-20', DatePrecision::Day)));
+
+    $this->getJson('/api/v1/notifications')
+        ->assertOk()
+        ->assertJsonPath('data.0.subject', 'Dune')
+        ->assertJsonPath('data.0.label', 'New release date')
+        ->assertJsonPath('data.0.facts', [])
+        ->assertJsonPath('data.0.change', ['from' => 'November 20, 2026', 'to' => 'December 18, 2026']);
 });
 
 test('search asks one scope and reports what the instance offers', function () {

@@ -1,5 +1,6 @@
 import { vTooltip } from '@/directives/tooltip';
 import Notifications from '@/pages/Notifications.vue';
+import { notificationEntry } from '@/test/factories';
 import type { NotificationEntry } from '@/types/notifications';
 import { router } from '@inertiajs/vue3';
 import { flushPromises, mount } from '@vue/test-utils';
@@ -19,21 +20,7 @@ afterEach(() => {
     sent.length = 0;
 });
 
-function notification(overrides: Partial<NotificationEntry> = {}): NotificationEntry {
-    return {
-        id: 'n1',
-        readAt: null,
-        createdAt: '2026-10-10T12:00:00+00:00',
-        event: 'episode_aired',
-        title: 'New episode of Severance',
-        detail: ['S02E05', 'The Return'],
-        href: '/episode/1/2/5',
-        imagePath: '/still.jpg',
-        mediaTitle: 'The Return',
-        data: {},
-        ...overrides,
-    };
-}
+const notification = notificationEntry;
 
 function page(notifications: NotificationEntry[]) {
     return mount(Notifications, {
@@ -43,14 +30,25 @@ function page(notifications: NotificationEntry[]) {
 }
 
 describe('Notifications', () => {
-    it('shows what the server wrote: the headline, its facts and the picture', () => {
+    it('shows what the server wrote, by day: the title, the event, its facts and the picture', () => {
         const wrapper = page([notification()]);
 
-        expect(wrapper.text()).toContain('New episode of Severance');
+        expect(wrapper.find('h2').text()).toBe('Today');
+        expect(wrapper.text()).toContain('Severance');
+        expect(wrapper.text()).toContain('New episode');
         expect(wrapper.text()).toContain('S02E05');
         expect(wrapper.text()).toContain('The Return');
         expect(wrapper.find('img').attributes('alt')).toBe('The Return');
         expect(wrapper.find('img').attributes('src')).toContain('/still.jpg');
+    });
+
+    it('strikes the old value of what moved and shows the new one beside it', () => {
+        const wrapper = page([
+            notification({ event: 'date_changed', label: 'New release date', facts: [], change: { from: 'Nov 25', to: 'Nov 24, 2026' } }),
+        ]);
+
+        expect(wrapper.find('.line-through').text()).toBe('Nov 25');
+        expect(wrapper.text()).toContain('Nov 24, 2026');
     });
 
     it('draws no picture for a notification without one', () => {
@@ -65,7 +63,7 @@ describe('Notifications', () => {
         const visit = vi.spyOn(router, 'visit').mockImplementation(() => undefined);
 
         await page([notification({ readAt: '2026-10-10T13:00:00+00:00' })])
-            .find('a.line-clamp-2')
+            .find('a[href="/episode/1/2/5"]')
             .trigger('click');
 
         expect(visit).toHaveBeenCalledWith('/episode/1/2/5');
@@ -74,7 +72,7 @@ describe('Notifications', () => {
     it('marks an unread one read before it leads there', async () => {
         const visit = vi.spyOn(router, 'visit').mockImplementation(() => undefined);
 
-        await page([notification()]).find('a.line-clamp-2').trigger('click');
+        await page([notification()]).find('a[href="/episode/1/2/5"]').trigger('click');
         await flushPromises();
 
         expect(sent).toEqual([{ url: '/ui.notifications.read/n1', method: 'PATCH' }]);
@@ -84,7 +82,7 @@ describe('Notifications', () => {
     it('is a link a middle click opens in a new tab, marking it read and leaving this page where it is', async () => {
         const visit = vi.spyOn(router, 'visit').mockImplementation(() => undefined);
         const reload = vi.spyOn(router, 'reload').mockImplementation(() => undefined);
-        const link = page([notification()]).find('a.line-clamp-2');
+        const link = page([notification()]).find('a[href="/episode/1/2/5"]');
 
         expect(link.attributes('href')).toBe('/episode/1/2/5');
 

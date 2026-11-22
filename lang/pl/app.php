@@ -37,7 +37,6 @@ return [
     'videtrack_is_experiencing_problems' => 'VideTrack ma problemy',
     'videtrack_is_free_software_under_the' => 'VideTrack jest wolnym oprogramowaniem na licencji :license.',
     'videtrack_is_up' => 'VideTrack działa',
-    'view_all_notifications' => 'Zobacz wszystkie powiadomienia',
     'where_to_watch_data_is_provided' => 'Dane o dostępności do oglądania dostarcza JustWatch.',
     'leave_page' => 'Opuść',
     'you_have_unsaved_changes_leave_this' => 'Masz niezapisane zmiany. Opuścić tę stronę?',
@@ -61,4 +60,7 @@ return [
     'search_shortcut' => 'Ctrl K',
     'nav_profile_description' => 'Twoja strona z biblioteką',
     'nav_settings_description' => 'Konto, integracje i powiadomienia',
+    'no_notifications' => 'Brak powiadomień',
+    'no_notifications_hint' => 'Tu pojawią się nowe daty, zmiany statusu i premiery tytułów, które śledzisz.',
+    'all_notifications' => 'Wszystkie powiadomienia',
 ];

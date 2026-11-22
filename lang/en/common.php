@@ -140,7 +140,6 @@ return [
     'today' => 'Today',
     'total_runtime' => 'Total runtime',
     'tracking' => 'Tracking',
-    'unread' => 'Unread',
     'upcoming_releases_from_the_titles_you' => 'Upcoming releases from the titles you track.',
     'username' => 'Username',
     'video' => 'Video',
@@ -158,4 +157,5 @@ return [
     'zoom_out' => 'Zoom out',
     'zoom_reset' => 'Show the whole',
     'webhooks' => 'Webhooks',
+    'yesterday' => 'Yesterday',
 ];
