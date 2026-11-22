@@ -24,7 +24,7 @@ const notification = notificationEntry;
 
 function page(notifications: NotificationEntry[]) {
     return mount(Notifications, {
-        props: { notifications, pagination: { currentPage: 1, totalPages: 1, total: notifications.length, perPage: 20 } },
+        props: { entries: notifications, pagination: { currentPage: 1, totalPages: 1, total: notifications.length, perPage: 20 } },
         global: { directives: { tooltip: vTooltip }, stubs: { AppLayout: { template: '<div><slot /></div>' } } },
     });
 }
@@ -96,7 +96,7 @@ describe('Notifications', () => {
             { url: '/ui.notifications.read/n1', method: 'PATCH' },
             { url: '/ui.notifications.read/n1', method: 'PATCH' },
         ]);
-        expect(reload).toHaveBeenCalledWith({ only: ['notifications'] });
+        expect(reload).toHaveBeenCalledWith({ only: ['entries'] });
     });
 
     it('marks every notification read, and offers it only while one is unread', async () => {
@@ -111,7 +111,7 @@ describe('Notifications', () => {
         await flushPromises();
 
         expect(sent).toEqual([{ url: '/ui.notifications.read-all', method: 'POST' }]);
-        expect(reload).toHaveBeenCalledWith({ only: ['notifications'] });
+        expect(reload).toHaveBeenCalledWith({ only: ['entries'] });
     });
 
     it('deletes one notification from its own button', async () => {
@@ -125,7 +125,7 @@ describe('Notifications', () => {
     it('asks for another page of a long feed', async () => {
         const get = vi.spyOn(router, 'get').mockImplementation(() => undefined);
         const wrapper = mount(Notifications, {
-            props: { notifications: [notification()], pagination: { currentPage: 1, totalPages: 3, total: 50, perPage: 20 } },
+            props: { entries: [notification()], pagination: { currentPage: 1, totalPages: 3, total: 50, perPage: 20 } },
             global: { directives: { tooltip: vTooltip }, stubs: { AppLayout: { template: '<div><slot /></div>' } } },
         });
 
