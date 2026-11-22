@@ -26,6 +26,8 @@ const touchScreen = useMediaQuery('(any-pointer: coarse)');
 const hovered = ref<number | null>(null);
 const chosen = ref<number | null>(null);
 const shown = computed(() => hovered.value ?? chosen.value ?? state.value?.rating ?? 0);
+/** The score the pointer rests on, or the finger chose. */
+const previewed = computed(() => hovered.value ?? chosen.value);
 const changed = computed(() => chosen.value !== null && chosen.value !== state.value?.rating);
 
 watch(media, () => {
@@ -107,9 +109,11 @@ function remove(): void {
                     />
                 </button>
             </div>
-            <div class="text-ink-muted mt-1.5 flex justify-between px-2.5 text-sm" aria-hidden="true">
+            <!-- The ends of the scale, and between them the score under the pointer: one star of ten does not say whether it is a 6 or a 7. -->
+            <div class="text-ink-muted mt-1.5 grid grid-cols-[1fr_auto_1fr] px-2.5 text-sm" aria-hidden="true">
                 <span>{{ RATING_MIN }}</span>
-                <span>{{ RATING_MAX }}</span>
+                <span class="text-action-rating font-semibold tabular-nums">{{ previewed === null ? '' : ratingScore(previewed) }}</span>
+                <span class="text-right">{{ RATING_MAX }}</span>
             </div>
 
             <button

@@ -51,6 +51,28 @@ describe('RateModal', () => {
         wrapper.unmount();
     });
 
+    it('says the score under the mouse between the ends of the scale, and nothing once it leaves', async () => {
+        const wrapper = modal(null);
+        await flushPromises();
+
+        const scale = () => [...(document.querySelector('[role=dialog] .grid')?.children ?? [])].map((end) => end.textContent?.trim());
+
+        expect(scale()).toEqual(['1', '', String(RATING_MAX)]);
+
+        vi.setSystemTime(Date.now() + 1000);
+        stars()[5]!.dispatchEvent(new PointerEvent('pointerenter', { pointerType: 'mouse' }));
+        await flushPromises();
+
+        expect(scale()).toEqual(['1', `6/${RATING_MAX}`, String(RATING_MAX)]);
+
+        stars()[0]!.parentElement!.dispatchEvent(new MouseEvent('mouseleave'));
+        await flushPromises();
+
+        expect(scale()).toEqual(['1', '', String(RATING_MAX)]);
+
+        wrapper.unmount();
+    });
+
     it('says the rating given, marks its star and offers to remove it', async () => {
         const wrapper = modal(9);
         await flushPromises();
