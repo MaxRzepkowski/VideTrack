@@ -1,7 +1,7 @@
 import { jsonFetch } from '@/lib/http';
 import { viewerUsername } from '@/lib/pageContext';
 import { listUrl } from '@/lib/urls';
-import { writeLibrary } from '@/stores/library';
+import { writeLibrary, writeLibraryAndLeave } from '@/stores/library';
 import { router } from '@inertiajs/vue3';
 
 /** What a list's own form sends: its name, its line and who may see it. */
@@ -15,7 +15,7 @@ export interface ListFields {
  * The lists themselves, written through API v1 like every write of the
  * library: one write at a time, the page's own props reloaded after it, and a
  * refusal told in the server's words. A write that makes a list goes to it;
- * deleting one goes back to the index.
+ * deleting one goes to the viewer's lists, without reading the gone list again.
  */
 export function useListActions() {
     /** A write that answers a new list, and the list's id once it landed. */
@@ -54,15 +54,11 @@ export function useListActions() {
         update: (list: number, fields: ListFields): Promise<boolean> =>
             writeLibrary(() => jsonFetch(route('ui.lists.update', { list }), { method: 'PATCH', body: fields }), ['list']),
 
-        async destroy(list: number): Promise<boolean> {
-            const landed = await writeLibrary(() => jsonFetch(route('ui.lists.destroy', { list }), { method: 'DELETE' }));
-
-            if (landed) {
-                router.visit(route('lists.index'));
-            }
-
-            return landed;
-        },
+        destroy: (list: number): Promise<boolean> =>
+            writeLibraryAndLeave(
+                () => jsonFetch(route('ui.lists.destroy', { list }), { method: 'DELETE' }),
+                route('users.lists', { user: viewerUsername() }),
+            ),
 
         removeItem: (list: number, item: number): Promise<boolean> =>
             writeLibrary(() => jsonFetch(route('ui.lists.items.destroy', { list, item }), { method: 'DELETE' })),
