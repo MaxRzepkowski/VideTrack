@@ -23,13 +23,13 @@ function langFixture(array $files): string
 
 function langCheck(string $root): LangCheck
 {
-    return new LangCheck(new LangFiles("{$root}/lang"), ["{$root}/src"]);
+    return new LangCheck(new LangFiles("{$root}/lang"), 'en', ["{$root}/src"]);
 }
 
 test('group keys present in every locale and named in the code pass', function () {
     $root = langFixture([
         'lang/en/media.php' => "<?php return ['apple' => 'Apple', 'count_banana' => ':count banana|:count bananas'];",
-        'lang/pl/media.php' => "<?php return ['apple' => 'Jabłko', 'count_banana' => ':count banan|:count bananów'];",
+        'lang/pl/media.php' => "<?php return ['apple' => 'Jabłko', 'count_banana' => ':count banan|:count banany|:count bananów'];",
         'lang/en/tasks.php' => "<?php return ['daily' => 'Daily'];",
         'lang/pl/tasks.php' => "<?php return ['daily' => 'Codziennie'];",
         // The framework's own strings and groups are not ours to account for.
@@ -94,4 +94,71 @@ test('a key of ours nothing names is reported as unused', function () {
     ]);
 
     expect(langCheck($root)->problems())->toBe(['"media.stale" is not used anywhere']);
+});
+
+/** The two complete languages with one text, a count of bananas, and the code that names both. */
+function completeLanguages(): array
+{
+    return [
+        'lang/en/media.php' => "<?php return ['apple' => 'Apple', 'count_banana' => ':count banana|:count bananas'];",
+        'lang/pl/media.php' => "<?php return ['apple' => 'Jabłko', 'count_banana' => ':count banan|:count banany|:count bananów'];",
+        'src/Page.vue' => "{{ trans('media.apple') }} {{ transChoice('media.count_banana', 2) }}",
+    ];
+}
+
+test('another language may lag behind, and says how far it is translated', function () {
+    $root = langFixture([...completeLanguages(), 'lang/de/media.php' => "<?php return ['apple' => 'Apfel'];"]);
+
+    expect(langCheck($root)->problems())->toBe([])
+        ->and(langCheck($root)->coverage())->toBe(['de' => ['translated' => 1, 'total' => 2]]);
+});
+
+test('a text another language keeps after the source dropped it is reported', function () {
+    $root = langFixture([...completeLanguages(), 'lang/de/media.php' => "<?php return ['apple' => 'Apfel', 'pear' => 'Birne'];"]);
+
+    expect(langCheck($root)->problems())->toBe(['de: "media.pear" is not a text of en']);
+});
+
+test('a translation filling in other parameters than its source is reported', function () {
+    $root = langFixture([...completeLanguages(), 'lang/de/media.php' => "<?php return ['count_banana' => ':n Banane|:n Bananen'];"]);
+
+    expect(langCheck($root)->problems())->toBe(['de: "media.count_banana" fills in :n, its source :count']);
+});
+
+test('a translation that drops every parameter is reported too', function () {
+    $root = langFixture([...completeLanguages(), 'lang/de/media.php' => "<?php return ['count_banana' => 'Bananen'];"]);
+
+    expect(langCheck($root)->problems())->toBe(['de: "media.count_banana" fills in no parameters, its source :count']);
+});
+
+test('a plural translation has the forms its language counts, or one the count leaves alone', function () {
+    $root = langFixture([
+        ...completeLanguages(),
+        // Russian tells three forms apart, like Polish.
+        'lang/ru/media.php' => "<?php return ['count_banana' => ':count банан|:count бананов'];",
+        'lang/uk/media.php' => "<?php return ['count_banana' => 'Бананів: :count'];",
+        'lang/cs/media.php' => "<?php return ['count_banana' => '{1} :count banán|[2,*] :count banánů'];",
+    ]);
+
+    expect(langCheck($root)->problems())->toBe(['ru: "media.count_banana" has 2 plural forms, the language counts 3']);
+});
+
+test('a complete language is held to its plural forms as well', function () {
+    $root = langFixture([...completeLanguages(), 'lang/pl/media.php' => "<?php return ['apple' => 'Jabłko', 'count_banana' => ':count banan|:count bananów'];"]);
+
+    expect(langCheck($root)->problems())->toBe(['pl: "media.count_banana" has 2 plural forms, the language counts 3']);
+});
+
+test("the framework's own plural strings are left as they come", function () {
+    $root = langFixture([
+        ...completeLanguages(),
+        'lang/en/validation.php' => "<?php return ['between' => ':min apple|:min apples'];",
+        'lang/pl/validation.php' => "<?php return ['between' => ':min jabłko|:min jabłka|:min jabłek'];",
+        'lang/ru/validation.php' => "<?php return ['between' => ':min яблоко|:min яблок'];",
+        'lang/en.json' => '{"(and :count more error)": "(and :count more error)|(and :count more errors)|(and :count more errors)"}',
+        'lang/pl.json' => '{"(and :count more error)": "(i jeszcze :count błąd)|(i jeszcze :count błędy)|(i jeszcze :count błędów)"}',
+        'lang/ru.json' => '{"(and :count more error)": "(и ещё :count ошибка)|(и ещё :count ошибок)"}',
+    ]);
+
+    expect(langCheck($root)->problems())->toBe([]);
 });

@@ -2,6 +2,7 @@
 
 namespace App\Support;
 
+use Illuminate\Translation\MessageSelector;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use SplFileInfo;
@@ -10,9 +11,12 @@ use SplFileInfo;
  * Checks the translation files the way the repo writes them. Our texts live
  * in group files (`lang/{locale}/{group}.php`) under context keys, named in
  * the code as "group.key"; `lang/{locale}.json` holds only the framework's own
- * strings. Every locale carries the same keys, every key the code names
- * exists, and every key of our groups is named somewhere in the code — a key
- * built at runtime cannot be checked, which is why the code spells them out.
+ * strings. The complete locales carry the same keys, every key the code names
+ * exists in them, and every key of our groups is named somewhere in the code —
+ * a key built at runtime cannot be checked, which is why the code spells them
+ * out. Any other locale may lag behind (a missing text reads in the source
+ * language), but what it has must fit: no key the source lacks, the same
+ * parameters, and as many plural forms as the language counts.
  */
 final class LangCheck
 {
@@ -33,11 +37,25 @@ final class LangCheck
 
     private const SOURCE_EXTENSIONS = ['php', 'ts', 'vue'];
 
+    /** The languages a change to a text is written in at once. */
+    private const COMPLETE_LOCALES = ['en', 'pl'];
+
+    /** A parameter a text fills in (`:count`, `:name`). */
+    private const PARAMETER = '/:([A-Za-z_]+)/';
+
+    /** A plural form chosen by its own condition (`{0}`, `[2,*]`) rather than by the language's rule. */
+    private const CONDITION = '/^\s*[\{\[]/';
+
+    /** Counts enough to meet every form a language's plural rule has. */
+    private const PLURAL_PROBE = 200;
+
     /**
+     * @param  string  $sourceLocale  the language every text is written in first and a missing one reads in
      * @param  list<string>  $sourceDirs
      */
     public function __construct(
         private readonly LangFiles $files,
+        private readonly string $sourceLocale,
         private readonly array $sourceDirs,
     ) {}
 
@@ -52,13 +70,119 @@ final class LangCheck
             $keysByLocale[$locale] = $this->keys($locale);
         }
 
+        $complete = array_intersect_key($keysByLocale, array_flip(self::COMPLETE_LOCALES));
         $sources = $this->sources();
 
         return [
-            ...$this->parityProblems($keysByLocale),
-            ...$this->usageProblems($keysByLocale, $sources),
-            ...$this->unusedProblems($keysByLocale, $sources),
+            ...$this->parityProblems($complete),
+            ...$this->usageProblems($complete, $sources),
+            ...$this->unusedProblems($complete, $sources),
+            ...$this->unknownProblems(array_diff_key($keysByLocale, $complete)),
+            ...$this->fitProblems(),
         ];
+    }
+
+    /**
+     * How far each locale that may lag behind is translated.
+     *
+     * @return array<string, array{translated: int, total: int}>
+     */
+    public function coverage(): array
+    {
+        $source = $this->files->texts($this->sourceLocale);
+        $coverage = [];
+
+        foreach (array_diff($this->files->locales(), self::COMPLETE_LOCALES) as $locale) {
+            $coverage[$locale] = [
+                'translated' => count(array_intersect_key($this->files->texts($locale), $source)),
+                'total' => count($source),
+            ];
+        }
+
+        return $coverage;
+    }
+
+    /**
+     * Keys a lagging locale has that the source language does not: a text
+     * renamed or removed since it was translated.
+     *
+     * @param  array<string, array<string, true>>  $keysByLocale
+     * @return list<string>
+     */
+    private function unknownProblems(array $keysByLocale): array
+    {
+        $source = $this->keys($this->sourceLocale);
+        $problems = [];
+
+        foreach ($keysByLocale as $locale => $keys) {
+            foreach (array_keys(array_diff_key($keys, $source)) as $key) {
+                $problems[] = "{$locale}: \"{$key}\" is not a text of ".$this->sourceLocale;
+            }
+        }
+
+        return $problems;
+    }
+
+    /**
+     * Translations that do not fit their source text: other parameters, or
+     * plural forms the language's rule does not count. A single form is a
+     * text the count leaves alone, so it always fits; the framework's own
+     * strings are left as they come.
+     *
+     * @return list<string>
+     */
+    private function fitProblems(): array
+    {
+        $source = $this->files->texts($this->sourceLocale);
+        $problems = [];
+
+        foreach (array_diff($this->files->locales(), [$this->sourceLocale]) as $locale) {
+            $forms = $this->pluralForms($locale);
+
+            foreach (array_intersect_key($this->files->texts($locale), $source) as $key => $text) {
+                if ($this->parameters($text) !== $this->parameters($source[$key])) {
+                    $problems[] = "{$locale}: \"{$key}\" fills in ".$this->listed($this->parameters($text)).', its source '.$this->listed($this->parameters($source[$key]));
+                }
+
+                $count = count(explode('|', $text));
+
+                if ($this->isOurs($key) && str_contains($source[$key], '|') && preg_match(self::CONDITION, $text) !== 1 && $count !== 1 && $count !== $forms) {
+                    $problems[] = "{$locale}: \"{$key}\" has {$count} plural forms, the language counts {$forms}";
+                }
+            }
+        }
+
+        return $problems;
+    }
+
+    /** @return list<string> */
+    private function parameters(string $text): array
+    {
+        preg_match_all(self::PARAMETER, $text, $matches);
+        $names = array_values(array_unique($matches[1]));
+        sort($names);
+
+        return $names;
+    }
+
+    /** @param  list<string>  $parameters */
+    private function listed(array $parameters): string
+    {
+        return $parameters === [] ? 'no parameters' : ':'.implode(', :', $parameters);
+    }
+
+    /** How many plural forms a language's rule tells apart, as the framework and the front both choose them. */
+    private function pluralForms(string $locale): int
+    {
+        $selector = new MessageSelector;
+
+        return count(array_unique(array_map(fn (int $number): int => $selector->getPluralIndex($locale, $number), range(0, self::PLURAL_PROBE))));
+    }
+
+    /** A key of our own groups, not one of the framework's strings. */
+    private function isOurs(string $key): bool
+    {
+        return preg_match(self::GROUP_KEY, $key) === 1 && ! in_array(strstr($key, '.', true), self::FRAMEWORK_GROUPS, true);
     }
 
     /**
@@ -131,9 +255,7 @@ final class LangCheck
         $all = $keysByLocale === [] ? [] : array_merge(...array_values($keysByLocale));
 
         foreach (array_keys($all) as $key) {
-            $group = strstr($key, '.', true);
-
-            if (preg_match(self::GROUP_KEY, $key) !== 1 || in_array($group, self::FRAMEWORK_GROUPS, true)) {
+            if (! $this->isOurs($key)) {
                 continue;
             }
 
