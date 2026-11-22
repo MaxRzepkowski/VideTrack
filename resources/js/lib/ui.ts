@@ -9,8 +9,11 @@ import type { NonEmpty } from '@/types';
  * the same twenty utilities copied into every view.
  */
 
-/** The colours a menu row can wear: its group's, or the danger colour for a row that is not a place. */
-export type RowTint = NavGroupId | 'danger';
+/**
+ * The colours a menu row can wear: its group's; the danger colour for a row
+ * that is not a place; `remove` for a dialog's row that takes something away.
+ */
+export type RowTint = NavGroupId | 'danger' | 'remove';
 
 // Tokens of the glyph, of the square under a pointed row, and of the glyph on that square.
 const TINT_TOKENS: Record<RowTint, readonly [string, string, string]> = {
@@ -18,6 +21,7 @@ const TINT_TOKENS: Record<RowTint, readonly [string, string, string]> = {
     discover: ['nav-discover', 'nav-discover-fill', 'nav-discover-ink'],
     releases: ['nav-releases', 'nav-releases-fill', 'nav-releases-ink'],
     danger: ['danger', 'danger-strong', 'on-accent'],
+    remove: ['remove', 'remove', 'on-remove'],
 };
 
 /** A tint as the custom properties a menu row (`MenuRow`) reads from an ancestor. */
@@ -26,6 +30,10 @@ export function rowTint(tint: RowTint): Record<'--tint' | '--tint-fill' | '--tin
 
     return { '--tint': `var(--color-${glyph})`, '--tint-fill': `var(--color-${fill})`, '--tint-ink': `var(--color-${ink})` };
 }
+
+/** The dimmed page behind a dialog or a sheet, fading with it. */
+export const DIALOG_OVERLAY_CLASS =
+    'data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:fade-in data-[state=closed]:fade-out bg-scrim/60 fixed inset-0 z-50';
 
 /**
  * A word of a menu row: the main bar, the profile's panels and the tabs of the

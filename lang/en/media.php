@@ -69,7 +69,6 @@ return [
     'currently_viewing_title' => 'Currently viewing: :title',
     'cycle_number' => 'Cycle :number',
     'day' => 'day|days',
-    'decrease_rating' => 'Decrease rating',
     'deletes_the_plays_of_this_cycle' => 'Deletes the plays of this cycle',
     'details' => 'Details',
     'aired' => 'Aired',
@@ -126,7 +125,6 @@ return [
     'in_favorites' => 'In favorites',
     'in_your_region_region' => 'In your region (:region)',
     'include_the_hours_from_the_dropped' => 'Include the hours from the dropped attempt',
-    'increase_rating' => 'Increase rating',
     'issue' => 'Issue',
     'issue_current_of_total' => 'Issue :current of :total',
     'issues' => 'Issues',
@@ -419,4 +417,6 @@ return [
     'search_titles_and_people' => 'Search titles and people',
     'clear_search' => 'Clear search',
     'search_escape_key' => 'Esc',
+    'not_rated' => 'Not rated',
+    'back_to_not_rated' => 'Back to not rated',
 ];

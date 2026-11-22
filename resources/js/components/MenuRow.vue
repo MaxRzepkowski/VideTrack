@@ -3,7 +3,8 @@ import { Link } from '@inertiajs/vue3';
 import type { LucideIcon } from '@lucide/vue';
 
 /**
- * A row of a header menu: a glyph on a square, the name and what is there. The
+ * A row of a menu or of a dialog: a glyph on a square, the name and what is
+ * there (or what it does); a link with `href`, else a button. The
  * colours come from the `--tint` properties of an ancestor (`rowTint()`); a
  * pointed, focused or highlighted row fills the square with its colour.
  *
@@ -11,18 +12,26 @@ import type { LucideIcon } from '@lucide/vue';
  * fades out, rather than the colours sliding: half-way through a slide the
  * glyph's colour meets the square's and the glyph blinks out.
  */
-defineProps<{
-    href: string;
-    icon: LucideIcon;
-    label: string;
-    description?: string;
-}>();
+withDefaults(
+    defineProps<{
+        href?: string;
+        icon: LucideIcon;
+        label: string;
+        description?: string;
+        /** How far the row stands in from its container's edges: a menu's panel, or a dialog's body. */
+        inset?: 'menu' | 'dialog';
+    }>(),
+    { inset: 'menu' },
+);
 </script>
 
 <template>
-    <Link
+    <component
+        :is="href === undefined ? 'button' : Link"
         :href="href"
-        class="group/row hover:bg-surface-overlay focus-visible:bg-surface-overlay focus-visible:outline-ink data-highlighted:bg-surface-overlay flex w-full cursor-pointer items-center gap-3 px-3 py-2 text-left transition-colors duration-150 focus-visible:outline-2 focus-visible:-outline-offset-2"
+        :type="href === undefined ? 'button' : undefined"
+        class="group/row hover:bg-surface-overlay focus-visible:bg-surface-overlay focus-visible:outline-ink data-highlighted:bg-surface-overlay flex w-full cursor-pointer items-center gap-3 py-2 text-left transition-colors duration-150 focus-visible:outline-2 focus-visible:-outline-offset-2"
+        :class="inset === 'dialog' ? 'px-5' : 'px-3'"
     >
         <span class="bg-surface-overlay relative grid size-10 shrink-0 place-items-center overflow-hidden rounded-lg">
             <span
@@ -39,7 +48,7 @@ defineProps<{
                 aria-hidden="true"
             />
         </span>
-        <span class="min-w-0">
+        <span class="min-w-0 flex-1">
             <span class="text-ink block text-base leading-snug font-semibold">{{ label }}</span>
             <span
                 v-if="description"
@@ -48,5 +57,5 @@ defineProps<{
                 {{ description }}
             </span>
         </span>
-    </Link>
+    </component>
 </template>

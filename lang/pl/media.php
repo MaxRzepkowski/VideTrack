@@ -69,7 +69,6 @@ return [
     'currently_viewing_title' => 'Aktualnie przeglądane: :title',
     'cycle_number' => 'Podejście :number',
     'day' => 'dzień|dni|dni',
-    'decrease_rating' => 'Zmniejsz ocenę',
     'deletes_the_plays_of_this_cycle' => 'Kasuje obejrzenia z tego podejścia',
     'details' => 'Szczegóły',
     'aired' => 'Wyemitowane',
@@ -126,7 +125,6 @@ return [
     'in_favorites' => 'W ulubionych',
     'in_your_region_region' => 'W twoim regionie (:region)',
     'include_the_hours_from_the_dropped' => 'Dolicz czas z porzuconego podejścia',
-    'increase_rating' => 'Zwiększ ocenę',
     'issue' => 'Zeszyt',
     'issue_current_of_total' => 'Zeszyt :current z :total',
     'issues' => 'Zeszyty',
@@ -419,4 +417,6 @@ return [
     'search_titles_and_people' => 'Szukaj tytułów i osób',
     'clear_search' => 'Wyczyść wyszukiwanie',
     'search_escape_key' => 'Esc',
+    'not_rated' => 'Bez oceny',
+    'back_to_not_rated' => 'Tytuł wraca do stanu bez oceny',
 ];

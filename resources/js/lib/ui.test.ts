@@ -9,6 +9,7 @@ describe('ui classes', () => {
             '--tint-ink': 'var(--color-nav-discover-ink)',
         });
         expect(rowTint('danger')['--tint']).toBe('var(--color-danger)');
+        expect(rowTint('remove')['--tint-ink']).toBe('var(--color-on-remove)');
     });
 
     it('lights the menu word of the page you are on, and only it', () => {
