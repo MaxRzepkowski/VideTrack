@@ -259,7 +259,26 @@ function failed(reason: string | null = null): void {
  * `send` answers null when, read at the moment it would go out, there is
  * nothing left to send: a shortcut the click before it already carried out.
  */
-export async function writeLibrary(send: () => Promise<Response | null>, reload: string[] = []): Promise<boolean> {
+export function writeLibrary(send: () => Promise<Response | null>, reload: string[] = []): Promise<boolean> {
+    // On a page left meanwhile, the page's own registrations still reload:
+    // its props were asked while this write was out, maybe before it landed.
+    return write(send, reload, (stillHere) => reloadPage(stillHere ? reload : []));
+}
+
+/**
+ * {@see writeLibrary} for a write that leaves the page with nothing to show
+ * (the list it shows, deleted): once it lands the store goes to `destination`
+ * instead of reloading the page's props, which would ask for what is gone.
+ */
+export function writeLibraryAndLeave(send: () => Promise<Response | null>, destination: string): Promise<boolean> {
+    return write(send, [], () => {
+        router.visit(destination);
+
+        return Promise.resolve();
+    });
+}
+
+async function write(send: () => Promise<Response | null>, reload: string[], landed: (stillHere: boolean) => Promise<void>): Promise<boolean> {
     const visit = pageVisit;
 
     try {
@@ -288,9 +307,7 @@ export async function writeLibrary(send: () => Promise<Response | null>, reload:
 
         absorbUserStates(answer.states ?? {});
         absorbCreatorStates(answer.creatorStates ?? {});
-        // On a page left meanwhile, the page's own registrations still reload:
-        // its props were asked while this write was out, maybe before it landed.
-        await reloadPage(visit === pageVisit ? reload : []);
+        await landed(visit === pageVisit);
 
         return true;
     } catch (error) {
