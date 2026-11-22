@@ -4,7 +4,7 @@ import type { LucideIcon } from '@lucide/vue';
 
 /**
  * A row of a header menu: a glyph on a square, the name and what is there. The
- * colours come from the `--tint` properties of an ancestor (`navTint()`); a
+ * colours come from the `--tint` properties of an ancestor (`rowTint()`); a
  * pointed, focused or highlighted row fills the square with its colour.
  *
  * The fill and the dark glyph fade in over the square and the light glyph

@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import AppLogo from '@/components/AppLogo.vue';
-import { currentMenuRow, DASHBOARD, groupItemHref, NAV_GROUPS, navHref, navTint } from '@/lib/navigation';
+import { currentMenuRow, DASHBOARD, groupItemHref, NAV_GROUPS, navHref } from '@/lib/navigation';
 import { signedInUser } from '@/lib/pageContext';
+import { rowTint } from '@/lib/ui';
 import { Link, usePage } from '@inertiajs/vue3';
 import { trans } from 'laravel-vue-i18n';
 import { Menu, X } from '@lucide/vue';
@@ -76,7 +77,7 @@ const rowState = (lit: boolean): string => (lit ? 'bg-surface-overlay text-ink' 
                     :key="group.id"
                     class="mt-3"
                     :aria-labelledby="`drawer-${group.id}`"
-                    :style="navTint(group.id)"
+                    :style="rowTint(group.id)"
                 >
                     <h2 :id="`drawer-${group.id}`" class="text-ink-muted px-3 pb-1 text-sm font-semibold">{{ group.label() }}</h2>
                     <Link
