@@ -3,7 +3,6 @@
 use App\Actions\Media\RefreshDueRelations;
 use App\Actions\Media\RefreshTitleRelations;
 use App\Catalog\Relations\RelationStore;
-use App\Catalog\Relations\TieRules;
 use App\Catalog\Relations\TitleRelation;
 use App\Catalog\Relations\TitleTie;
 use App\Catalog\Wikidata\RelatedWorks;
@@ -285,9 +284,9 @@ test('of a franchise the page shows the rest, known widely enough, outside the f
     inFranchise($film, 'Q462');
     FranchiseMember::factory()->create(['ref' => '11', 'title' => 'Itself']);
     FranchiseMember::factory()->create(['title' => 'A part of its collection', 'collection_ref' => '10']);
-    FranchiseMember::factory()->create(['title' => 'A tie-in short', 'votes' => TieRules::UNIVERSE_MIN_FILM_VOTES - 1]);
-    FranchiseMember::factory()->create(['type' => 'show', 'title' => 'A little-seen show', 'votes' => TieRules::UNIVERSE_MIN_VOTES - 1]);
-    FranchiseMember::factory()->create(['type' => 'show', 'title' => 'A show', 'votes' => TieRules::UNIVERSE_MIN_VOTES, 'release_date' => '2020-01-01']);
+    FranchiseMember::factory()->create(['title' => 'A tie-in short', 'votes' => config()->integer('tracker.widely_known_votes.movie') - 1]);
+    FranchiseMember::factory()->create(['type' => 'show', 'title' => 'A little-seen show', 'votes' => config()->integer('tracker.widely_known_votes.show') - 1]);
+    FranchiseMember::factory()->create(['type' => 'show', 'title' => 'A show', 'votes' => config()->integer('tracker.widely_known_votes.show'), 'release_date' => '2020-01-01']);
     FranchiseMember::factory()->create(['title' => 'Stored here', 'votes' => null, 'release_date' => '2019-01-01']);
     FranchiseMember::factory()->create(['title' => 'Another branch', 'collection_ref' => '20', 'release_date' => '2016-01-01']);
     FranchiseMember::factory()->create(['franchise' => 'Q999', 'title' => 'Another universe']);

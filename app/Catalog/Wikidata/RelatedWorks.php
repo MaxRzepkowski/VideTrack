@@ -2,13 +2,11 @@
 
 namespace App\Catalog\Wikidata;
 
-use App\Catalog\MediaKind;
 use App\Catalog\Relations\CatalogWork;
 use App\Catalog\Relations\RelatedWork;
 use App\Catalog\Relations\SourceAnswer;
 use App\Catalog\Relations\TitleRelation;
 use App\Support\ExternalServiceException;
-use App\Support\Payload;
 
 /**
  * The films and shows Wikidata ties to a title in ways its provider does not:
@@ -43,9 +41,6 @@ final readonly class RelatedWorks
     /** How a franchise row is told from a tie in the one answer. */
     private const FRANCHISE = 'franchise';
 
-    /** The catalogue Wikidata's P4947 (film) and P4983 (show) ids belong to, as the id resolver names it. */
-    private const SCREEN_CATALOGUE = 'tmdb';
-
     public function __construct(private WikidataClient $wikidata) {}
 
     /**
@@ -67,12 +62,13 @@ final readonly class RelatedWorks
 
         $subjects = implode(' ', array_map(fn (string $qid): string => "wd:{$qid}", $qids));
         $unwanted = self::UNWANTED;
+        [$screenVariables, $screenIds, $onScreen] = [CatalogueId::variables(CatalogueId::SCREEN), CatalogueId::patterns('o', CatalogueId::SCREEN), CatalogueId::anyBound(CatalogueId::SCREEN)];
         $franchise = self::FRANCHISE;
         $tieRows = self::MAX_TIE_ROWS;
         [$spinOff, $spinOffOf, $next, $previous] = [TitleRelation::SpinOff->value, TitleRelation::SpinOffOf->value, TitleRelation::Next->value, TitleRelation::Previous->value];
 
         $sparql = <<<SPARQL
-            SELECT ?s ?rel ?o ?movie ?show WHERE {
+            SELECT ?s ?rel ?o {$screenVariables} WHERE {
               VALUES ?s { {$subjects} }
               { ?s wdt:P2512 ?o . BIND("{$spinOff}" AS ?rel) }
               UNION { ?o wdt:P2512 ?s . BIND("{$spinOffOf}" AS ?rel) }
@@ -81,9 +77,8 @@ final readonly class RelatedWorks
               UNION { ?s wdt:P155 ?o . BIND("{$previous}" AS ?rel) }
               UNION { ?o wdt:P156 ?s . BIND("{$previous}" AS ?rel) }
               UNION { ?s wdt:P8345|wdt:P1434 ?o . BIND("{$franchise}" AS ?rel) }
-              OPTIONAL { ?o wdt:P4947 ?movie . }
-              OPTIONAL { ?o wdt:P4983 ?show . }
-              FILTER(?rel = "{$franchise}" || BOUND(?movie) || BOUND(?show))
+              {$screenIds}
+              FILTER(?rel = "{$franchise}" || {$onScreen})
               FILTER NOT EXISTS {
                 VALUES ?unwanted { {$unwanted} }
                 { ?o wdt:P136 ?unwanted } UNION { ?o wdt:P31 ?unwanted }
@@ -96,15 +91,15 @@ final readonly class RelatedWorks
         $franchises = [];
 
         foreach ($this->wikidata->select($sparql, self::TIMEOUT_SECONDS) as $row) {
-            $subject = $this->entity($row, 's');
-            $kind = (string) $this->value($row, 'rel');
+            $subject = SparqlRow::entity($row, 's');
+            $kind = (string) SparqlRow::value($row, 'rel');
 
             if ($subject === null) {
                 continue;
             }
 
             if ($kind === self::FRANCHISE) {
-                $hub = $this->entity($row, 'o');
+                $hub = SparqlRow::entity($row, 'o');
 
                 if ($hub !== null && SourceWorks::isItem($hub)) {
                     $franchises[$subject][$hub] = $hub;
@@ -119,7 +114,7 @@ final readonly class RelatedWorks
                 continue;
             }
 
-            foreach ($this->screenWorks($row) as $key => $work) {
+            foreach (CatalogueId::works($row, CatalogueId::SCREEN) as $key => $work) {
                 $ties[$subject]["{$relation->value}:{$key}"] = new RelatedWork($relation, $work);
             }
         }
@@ -145,15 +140,15 @@ final readonly class RelatedWorks
 
         $hubs = implode(' ', array_map(fn (string $qid): string => "wd:{$qid}", $franchises));
         $unwanted = self::UNWANTED;
+        [$screenVariables, $screenIds, $onScreen] = [CatalogueId::variables(CatalogueId::SCREEN), CatalogueId::patterns('o', CatalogueId::SCREEN), CatalogueId::anyBound(CatalogueId::SCREEN)];
         $memberRows = self::MAX_MEMBER_ROWS;
 
         $sparql = <<<SPARQL
-            SELECT ?s ?o ?movie ?show WHERE {
+            SELECT ?s ?o {$screenVariables} WHERE {
               VALUES ?s { {$hubs} }
               ?o wdt:P8345|wdt:P1434 ?s .
-              OPTIONAL { ?o wdt:P4947 ?movie . }
-              OPTIONAL { ?o wdt:P4983 ?show . }
-              FILTER(BOUND(?movie) || BOUND(?show))
+              {$screenIds}
+              FILTER({$onScreen})
               FILTER NOT EXISTS {
                 VALUES ?unwanted { {$unwanted} }
                 { ?o wdt:P136 ?unwanted } UNION { ?o wdt:P31 ?unwanted }
@@ -165,62 +160,17 @@ final readonly class RelatedWorks
         $members = [];
 
         foreach ($this->wikidata->select($sparql, self::TIMEOUT_SECONDS) as $row) {
-            $hub = $this->entity($row, 's');
+            $hub = SparqlRow::entity($row, 's');
 
             if ($hub === null) {
                 continue;
             }
 
-            foreach ($this->screenWorks($row) as $key => $work) {
+            foreach (CatalogueId::works($row, CatalogueId::SCREEN) as $key => $work) {
                 $members[$hub][$key] = $work;
             }
         }
 
         return array_map(array_values(...), $members);
-    }
-
-    /**
-     * The row's other work as a film, a show or both, by its ids at our screen provider.
-     *
-     * @param  array<array-key, mixed>  $row
-     * @return array<string, CatalogWork> by kind and id
-     */
-    private function screenWorks(array $row): array
-    {
-        $works = [];
-
-        foreach ([MediaKind::Movie->value => 'movie', MediaKind::Show->value => 'show'] as $kind => $variable) {
-            $id = $this->value($row, $variable);
-
-            if ($id !== null && ctype_digit($id)) {
-                $works["{$kind}:{$id}"] = new CatalogWork(MediaKind::from($kind), [self::SCREEN_CATALOGUE => $id]);
-            }
-        }
-
-        return $works;
-    }
-
-    /**
-     * One variable of a SPARQL result row: `{"type": …, "value": …}`.
-     *
-     * @param  array<array-key, mixed>  $row
-     */
-    private function value(array $row, string $variable): ?string
-    {
-        $binding = $row[$variable] ?? null;
-
-        return is_array($binding) ? Payload::string($binding, 'value') : null;
-    }
-
-    /**
-     * The QID a variable names, read off the end of its entity URI.
-     *
-     * @param  array<array-key, mixed>  $row
-     */
-    private function entity(array $row, string $variable): ?string
-    {
-        $uri = $this->value($row, $variable);
-
-        return $uri === null ? null : basename($uri);
     }
 }

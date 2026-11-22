@@ -4,7 +4,6 @@ namespace App\Catalog\Wikidata;
 
 use App\Catalog\ProviderException;
 use App\Catalog\ProviderRejected;
-use App\Support\Payload;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -84,9 +83,9 @@ final readonly class SourceWorks
         $works = [];
 
         foreach ($bindings as $row) {
-            $entity = $this->entity($row);
+            $entity = SparqlRow::entity($row, 'work');
             // Query by the English label when present, else the localized one.
-            $label = $this->value($row, 'enLabel') ?? $this->value($row, 'workLabel');
+            $label = SparqlRow::value($row, 'enLabel') ?? SparqlRow::value($row, 'workLabel');
 
             if ($entity === null || $label === null || $label === $entity) {
                 continue;
@@ -94,7 +93,7 @@ final readonly class SourceWorks
 
             $work = $works[$entity] ?? ['label' => $label, 'authors' => [], 'isbns' => []];
 
-            $author = $this->value($row, 'authorLabel');
+            $author = SparqlRow::value($row, 'authorLabel');
 
             if ($author !== null && ! in_array($author, $work['authors'], true)) {
                 $work['authors'][] = $author;
@@ -144,7 +143,7 @@ final readonly class SourceWorks
         $ids = [];
 
         foreach ($bindings as $row) {
-            $id = $this->value($row, 'mal');
+            $id = SparqlRow::value($row, 'mal');
 
             if ($id !== null && ctype_digit($id) && ! in_array($id, $ids, true)) {
                 $ids[] = $id;
@@ -182,10 +181,10 @@ final readonly class SourceWorks
         $isbns = [];
 
         foreach ($bindings as $row) {
-            $entity = $this->entity($row);
+            $entity = SparqlRow::entity($row, 'work');
             // Wikidata prints ISBNs hyphenated ("978-1-…"); Hardcover stores
             // them bare — compare on digits only.
-            $printed = $this->value($row, 'isbn');
+            $printed = SparqlRow::value($row, 'isbn');
             $isbn = $printed === null ? null : preg_replace('/\D/', '', $printed);
 
             if ($entity !== null && $isbn !== null && strlen($isbn) === 13 && ! in_array($isbn, $isbns[$entity] ?? [], true)) {
@@ -194,29 +193,5 @@ final readonly class SourceWorks
         }
 
         return $isbns;
-    }
-
-    /**
-     * One variable of a SPARQL result row: `{"type": …, "value": …}`.
-     *
-     * @param  array<array-key, mixed>  $row
-     */
-    private function value(array $row, string $variable): ?string
-    {
-        $binding = $row[$variable] ?? null;
-
-        return is_array($binding) ? Payload::string($binding, 'value') : null;
-    }
-
-    /**
-     * The QID of the row's `?work`, read off the end of its entity URI.
-     *
-     * @param  array<array-key, mixed>  $row
-     */
-    private function entity(array $row): ?string
-    {
-        $uri = $this->value($row, 'work');
-
-        return $uri === null ? null : basename($uri);
     }
 }
