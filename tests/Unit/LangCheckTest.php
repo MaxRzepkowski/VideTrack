@@ -1,6 +1,7 @@
 <?php
 
 use App\Support\LangCheck;
+use App\Support\LangFiles;
 
 /**
  * A throwaway lang directory and source tree.
@@ -22,7 +23,7 @@ function langFixture(array $files): string
 
 function langCheck(string $root): LangCheck
 {
-    return new LangCheck("{$root}/lang", ["{$root}/src"]);
+    return new LangCheck(new LangFiles("{$root}/lang"), ["{$root}/src"]);
 }
 
 test('group keys present in every locale and named in the code pass', function () {

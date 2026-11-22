@@ -2,7 +2,6 @@
 
 namespace App\Support;
 
-use Illuminate\Support\Arr;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use SplFileInfo;
@@ -38,7 +37,7 @@ final class LangCheck
      * @param  list<string>  $sourceDirs
      */
     public function __construct(
-        private readonly string $langDir,
+        private readonly LangFiles $files,
         private readonly array $sourceDirs,
     ) {}
 
@@ -49,7 +48,7 @@ final class LangCheck
     {
         $keysByLocale = [];
 
-        foreach ($this->locales() as $locale) {
+        foreach ($this->files->locales() as $locale) {
             $keysByLocale[$locale] = $this->keys($locale);
         }
 
@@ -63,44 +62,13 @@ final class LangCheck
     }
 
     /**
-     * @return list<string>
-     */
-    private function locales(): array
-    {
-        $locales = [];
-
-        foreach (glob("{$this->langDir}/*", GLOB_ONLYDIR) ?: [] as $dir) {
-            $locales[] = basename($dir);
-        }
-
-        return $locales;
-    }
-
-    /**
-     * Every key a locale defines: "group.path" for the group files, the bare
-     * string for the framework's JSON.
+     * Every key a locale defines.
      *
      * @return array<string, true>
      */
     private function keys(string $locale): array
     {
-        $keys = [];
-
-        foreach (glob("{$this->langDir}/{$locale}/*.php") ?: [] as $file) {
-            $group = basename($file, '.php');
-
-            foreach (array_keys(Arr::dot((array) require $file)) as $path) {
-                $keys["{$group}.{$path}"] = true;
-            }
-        }
-
-        $json = "{$this->langDir}/{$locale}.json";
-
-        foreach (is_file($json) ? (array) json_decode((string) file_get_contents($json), true) : [] as $key => $value) {
-            $keys[(string) $key] = true;
-        }
-
-        return $keys;
+        return array_fill_keys($this->files->keys($locale), true);
     }
 
     /**
