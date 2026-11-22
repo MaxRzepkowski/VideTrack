@@ -20,7 +20,6 @@ return [
     'mute' => 'Mute',
     'name_favorites' => ':name: favorites',
     'name_history' => ':name: history',
-    'name_following' => ':name: following',
     'name_in_progress' => ':name: in progress',
     'name_ratings' => ':name: ratings',
     'nothing_followed_yet_use_the_bell' => 'Nothing followed yet. Use the bell on a title or person page.',

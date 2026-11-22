@@ -56,6 +56,7 @@ return [
     'nav_suggestions_description' => 'Z tego, co już znasz',
     'nav_trending_description' => 'Najpopularniejsze w tym tygodniu',
     'nav_calendar_description' => 'Odcinki i premiery dzień po dniu',
+    'nav_following_description' => 'Tytuły i twórcy, których premiery śledzisz',
     'nav_countdowns_description' => 'Dni do wybranych premier',
     'search_shortcut' => 'Ctrl K',
     'nav_profile_description' => 'Twoja strona z biblioteką',

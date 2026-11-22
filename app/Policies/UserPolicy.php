@@ -18,13 +18,4 @@ class UserPolicy
             ? Response::allow()
             : Response::denyAsNotFound();
     }
-
-    /**
-     * The bell list is nobody else's business — not even an admin's. Another
-     * user's answers 404: it should not even be known to exist.
-     */
-    public function viewFollowing(User $viewer, User $profile): Response
-    {
-        return $viewer->id === $profile->id ? Response::allow() : Response::denyAsNotFound();
-    }
 }

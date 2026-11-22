@@ -28,7 +28,7 @@ use stdClass;
  * favorites). It knows nothing about which panel it serves: the caller names
  * the source (ActivitySource: the table and its date column) and the
  * controls' state (ActivityFilters), and gets back one page plus the day
- * keys. The following panel does not use it — follows point at people and
+ * keys. The Following page does not use it — follows point at people and
  * companies, not at logged media.
  *
  * @phpstan-type GroupRow array{groupId: int, at: string, added: string|null}

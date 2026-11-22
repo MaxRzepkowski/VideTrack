@@ -52,7 +52,7 @@ const statColumns = computed(() => (Math.ceil(statKinds.value.length / 2) >= 3 ?
         <h1 class="sr-only">{{ profile.name }}</h1>
 
         <PageMasthead class="pb-4">
-            <UserHeader :profile="profile" :is-owner="isOwner" active="show" />
+            <UserHeader :profile="profile" active="show" />
         </PageMasthead>
 
         <!-- What the header leaves out: the bio and since when the account

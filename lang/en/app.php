@@ -56,6 +56,7 @@ return [
     'nav_suggestions_description' => 'From what you already know',
     'nav_trending_description' => 'Most popular this week',
     'nav_calendar_description' => 'Episodes and releases day by day',
+    'nav_following_description' => 'Titles and creators whose releases you follow',
     'nav_countdowns_description' => 'Days until the releases you picked',
     'search_shortcut' => 'Ctrl K',
     'nav_profile_description' => 'Your page with your library',

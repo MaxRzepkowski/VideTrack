@@ -168,7 +168,7 @@ test('the following panel lights the bells of the very rows it lists', function 
     Follow::factory()->create(['user_id' => $user->id, 'company_id' => $company->id, 'mode' => FollowMode::Follow]);
 
     $this->actingAs($user)
-        ->get(route('users.following', ['user' => $user->username]))
+        ->get(route('follows.index'))
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->where('creatorStates.person:tmdb:6384.followed', true)

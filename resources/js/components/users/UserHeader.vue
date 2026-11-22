@@ -12,7 +12,6 @@ import { computed, nextTick, onMounted, ref, watch } from 'vue';
 const props = withDefaults(
     defineProps<{
         profile: ProfileData;
-        isOwner: boolean;
         /** Which panel is open — the route name without the `users.` prefix. */
         active: UserPanel;
         /**
@@ -29,7 +28,7 @@ const props = withDefaults(
 // Every panel of a user hangs off the same header, so the tab bar is the same
 // everywhere.
 const tabs = computed(() =>
-    USER_PANELS.filter((panel) => props.isOwner || !panel.ownerOnly).map((panel) => ({
+    USER_PANELS.map((panel) => ({
         key: panel.id,
         label: panel.label(),
         icon: panel.icon,

@@ -8,7 +8,7 @@ use App\Users\PanelReader;
 
 /**
  * Every page of a user (profile, history, ratings, favorites, in progress,
- * lists, following) is one view with one header: the same cover, avatar and
+ * lists) is one view with one header: the same cover, avatar and
  * tab bar on top, only the panel below it changes. They all send the header
  * the same props from here, so the block never drifts between tabs.
  */

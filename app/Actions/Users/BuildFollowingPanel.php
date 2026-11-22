@@ -22,7 +22,7 @@ use Illuminate\Support\Facades\App;
 use LogicException;
 
 /**
- * The following panel of a user view — the inspection page of the bell:
+ * The Following page, where the viewer inspects their bells:
  * everything they follow or mute by hand, titles, people and the titles
  * auto-followed through them, as one grid, newest first, filterable by kind
  * and type. Matrix-derived tracking (backlog, watching…) deliberately stays

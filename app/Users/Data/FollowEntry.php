@@ -7,7 +7,7 @@ use App\Tracking\BellEntryKind;
 use Spatie\TypeScriptTransformer\Attributes\TypeScript;
 
 /**
- * One bell on the following panel: a followed person, company or collection,
+ * One bell on the Following page: a followed person, company or collection,
  * a title belled by hand or by a followed creator, or a muted one.
  */
 #[TypeScript]

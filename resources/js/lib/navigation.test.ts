@@ -3,6 +3,7 @@ import {
     CALENDAR,
     currentMenuRow,
     DASHBOARD,
+    FOLLOWING,
     groupItemHref,
     groupOf,
     menuPlaces,
@@ -10,9 +11,9 @@ import {
     navHref,
     OTHER_PLACES,
     SETTINGS_NAV,
+    settingsNav,
     STATISTICS,
     SUGGESTIONS,
-    settingsNav,
     USER_PANELS,
     userPanel,
 } from '@/lib/navigation';
@@ -43,13 +44,9 @@ describe('the navigation tree', () => {
         expect(navHref(userPanel('history'), 'alex')).toBe('/users.history/alex');
     });
 
-    it('shows the following tab to the owner only', () => {
-        expect(USER_PANELS.filter((panel) => panel.ownerOnly).map((panel) => panel.id)).toEqual(['following']);
-    });
-
     it('gives the profile the rounded person and following the bell', () => {
         expect(userPanel('show').icon).toBe(SETTINGS_NAV[0].icon);
-        expect(userPanel('following').icon).toBe(OTHER_PLACES.find((entry) => entry.id === 'notifications')?.icon);
+        expect(FOLLOWING.icon).toBe(OTHER_PLACES.find((entry) => entry.id === 'notifications')?.icon);
     });
 
     it('lists connected accounts only where a provider is configured, and the password only where it signs in', () => {
@@ -114,6 +111,7 @@ describe('groupOf', () => {
         expect(groupOf(STATISTICS)).toBe('library');
         expect(groupOf(userPanel('lists'))).toBe('library');
         expect(groupOf(DASHBOARD)).toBeNull();
-        expect(groupOf(userPanel('following'))).toBeNull();
+        expect(groupOf(FOLLOWING)).toBe('releases');
+        expect(groupOf(userPanel('show'))).toBeNull();
     });
 });
