@@ -45,4 +45,17 @@ describe('the titles of the same universe', () => {
     it('is not there at all for a title with nothing tied to it', () => {
         expect(section([]).find('section').exists()).toBe(false);
     });
+
+    it('lists works in other media under the heading the page gives it', () => {
+        const wrapper = mount(RelatedTitles, {
+            props: {
+                titles: [{ relation: 'based_on', label: 'Source work', media: mediaSummary({ type: 'book', ref: '10' }) }],
+                heading: 'In other media',
+            },
+            global: { stubs: { MediaCard: true } },
+        });
+
+        expect(wrapper.find('h2').text()).toBe('In other media');
+        expect(wrapper.findAllComponents(MediaCard).map((card) => card.props('subtitle'))).toEqual(['Source work']);
+    });
 });

@@ -120,8 +120,8 @@ class ScheduledTasks
                 queue: fn () => RefreshSuggestionSets::queueTask(),
             ),
             // Daily, though a title is asked about once in months: a run takes
-            // on a few hundred titles, so a new library is covered over
-            // several mornings and a covered one costs nothing.
+            // on a few hundred titles, the library's first, so a new library
+            // is covered over a few mornings and a covered one costs nothing.
             new ScheduledTask(
                 name: TaskName::RefreshRelations,
                 cron: '30 7 * * *',

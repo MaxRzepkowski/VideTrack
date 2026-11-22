@@ -6,14 +6,19 @@ use App\Catalog\Relations\RelationStore;
 use App\Catalog\Relations\TitleRelation;
 use App\Catalog\Relations\TitleTie;
 use App\Catalog\Wikidata\RelatedWorks;
+use App\Catalog\Wikidata\TitleItems;
 use App\Models\FranchiseMember;
+use App\Models\ListItem;
 use App\Models\MediaItem;
+use App\Models\MediaList;
+use App\Models\Play;
 use App\Models\RelatedTitle;
 use App\Models\User;
 use App\Tasks\TaskName;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Sleep;
 use Inertia\Testing\AssertableInertia;
 
 /**
@@ -34,16 +39,26 @@ function wikidataTie(string $subject, TitleRelation $relation, ?string $movie = 
 }
 
 /**
- * Wikidata answering with the given rows, TMDB with the given details by path.
+ * Wikidata answering with the given rows (the question about films and
+ * shows, the one across media, the one finding our titles' items), TMDB
+ * with the given details by path.
  *
  * @param  list<array<string, mixed>>  $rows
  * @param  array<string, array<string, mixed>>  $tmdb  path => details
+ * @param  list<array<string, mixed>>  $acrossMedia
+ * @param  list<array<string, mixed>>  $items
  */
-function fakeRelations(array $rows, array $tmdb = []): void
+function fakeRelations(array $rows, array $tmdb = [], array $acrossMedia = [], array $items = []): void
 {
-    Http::fake(function (Request $request) use ($rows, $tmdb) {
+    Http::fake(function (Request $request) use ($rows, $tmdb, $acrossMedia, $items) {
         if (str_contains($request->url(), '/sparql')) {
-            return Http::response(['results' => ['bindings' => $rows]]);
+            $query = (string) ($request->data()['query'] ?? '');
+
+            return Http::response(['results' => ['bindings' => match (true) {
+                str_contains($query, 'wdt:P4969') => $acrossMedia,
+                str_contains($query, 'SELECT ?id ?value ?item') => $items,
+                default => $rows,
+            }]]);
         }
 
         foreach ($tmdb as $path => $details) {
@@ -137,14 +152,14 @@ test('adult material and a work the catalogue lacks are left out; the rest is ke
 test('the run asks about what was never asked, notes an empty answer and comes back after months', function () {
     $tied = titleKnownToWikidata('Q1079');
     $alone = titleKnownToWikidata('Q5');
-    // No id at the source: never asked about.
+    // Its provider names no item: looked for by its TMDB id, and not found.
     MediaItem::factory()->movie()->create();
     RelatedTitle::factory()->create(['media_item_id' => $tied->id, 'ref' => '111']);
     fakeRelations([wikidataTie('Q1079', TitleRelation::SpinOff, show: '60059')], ['tv/60059' => [...jsonFixture('tmdb/tv'), 'id' => 60059]]);
 
     $run = runScheduledTask(TaskName::RefreshRelations->value);
 
-    expect($run->summary)->toBe('Asked about 2 of 2 titles due. Kept 1 ties and 0 titles of their franchises.')
+    expect($run->summary)->toBe('Asked about 3 of 3 titles due. Kept 1 ties and 0 titles of their franchises.')
         // What the source no longer says is gone.
         ->and(RelatedTitle::query()->pluck('ref')->all())->toBe(['60059'])
         ->and(app(RelationStore::class)->of($alone))->toBe([])
@@ -152,18 +167,64 @@ test('the run asks about what was never asked, notes an empty answer and comes b
 
     $this->travel(RelationStore::FRESH_DAYS + 1)->days();
 
-    expect(app(RelationStore::class)->countDue(now()))->toBe(2);
+    expect(app(RelationStore::class)->countDue(now(), app(TitleItems::class)->findableTypes()))->toBe(3);
 });
 
-test('a source that does not answer ends the run and leaves the titles due', function () {
-    titleKnownToWikidata('Q1079');
+test('a source failing title after title ends the run; each title it failed on waits for the next run', function () {
+    $titles = array_map(fn (int $number) => titleKnownToWikidata("Q{$number}"), range(1, RefreshDueRelations::FAILURES_BEFORE_STOP + 1));
     Http::fake(['*' => Http::response([], 503)]);
 
     $run = runScheduledTask(TaskName::RefreshRelations->value);
+    $due = fn (): int => app(RelationStore::class)->countDue(now(), app(TitleItems::class)->findableTypes());
 
-    expect($run->summary)->toBe('Asked about 0 of 1 titles due. Kept 0 ties and 0 titles of their franchises.')
+    $stop = RefreshDueRelations::FAILURES_BEFORE_STOP;
+
+    expect($run->summary)->toBe('Asked about '.$stop.' of '.($stop + 1).' titles due. Kept 0 ties and 0 titles of their franchises.')
+        ->and($run->errors)->toHaveCount($stop)
+        ->and($run->errors[0])->toStartWith("{$titles[0]->title}: ")
+        ->and($due())->toBe(1);
+
+    $this->travel(RefreshDueRelations::HOURS_AFTER_FAILURE + 1)->hours();
+
+    expect($due())->toBe($stop + 1);
+});
+
+test('a service\'s limit is waited out and the batch asked again', function () {
+    Sleep::fake();
+    titleKnownToWikidata('Q1079');
+    $answered = 0;
+    Http::fake(function () use (&$answered) {
+        return $answered++ === 0
+            ? Http::response([], 429, ['Retry-After' => '5'])
+            : Http::response(['results' => ['bindings' => []]]);
+    });
+
+    $run = runScheduledTask(TaskName::RefreshRelations->value);
+
+    expect($run->summary)->toBe('Asked about 1 of 1 titles due. Kept 0 ties and 0 titles of their franchises.')
+        ->and($run->errors)->toBeNull();
+    Sleep::assertSequence([Sleep::for(5)->seconds()]);
+});
+
+test('a batch too heavy to answer is asked in halves, and only the title behind it waits a day', function () {
+    foreach (['Q1', 'Q2', 'Q3'] as $qid) {
+        titleKnownToWikidata($qid);
+    }
+    $heavy = titleKnownToWikidata('Q999999', ['title' => 'The Heavy One']);
+    Http::fake(fn (Request $request) => str_contains((string) ($request->data()['query'] ?? ''), 'wd:Q999999')
+        ? Http::response([], 502)
+        : Http::response(['results' => ['bindings' => []]]));
+
+    $run = runScheduledTask(TaskName::RefreshRelations->value);
+
+    expect($run->summary)->toBe('Asked about 4 of 4 titles due. Kept 0 ties and 0 titles of their franchises.')
         ->and($run->errors)->toHaveCount(1)
-        ->and(app(RelationStore::class)->countDue(now()))->toBe(1);
+        ->and($run->errors[0])->toStartWith('The Heavy One: ')
+        ->and(app(RelationStore::class)->countDue(now(), app(TitleItems::class)->findableTypes()))->toBe(0);
+
+    $this->travel(RefreshDueRelations::HOURS_AFTER_FAILURE + 1)->hours();
+
+    expect(app(RelationStore::class)->due(now(), 10, app(TitleItems::class)->findableTypes())->pluck('id')->all())->toBe([$heavy->id]);
 });
 
 test('a batch is as large as the job says', function () {
@@ -174,7 +235,8 @@ test('a batch is as large as the job says', function () {
     fakeRelations([]);
     runScheduledTask(TaskName::RefreshRelations->value);
 
-    expect(Http::recorded()->filter(fn (array $pair) => str_contains($pair[0]->url(), '/sparql')))->toHaveCount(2);
+    // Two batches, each one question about films and shows and one across media.
+    expect(Http::recorded()->filter(fn (array $pair) => str_contains($pair[0]->url(), '/sparql')))->toHaveCount(4);
 });
 
 test('a title\'s page shows its ties with their states, without asking anyone', function () {
@@ -332,4 +394,28 @@ test('finding the tied works costs the same number of queries for one work as fo
     // The works are looked up together, so a title with many ties asks the
     // database no more often than a title with one.
     expect($queriesFor(8))->toBe($queriesFor(1));
+});
+
+test('the titles someone holds are asked about before the rest of the catalogue; a collection\'s own list holds none', function () {
+    foreach (range(1, RefreshDueRelations::BATCH) as $number) {
+        titleKnownToWikidata("Q{$number}");
+    }
+    $watched = MediaItem::factory()->movie()->create(['metadata' => ['wikidataId' => 'Q500']]);
+    Play::factory()->for(User::factory())->create(['media_item_id' => $watched->id]);
+    projectEveryLibrary();
+    $listed = titleKnownToWikidata('Q501');
+    ListItem::factory()->create(['list_id' => MediaList::factory()->create()->id, 'media_item_id' => $listed->id]);
+    $collected = titleKnownToWikidata('Q502');
+    ListItem::factory()->create(['list_id' => MediaList::factory()->collection('tmdb', '10')->create()->id, 'media_item_id' => $collected->id]);
+    $asked = [];
+    Http::fake(function (Request $request) use (&$asked) {
+        $asked[] = (string) ($request->data()['query'] ?? '');
+
+        return Http::response(['results' => ['bindings' => []]]);
+    });
+
+    runScheduledTask(TaskName::RefreshRelations->value);
+
+    expect($asked[0])->toContain('VALUES ?s { wd:Q500 wd:Q501 }')
+        ->and(app(RelationStore::class)->countDue(now(), app(TitleItems::class)->findableTypes()))->toBe(0);
 });

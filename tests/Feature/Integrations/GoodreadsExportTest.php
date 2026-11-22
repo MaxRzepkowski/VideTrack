@@ -222,8 +222,8 @@ test('the Goodreads file reads back through the Goodreads import into the same l
     $books = MediaItem::query()->where('type', 'book')->get();
     Http::fake(['api.hardcover.app/*' => fn (Request $request) => Http::response(['data' => [
         'book_mappings' => $books
-            ->filter(fn (MediaItem $book): bool => ItemMetadata::fromStored($book->metadata)->goodreadsId() === data_get($request->data(), 'variables.id'))
-            ->map(fn (MediaItem $book): array => ['book_id' => (int) $book->provider_ref])->values()->all(),
+            ->filter(fn (MediaItem $book): bool => in_array(ItemMetadata::fromStored($book->metadata)->goodreadsId(), (array) data_get($request->data(), 'variables.ids'), true))
+            ->map(fn (MediaItem $book): array => ['external_id' => ItemMetadata::fromStored($book->metadata)->goodreadsId(), 'book_id' => (int) $book->provider_ref])->values()->all(),
     ]])]);
 
     $copy = User::factory()->create();

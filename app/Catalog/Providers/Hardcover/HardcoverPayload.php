@@ -120,6 +120,8 @@ final readonly class HardcoverPayload
             posterPath: $this->coverUrl($data),
             communityRating: $this->rating($data),
             releaseDate: $releaseDate,
+            // Asked for by the book's own page, not by listings.
+            votes: Payload::positiveInt($data, 'ratings_count'),
             progressTotal: Payload::positiveInt($data, 'pages'),
             authors: $this->authors($data),
             extra: array_filter(['bookKind' => HardcoverBookKind::of($data)?->value]),

@@ -31,4 +31,10 @@ final class Isbn
 
         return $base.((10 - $sum % 10) % 10);
     }
+
+    /** Whether an ISBN-13 was registered in the English-language groups (978-0, 978-1, 979-8). */
+    public static function isEnglish(string $thirteen): bool
+    {
+        return str_starts_with($thirteen, '9780') || str_starts_with($thirteen, '9781') || str_starts_with($thirteen, '9798');
+    }
 }

@@ -76,7 +76,7 @@ test('a BookWyrm export places books by Goodreads id and ISBN, then by title and
 
     // The ISBN-10 edition was asked about in its 13-digit form, Dune by its Goodreads id; the ASIN never.
     Http::assertSent(fn (Request $request) => data_get($request->data(), 'variables.isbns') === ['9780547928227']);
-    Http::assertSent(fn (Request $request) => data_get($request->data(), 'variables.id') === '234225');
+    Http::assertSent(fn (Request $request) => data_get($request->data(), 'variables.ids') === ['234225']);
     Http::assertNotSent(fn (Request $request) => str_contains((string) json_encode($request->data()), 'B0B3Y8WL2L'));
 });
 

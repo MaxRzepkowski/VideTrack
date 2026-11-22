@@ -4,8 +4,6 @@ namespace App\Catalog;
 
 use App\Catalog\Contracts\SupportsIsbnLookup;
 use App\Catalog\Data\ResolvedMedia;
-use App\Models\ExternalIdMapping;
-use Illuminate\Support\Facades\Cache;
 
 /**
  * "A Jellyfin server says imdb tt0133093 just finished" → `movie:603`.
@@ -21,14 +19,12 @@ use Illuminate\Support\Facades\Cache;
  */
 final readonly class ExternalIdResolver
 {
-    /** Remember a fruitless lookup for a day so we stop asking. */
-    private const MISS_TTL_HOURS = 24;
-
     public function __construct(
         private MediaTypeRegistry $types,
         private ProviderRegistry $providers,
         private ExternalRefLookup $externalRefs,
         private HierarchyPath $hierarchy,
+        private ExternalIdMemory $memory,
     ) {}
 
     /**
@@ -64,6 +60,65 @@ final readonly class ExternalIdResolver
         }
 
         return $this->first($ids, $mediaKind, $locale);
+    }
+
+    /**
+     * Asks together about the foreign ids of many items of one kind that no
+     * one has asked about yet, where the provider answers about many at once,
+     * so resolving each item afterwards costs no request: what it knows is
+     * mapped, what it does not is remembered as a miss, as if asked alone.
+     * Ids of a source asked one at a time are left to resolve(). An item
+     * known by our own provider's id needs nothing, and one an earlier source
+     * already names is not asked about by the later ones.
+     *
+     * @param  list<array<string, string>>  $idBags  each item's source => id
+     *
+     * @throws ProviderException|ProviderRejected the provider could not be asked
+     */
+    public function prefetch(array $idBags, MediaKind $mediaKind): void
+    {
+        // Below a root an item is found through its show, never by its own ids alone.
+        if (! $this->types->has($mediaKind->value) || ! $this->types->get($mediaKind->value)->isRoot()) {
+            return;
+        }
+
+        $native = $this->nativeSource($mediaKind);
+        $open = array_filter(array_map($this->usable(...), $idBags), fn (array $ids): bool => $ids !== [] && ($native === null || ! isset($ids[$native])));
+
+        foreach ($this->sourcesFor($mediaKind) as $source) {
+            // An ISBN is no id a provider translates: resolve() asks after the book itself.
+            if ($source === ExternalIdSource::Isbn) {
+                continue;
+            }
+
+            $ids = array_values(array_unique(array_filter(array_map(fn (array $bag): ?string => $bag[$source->value] ?? null, $open))));
+            $mapped = $this->memory->mapped($source, $ids, $mediaKind);
+            $missed = $this->memory->missed($source, $ids, $mediaKind);
+            $unasked = array_values(array_filter($ids, fn (string $id): bool => ! isset($mapped[$id]) && ! isset($missed[$id])));
+            $refs = $unasked === [] ? [] : $this->externalRefs->refsFor($mediaKind->value, $source, $unasked);
+
+            if ($refs === null) {
+                continue;
+            }
+
+            $found = [];
+            $misses = [];
+
+            foreach ($refs as $id => $ref) {
+                if ($ref === null) {
+                    $misses[] = (string) $id;
+                } else {
+                    $found[(string) $id] = $ref;
+                    $mapped[(string) $id] = true;
+                }
+            }
+
+            $this->memory->rememberAll($source, $mediaKind, $found);
+            $this->memory->rememberMisses($source, $misses, $mediaKind);
+
+            // A later source is asked only about the items this one did not name.
+            $open = array_filter($open, fn (array $bag): bool => ! isset($bag[$source->value], $mapped[$bag[$source->value]]));
+        }
     }
 
     /**
@@ -184,26 +239,18 @@ final readonly class ExternalIdResolver
     }
 
     /**
-     * One foreign id, asked about through both caches: the durable mapping
-     * table first (a bulk import asks about the same ids thousands of times),
-     * then a short-lived negative cache so a genuinely unknown id is not
-     * re-asked on every delivery.
+     * One foreign id, asked about only when nothing is known of it yet
+     * (ExternalIdMemory).
      */
     private function through(ExternalIdSource $source, string $id, MediaKind $mediaKind, string $locale): ?ResolvedMedia
     {
-        $mapped = ExternalIdMapping::query()
-            ->where('source', $source)
-            ->where('external_ref', $id)
-            ->where('media_kind', $mediaKind)
-            ->first();
+        $mapped = $this->memory->find($source, $id, $mediaKind);
 
         if ($mapped !== null) {
-            return new ResolvedMedia($mapped->type, $mapped->provider_ref);
+            return $mapped;
         }
 
-        $missKey = "extid-miss:{$source->value}:{$id}:{$mediaKind->value}";
-
-        if (Cache::get($missKey) === true) {
+        if ($this->memory->isMiss($source, $id, $mediaKind)) {
             return null;
         }
 
@@ -218,19 +265,12 @@ final readonly class ExternalIdResolver
         }
 
         if ($resolved === null) {
-            Cache::put($missKey, true, now()->addHours(self::MISS_TTL_HOURS));
+            $this->memory->rememberMiss($source, $id, $mediaKind);
 
             return null;
         }
 
-        ExternalIdMapping::query()->updateOrCreate(
-            ['source' => $source, 'external_ref' => $id, 'media_kind' => $mediaKind],
-            [
-                'type' => $resolved->type,
-                'provider' => $this->types->get($resolved->type)->provider,
-                'provider_ref' => $resolved->ref,
-            ],
-        );
+        $this->memory->remember($source, $id, $mediaKind, $resolved);
 
         return $resolved;
     }

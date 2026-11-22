@@ -26,6 +26,7 @@ const props = defineProps<{
     manga: MediaDetails<MangaExtra>;
     recentlyViewed?: MediaSummary[];
     relatedTitles?: TitleTie[];
+    otherMedia?: TitleTie[];
     fromLibrary?: boolean;
     removedAtSource?: boolean;
 }>();
@@ -109,6 +110,7 @@ const detailRows = computed<DetailRow[]>(() => [
 
         <template #below>
             <RelatedTitles :titles="relatedTitles ?? []" :source="null" />
+            <RelatedTitles :titles="otherMedia ?? []" :heading="trans('media.in_other_media')" />
         </template>
 
         <template #after>

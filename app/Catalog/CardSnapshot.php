@@ -54,8 +54,7 @@ final readonly class CardSnapshot
             backdropPath: Payload::string($row->card, 'backdropPath'),
             communityRating: is_numeric($rating) ? (float) $rating : null,
             releaseDate: $row->release_date?->toDateString(),
-            // A tie carries no count of ratings; a set's or a franchise's member does.
-            votes: $row instanceof RelatedTitle ? null : $row->votes,
+            votes: $row->votes,
         );
     }
 }

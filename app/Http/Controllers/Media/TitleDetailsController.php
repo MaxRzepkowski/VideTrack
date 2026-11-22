@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Media;
 
 use App\Actions\Media\ResolveEventsShowing;
+use App\Actions\Media\ResolveRelatedTitles;
 use App\Actions\Media\ResolveTitleCollection;
 use App\Actions\Media\ResolveTitleDetails;
 use App\Catalog\Contracts\SupportsEvents;
@@ -40,6 +41,7 @@ class TitleDetailsController extends Controller
         LibraryStates $states,
         RecentViews $recentViews,
         TieRules $tieRules,
+        ResolveRelatedTitles $relatedTitles,
         string $type,
         string $ref,
     ): Response {
@@ -54,6 +56,7 @@ class TitleDetailsController extends Controller
         $recentViews->record($viewer, $details->summary);
 
         $provider = $providers->forType($types->get($type));
+        $related = $relatedTitles->execute($details);
 
         $props = [
             $type => $details,
@@ -61,13 +64,15 @@ class TitleDetailsController extends Controller
             'removedAtSource' => $title->removedAtSource,
             // The titles its provider ties to it with the details (a manga's sequel).
             'relatedTitles' => $tieRules->fromProvider($details->ties),
+            // Its works in other media, as the background task stored them.
+            'otherMedia' => $related->otherMedia,
             // The series or saga the title belongs to, where its provider curates one;
             // from the library alone the provider is not asked.
             'collection' => $title->fromLibrary
                 ? null
                 : fn (): ?CollectionBannerData => $titleCollection->execute($provider, $details, App::getLocale()),
             'recentlyViewed' => fn (): array => $recentViews->recent($viewer, except: $details->summary),
-            'userStates' => fn (): array => $states->resolveForDetails($viewer, $details),
+            'userStates' => fn (): array => [...$states->resolveForDetails($viewer, $details), ...$states->resolve($viewer, $related->cards())],
         ];
 
         // Every event that showed it (a game at Summer Game Fest), long past ones

@@ -81,7 +81,26 @@ final readonly class LibraryHolders
      */
     public function rootsHeldBy(int $userId): Collection
     {
-        $withHistory = Numbers::ints(LibraryEntry::query()->where('user_id', $userId)->distinct()->pluck('root_id'));
+        return $this->heldRoots($userId);
+    }
+
+    /**
+     * The roots of every title anyone holds anything on, as rootsHeldBy().
+     *
+     * @return Collection<int, int>
+     */
+    public function rootsHeldByAnyone(): Collection
+    {
+        return $this->heldRoots(null);
+    }
+
+    /**
+     * @param  int|null  $userId  null: anyone's
+     * @return Collection<int, int>
+     */
+    private function heldRoots(?int $userId): Collection
+    {
+        $withHistory = Numbers::ints(LibraryEntry::query()->when($userId !== null, fn (Builder $entries) => $entries->where('user_id', $userId))->distinct()->pluck('root_id'));
 
         return collect($withHistory)
             ->merge($this->hierarchy->rootIds($this->heldBesidesHistory($userId, null)))
@@ -94,22 +113,25 @@ final readonly class LibraryHolders
      * cycle, a bell or mute of their own, or an entry on one of the user's
      * own lists.
      *
+     * @param  int|null  $userId  null: anyone's
      * @param  Collection<int, int>|null  $ids  null: on any item
      * @return Collection<int, int>
      */
-    private function heldBesidesHistory(int $userId, ?Collection $ids): Collection
+    private function heldBesidesHistory(?int $userId, ?Collection $ids): Collection
     {
         $on = fn (Builder|QueryBuilder $query, string $column = 'media_item_id') => $ids === null
             ? $query->whereNotNull($column)
             : $query->whereIn($column, $ids);
+        $of = fn (Builder $query, string $column = 'user_id') => $userId === null ? $query : $query->where($column, $userId);
 
         $held = collect([
-            $on(Rating::query()->where('user_id', $userId))->pluck('media_item_id'),
-            $on(Favorite::query()->where('user_id', $userId))->pluck('media_item_id'),
-            $on(MediaUserState::query()->where('user_id', $userId))->pluck('media_item_id'),
-            $on(WatchCycle::query()->where('user_id', $userId))->distinct()->pluck('media_item_id'),
-            $on(Follow::query()->chosenByUser()->where('user_id', $userId))->pluck('media_item_id'),
-            $on(ListItem::query()->join('lists', 'lists.id', '=', 'list_items.list_id')->where('lists.user_id', $userId), 'list_items.media_item_id')
+            $on($of(Rating::query()))->pluck('media_item_id'),
+            $on($of(Favorite::query()))->pluck('media_item_id'),
+            $on($of(MediaUserState::query()))->pluck('media_item_id'),
+            $on($of(WatchCycle::query()))->distinct()->pluck('media_item_id'),
+            $on($of(Follow::query()->chosenByUser()))->pluck('media_item_id'),
+            // A collection's own list belongs to no user.
+            $on($of(ListItem::query()->join('lists', 'lists.id', '=', 'list_items.list_id')->whereNotNull('lists.user_id'), 'lists.user_id'), 'list_items.media_item_id')
                 ->distinct()
                 ->pluck('list_items.media_item_id'),
         ])->flatten();

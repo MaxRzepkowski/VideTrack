@@ -82,7 +82,7 @@ final readonly class IgdbGames
         // aside where they do not apply: cheaper than a second request once
         // the game's own answer has said which it is.
         $answer = $this->client->multiquery([
-            self::GAME => ['games', 'fields name, summary, storyline, first_release_date, total_rating, hypes, game_type, game_status.status, url, '
+            self::GAME => ['games', 'fields name, summary, storyline, first_release_date, total_rating, total_rating_count, hypes, game_type, game_status.status, url, '
             .'cover.image_id, screenshots.image_id, artworks.image_id, '
             .'genres.name, themes.name, keywords.name, game_modes.name, platforms.name, '
             .'game_engines.name, '.IgdbFranchises::FIELDS.', '

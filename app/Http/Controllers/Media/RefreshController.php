@@ -12,8 +12,8 @@ use App\Catalog\Creators\CreatorRef;
 use App\Catalog\Hierarchy;
 use App\Catalog\ProviderCacheContext;
 use App\Catalog\ProviderRegistry;
-use App\Catalog\Relations\RelationStore;
 use App\Catalog\TitleStore;
+use App\Catalog\Wikidata\TitleItems;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Media\RefreshMediaRequest;
 use App\Jobs\RefreshTitleTies;
@@ -38,7 +38,7 @@ class RefreshController extends Controller
         Hierarchy $hierarchy,
         RetireGoneParts $retireParts,
         EpisodeTimes $episodeTimes,
-        RelationStore $relations,
+        TitleItems $items,
     ): RedirectResponse {
         // Resolve the (already persisted) target, then climb to its root:
         // refresh() re-fetches the whole tree with no short-circuit, so
@@ -56,7 +56,7 @@ class RefreshController extends Controller
         // background: a show's air times, and the title's ties and franchise.
         $episodeTimes->afterRefresh($root, scheduleChanged: true);
 
-        if ($relations->sourceIdOf($root) !== null) {
+        if ($items->findable($root)) {
             RefreshTitleTies::dispatch($root->id);
         }
 

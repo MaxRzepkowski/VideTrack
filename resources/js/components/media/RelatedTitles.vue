@@ -9,20 +9,23 @@ import { trans } from 'laravel-vue-i18n';
 import { computed, ref } from 'vue';
 
 /**
- * The titles of this one's universe that its provider does not group with
- * it: its spin-offs, what it was spun off from, what continues it, then the
- * rest of the franchise. A card says how it stands to this title where that
- * is known. Found through Wikidata by a background task, so the page never
- * waits for it, or named by the title's own provider with its details. A
- * large universe opens two rows deep.
+ * Titles tied to this one in a way its provider does not group: those of its
+ * universe (its spin-offs, what it was spun off from, what continues it, the
+ * rest of the franchise), or, under its own heading, its works in other
+ * media (the novel behind it, the game made of it). A card says how it
+ * stands to this title where that is known. Found through Wikidata by a
+ * background task, so the page never waits for it, or named by the title's
+ * own provider with its details. A long list opens two rows deep.
  */
 const props = withDefaults(
     defineProps<{
         titles: TitleTie[];
+        /** The section's heading. */
+        heading?: string;
         /** Who says so, beside the heading; none where the page names no source. */
         source?: string | null;
     }>(),
-    { source: () => trans('media.via_wikidata') },
+    { heading: () => trans('media.from_the_same_universe'), source: () => trans('media.via_wikidata') },
 );
 
 const ROWS = 2;
@@ -35,7 +38,7 @@ const shown = computed(() => (expanded.value ? props.titles : props.titles.slice
 
 <template>
     <section v-if="titles.length" class="pt-16">
-        <SectionHeading :title="trans('media.from_the_same_universe')">
+        <SectionHeading :title="heading">
             <template v-if="source" #badge>
                 <span class="text-ink-faint text-sm font-medium">{{ source }}</span>
             </template>

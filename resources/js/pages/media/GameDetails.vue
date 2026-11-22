@@ -12,6 +12,7 @@ import OverviewSection from '@/components/media/OverviewSection.vue';
 import PhotosSection from '@/components/media/PhotosSection.vue';
 import RecentlyViewed from '@/components/media/RecentlyViewed.vue';
 import RecommendationsBand from '@/components/media/RecommendationsBand.vue';
+import RelatedTitles from '@/components/media/RelatedTitles.vue';
 import StickyActionsPanel from '@/components/media/StickyActionsPanel.vue';
 import TitlePageLayout from '@/components/media/TitlePageLayout.vue';
 import TitleShelf from '@/components/media/TitleShelf.vue';
@@ -29,7 +30,7 @@ import type { TooltipRow } from '@/lib/tooltip';
 import { mediaUrl } from '@/lib/urls';
 import type { GameExtra } from '@/types/extras';
 import type { EventEntry } from '@/types/generated';
-import type { CertificationRow, Chip, CollectionBannerData, CreatorLink, DetailRow, MediaDetails, MediaSummary } from '@/types/media';
+import type { CertificationRow, Chip, CollectionBannerData, CreatorLink, DetailRow, MediaDetails, MediaSummary, TitleTie } from '@/types/media';
 import { Head, Link } from '@inertiajs/vue3';
 import { trans } from 'laravel-vue-i18n';
 import { Gauge, Timer, Trophy } from '@lucide/vue';
@@ -40,6 +41,7 @@ const props = defineProps<{
     recentlyViewed?: MediaSummary[];
     fromLibrary?: boolean;
     removedAtSource?: boolean;
+    otherMedia?: TitleTie[];
     /** The series it belongs to, where IGDB curates one. */
     collection?: CollectionBannerData | null;
     /** The showcases that showed it, the latest first. */
@@ -247,6 +249,7 @@ const ownedEdition = computed(() => {
             <TitleShelf :title="trans('media.editions')" :items="game.extra.editions ?? []" />
             <TitleShelf :title="trans('media.dlcs')" :items="game.extra.dlcs ?? []" />
             <TitleShelf :title="trans('media.other_releases')" :items="game.extra.otherReleases ?? []" />
+            <RelatedTitles :titles="otherMedia ?? []" :heading="trans('media.in_other_media')" />
             <!-- Asked of the provider after the page is drawn. -->
             <EventShelf :title="trans('media.shown_at')" :events="shownAt ?? []" />
         </template>

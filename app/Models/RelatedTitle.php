@@ -10,8 +10,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
 
 /**
- * A title tied to a stored one (its spin-off, what comes next): which title,
- * how it stands to ours, and the card it was found with.
+ * A title tied to a stored one (its spin-off, what comes next, the novel it
+ * is based on): which title, how it stands to ours, and the card it was found with.
  *
  * @property int $id
  * @property int $media_item_id
@@ -22,6 +22,7 @@ use Illuminate\Support\Carbon;
  * @property string $title
  * @property Carbon|null $release_date
  * @property array<string, mixed> $card
+ * @property int|null $votes how many rated the title at the provider; null where it is stored here
  * @property-read MediaItem $mediaItem
  */
 class RelatedTitle extends Model

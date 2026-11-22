@@ -1041,7 +1041,7 @@ export type TimeTitle = {
     readonly estimatedMinutes: number | null;
     readonly parts: number | null;
 };
-export type TitleRelation = 'spin_off' | 'spin_off_of' | 'next' | 'previous' | 'same_universe';
+export type TitleRelation = 'spin_off' | 'spin_off_of' | 'next' | 'previous' | 'same_universe' | 'based_on' | 'adaptation' | 'same_source';
 export type TitleStatus =
     | 'rumored'
     | 'planned'

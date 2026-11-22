@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Media;
 
 use App\Actions\Media\ResolveRelatedTitles;
-use App\Actions\Media\ResolveSourceBooks;
 use App\Actions\Media\ResolveTitleCollection;
 use App\Actions\Media\ResolveTitleDetails;
 use App\Catalog\Data\CollectionBannerData;
@@ -30,7 +29,6 @@ class MovieDetailsController extends Controller
         ResolveTitleDetails $resolve,
         WhereToWatch $whereToWatch,
         ResolveTitleCollection $titleCollection,
-        ResolveSourceBooks $sourceBooks,
         RecentViews $recentViews,
         ResolveRelatedTitles $relatedTitles,
         string $ref,
@@ -45,11 +43,7 @@ class MovieDetailsController extends Controller
 
         $recentViews->record($viewer, $details->summary);
 
-        // Read by two deferred props that land in the same follow-up request;
-        // `once` keeps it to a single Wikidata round-trip.
-        $books = fn (): ?array => once(fn (): ?array => $sourceBooks->execute($details, App::getLocale()));
-
-        $related = $relatedTitles->execute('movie', $ref);
+        $related = $relatedTitles->execute($details);
 
         return Inertia::render('media/MovieDetails', [
             'movie' => $details,
@@ -59,15 +53,6 @@ class MovieDetailsController extends Controller
             'collection' => $fromLibrary
                 ? null
                 : fn (): ?CollectionBannerData => $titleCollection->execute($provider, $details, App::getLocale()),
-            // Deferred (Wikidata bridge): the source book(s) resolved through
-            // our own book provider — P144 → literary work → ISBN lookup. The
-            // SPARQL round-trip must never block the render; the section
-            // appears once the follow-up request lands.
-            'sourceBooks' => Inertia::defer($books),
-            // The book cards carry the shared action bar, but `userStates`
-            // resolves with the render, before the books are known — their
-            // share arrives with them.
-            'deferredUserStates' => Inertia::defer(fn (): array => $states->resolve($viewer, $books() ?? [])),
             'watchProviders' => $fromLibrary
                 ? null
                 : fn (): ?WatchAvailability => $whereToWatch->forViewer($provider, 'movie', $ref, $viewer, App::getLocale()),
@@ -77,9 +62,10 @@ class MovieDetailsController extends Controller
             'offerRegions' => $fromLibrary
                 ? []
                 : fn (): array => $whereToWatch->regionsWithOffers($provider, 'movie', $ref),
-            // Spin-offs and what follows, as the background task stored them.
-            'relatedTitles' => $related,
-            'userStates' => fn (): array => [...$states->resolveForDetails($viewer, $details), ...$states->resolve($viewer, array_column($related, 'media'))],
+            // Spin-offs, what follows and its works in other media, as the background task stored them.
+            'relatedTitles' => $related->universe,
+            'otherMedia' => $related->otherMedia,
+            'userStates' => fn (): array => [...$states->resolveForDetails($viewer, $details), ...$states->resolve($viewer, $related->cards())],
         ]);
     }
 }

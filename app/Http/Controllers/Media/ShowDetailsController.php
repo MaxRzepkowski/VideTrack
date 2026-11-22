@@ -3,8 +3,6 @@
 namespace App\Http\Controllers\Media;
 
 use App\Actions\Media\ResolveRelatedTitles;
-use App\Actions\Media\ResolveSourceBooks;
-use App\Actions\Media\ResolveSourceManga;
 use App\Actions\Media\ResolveTitleDetails;
 use App\Actions\Media\ResolveTotalRuntime;
 use App\Catalog\Contracts\SupportsEpisodeRatings;
@@ -32,8 +30,6 @@ class ShowDetailsController extends Controller
         LibraryStates $states,
         ResolveTitleDetails $resolve,
         WhereToWatch $whereToWatch,
-        ResolveSourceBooks $sourceBooks,
-        ResolveSourceManga $sourceManga,
         EpisodeTimes $episodeTimes,
         ResolveTotalRuntime $totalRuntime,
         RecentViews $recentViews,
@@ -50,12 +46,7 @@ class ShowDetailsController extends Controller
 
         $airing = $details->airingEpisodes();
 
-        // Each read by two deferred props that land in the same follow-up
-        // request; `once` keeps it to a single Wikidata round-trip apiece.
-        $books = fn (): ?array => once(fn (): ?array => $sourceBooks->execute($details, App::getLocale()));
-        $manga = fn (): ?array => once(fn (): ?array => $sourceManga->execute($details, App::getLocale()));
-
-        $related = $relatedTitles->execute('show', $ref);
+        $related = $relatedTitles->execute($details);
 
         return Inertia::render('media/ShowDetails', [
             'show' => $details,
@@ -73,16 +64,6 @@ class ShowDetailsController extends Controller
             'watchProviders' => $fromLibrary
                 ? null
                 : fn (): ?WatchAvailability => $whereToWatch->forViewer($provider, 'show', $ref, $viewer, App::getLocale()),
-            // Deferred (Wikidata bridge): the source book(s) resolved through
-            // our own book provider — P144 → literary work → ISBN lookup.
-            'sourceBooks' => Inertia::defer($books),
-            // Deferred (Wikidata bridge): the source manga for an anime —
-            // P144 → MyAnimeList manga id (P4087) → our manga provider.
-            'sourceManga' => Inertia::defer($manga),
-            // The source cards carry the shared action bar, but `userStates`
-            // resolves with the render, before the sources are known — their
-            // share arrives with them.
-            'deferredUserStates' => Inertia::defer(fn (): array => $states->resolve($viewer, [...$books() ?? [], ...$manga() ?? []])),
             // Deferred: the chart data arrives after the page renders; a
             // provider without the capability (or an outage) hides the chart.
             'episodeRatings' => Inertia::defer(function () use ($provider, $ref): array {
@@ -105,9 +86,10 @@ class ShowDetailsController extends Controller
 
                 return $episodeTimes->ofEpisodes($ref, $airing);
             }),
-            // Spin-offs and what follows, as the background task stored them.
-            'relatedTitles' => $related,
-            'userStates' => fn (): array => [...$states->resolveForDetails($viewer, $details), ...$states->resolve($viewer, array_column($related, 'media'))],
+            // Spin-offs, what follows and its works in other media, as the background task stored them.
+            'relatedTitles' => $related->universe,
+            'otherMedia' => $related->otherMedia,
+            'userStates' => fn (): array => [...$states->resolveForDetails($viewer, $details), ...$states->resolve($viewer, $related->cards())],
         ]);
     }
 }

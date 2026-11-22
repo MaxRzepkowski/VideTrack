@@ -144,7 +144,7 @@ test('a Goodreads export places a book by its Goodreads id before asking about i
     // Hardcover maps the Kindle Dune (Goodreads 44767458) to its book; no other id.
     Http::fake(['api.hardcover.app/*' => fn (Request $request) => match (true) {
         str_contains((string) data_get($request->data(), 'query'), 'query ByGoodreads') => Http::response(['data' => [
-            'book_mappings' => data_get($request->data(), 'variables.id') === '44767458' ? [['book_id' => 312460]] : [],
+            'book_mappings' => in_array('44767458', (array) data_get($request->data(), 'variables.ids'), true) ? [['external_id' => '44767458', 'book_id' => 312460]] : [],
         ]]),
         str_contains((string) data_get($request->data(), 'query'), 'query ByIsbn') => Http::response(jsonFixture('hardcover/by_isbn')),
         default => Http::response(['data' => []]),

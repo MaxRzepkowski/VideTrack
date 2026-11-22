@@ -143,6 +143,8 @@ final readonly class IgdbPayload
             backdropPath: $backdropPath,
             communityRating: $this->rating($data),
             releaseDate: $releaseDate,
+            // Asked for by the game's own page and by search, not by every listing.
+            votes: Payload::positiveInt($data, 'total_rating_count'),
             extra: [
                 ...($kind === null ? [] : ['gameType' => $kind->value]),
                 // How many follow it ahead of release; the card says it while the game is still to come.

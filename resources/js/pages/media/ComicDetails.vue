@@ -4,11 +4,12 @@ import MediaStatusPanel from '@/components/media/MediaStatusPanel.vue';
 import MediaTitleHeader from '@/components/media/MediaTitleHeader.vue';
 import OverviewSection from '@/components/media/OverviewSection.vue';
 import RecentlyViewed from '@/components/media/RecentlyViewed.vue';
+import RelatedTitles from '@/components/media/RelatedTitles.vue';
 import StickyActionsPanel from '@/components/media/StickyActionsPanel.vue';
 import TitlePageLayout from '@/components/media/TitlePageLayout.vue';
 import { plainCredits } from '@/lib/creators';
 import type { ComicExtra } from '@/types/extras';
-import type { DetailRow, MediaDetails, MediaSummary } from '@/types/media';
+import type { DetailRow, MediaDetails, MediaSummary, TitleTie } from '@/types/media';
 import { Head } from '@inertiajs/vue3';
 import { trans, transChoice } from 'laravel-vue-i18n';
 import { computed } from 'vue';
@@ -18,6 +19,7 @@ const props = defineProps<{
     recentlyViewed?: MediaSummary[];
     fromLibrary?: boolean;
     removedAtSource?: boolean;
+    otherMedia?: TitleTie[];
 }>();
 
 const creators = computed(() => props.comic.extra.creators ?? []);
@@ -67,6 +69,7 @@ const detailRows = computed<DetailRow[]>(() => [
         <OverviewSection :overview="comic.overview" :people="creatorPeople" />
 
         <template #below>
+            <RelatedTitles :titles="otherMedia ?? []" :heading="trans('media.in_other_media')" />
             <RecentlyViewed
                 class="pt-16 md:pt-32"
                 :title="comic.title"
