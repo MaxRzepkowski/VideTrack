@@ -77,7 +77,7 @@ export const DASHBOARD: NavEntry = {
     keywords: () => trans('palette.keywords_dashboard'),
 };
 
-const DISCOVER: NavEntry = {
+export const DISCOVER: NavEntry = {
     id: 'discover',
     route: 'discover',
     label: () => trans('common.discover'),
@@ -86,7 +86,7 @@ const DISCOVER: NavEntry = {
     keywords: () => trans('palette.keywords_discover'),
 };
 
-const SUGGESTIONS: NavEntry = {
+export const SUGGESTIONS: NavEntry = {
     id: 'suggestions',
     route: 'suggestions.index',
     label: () => trans('suggestions.suggestions'),
@@ -107,7 +107,7 @@ const TRENDING: NavEntry = {
     keywords: () => trans('palette.keywords_trending'),
 };
 
-const CALENDAR: NavEntry = {
+export const CALENDAR: NavEntry = {
     id: 'calendar',
     route: 'calendar',
     label: () => trans('common.calendar'),
@@ -116,7 +116,7 @@ const CALENDAR: NavEntry = {
     keywords: () => trans('palette.keywords_calendar'),
 };
 
-const COUNTDOWNS: NavEntry = {
+export const COUNTDOWNS: NavEntry = {
     id: 'countdowns',
     route: 'countdowns',
     label: () => trans('common.countdowns'),
@@ -125,7 +125,7 @@ const COUNTDOWNS: NavEntry = {
     keywords: () => trans('palette.keywords_countdowns'),
 };
 
-const STATISTICS: NavEntry = {
+export const STATISTICS: NavEntry = {
     id: 'statistics',
     route: 'statistics',
     label: () => trans('statistics.title'),
@@ -414,6 +414,11 @@ export const NAV_GROUPS: NonEmpty<NavGroup> = [
         items: [place(CALENDAR), place(COUNTDOWNS)],
     },
 ];
+
+/** The group of the main menu a place or a panel sits in; null for one the menu does not hold. */
+export function groupOf(entry: NavEntry): NavGroupId | null {
+    return NAV_GROUPS.find((group) => group.items.some((item) => item.entry.id === entry.id))?.id ?? null;
+}
 
 /** Where a menu row leads, for the user signed in as `username`. */
 export function groupItemHref(item: NavGroupItem, username: string): string {

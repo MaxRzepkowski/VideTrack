@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { groupOf, STATISTICS } from '@/lib/navigation';
 import StatTile from '@/components/dashboard/StatTile.vue';
 import EmptyState from '@/components/EmptyState.vue';
 import PageHeading from '@/components/PageHeading.vue';
@@ -62,7 +63,7 @@ const hasTitles = computed(() => props.page.titles.titles.total > 0);
 
         <PageMasthead>
             <div class="max-w-content mx-auto w-full px-4 pt-8 pb-6 md:px-10">
-                <PageHeading :title="trans('statistics.title')" :subtitle="trans('statistics.subtitle')">
+                <PageHeading :group="groupOf(STATISTICS)" :title="trans('statistics.title')" :subtitle="trans('statistics.subtitle')">
                     <template #icon><ChartNoAxesColumn class="size-6" /></template>
                 </PageHeading>
             </div>

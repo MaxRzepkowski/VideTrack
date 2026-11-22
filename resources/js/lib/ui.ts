@@ -41,6 +41,18 @@ export function rowTint(tint: RowTint): Record<'--tint' | '--tint-fill' | '--tin
     return { '--tint': `var(--color-${glyph})`, '--tint-fill': `var(--color-${fill})`, '--tint-ink': `var(--color-${ink})` };
 }
 
+// Written out in full: Tailwind reads class names, it cannot build them.
+const GROUP_GLYPH: Record<NavGroupId, string> = {
+    library: 'text-nav-library',
+    discover: 'text-nav-discover',
+    releases: 'text-nav-releases',
+};
+
+/** The glyph of a page or section heading: its menu group's colour, the brand's where it sits in none. */
+export function headingGlyphClass(group: NavGroupId | null): string {
+    return group === null ? 'text-brand-soft' : GROUP_GLYPH[group];
+}
+
 /** The dimmed page behind a dialog or a sheet, fading with it. */
 export const DIALOG_OVERLAY_CLASS =
     'data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:fade-in data-[state=closed]:fade-out bg-scrim/60 fixed inset-0';

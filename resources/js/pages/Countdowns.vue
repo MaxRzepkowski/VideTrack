@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { COUNTDOWNS, groupOf } from '@/lib/navigation';
 import CountdownCard from '@/components/countdown/CountdownCard.vue';
 import EmptyState from '@/components/EmptyState.vue';
 import EventCountdownCard from '@/components/events/EventCountdownCard.vue';
@@ -79,7 +80,11 @@ const typeOptions = computed(() =>
 
         <PageMasthead>
             <div class="max-w-content mx-auto w-full px-4 pt-8 pb-6 md:px-10">
-                <PageHeading :title="trans('common.countdowns')" :subtitle="trans('calendar.track_the_time_left_until_upcoming')">
+                <PageHeading
+                    :group="groupOf(COUNTDOWNS)"
+                    :title="trans('common.countdowns')"
+                    :subtitle="trans('calendar.track_the_time_left_until_upcoming')"
+                >
                     <template #icon><Timer class="size-6" /></template>
                 </PageHeading>
             </div>

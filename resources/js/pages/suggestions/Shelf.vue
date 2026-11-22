@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { groupOf, SUGGESTIONS } from '@/lib/navigation';
 import EmptyState from '@/components/EmptyState.vue';
 import MediaCard from '@/components/media/MediaCard.vue';
 import MediaGrid from '@/components/media/MediaGrid.vue';
@@ -115,7 +116,11 @@ const isEmpty = computed(() => (props.subjects === null ? props.suggestions.leng
                         <TextLink :href="shelfHref">{{ shelf.title }}</TextLink>
                     </template>
                 </nav>
-                <PageHeading :title="subject?.title ?? shelf.title" :subtitle="subject === null ? shelf.description : subject.caption">
+                <PageHeading
+                    :group="groupOf(SUGGESTIONS)"
+                    :title="subject?.title ?? shelf.title"
+                    :subtitle="subject === null ? shelf.description : subject.caption"
+                >
                     <template #icon><Sparkles class="size-6" /></template>
                 </PageHeading>
                 <p v-if="subject?.href" class="m-0 mt-3 text-base">

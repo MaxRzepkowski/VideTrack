@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { CALENDAR, groupOf } from '@/lib/navigation';
 import MonthGrid from '@/components/calendar/MonthGrid.vue';
 import PageHeading from '@/components/PageHeading.vue';
 import PageMasthead from '@/components/PageMasthead.vue';
@@ -69,7 +70,11 @@ onBeforeUnmount(() => clearTimeout(jumpTimer));
         <PageMasthead>
             <div class="max-w-content mx-auto w-full px-4 pt-8 pb-6 md:px-10">
                 <div class="flex flex-wrap items-center justify-between gap-4">
-                    <PageHeading :title="trans('common.calendar')" :subtitle="trans('common.upcoming_releases_from_the_titles_you')">
+                    <PageHeading
+                        :group="groupOf(CALENDAR)"
+                        :title="trans('common.calendar')"
+                        :subtitle="trans('common.upcoming_releases_from_the_titles_you')"
+                    >
                         <template #icon><CalendarDays class="size-6" /></template>
                     </PageHeading>
 

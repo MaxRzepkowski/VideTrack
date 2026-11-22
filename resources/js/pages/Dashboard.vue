@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { CALENDAR, groupOf } from '@/lib/navigation';
 import CalendarSection from '@/components/dashboard/CalendarSection.vue';
 import CompletedShowCard from '@/components/dashboard/CompletedShowCard.vue';
 import PlayingCard from '@/components/dashboard/PlayingCard.vue';
@@ -167,7 +168,11 @@ const statKinds = computed(() => inRegistryOrder(Object.keys(props.stats)));
             </PageSection>
 
             <PageSection>
-                <SectionHeading :title="trans('common.calendar')" :subtitle="trans('common.upcoming_releases_from_the_titles_you')">
+                <SectionHeading
+                    :group="groupOf(CALENDAR)"
+                    :title="trans('common.calendar')"
+                    :subtitle="trans('common.upcoming_releases_from_the_titles_you')"
+                >
                     <template #icon><CalendarDays class="size-6" /></template>
                     <SectionMoreLink :href="route('calendar')" :label="trans('common.calendar')" placement="heading" />
                 </SectionHeading>
