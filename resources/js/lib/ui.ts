@@ -1,11 +1,31 @@
+import type { NavGroupId } from '@/lib/navigation';
 import type { NonEmpty } from '@/types';
 
 /**
- * Shared class strings for controls that are plain HTML elements, not
- * components — a `<select>` keeps its own `v-model` / `:value` + `@change`
- * binding, so wrapping it would cost more than it saves. One definition here
- * instead of the same twenty utilities copied into every view.
+ * Shared looks of plain HTML controls and of menu rows: class strings for
+ * elements that are not components (a `<select>` keeps its own `v-model` /
+ * `:value` + `@change` binding, so wrapping it would cost more than it saves)
+ * and the colour properties a menu row reads. One definition here instead of
+ * the same twenty utilities copied into every view.
  */
+
+/** The colours a menu row can wear: its group's, or the danger colour for a row that is not a place. */
+export type RowTint = NavGroupId | 'danger';
+
+// Tokens of the glyph, of the square under a pointed row, and of the glyph on that square.
+const TINT_TOKENS: Record<RowTint, readonly [string, string, string]> = {
+    library: ['nav-library', 'nav-library-fill', 'nav-library-ink'],
+    discover: ['nav-discover', 'nav-discover-fill', 'nav-discover-ink'],
+    releases: ['nav-releases', 'nav-releases-fill', 'nav-releases-ink'],
+    danger: ['danger', 'danger-strong', 'on-accent'],
+};
+
+/** A tint as the custom properties a menu row (`MenuRow`) reads from an ancestor. */
+export function rowTint(tint: RowTint): Record<'--tint' | '--tint-fill' | '--tint-ink', string> {
+    const [glyph, fill, ink] = TINT_TOKENS[tint];
+
+    return { '--tint': `var(--color-${glyph})`, '--tint-fill': `var(--color-${fill})`, '--tint-ink': `var(--color-${ink})` };
+}
 
 /**
  * A word of a menu row: the main bar, the profile's panels and the tabs of the

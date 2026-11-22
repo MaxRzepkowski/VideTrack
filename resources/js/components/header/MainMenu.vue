@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import MenuRow from '@/components/header/MenuRow.vue';
-import { activeMenuWord, DASHBOARD, groupItemHref, NAV_GROUPS, navHref, navTint } from '@/lib/navigation';
+import MenuRow from '@/components/MenuRow.vue';
+import { activeMenuWord, DASHBOARD, groupItemHref, NAV_GROUPS, navHref } from '@/lib/navigation';
 import { signedInUser } from '@/lib/pageContext';
-import { NAV_WORD_CLASS, navWordState } from '@/lib/ui';
+import { NAV_WORD_CLASS, navWordState, rowTint } from '@/lib/ui';
 import { Link, usePage } from '@inertiajs/vue3';
 import { ChevronDown } from '@lucide/vue';
 import {
@@ -42,7 +42,7 @@ const open = ref('');
                 </NavigationMenuLink>
             </NavigationMenuItem>
 
-            <NavigationMenuItem v-for="group in NAV_GROUPS" :key="group.id" :value="group.id" class="relative" :style="navTint(group.id)">
+            <NavigationMenuItem v-for="group in NAV_GROUPS" :key="group.id" :value="group.id" class="relative" :style="rowTint(group.id)">
                 <NavigationMenuTrigger
                     class="group/word pr-3"
                     :class="[

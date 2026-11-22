@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import MenuRow from '@/components/header/MenuRow.vue';
+import MenuRow from '@/components/MenuRow.vue';
 import { DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
-import { navHref, navTint, SETTINGS_NAV, userPanel } from '@/lib/navigation';
+import { navHref, SETTINGS_NAV, userPanel } from '@/lib/navigation';
+import { rowTint } from '@/lib/ui';
 import type { User } from '@/types';
 import { trans } from 'laravel-vue-i18n';
 import { LogOut, Settings } from '@lucide/vue';
@@ -21,7 +22,7 @@ const settingsHref = navHref(SETTINGS_NAV[0]);
 <template>
     <!-- The menu's content is teleported: the rows take the account's colour here, not from the header.
          Signing out is no place to go, so it wears the danger colour. -->
-    <div :style="navTint('library')">
+    <div :style="rowTint('library')">
         <DropdownMenuItem as-child>
             <MenuRow
                 :href="navHref(profile, props.user.username)"
@@ -35,7 +36,7 @@ const settingsHref = navHref(SETTINGS_NAV[0]);
         </DropdownMenuItem>
         <DropdownMenuSeparator class="bg-line mx-0 my-2" />
         <DropdownMenuItem as-child>
-            <MenuRow :href="route('logout')" method="post" as="button" :icon="LogOut" :label="trans('app.sign_out')" :style="navTint('danger')" />
+            <MenuRow :href="route('logout')" method="post" as="button" :icon="LogOut" :label="trans('app.sign_out')" :style="rowTint('danger')" />
         </DropdownMenuItem>
     </div>
 </template>

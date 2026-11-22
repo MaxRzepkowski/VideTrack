@@ -1,7 +1,16 @@
-import { navWordState, POSTER_GRID_STEPS, posterGridClass, SELECT_CLASS, SELECT_CLASS_ON_CARD } from '@/lib/ui';
+import { navWordState, POSTER_GRID_STEPS, posterGridClass, rowTint, SELECT_CLASS, SELECT_CLASS_ON_CARD } from '@/lib/ui';
 import { describe, expect, it } from 'vitest';
 
 describe('ui classes', () => {
+    it("tints a row with its group's tokens, or the danger colour", () => {
+        expect(rowTint('discover')).toEqual({
+            '--tint': 'var(--color-nav-discover)',
+            '--tint-fill': 'var(--color-nav-discover-fill)',
+            '--tint-ink': 'var(--color-nav-discover-ink)',
+        });
+        expect(rowTint('danger')['--tint']).toBe('var(--color-danger)');
+    });
+
     it('lights the menu word of the page you are on, and only it', () => {
         expect(navWordState(true)).toBe('bg-surface-raised text-ink');
         expect(navWordState(false)).not.toContain('bg-surface-raised');

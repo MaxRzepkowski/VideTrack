@@ -415,24 +415,6 @@ export const NAV_GROUPS: NonEmpty<NavGroup> = [
     },
 ];
 
-/** The colours a menu row can wear: its group's, or the danger colour for a row that is not a place. */
-export type MenuTint = NavGroupId | 'danger';
-
-// Tokens of the glyph, of the square under a pointed row, and of the glyph on that square.
-const TINT_TOKENS: Record<MenuTint, readonly [string, string, string]> = {
-    library: ['nav-library', 'nav-library-fill', 'nav-library-ink'],
-    discover: ['nav-discover', 'nav-discover-fill', 'nav-discover-ink'],
-    releases: ['nav-releases', 'nav-releases-fill', 'nav-releases-ink'],
-    danger: ['danger', 'danger-strong', 'on-accent'],
-};
-
-/** A tint as the custom properties a menu row (`MenuRow`) reads from an ancestor. */
-export function navTint(tint: MenuTint): Record<'--tint' | '--tint-fill' | '--tint-ink', string> {
-    const [glyph, fill, ink] = TINT_TOKENS[tint];
-
-    return { '--tint': `var(--color-${glyph})`, '--tint-fill': `var(--color-${fill})`, '--tint-ink': `var(--color-${ink})` };
-}
-
 /** Where a menu row leads, for the user signed in as `username`. */
 export function groupItemHref(item: NavGroupItem, username: string): string {
     return item.kind === 'own-panel' ? navHref(item.entry, username) : navHref(item.entry);

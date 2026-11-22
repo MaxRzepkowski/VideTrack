@@ -6,7 +6,6 @@ import {
     menuPlaces,
     NAV_GROUPS,
     navHref,
-    navTint,
     OTHER_PLACES,
     SETTINGS_NAV,
     settingsNav,
@@ -101,14 +100,5 @@ describe('the navigation tree', () => {
         expect(currentMenuRow('/users.history/alex', 'alex')).toBe('history');
         expect(currentMenuRow('/discover?type=game', 'alex')).toBe('discover');
         expect(currentMenuRow('/users.history/sam', 'alex')).toBeNull();
-    });
-
-    it("tints a row with its group's tokens, or the danger colour", () => {
-        expect(navTint('discover')).toEqual({
-            '--tint': 'var(--color-nav-discover)',
-            '--tint-fill': 'var(--color-nav-discover-fill)',
-            '--tint-ink': 'var(--color-nav-discover-ink)',
-        });
-        expect(navTint('danger')['--tint']).toBe('var(--color-danger)');
     });
 });
