@@ -1,4 +1,4 @@
-import { navWordState, POSTER_GRID_STEPS, posterGridClass, rowTint, SELECT_CLASS, SELECT_CLASS_ON_CARD } from '@/lib/ui';
+import { headingGlyphClass, navWordState, POSTER_GRID_STEPS, posterGridClass, rowTint, SELECT_CLASS, SELECT_CLASS_ON_CARD } from '@/lib/ui';
 import { describe, expect, it } from 'vitest';
 
 describe('ui classes', () => {
@@ -20,6 +20,11 @@ describe('ui classes', () => {
         });
     });
 
+    it("colours a heading's glyph as its menu group, and in the brand's colour outside the menu", () => {
+        expect(headingGlyphClass('releases')).toBe('text-nav-releases');
+        expect(headingGlyphClass('library')).toBe('text-nav-library');
+        expect(headingGlyphClass(null)).toBe('text-brand-soft');
+    });
 
     it('lights the menu word of the page you are on, and only it', () => {
         expect(navWordState(true)).toBe('bg-surface-raised text-ink');

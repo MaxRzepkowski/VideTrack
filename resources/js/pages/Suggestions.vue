@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { groupOf, SUGGESTIONS } from '@/lib/navigation';
 import EmptyState from '@/components/EmptyState.vue';
 import PageHeading from '@/components/PageHeading.vue';
 import PageMasthead from '@/components/PageMasthead.vue';
@@ -22,7 +23,11 @@ defineProps<{ shelves: SuggestionShelf[] }>();
 
         <PageMasthead>
             <div class="max-w-content mx-auto w-full px-4 pt-8 pb-6 md:px-10">
-                <PageHeading :title="trans('suggestions.suggestions')" :subtitle="trans('suggestions.titles_you_have_a_reason_to_catch_up_on')">
+                <PageHeading
+                    :group="groupOf(SUGGESTIONS)"
+                    :title="trans('suggestions.suggestions')"
+                    :subtitle="trans('suggestions.titles_you_have_a_reason_to_catch_up_on')"
+                >
                     <template #icon><Sparkles class="size-6" /></template>
                 </PageHeading>
             </div>

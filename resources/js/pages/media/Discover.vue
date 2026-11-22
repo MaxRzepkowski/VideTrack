@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { DISCOVER, groupOf } from '@/lib/navigation';
 import DiscoverBrowse from '@/components/discover/DiscoverBrowse.vue';
 import DiscoverFiltered from '@/components/discover/DiscoverFiltered.vue';
 import DiscoverPeople from '@/components/discover/DiscoverPeople.vue';
@@ -54,7 +55,11 @@ const title = computed(() => {
 
         <PageMasthead>
             <div class="max-w-content mx-auto w-full px-4 pt-8 pb-6 md:px-10">
-                <PageHeading :title="genreName ?? trans('common.discover')" :subtitle="trans('discover.browse_trending_popular_and_upcoming_titles')">
+                <PageHeading
+                    :group="groupOf(DISCOVER)"
+                    :title="genreName ?? trans('common.discover')"
+                    :subtitle="trans('discover.browse_trending_popular_and_upcoming_titles')"
+                >
                     <template #icon><Compass class="size-6" /></template>
                 </PageHeading>
             </div>

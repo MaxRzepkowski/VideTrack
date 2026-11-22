@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import type { NavGroupId } from '@/lib/navigation';
+import { headingGlyphClass } from '@/lib/ui';
+
 // The one section-heading scale used across the app: every in-page section
 // gets a 24px semibold title with an optional muted subtitle; page-level
 // titles are 28px (`text-title`) in the views. `compactOnMobile` steps the
@@ -7,9 +10,11 @@ withDefaults(
     defineProps<{
         title: string;
         subtitle?: string | null;
+        /** The main menu's group the page belongs to, whose colour the glyph wears. */
+        group?: NavGroupId | null;
         compactOnMobile?: boolean;
     }>(),
-    { subtitle: null, compactOnMobile: false },
+    { subtitle: null, compactOnMobile: false, group: null },
 );
 </script>
 
@@ -17,7 +22,12 @@ withDefaults(
     <div class="mb-5">
         <div class="flex flex-wrap items-end justify-between gap-x-6 gap-y-2">
             <div class="flex min-w-0 items-start gap-3">
-                <span v-if="$slots.icon" class="text-brand-soft mt-1 flex size-6 shrink-0 items-center justify-center" aria-hidden="true">
+                <span
+                    v-if="$slots.icon"
+                    class="mt-1 flex size-6 shrink-0 items-center justify-center"
+                    :class="headingGlyphClass(group)"
+                    aria-hidden="true"
+                >
                     <slot name="icon" />
                 </span>
                 <!-- `badge` rides beside the title (a source credit, a counter);

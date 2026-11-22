@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { groupOf, userPanel } from '@/lib/navigation';
 import ListCardFooter from '@/components/lists/ListCardFooter.vue';
 import ListCover from '@/components/lists/ListCover.vue';
 import PageHeading from '@/components/PageHeading.vue';
@@ -170,7 +171,7 @@ async function create(): Promise<void> {
             <UserHeader v-if="profile" :profile="profile" :is-owner="isOwner" active="lists" identity="link" />
 
             <div v-else class="max-w-content mx-auto w-full px-4 pt-8 pb-6 md:px-10">
-                <PageHeading :title="heading" :subtitle="trans('lists.create_and_organize_lists_for_the')">
+                <PageHeading :group="groupOf(userPanel('lists'))" :title="heading" :subtitle="trans('lists.create_and_organize_lists_for_the')">
                     <template #icon><ListIcon class="size-6" /></template>
                 </PageHeading>
             </div>

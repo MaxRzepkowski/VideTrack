@@ -1,13 +1,17 @@
 import {
     activeMenuWord,
+    CALENDAR,
     currentMenuRow,
     DASHBOARD,
     groupItemHref,
+    groupOf,
     menuPlaces,
     NAV_GROUPS,
     navHref,
     OTHER_PLACES,
     SETTINGS_NAV,
+    STATISTICS,
+    SUGGESTIONS,
     settingsNav,
     USER_PANELS,
     userPanel,
@@ -100,5 +104,16 @@ describe('the navigation tree', () => {
         expect(currentMenuRow('/users.history/alex', 'alex')).toBe('history');
         expect(currentMenuRow('/discover?type=game', 'alex')).toBe('discover');
         expect(currentMenuRow('/users.history/sam', 'alex')).toBeNull();
+    });
+});
+
+describe('groupOf', () => {
+    it('names the menu group a place or a panel sits in, and none for one outside the menu', () => {
+        expect(groupOf(CALENDAR)).toBe('releases');
+        expect(groupOf(SUGGESTIONS)).toBe('discover');
+        expect(groupOf(STATISTICS)).toBe('library');
+        expect(groupOf(userPanel('lists'))).toBe('library');
+        expect(groupOf(DASHBOARD)).toBeNull();
+        expect(groupOf(userPanel('following'))).toBeNull();
     });
 });
