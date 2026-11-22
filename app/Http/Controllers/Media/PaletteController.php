@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Media;
 
 use App\Actions\Media\SearchLibrary;
+use App\Actions\Media\SearchLists;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Media\SearchRequest;
 use App\Library\RecentViews;
@@ -22,10 +23,10 @@ use Illuminate\Http\Request;
  */
 class PaletteController extends Controller
 {
-    /** Both groups stay short enough to scan without scrolling the overlay. */
+    /** Every group stays short enough to scan without scrolling the overlay. */
     public const LIMIT = 8;
 
-    public function __invoke(#[CurrentUser] User $viewer, Request $request, SearchLibrary $library, RecentViews $recentViews): JsonResponse
+    public function __invoke(#[CurrentUser] User $viewer, Request $request, SearchLibrary $library, SearchLists $lists, RecentViews $recentViews): JsonResponse
     {
         // A pasted wall of text is cut like on the search page, not refused.
         $query = mb_substr(trim((string) $request->string('q')), 0, SearchRequest::MAX_TERM);
@@ -35,12 +36,14 @@ class PaletteController extends Controller
             return response()->json([
                 'recent' => $recentViews->recent($viewer, limit: self::LIMIT),
                 'results' => [],
+                'lists' => [],
             ]);
         }
 
         return response()->json([
             'recent' => [],
             'results' => $library->execute($viewer, $query, self::LIMIT),
+            'lists' => $lists->execute($viewer, $query, self::LIMIT),
         ]);
     }
 }

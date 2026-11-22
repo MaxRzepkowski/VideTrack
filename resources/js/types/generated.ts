@@ -735,6 +735,13 @@ export type PageInfo = {
     readonly totalPages: number;
     readonly total: number;
 };
+export type PaletteList = {
+    readonly id: number;
+    readonly title: string;
+    readonly href: string;
+    readonly itemCount: number;
+    readonly isCollection: boolean;
+};
 export type PartNumber = {
     readonly season: number | null;
     readonly number: number | null;

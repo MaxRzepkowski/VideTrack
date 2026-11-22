@@ -6,10 +6,11 @@ import { useCommandPalette } from '@/composables/useCommandPalette';
 import { allCommands, matchCommands, type Command as PaletteCommand, type PaletteItem } from '@/lib/commands';
 import { jsonFetch } from '@/lib/http';
 import { mediaUrl } from '@/lib/urls';
+import type { PaletteList } from '@/types/generated';
 import { router } from '@inertiajs/vue3';
 import { useDebounceFn } from '@vueuse/core';
-import { trans } from 'laravel-vue-i18n';
-import { LoaderCircle, Search } from '@lucide/vue';
+import { trans, transChoice } from 'laravel-vue-i18n';
+import { Layers, List, LoaderCircle, Search } from '@lucide/vue';
 import { computed, ref, watch } from 'vue';
 
 // The endpoint reads the local library, not a provider, so this only has to
@@ -20,6 +21,7 @@ const { open, close } = useCommandPalette();
 
 const term = ref('');
 const results = ref<PaletteItem[]>([]);
+const lists = ref<PaletteList[]>([]);
 const recent = ref<PaletteItem[]>([]);
 const loading = ref(false);
 const highlighted = ref<string | undefined>(undefined);
@@ -30,8 +32,8 @@ const highlighted = ref<string | undefined>(undefined);
 // the top. Clearing it makes radix highlight the first row again. Guarded on
 // there being rows: with none, the row count does not change, radix's own reset
 // never runs and the palette would be left with nothing highlighted at all.
-watch(results, (rows) => {
-    if (rows.length > 0) {
+watch([results, lists], ([rows, found]) => {
+    if (rows.length + found.length > 0) {
         highlighted.value = undefined;
     }
 });
@@ -51,11 +53,14 @@ function fetchPalette(query: string): void {
     loading.value = true;
 
     void jsonFetch(route('palette', query === '' ? {} : { q: query }), { signal: controller.signal })
-        .then((response) => (response.ok ? (response.json() as Promise<{ recent: PaletteItem[]; results: PaletteItem[] }>) : null))
+        .then((response) =>
+            response.ok ? (response.json() as Promise<{ recent: PaletteItem[]; results: PaletteItem[]; lists: PaletteList[] }>) : null,
+        )
         .then((payload) => {
             if (payload && token === latest) {
                 recent.value = payload.recent;
                 results.value = payload.results;
+                lists.value = payload.lists;
             }
         })
         // An abort is the expected end of every keystroke but the last, and a
@@ -88,6 +93,7 @@ watch(term, (value) => {
         latest++;
         loading.value = false;
         results.value = [];
+        lists.value = [];
 
         return;
     }
@@ -101,6 +107,7 @@ watch(open, (isOpen) => {
         // above, which would abort the very fetch that opening starts.
         term.value = '';
         results.value = [];
+        lists.value = [];
 
         return;
     }
@@ -120,6 +127,11 @@ const searching = computed(() => term.value.trim() !== '');
 function go(item: PaletteItem): void {
     close();
     router.visit(mediaUrl(item));
+}
+
+function openList(list: PaletteList): void {
+    close();
+    router.visit(list.href);
 }
 
 function openSearchPage(): void {
@@ -158,7 +170,8 @@ function run(command: PaletteCommand): void {
 
                       nothing typed → Recently viewed, then every command
                       typing       → matched commands, then library hits, then
-                                     the way out to the providers
+                                     the lists it names, then the way out to
+                                     the providers
 
                     Typing a page name therefore opens that page ("calendar" →
                     Calendar), which is the whole point of the shortcut. With
@@ -190,6 +203,16 @@ function run(command: PaletteCommand): void {
                     <CommandGroup v-if="searching && results.length" :heading="trans('palette.search_results')">
                         <CommandItem v-for="item in results" :key="item.type + item.ref" :value="`media:${item.type}:${item.ref}`" @select="go(item)">
                             <CommandMediaRow :item="item" />
+                        </CommandItem>
+                    </CommandGroup>
+
+                    <CommandGroup v-if="searching && lists.length" :heading="trans('common.lists')">
+                        <CommandItem v-for="list in lists" :key="list.id" :value="`list:${list.id}`" @select="openList(list)">
+                            <component :is="list.isCollection ? Layers : List" class="text-ink-muted size-4 shrink-0" aria-hidden="true" />
+                            <span v-tooltip.truncated="list.title" class="min-w-0 flex-1 truncate">{{ list.title }}</span>
+                            <span class="text-ink-muted shrink-0 text-sm">{{
+                                transChoice('common.count_item', list.itemCount, { count: String(list.itemCount) })
+                            }}</span>
                         </CommandItem>
                     </CommandGroup>
 

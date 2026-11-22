@@ -13,6 +13,7 @@ use App\Http\Controllers\Media\PaletteController;
 use App\Library\RecentViews;
 use App\Library\WatchedAt;
 use App\Models\MediaItem;
+use App\Models\MediaList;
 use App\Models\User;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Http;
@@ -176,4 +177,40 @@ test('a wildcard typed into the box is a literal', function () {
     $response = $this->actingAs($user)->getJson(route('palette', ['q' => '100%']))->assertOk();
 
     expect(collect($response->json('results'))->pluck('title')->all())->toBe(['100% Wolf']);
+});
+
+test('a query finds the lists it names: the viewer\'s own first, then the collections, never someone else\'s', function () {
+    $user = User::factory()->create(['username' => 'alex']);
+    $weekend = MediaList::factory()->for($user)->create(['title' => 'Weekend films']);
+    MediaList::factory()->for($user)->create(['title' => 'Comfort shows']);
+    MediaList::factory()->create(['title' => 'Weekend picks of someone else']);
+    $saga = MediaList::factory()->collection('tmdb', '119')->create(['title' => 'The Weekend Saga']);
+
+    $lists = $this->actingAs($user)->getJson(route('palette', ['q' => 'weekend']))->assertOk()->json('lists');
+
+    expect($lists)->toBe([
+        ['id' => $weekend->id, 'title' => 'Weekend films', 'href' => route('users.lists.show', ['user' => 'alex', 'list' => $weekend->id], absolute: false), 'itemCount' => 0, 'isCollection' => false],
+        ['id' => $saga->id, 'title' => 'The Weekend Saga', 'href' => route('collections.show', ['provider' => 'tmdb', 'ref' => '119'], absolute: false), 'itemCount' => 0, 'isCollection' => true],
+    ]);
+});
+
+test('the Backlog is found by the name it shows, and an empty query offers no lists', function () {
+    $user = User::factory()->create();
+
+    $this->actingAs($user)->getJson(route('palette', ['q' => 'backl']))
+        ->assertJsonPath('lists.0.id', $user->watchlist()->id)
+        ->assertJsonPath('lists.0.title', 'Backlog');
+
+    $this->actingAs($user)->getJson(route('palette'))->assertJsonPath('lists', []);
+});
+
+test('the lists the palette offers stay within its limit, the viewer\'s own taking the room first', function () {
+    $user = User::factory()->create();
+    MediaList::factory()->for($user)->count(PaletteController::LIMIT)->create(['title' => 'Saga night']);
+    MediaList::factory()->collection('tmdb', '10')->create(['title' => 'Saga collection']);
+
+    $lists = $this->actingAs($user)->getJson(route('palette', ['q' => 'saga']))->json('lists');
+
+    expect($lists)->toHaveCount(PaletteController::LIMIT)
+        ->and(array_column($lists, 'isCollection'))->not->toContain(true);
 });
