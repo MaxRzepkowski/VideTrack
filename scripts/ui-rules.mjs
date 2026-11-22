@@ -63,6 +63,14 @@ const RULES = [
             ) || /rgba?\(|#[0-9a-fA-F]{6}\b|#[0-9a-fA-F]{3}\b(?!-)/.test(line),
     },
     {
+        // Tailwind keeps a class or a colour token only where it sees it named in full; one put
+        // together at runtime compiles to nothing. A development server that saw the full name once
+        // keeps it until it restarts, so the page looks right there and wrong in a build.
+        id: 'built-colour-name',
+        why: 'a colour class or token named at runtime (`bg-${x}`, `var(--color-${x})`) — write each name out in full',
+        test: (line) => /(?<![\w-])(?:[a-z-]+:)*(bg|text|border|ring|fill|stroke|outline|decoration|shadow)-\$\{|--color-\$\{/.test(line),
+    },
+    {
         // app.css defines no second palette, so these names would compile to
         // nothing.
         id: 'shadcn-colour',
