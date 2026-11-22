@@ -205,6 +205,14 @@ export const USER_PANELS: (NavEntry & { id: UserPanel; ownerOnly?: boolean })[] 
         keywords: () => trans('palette.keywords_ratings'),
     },
     {
+        id: 'lists',
+        route: 'users.lists',
+        label: () => trans('common.lists'),
+        icon: List,
+        description: () => trans('app.nav_lists_description'),
+        keywords: () => trans('palette.keywords_profile_lists'),
+    },
+    {
         id: 'favorites',
         route: 'users.favorites',
         label: () => trans('common.favorites'),
@@ -219,14 +227,6 @@ export const USER_PANELS: (NavEntry & { id: UserPanel; ownerOnly?: boolean })[] 
         icon: CirclePlay,
         description: () => trans('app.nav_in_progress_description'),
         keywords: () => trans('palette.keywords_in_progress'),
-    },
-    {
-        id: 'lists',
-        route: 'users.lists',
-        label: () => trans('common.lists'),
-        icon: List,
-        description: () => trans('app.nav_lists_description'),
-        keywords: () => trans('palette.keywords_profile_lists'),
     },
     {
         // The bell of "Follow releases": what you follow is personal, so the
@@ -392,12 +392,12 @@ export const NAV_GROUPS: NonEmpty<NavGroup> = [
         label: () => trans('app.nav_library'),
         icon: Library,
         items: [
-            ownPanel('progress'),
-            place(BACKLOG),
-            ownPanel('lists'),
-            ownPanel('favorites'),
             ownPanel('history'),
             ownPanel('ratings'),
+            ownPanel('lists'),
+            place(BACKLOG),
+            ownPanel('favorites'),
+            ownPanel('progress'),
             place(STATISTICS),
         ],
     },

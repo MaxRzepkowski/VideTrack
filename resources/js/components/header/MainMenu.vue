@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import MenuRow from '@/components/MenuRow.vue';
-import { activeMenuWord, DASHBOARD, groupItemHref, NAV_GROUPS, navHref } from '@/lib/navigation';
+import { activeMenuWord, DASHBOARD, groupItemHref, NAV_GROUPS, navHref, type NavGroup } from '@/lib/navigation';
 import { signedInUser } from '@/lib/pageContext';
 import { NAV_WORD_CLASS, navWordState, rowTint } from '@/lib/ui';
-import { Link, usePage } from '@inertiajs/vue3';
+import { Link, router, usePage } from '@inertiajs/vue3';
 import { ChevronDown } from '@lucide/vue';
 import {
     NavigationMenuContent,
@@ -17,8 +17,8 @@ import { computed, ref } from 'vue';
 
 /**
  * The bar's words: Dashboard, then a group per question (what you have, what
- * to find, what is coming), each opening a panel of its places on hover, click
- * or keyboard. The word of the page you are on is lit; the rows in a panel are
+ * to find, what is coming), each opening a panel of its places on hover, a tap
+ * or the keyboard. The word of the page you are on is lit; the rows in a panel are
  * not, so a panel always reads the same.
  */
 
@@ -28,10 +28,23 @@ const active = computed(() => activeMenuWord(page.url, viewer.value.username));
 
 // Which group is open ('' for none): the arrow under a word shows with its panel.
 const open = ref('');
+
+/**
+ * A word clicked with a mouse goes to its group's first place: the pointer
+ * resting on the word already showed the panel. A tap or a key has no such
+ * preview, so it opens the panel instead: the menu's own click, which it
+ * keeps from a mouse.
+ */
+function goToFirst(group: NavGroup, event: MouseEvent): void {
+    if (event instanceof PointerEvent && event.pointerType === 'mouse') {
+        open.value = '';
+        router.visit(groupItemHref(group.items[0], viewer.value.username));
+    }
+}
 </script>
 
 <template>
-    <NavigationMenuRoot v-model="open" :delay-duration="80" class="relative">
+    <NavigationMenuRoot v-model="open" :delay-duration="80" disable-click-trigger class="relative">
         <NavigationMenuList class="flex items-center gap-2">
             <NavigationMenuItem>
                 <NavigationMenuLink as-child :active="active === 'dashboard'">
@@ -50,6 +63,7 @@ const open = ref('');
                         navWordState(active === group.id),
                         active === group.id ? '' : 'data-[state=open]:bg-surface data-[state=open]:text-ink',
                     ]"
+                    @click="goToFirst(group, $event)"
                 >
                     <component
                         :is="group.icon"
