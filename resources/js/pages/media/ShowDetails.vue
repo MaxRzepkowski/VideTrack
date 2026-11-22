@@ -186,7 +186,7 @@ function episodeCountOf(season: MediaSummary): string {
         <template #after>
             <RecommendationsBand
                 :related="show.related"
-                :related-title="trans('media.related_shows')"
+                :related-title="trans('media.recommended_shows')"
                 :similar="show.similar"
                 :similar-title="trans('media.similar_shows')"
             />

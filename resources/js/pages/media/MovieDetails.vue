@@ -129,7 +129,7 @@ const detailRows = computed<DetailRow[]>(() => [
         <template #after>
             <RecommendationsBand
                 :related="movie.related"
-                :related-title="trans('media.related_movies')"
+                :related-title="trans('media.recommended_movies')"
                 :similar="movie.similar"
                 :similar-title="trans('media.similar_movies')"
             />

@@ -255,8 +255,8 @@ const ownedEdition = computed(() => {
         </template>
 
         <template #after>
-            <!-- Related games show about ten, rounded up to a whole row. -->
-            <RecommendationsBand :related="game.related" :related-title="trans('media.related_games')" :shelf-size="10" />
+            <!-- Similar games show about ten, rounded up to a whole row. -->
+            <RecommendationsBand :related="game.related" :related-title="trans('media.similar_games')" :shelf-size="10" />
         </template>
 
         <template #recent>
