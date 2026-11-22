@@ -87,6 +87,9 @@
     --color-danger-surface: #1a1216;
     --color-danger-line: #3a2028;
     --color-danger-strong: #b3244a;
+    /* The fill of a dialog's destructive action (delete, drop, remove), and the text on it. */
+    --color-remove: #ff5c5c;
+    --color-on-remove: #0a0a0d;
 
     /* On the air: the red mark of an event streaming now, the one sign a live show wears everywhere. */
     --color-live: #ff3b47;
@@ -99,6 +102,8 @@
     --color-action-watchlist: #4dcaff;
     --color-action-favorite: #ff4a90;
     --color-action-rating: #ffc53d;
+    /* A star of the rating scale not reached. */
+    --color-rating-empty: #4a4a55;
 
     /* Groups of the main menu: the glyph's colour, the square under a pointed
        row, and the glyph drawn on that square. */
