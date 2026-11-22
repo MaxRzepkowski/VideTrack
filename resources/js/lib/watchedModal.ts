@@ -1,10 +1,12 @@
-import { dateTimeInputInstant } from '@/lib/format';
-import { mediaTypeDefinition } from '@/lib/mediaTypes';
+import { leafCode, showTitleOf } from '@/lib/badges';
+import { dateTimeInputInstant, episodeCode, formatDateTime, formatTimestampDate } from '@/lib/format';
+import { hasUserStatus, mediaTypeDefinition } from '@/lib/mediaTypes';
 import { formatProgress, hasProgress, isPositionCounter, playActionLabels, positionText } from '@/lib/progress';
 import { shownStatus, shownStatusVisual } from '@/lib/status';
+import type { RowTint } from '@/lib/ui';
 import type { UserMediaState } from '@/types/generated';
 import type { IsoInstant, MediaSummary, WatchedAtChoice } from '@/types/media';
-import { trans } from 'laravel-vue-i18n';
+import { trans, transChoice } from 'laravel-vue-i18n';
 
 /*
  * The watched modal's decisions, apart from its screen: which view a title
@@ -240,4 +242,240 @@ export function watchedAtChoice(mode: WhenMode, date: string): WatchedAtChoice |
     const picked = dateTimeInputInstant(date);
 
     return picked === null ? null : (picked.toISOString() as IsoInstant);
+}
+
+/** What kind of write the dialog's one action is, which its colour says: logging a play, logging progress, dropping, resuming. */
+export type ActionTone = 'watched' | 'progress' | 'drop' | 'hold';
+
+/**
+ * The colours of a kind of write, decided once: the fill of its button (with
+ * the ink on it), the colour of its words elsewhere, and the tint of its row.
+ */
+export const TONE_LOOK: Record<ActionTone, { fill: string; color: string; tint: RowTint }> = {
+    watched: { fill: 'bg-action-watched text-on-bright', color: 'var(--color-action-watched)', tint: 'watched' },
+    progress: { fill: 'bg-brand text-on-accent', color: 'var(--color-status-progress)', tint: 'progress' },
+    drop: { fill: 'bg-remove text-on-remove', color: 'var(--color-remove)', tint: 'remove' },
+    hold: { fill: 'bg-status-onhold text-on-bright', color: 'var(--color-status-onhold)', tint: 'hold' },
+};
+
+export function actionTone(intent: WatchedIntent, state: UserMediaState): ActionTone {
+    switch (intent) {
+        case 'drop':
+            return 'drop';
+        case 'status':
+            return state.status === 'dropped' ? 'drop' : 'hold';
+        case 'session':
+            return 'progress';
+        case 'complete':
+            return 'watched';
+    }
+}
+
+/**
+ * A row under the dialog's one action: a write of its own, a step to one
+ * (drop, correct the total, complete, add a session), or the history.
+ */
+export type StatusRow =
+    'wholeRun' | 'nextEpisode' | 'complete' | 'addSession' | 'correctTotal' | 'hold' | 'drop' | 'unmark' | 'removeProgress' | 'cycles' | 'history';
+
+/**
+ * The rows of the view the dialog opens on, in their order. Only what can be
+ * done is offered: a completed playable has no open attempt to drop, a title
+ * on hold is not put on hold again. A step has no rows: its action is the
+ * whole question.
+ */
+export function statusRows(
+    media: MediaSummary,
+    state: UserMediaState,
+    intent: WatchedIntent,
+    has: { history: boolean; cycles: boolean },
+): StatusRow[] {
+    const playable = isPlayable(media);
+    const container = !playable;
+    const canHold = hasUserStatus(media) && state.status !== 'on_hold';
+    const rows: StatusRow[] = [];
+    const offer = (row: StatusRow, when: boolean): void => {
+        if (when) {
+            rows.push(row);
+        }
+    };
+
+    if (intent === 'status') {
+        const nextEpisode = state.status === 'on_hold' && container && state.nextEpisode !== null;
+
+        offer('nextEpisode', nextEpisode);
+        offer('complete', !nextEpisode && !container);
+        offer('drop', state.status === 'on_hold');
+    } else if (intent === 'session') {
+        offer('correctTotal', !isPositionCounter(media) && (state.progress ?? 0) > 0);
+        offer('complete', true);
+        offer('hold', canHold);
+        offer('drop', true);
+        offer('removeProgress', state.status === 'in_progress');
+    } else if (intent === 'complete') {
+        offer('wholeRun', episodeStep(media, state, intent) !== null);
+        offer('addSession', hasProgress(media) && state.watched);
+        offer('hold', canHold);
+        offer('drop', !(playable && state.watched && state.status === null));
+        // Unmarking empties the current run, so it needs something watched in it; a
+        // container without episode counters (a specials season) counts its plays.
+        offer('unmark', container && unmarkCount(state) > 0);
+    }
+
+    offer('cycles', has.cycles && intent !== 'drop');
+    offer('history', has.history && intent !== 'drop');
+
+    return rows;
+}
+
+/** The history a row sums up: how many plays, and the latest one's moment. */
+export interface HistorySummary {
+    count: number;
+    last: string | null;
+}
+
+/** A row's name and the line under it, which says what it does to this title. */
+export function statusRowText(
+    row: StatusRow,
+    media: MediaSummary,
+    state: UserMediaState,
+    history: HistorySummary,
+): { label: string; description: string } {
+    const watchedEpisodes = state.watchedEpisodes ?? 0;
+
+    switch (row) {
+        case 'wholeRun':
+            return {
+                label: media.type === 'season' ? trans('media.watch_the_whole_season') : trans('media.watch_the_whole_show'),
+                description:
+                    watchedEpisodes > 0
+                        ? transChoice('media.the_remaining_count_episodes', state.remainingEpisodes ?? 0, {
+                              count: String(state.remainingEpisodes ?? 0),
+                          })
+                        : transChoice('media.all_count_episodes_with_the_same_date', state.airedEpisodes ?? 0, {
+                              count: String(state.airedEpisodes ?? 0),
+                          }),
+            };
+        case 'nextEpisode':
+            return { label: nextEpisodeLabel(state), description: trans('media.resumes_and_logs_the_episode') };
+        case 'complete':
+            return {
+                label: state.status !== null && state.status !== 'in_progress' ? completeLabel(media, state) : trans('media.complete'),
+                description: completeDescription(media, state),
+            };
+        case 'addSession':
+            return { label: trans('media.add_session'), description: trans('media.log_more_hours_to_this_play') };
+        case 'correctTotal':
+            return {
+                label: trans('media.correct_the_total'),
+                description: trans('media.logged_so_far_time', { time: formatProgress(media, state.progress) ?? '' }),
+            };
+        case 'hold':
+            return { label: trans('media.put_on_hold'), description: trans('media.stays_out_of_up_next_until_you_resume') };
+        case 'drop':
+            return { label: trans('media.drop'), description: trans('media.saved_in_history_as_an_unfinished_attempt') };
+        case 'unmark': {
+            const count = unmarkCount(state);
+
+            // Past the first run, only the current one is emptied: the line says so.
+            return {
+                label: trans('media.mark_as_unwatched'),
+                description: transChoice(
+                    state.cycle > 1 ? 'media.removes_plays_from_count_episodes_of_this_cycle' : 'media.removes_plays_from_count_episodes',
+                    count,
+                    { count: String(count) },
+                ),
+            };
+        }
+        case 'removeProgress':
+            return { label: trans('media.remove_progress'), description: trans('media.clears_the_progress_and_the_status') };
+        case 'cycles':
+            return {
+                label: trans('media.watch_cycles'),
+                description: transChoice('media.count_cycles_the_current_one_number', state.cycle, {
+                    count: String(state.cycle),
+                    number: String(state.cycle),
+                }),
+            };
+        case 'history':
+            return {
+                label: trans('common.history'),
+                description: transChoice('media.count_plays_last_on_date', history.count, {
+                    count: String(history.count),
+                    date: formatDateTime(history.last) ?? '',
+                }),
+            };
+    }
+}
+
+/** What completing writes, said before it happens. */
+function completeDescription(media: MediaSummary, state: UserMediaState): string {
+    if (!hasProgress(media)) {
+        return trans('media.logged_with_todays_date');
+    }
+
+    if (isPositionCounter(media)) {
+        return trans('media.saved_in_history_at_the_position');
+    }
+
+    return (state.progress ?? 0) > 0 ? trans('media.saved_in_history_with_the_hours_played') : trans('media.saved_in_history_with_or_without_hours');
+}
+
+/** The episode a show or a season is at, as the button that watches it names it: "Watch S02E04". */
+export function nextEpisodeLabel(state: UserMediaState): string {
+    const next = state.nextEpisode;
+
+    return next !== null && next.seasonNumber !== null && next.number !== null
+        ? trans('media.watch_episode_code', { code: episodeCode(next.seasonNumber, next.number) })
+        : trans('media.watch_the_next_episode');
+}
+
+/**
+ * How many episodes marking a show or a season unwatched empties: those
+ * watched in the current run; a container without episode counters (a
+ * specials season) counts its plays.
+ */
+export function unmarkCount(state: UserMediaState): number {
+    return state.watchedEpisodes ?? state.plays;
+}
+
+/**
+ * The facts under the title beside the status: an episode's code, the show a
+ * season belongs to, how many episodes an untouched show holds, the day a
+ * title was dropped (when no amount says more).
+ */
+export function statusFacts(media: MediaSummary, state: UserMediaState, withCaption: boolean): string[] {
+    const untouchedRun = !withCaption && !isPlayable(media) && (state.airedEpisodes ?? 0) > 0;
+    const droppedOn = state.status === 'dropped' && !state.droppedAmount ? formatTimestampDate(state.droppedAt) : null;
+
+    return [
+        leafCode(media),
+        showTitleOf(media),
+        untouchedRun ? transChoice('common.count_episode', state.airedEpisodes ?? 0, { count: String(state.airedEpisodes ?? 0) }) : null,
+        droppedOn,
+    ].filter((fact): fact is string => fact !== null);
+}
+
+/** A step of the dialog, as it names itself under the title: its words, in the colour of its write. */
+export function stepName(
+    media: MediaSummary,
+    step: { intent: WatchedIntent; correcting: boolean; cycles: boolean },
+): { text: string; color: string } {
+    if (step.cycles) {
+        return { text: trans('media.watch_cycles'), color: 'var(--color-ink-muted)' };
+    }
+
+    if (step.correcting) {
+        return { text: trans('media.correct_the_total'), color: 'var(--color-ink-muted)' };
+    }
+
+    if (step.intent === 'drop') {
+        return { text: trans('media.drop'), color: TONE_LOOK.drop.color };
+    }
+
+    if (step.intent === 'complete') {
+        return { text: trans('media.complete'), color: TONE_LOOK.watched.color };
+    }
+
+    return { text: isPositionCounter(media) ? trans('media.update_progress') : trans('media.add_session'), color: TONE_LOOK.progress.color };
 }

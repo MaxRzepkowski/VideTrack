@@ -1,45 +1,51 @@
 <script setup lang="ts">
 import Hairline from '@/components/Hairline.vue';
+import EpisodeProgress from '@/components/media/watched/EpisodeProgress.vue';
+import StatusRows from '@/components/media/watched/StatusRows.vue';
+import StatusAction from '@/components/media/watched/StatusAction.vue';
 import WatchedCounter from '@/components/media/watched/WatchedCounter.vue';
 import WatchedCycles from '@/components/media/watched/WatchedCycles.vue';
 import WatchedHistory from '@/components/media/watched/WatchedHistory.vue';
-import WatchedWhen from '@/components/media/watched/WatchedWhen.vue';
 import MetaLine from '@/components/MetaLine.vue';
-import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
+import AppModal from '@/components/modal/AppModal.vue';
 import { confirm } from '@/composables/useConfirm';
 import { shownState, stateKey, useMediaActions } from '@/composables/useMediaActions';
 import { useMediaModals } from '@/composables/useMediaModals';
 import { usePlayHistory } from '@/composables/usePlayHistory';
-import { leafCode } from '@/lib/badges';
 import { localDateTimeInput } from '@/lib/format';
-import { hasUserStatus } from '@/lib/mediaTypes';
-import { formatProgress, hasProgress, isPositionCounter, parseDecimal, positionText, progressFromInput, progressToInput } from '@/lib/progress';
+import { hasProgress, isPositionCounter, parseDecimal, positionText, progressFromInput, progressToInput, playActionLabels } from '@/lib/progress';
 import {
     actionLabel,
-    completeLabel,
+    actionTone,
     dropDescription,
     episodeStep,
+    nextEpisodeLabel,
     openingIntent,
     statusCaption,
     statusDescription,
+    statusFacts,
+    statusRows,
+    stepName,
+    unmarkCount,
     watchedAtChoice,
+    type ActionTone,
+    type StatusRow,
     type WatchedIntent,
     type WhenMode,
 } from '@/lib/watchedModal';
+import type { LucideIcon } from '@lucide/vue';
 import { trans, transChoice } from 'laravel-vue-i18n';
-import { Check, ChevronDown, CircleCheck, CircleOff, Pause, Plus, RotateCcw, Trash2 } from '@lucide/vue';
+import { ArrowLeft, Ban, Check, Play, Plus, RotateCcw } from '@lucide/vue';
 import { computed, ref, watch } from 'vue';
 
 // THE status modal (attempt model): one surface for everything that writes
 // the user's relationship with a title. It is built around the ONE action
-// almost every visit wants — completing the title, now. That action is the
-// only button with weight; the date sits under it as a line you can click,
-// and the rarer writes (hold, drop, history) are quiet footer links. There
-// are no status tabs: a tab strip charges every visit for a choice that is
-// already made by the time the modal opens.
-//
-// The counter of a progress type (game hours, book pages) is editable right
-// here, so a title in progress needs no second door.
+// the title's state asks for — completing it, logging progress, taking a
+// status off — in the colour of its kind of write, with when beside it for a
+// dated write. The rarer writes are rows under it, each saying what it does;
+// a row that needs more (a drop's date, a corrected total, the hours of a
+// completion) opens a step with a way back. There are no status tabs: a tab
+// strip charges every visit for a choice already made when the modal opens.
 const { modals, close } = useMediaModals();
 const { isPlayable, markWatched, markNextEpisodeWatched, unmarkWatched, startRewatch, logProgress, setStatus, discardProgress } = useMediaActions();
 
@@ -47,6 +53,8 @@ const media = computed(() => modals.watched);
 const state = computed(() => (media.value ? shownState(stateKey(media.value)) : null));
 
 const intent = ref<WatchedIntent>('complete');
+// The view the modal opened on; any other is a step, with a way back to it.
+const mainIntent = ref<WatchedIntent>('complete');
 const mode = ref<WhenMode>('now');
 const customDate = ref('');
 
@@ -67,11 +75,12 @@ const correcting = ref(false);
 const mergeDropped = ref(true);
 
 const historyOpen = ref(false);
+// The runs behind a show, a step of their own: each one, and the newest reset to undo.
+const cyclesOpen = ref(false);
 
 const { plays, cycles, loadPlays, loadCycles, clear: clearHistory } = usePlayHistory(() => media.value);
 
 const withProgress = computed(() => media.value !== null && hasProgress(media.value));
-const withStatus = computed(() => media.value !== null && hasUserStatus(media.value));
 const container = computed(() => media.value !== null && !isPlayable(media.value));
 const position = computed(() => (media.value ? positionText(media.value) : null));
 
@@ -125,11 +134,13 @@ watch(media, (opened) => {
     }
 
     intent.value = openingIntent(opened, state.value, modals.watchedTab);
+    mainIntent.value = intent.value;
     mode.value = 'now';
     customDate.value = localDateTimeInput();
     correcting.value = false;
     mergeDropped.value = true;
     historyOpen.value = false;
+    cyclesOpen.value = false;
     clearHistory();
 
     resetAmount();
@@ -172,96 +183,169 @@ watch(
 
 // ---- What the modal shows ----
 
-// Whether the counter field is on screen carrying the live progress — the
-// caption above then names the status alone.
-const counterShown = computed(() => withProgress.value && intent.value !== 'status');
+const isStep = computed(() => intent.value !== mainIntent.value || correcting.value || cyclesOpen.value);
 
-const caption = computed(() => (media.value && state.value ? statusCaption(media.value, state.value, counterShown.value) : null));
+// The caption carries the counter even beside the field: a session's field
+// holds the hours to add, not the total, and the line reads as the title's state.
+const caption = computed(() => (media.value && state.value ? statusCaption(media.value, state.value, false) : null));
 
-const chip = computed(() => (media.value ? leafCode(media.value) : null));
+const facts = computed(() => (media.value && state.value ? statusFacts(media.value, state.value, caption.value !== null) : []));
+
+const step = computed(() =>
+    media.value ? stepName(media.value, { intent: intent.value, correcting: correcting.value, cycles: cyclesOpen.value }) : null,
+);
 
 // A fully watched container has nothing left to mark (the cascade only fills
 // unwatched episodes); playables can always take another play (rewatch).
 const canMark = computed(() => media.value !== null && state.value !== null && (isPlayable(media.value) || !state.value.watched));
 
-// Starting over belongs exactly where the modal runs out of things to offer:
-// a finished show has nothing left to mark, a dropped one only offers taking
-// the status off. Both are the moment "from the top" is the real question.
-// Only a show carries cycles of its own — a season or an episode is watched
-// inside the run its show is in.
+// Starting over belongs where the modal runs out of things to offer: a
+// finished show has nothing left to mark. Only a show carries cycles of its
+// own — a season or an episode is watched inside the run its show is in.
 const canWatchAgain = computed(
-    () =>
-        media.value?.type === 'show' &&
-        state.value !== null &&
-        state.value.plays > 0 &&
-        ((intent.value === 'complete' && state.value.watched) || (intent.value === 'status' && state.value.status === 'dropped')),
+    () => media.value?.type === 'show' && state.value !== null && state.value.plays > 0 && state.value.watched && intent.value === 'complete',
 );
 
-const step = computed(() => (media.value && state.value ? episodeStep(media.value, state.value, intent.value) : null));
+const episode = computed(() => (media.value && state.value ? episodeStep(media.value, state.value, intent.value) : null));
 
 const releaseUnavailable = computed(() => media.value !== null && isPlayable(media.value) && !media.value.releaseDate);
 
 const sessionMode = computed(() => intent.value === 'session');
 
-// A session on a game ADDS hours, so the running total belongs on screen as
-// context with a way to correct it. A position counter has one number and
-// the field already is it.
-const sessionTotal = computed(() =>
-    media.value && sessionMode.value && !correcting.value && !position.value && (state.value?.progress ?? 0) > 0
-        ? formatProgress(media.value, state.value?.progress ?? null)
-        : null,
-);
-
 // Completing while the newest entry is a drop: absorb its hours or start
 // fresh. Position counters never sum, so the choice does not apply to them.
 const overDropped = computed(() => (state.value?.latestDropped ?? false) && intent.value === 'complete');
 
-// A completed title has no open attempt to drop or pause. A game with an
-// open state (playing / sessions) is a fresh attempt and stays droppable.
-const completedLock = computed(
-    () => media.value !== null && state.value !== null && isPlayable(media.value) && state.value.watched && state.value.status === null,
+const showEpisodes = computed(
+    () => media.value !== null && state.value !== null && container.value && (state.value.watchedEpisodes ?? 0) > 0 && !isStep.value,
 );
 
-const accent = computed(() => {
-    if (intent.value === 'drop') {
-        return 'var(--color-status-dropped)';
+/** The one action of the view: what it says and does, its colour, and whether it takes a date. */
+const primary = computed<{ label: string; icon: LucideIcon; tone: ActionTone; dated: boolean; act: () => void } | null>(() => {
+    const current = media.value;
+    const shown = state.value;
+
+    if (!current || !shown || cyclesOpen.value) {
+        return null;
     }
 
+    const tone = actionTone(intent.value, shown);
+
     if (intent.value === 'status') {
-        return state.value?.status === 'dropped' ? 'var(--color-status-dropped)' : 'var(--color-status-onhold)';
-    }
-
-    return 'var(--color-action-watched)';
-});
-
-const label = computed(() =>
-    media.value && state.value ? actionLabel(media.value, state.value, { intent: intent.value, correcting: correcting.value, step: step.value }) : '',
-);
-
-const actionIcon = computed(() => {
-    if (intent.value === 'status') {
-        return RotateCcw;
+        return {
+            label: shown.status === 'on_hold' ? trans('media.resume') : trans('media.remove_status'),
+            icon: shown.status === 'on_hold' ? Play : RotateCcw,
+            tone,
+            dated: false,
+            act,
+        };
     }
 
     if (intent.value === 'drop') {
-        return CircleOff;
+        return { label: trans('media.drop_this_title'), icon: Ban, tone, dated: true, act };
     }
 
-    return sessionMode.value && !correcting.value ? Plus : Check;
+    if (sessionMode.value) {
+        return {
+            label: actionLabel(current, shown, { intent: 'session', correcting: correcting.value, step: null }),
+            icon: correcting.value || position.value ? Check : Plus,
+            tone,
+            dated: false,
+            act,
+        };
+    }
+
+    if (episode.value) {
+        return {
+            label: episode.value === 'first' && shown.nextEpisode === null ? trans('media.watch_the_first_episode') : nextEpisodeLabel(shown),
+            icon: Check,
+            tone,
+            dated: true,
+            act: startNextEpisode,
+        };
+    }
+
+    if (canWatchAgain.value) {
+        return { label: trans('media.watch_again'), icon: RotateCcw, tone, dated: false, act: watchAgain };
+    }
+
+    if (!canMark.value) {
+        return null;
+    }
+
+    return {
+        label:
+            isStep.value && withProgress.value
+                ? playActionLabels(current).mark
+                : actionLabel(current, shown, { intent: 'complete', correcting: false, step: null }),
+        icon: Check,
+        tone,
+        dated: true,
+        act,
+    };
 });
 
-// Correcting the counter from the completion view is its own write, so it
-// gets its own full-width button — the same weight as the main action,
-// below the field rather than inside its row. Growing downwards leaves the
-// input and the spinner arrows exactly where the cursor left them. (In the
-// session view the main button already IS the save.)
-const canSaveCounter = computed(() => intent.value === 'complete' && withProgress.value);
+// The rows of the view the modal opened on; a step has its one action alone.
+const rows = computed<StatusRow[]>(() =>
+    media.value && state.value && !isStep.value
+        ? statusRows(media.value, state.value, mainIntent.value, { history: plays.value.length > 0, cycles: cycles.value.length > 1 })
+        : [],
+);
 
-const episodePercent = computed(() => {
-    const total = state.value?.airedEpisodes ?? 0;
+const historySummary = computed(() => ({
+    count: plays.value.length,
+    last: plays.value.reduce<string | null>((latest, play) => (latest === null || play.watchedAt > latest ? play.watchedAt : latest), null),
+}));
 
-    return total > 0 ? Math.round(((state.value?.watchedEpisodes ?? 0) / total) * 100) : 0;
-});
+function pressRow(row: StatusRow): void {
+    switch (row) {
+        case 'wholeRun':
+            act();
+            break;
+        case 'nextEpisode':
+            startNextEpisode();
+            break;
+        case 'complete':
+            if (withProgress.value) {
+                intent.value = 'complete';
+            } else {
+                mode.value = 'now';
+                act('complete');
+            }
+            break;
+        case 'addSession':
+            intent.value = 'session';
+            break;
+        case 'correctTotal':
+            intent.value = 'session';
+            correcting.value = true;
+            break;
+        case 'hold':
+            hold();
+            break;
+        case 'drop':
+            intent.value = 'drop';
+            break;
+        case 'unmark':
+            void unmark();
+            break;
+        case 'removeProgress':
+            void resetProgress();
+            break;
+        case 'cycles':
+            cyclesOpen.value = true;
+            break;
+        case 'history':
+            historyOpen.value = !historyOpen.value;
+            break;
+    }
+}
+
+function back(): void {
+    intent.value = mainIntent.value;
+    correcting.value = false;
+    cyclesOpen.value = false;
+}
 
 // ---- Writes ----
 
@@ -293,14 +377,15 @@ function saveCounter(): void {
     close();
 }
 
-function act(): void {
+/** The view's one action; `as` writes another view's (a row completing from the status view). */
+function act(as: WatchedIntent = intent.value): void {
     const current = media.value;
 
     if (!current) {
         return;
     }
 
-    if (intent.value === 'status') {
+    if (as === 'status') {
         setStatus(current, null);
         close();
 
@@ -313,14 +398,14 @@ function act(): void {
         return;
     }
 
-    if (intent.value === 'drop') {
+    if (as === 'drop') {
         setStatus(current, 'dropped', withProgress.value ? parseAmount(amount.value) : null, when);
         close();
 
         return;
     }
 
-    if (sessionMode.value) {
+    if (as === 'session') {
         if (correcting.value) {
             saveCounter();
 
@@ -404,7 +489,7 @@ async function unmark(): Promise<void> {
         return;
     }
 
-    const count = shown.watchedEpisodes ?? shown.plays;
+    const count = unmarkCount(shown);
     const confirmed = await confirm({
         message: transChoice(shown.cycle > 1 ? 'media.unmark_cycle_confirm' : 'media.unmark_confirm', count, { count: String(count) }),
         confirmLabel: trans('media.mark_as_unwatched'),
@@ -426,296 +511,105 @@ function watchAgain(): void {
 </script>
 
 <template>
-    <Dialog :open="media !== null" @update:open="(open: boolean) => !open && close()">
-        <!-- The accent is bound per element, not as a `--accent` custom
-             property on the dialog: DialogContent's root is a fragment
-             (portal + overlay + content), so a fallthrough `style` never
-             reaches the DOM and every rule reading the variable dies. -->
-        <DialogContent v-if="media && state" class="border-line-subtle bg-surface max-w-md rounded-2xl p-5 sm:p-6">
-            <!-- Keyed by the title, so the parts holding a view of their own
-                 (the open date picker, the percent lens) start fresh with
-                 each one. -->
-            <div :key="stateKey(media)" class="flex flex-col">
-                <!-- The title leads; where it stands today is the caption
-                     under it, carried by the colour of the words alone. No
-                     status dot, no badge slab — the line is short enough to
-                     read as one phrase. -->
-                <DialogTitle class="mr-8 min-w-0 text-xl leading-snug font-semibold tracking-tight" :class="caption || chip ? '' : 'mb-5'">
-                    {{ media.title }}
-                </DialogTitle>
+    <AppModal :open="media !== null" :title="media?.title ?? ''" @update:open="(open: boolean) => !open && close()">
+        <template v-if="media && state && isStep" #leading>
+            <button
+                type="button"
+                :aria-label="trans('common.back')"
+                class="bg-surface-raised text-ink-muted hover:text-ink mt-0.5 flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-lg transition-colors duration-150"
+                @click="back"
+            >
+                <ArrowLeft class="size-4.5" />
+            </button>
+        </template>
 
-                <p v-if="caption || chip" class="m-0 mt-1.5 mb-5 flex min-w-0 items-baseline gap-1.5 text-sm font-semibold">
-                    <span v-if="chip" class="text-ink-faint shrink-0 tabular-nums">{{ chip }}</span>
-                    <Hairline v-if="chip && caption" class="mx-0" />
-                    <MetaLine v-if="caption" :parts="caption.parts" class="min-w-0" :style="{ color: caption.color }" />
+        <template v-if="media && state" #meta>
+            <span v-if="isStep && step" class="font-medium" :style="{ color: step.color }">{{ step.text }}</span>
+            <template v-else>
+                <MetaLine v-if="caption" :parts="caption.parts" class="min-w-0 font-medium" :style="{ color: caption.color }" />
+                <Hairline v-if="caption && facts.length" class="mx-0" />
+                <MetaLine v-if="facts.length" :parts="facts" class="text-ink-muted min-w-0" />
+            </template>
+        </template>
+
+        <!-- Keyed by the title, so the parts holding a view of their own (the
+             percent lens, an open history) start fresh with each one. -->
+        <div v-if="media && state" :key="stateKey(media)" class="flex flex-col">
+            <WatchedCycles v-if="cyclesOpen" :media="media" :cycles="cycles" @undone="close" />
+
+            <div v-else class="flex flex-col gap-3 px-5 pb-4">
+                <!-- What a status or a drop does to this title, said before the button. -->
+                <p
+                    v-for="statement in intent === 'status' ? statusDescription(media, state) : []"
+                    :key="statement"
+                    class="text-ink-muted m-0 text-sm"
+                >
+                    {{ statement }}
                 </p>
+                <p v-if="intent === 'drop'" class="text-ink-muted m-0 text-sm">{{ dropDescription(media) }}</p>
 
-                <!-- ============ Already on hold / dropped ============ -->
-                <template v-if="intent === 'status'">
-                    <div class="mb-4 flex flex-col gap-2">
-                        <p v-for="statement in statusDescription(media, state)" :key="statement" class="text-ink-muted m-0 text-sm leading-relaxed">
-                            {{ statement }}
-                        </p>
-                    </div>
-                </template>
+                <EpisodeProgress v-if="showEpisodes" :watched="state.watchedEpisodes ?? 0" :aired="state.airedEpisodes ?? 0" />
 
-                <!-- ============ Completing / dropping / logging ============ -->
-                <template v-else>
-                    <!-- Containers: how far the episodes got (read-only —
-                         episodes are marked on their own rows). A counter
-                         over a bar needs no word naming it. -->
-                    <div v-if="container && (state.watchedEpisodes ?? 0) > 0 && intent === 'complete'" class="mb-4 flex flex-col gap-2">
-                        <span class="text-ink-secondary text-sm font-semibold tabular-nums"
-                            >{{ state.watchedEpisodes }} / {{ state.airedEpisodes }}</span
-                        >
-                        <div class="bg-surface-overlay h-1 overflow-hidden rounded-full">
-                            <div
-                                class="bg-status-progress h-full rounded-full transition-[width] duration-300"
-                                :style="{ width: `${episodePercent}%` }"
-                            ></div>
-                        </div>
-                    </div>
-
-                    <!-- The counter, editable from the moment the modal opens.
-                         The field keeps a stable width and the save button
-                         sits in its own reserved row underneath, so clicking
-                         the spinner arrows never moves anything. -->
-                    <div v-if="withProgress" class="mb-4 flex flex-col gap-2">
-                        <WatchedCounter
-                            v-model="amount"
-                            :media="media"
-                            :adding="sessionMode && !correcting && !position"
-                            @edited="amountDirty = true"
-                        />
-
-                        <!-- A game session ADDS to a running total, so the
-                             total belongs on screen — with the way to correct
-                             it instead of adding to it. -->
-                        <p v-if="sessionTotal" class="text-ink-muted m-0 flex flex-wrap items-baseline gap-x-1.5 text-sm">
-                            <span>{{ trans('media.logged_so_far_time', { time: sessionTotal }) }}</span>
-                            <Hairline class="mx-0" />
-                            <button
-                                v-tooltip="position?.correctCounter ?? trans('media.correct_the_hour_counter')"
-                                type="button"
-                                class="text-ink-secondary hover:text-ink font-semibold underline decoration-dotted underline-offset-4 transition-colors duration-150"
-                                @click="correcting = true"
-                            >
-                                {{ trans('media.correct') }}
-                            </button>
-                        </p>
-
-                        <button
-                            v-if="sessionMode && correcting"
-                            type="button"
-                            class="text-ink-muted hover:text-ink m-0 self-start text-sm font-semibold underline decoration-dotted underline-offset-4 transition-colors duration-150"
-                            @click="correcting = false"
-                        >
-                            {{ trans('media.add_session') }}
-                        </button>
-
-                        <button
-                            v-if="canSaveCounter && amountDirty"
-                            v-tooltip="position?.correctCounter ?? trans('media.correct_the_hour_counter')"
-                            type="button"
-                            class="bg-brand text-on-accent mt-1 w-full rounded-xl py-3.5 text-base font-bold transition-opacity duration-150 hover:opacity-90"
-                            @click="saveCounter"
-                        >
-                            {{ trans('common.save') }}
-                        </button>
-
-                        <p v-if="sessionMode && state.watched && !state.progress" class="text-ink-muted m-0 text-sm">
-                            {{ position?.anotherRun ?? trans('media.this_starts_another_playthrough_hours_of') }}
-                        </p>
-                    </div>
-
-                    <!-- Absorbing the hours frozen at the last drop: one line,
-                         checked by default, hidden where it cannot apply. -->
-                    <button
-                        v-if="overDropped && withProgress && !position && !sessionMode"
-                        type="button"
-                        :aria-pressed="mergeDropped"
-                        class="text-ink-secondary hover:text-ink mb-4 flex items-center gap-2.5 text-left text-sm transition-colors duration-150"
-                        @click="mergeDropped = !mergeDropped"
-                    >
-                        <span
-                            class="flex size-4.5 shrink-0 items-center justify-center rounded-md border transition-colors duration-150"
-                            :class="mergeDropped ? 'border-transparent' : 'border-line-strong'"
-                            :style="mergeDropped ? { background: accent } : undefined"
-                        >
-                            <Check v-if="mergeDropped" class="text-surface-base size-3" :stroke-width="3" />
-                        </span>
-                        {{ trans('media.include_the_hours_from_the_dropped') }}
-                    </button>
-
-                    <p v-if="intent === 'drop'" class="text-ink-muted m-0 mb-4 text-sm leading-relaxed">{{ dropDescription(media) }}</p>
-                </template>
-
-                <!-- ============ The one action ============ -->
-                <!-- Two, on an untouched show or season: starting it leads, and
-                     taking the whole run keeps its place below in outline. -->
-                <button
-                    v-if="step"
-                    type="button"
-                    class="text-surface-base mb-2 flex w-full items-center justify-center gap-2.5 rounded-xl py-3.5 text-base font-bold transition-opacity duration-150 hover:opacity-90"
-                    :style="{ background: accent }"
-                    @click="startNextEpisode"
-                >
-                    <Check class="size-5 shrink-0" :stroke-width="2.4" />
-                    {{ step === 'first' ? trans('media.watch_the_first_episode') : trans('media.watch_the_next_episode') }}
-                </button>
-
-                <button
-                    v-if="canMark || intent !== 'complete'"
-                    type="button"
-                    class="flex w-full items-center justify-center gap-2.5 rounded-xl py-3.5 text-base font-bold transition-opacity duration-150 hover:opacity-90"
-                    :class="sessionMode ? 'bg-brand text-on-accent' : step ? 'border' : 'text-surface-base'"
-                    :style="sessionMode ? undefined : step ? { borderColor: accent, color: accent } : { background: accent }"
-                    @click="act"
-                >
-                    <component :is="actionIcon" class="size-5 shrink-0" :stroke-width="2.4" />
-                    {{ label }}
-                </button>
-
-                <!-- Hidden rather than taken down, so a picker left open stays
-                     open across a look at another view. -->
-                <WatchedWhen
-                    v-show="!sessionMode && intent !== 'status' && (canMark || intent === 'drop')"
-                    v-model:mode="mode"
-                    v-model:date="customDate"
-                    :release-date="media.releaseDate"
-                    :release-unavailable="releaseUnavailable"
-                    :accent="accent"
-                />
-
-                <!-- Starting over. Outlined, not a slab: it is the rarer of
-                     the two answers a finished show has, and the line under it
-                     says what it costs (nothing). -->
-                <template v-if="canWatchAgain">
-                    <button
-                        type="button"
-                        class="mt-2.5 flex w-full items-center justify-center gap-2.5 rounded-xl border py-3.5 text-base font-bold transition-opacity duration-150 hover:opacity-90"
-                        :style="{ borderColor: 'var(--color-action-watched)', color: 'var(--color-action-watched)' }"
-                        @click="watchAgain"
-                    >
-                        <RotateCcw class="size-5 shrink-0" :stroke-width="2.4" />
-                        {{ trans('media.watch_again') }}
-                    </button>
-                    <p class="text-ink-muted m-0 mt-2 text-sm leading-relaxed">
-                        {{ trans('media.your_history_and_statistics_stay_the') }}
+                <!-- The counter of a progress type, wherever a write carries it. -->
+                <template v-if="withProgress && intent !== 'status'">
+                    <WatchedCounter v-model="amount" :media="media" :adding="sessionMode && !correcting && !position" @edited="amountDirty = true" />
+                    <p v-if="sessionMode && !correcting && state.watched && !state.progress" class="text-ink-muted m-0 text-sm">
+                        {{ position?.anotherRun ?? trans('media.this_starts_another_playthrough_hours_of') }}
                     </p>
                 </template>
 
-                <!-- Containers keep the bulk unmark (plays live on episodes).
-                     A container with no episode counters — a specials season —
-                     counts the plays themselves instead. Past the first cycle
-                     the wording names the run it empties, because the earlier
-                     ones are staying. -->
+                <!-- Absorbing the hours frozen at the last drop: one line,
+                     checked by default, hidden where it cannot apply. -->
                 <button
-                    v-if="container && state.plays > 0 && intent === 'complete'"
+                    v-if="overDropped && withProgress && !position"
                     type="button"
-                    class="border-danger-line text-danger hover:bg-danger-surface mt-2.5 w-full rounded-xl border bg-transparent py-2.5 text-sm font-semibold transition-colors duration-150"
-                    @click="unmark"
+                    :aria-pressed="mergeDropped"
+                    class="text-ink-secondary hover:text-ink flex items-center gap-2.5 text-left text-sm transition-colors duration-150"
+                    @click="mergeDropped = !mergeDropped"
                 >
-                    {{
-                        transChoice(
-                            state.cycle > 1 ? 'media.mark_as_unwatched_removes_count_episode' : 'media.mark_as_unwatched_removes_plays_from',
-                            state.watchedEpisodes ?? state.plays,
-                            {
-                                count: String(state.watchedEpisodes ?? state.plays),
-                            },
-                        )
-                    }}
+                    <span
+                        class="flex size-4.5 shrink-0 items-center justify-center rounded-md border transition-colors duration-150"
+                        :class="mergeDropped ? 'bg-action-watched border-transparent' : 'border-line-strong'"
+                    >
+                        <Check v-if="mergeDropped" class="text-on-bright size-3" :stroke-width="3" />
+                    </span>
+                    {{ trans('media.include_the_hours_from_the_dropped') }}
                 </button>
 
-                <!-- The runs behind. A single one says nothing the status line
-                     does not already say, so the list appears once a second
-                     cycle exists. -->
-                <WatchedCycles v-if="cycles.length > 1" :media="media" :cycles="cycles" @undone="close" />
-
-                <!-- ============ The quiet writes ============ -->
-                <div class="border-line-subtle text-ink-muted mt-5 flex flex-wrap items-center gap-x-4 gap-y-2 border-t pt-3.5 text-sm font-semibold">
-                    <!-- Logging another session on a title in progress: the
-                         way back from the completion view. -->
-                    <button
-                        v-if="withProgress && intent === 'complete'"
-                        type="button"
-                        class="hover:text-status-progress flex items-center gap-1.5 transition-colors duration-150"
-                        @click="intent = 'session'"
-                    >
-                        <Plus class="size-4 shrink-0" />
-                        {{ position ? trans('media.update_progress') : trans('media.add_session') }}
-                    </button>
-
-                    <button
-                        v-if="withStatus && intent !== 'status' && state.status !== 'on_hold'"
-                        type="button"
-                        class="hover:text-status-onhold flex items-center gap-1.5 transition-colors duration-150"
-                        @click="hold"
-                    >
-                        <Pause class="size-4 shrink-0" />
-                        {{ trans('media.put_on_hold') }}
-                    </button>
-
-                    <button
-                        v-if="intent !== 'drop' && intent !== 'status' && !completedLock"
-                        type="button"
-                        class="hover:text-danger flex items-center gap-1.5 transition-colors duration-150"
-                        @click="intent = 'drop'"
-                    >
-                        <CircleOff class="size-4 shrink-0" />
-                        {{ trans('media.drop') }}
-                    </button>
-
-                    <!-- The open attempt is one row server-side: throwing it
-                         away takes the counter and the status with it. -->
-                    <button
-                        v-if="state.status === 'in_progress' && intent !== 'drop'"
-                        type="button"
-                        class="hover:text-danger flex items-center gap-1.5 transition-colors duration-150"
-                        @click="resetProgress"
-                    >
-                        <Trash2 class="size-4 shrink-0" />
-                        {{ trans('media.remove_progress') }}
-                    </button>
-
-                    <!-- The way back to completing: from the session view it
-                         is one of four links, so it stays short there. -->
-                    <button
-                        v-if="intent !== 'complete'"
-                        type="button"
-                        class="hover:text-action-watched flex items-center gap-1.5 transition-colors duration-150"
-                        @click="intent = 'complete'"
-                    >
-                        <CircleCheck class="size-4 shrink-0" />
-                        {{ sessionMode ? trans('media.complete') : completeLabel(media, state) }}
-                    </button>
-
-                    <button
-                        v-if="plays.length > 0"
-                        type="button"
-                        class="hover:text-ink ml-auto flex items-center gap-1 transition-colors duration-150"
-                        :aria-expanded="historyOpen"
-                        @click="historyOpen = !historyOpen"
-                    >
-                        {{ trans('media.history_count', { count: String(plays.length) }) }}
-                        <ChevronDown class="size-4 shrink-0 transition-transform duration-200" :class="historyOpen ? 'rotate-180' : ''" />
-                    </button>
-                </div>
-
-                <WatchedHistory
-                    v-if="historyOpen && plays.length > 0"
-                    :media="media"
-                    :plays="plays"
-                    :with-progress="withProgress"
-                    @changed="loadPlays"
-                    @emptied="close"
+                <StatusAction
+                    v-if="primary"
+                    v-model:mode="mode"
+                    v-model:date="customDate"
+                    :label="primary.label"
+                    :icon="primary.icon"
+                    :tone="primary.tone"
+                    :dated="primary.dated"
+                    :release-date="media.releaseDate"
+                    :release-precision="media.extra.releasePrecision"
+                    :release-unavailable="releaseUnavailable"
+                    @act="primary.act()"
                 />
-
-                <!-- Completed playable: the drop link is gone, say why. -->
-                <p v-if="completedLock && intent === 'complete'" class="text-ink-faint m-0 mt-3 text-sm">
-                    {{ trans('media.you_have_completed_this_title_only') }}
-                </p>
+                <p v-if="canWatchAgain" class="text-ink-muted m-0 text-sm">{{ trans('media.your_history_and_statistics_stay_the') }}</p>
             </div>
-        </DialogContent>
-    </Dialog>
+
+            <template v-if="rows.length">
+                <div class="border-line border-t" />
+                <StatusRows
+                    :rows="rows"
+                    :media="media"
+                    :state="state"
+                    :history="historySummary"
+                    :history-open="historyOpen"
+                    :with-progress="withProgress"
+                    @press="pressRow"
+                >
+                    <template #history>
+                        <div class="px-5 pb-2">
+                            <WatchedHistory :media="media" :plays="plays" :with-progress="withProgress" @changed="loadPlays" @emptied="close" />
+                        </div>
+                    </template>
+                </StatusRows>
+            </template>
+        </div>
+    </AppModal>
 </template>

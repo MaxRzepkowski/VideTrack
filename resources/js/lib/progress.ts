@@ -191,6 +191,11 @@ export function counterView(media: MediaSummary, amount: number): ProgressView {
  * or, with nothing left between, what was watched; the remainder counts the
  * episodes neither watched nor skipped. A paused film has no strip.
  */
+/** How much of a run is watched, in whole percent, never past the whole. */
+export function episodeShare(watched: number, aired: number): number {
+    return aired > 0 ? Math.min(100, Math.round((watched / aired) * 100)) : 0;
+}
+
 export function activityProgress(entry: ProgressEntry): ProgressView | null {
     if (hasProgress(entry.media)) {
         return counterView(entry.media, entry.progress ?? 0);
@@ -205,7 +210,7 @@ export function activityProgress(entry: ProgressEntry): ProgressView | null {
     const watched = entry.watchedEpisodes ?? 0;
 
     return {
-        percent: aired > 0 ? Math.min(100, Math.round((watched / aired) * 100)) : 0,
+        percent: episodeShare(watched, aired),
         caption:
             entry.position != null
                 ? trans('common.episode_current_of_total', { current: formatNumber(entry.position), total: formatNumber(aired) })

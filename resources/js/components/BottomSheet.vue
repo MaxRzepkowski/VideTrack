@@ -22,7 +22,7 @@ const { followFinger } = drag;
 <template>
     <DialogRoot v-model:open="open">
         <DialogPortal>
-            <DialogOverlay :class="DIALOG_OVERLAY_CLASS" />
+            <DialogOverlay :class="[DIALOG_OVERLAY_CLASS, 'z-50']" />
             <DialogContent
                 class="border-line-strong bg-surface text-ink data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:slide-in-from-bottom data-[state=closed]:slide-out-to-bottom fixed inset-x-2 bottom-0 z-50 flex max-h-[90dvh] flex-col rounded-t-2xl border-x border-t pb-6 duration-300"
                 :style="followFinger"

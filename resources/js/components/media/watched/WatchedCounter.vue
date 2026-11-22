@@ -151,8 +151,10 @@ const placeholder = computed(() => (position.value ? trans('media.e_g_250') : tr
         </button>
     </div>
 
-    <div class="border-line bg-surface-raised flex items-center gap-3 rounded-xl border px-4 py-3">
-        <label :for="fieldId" class="text-ink-muted min-w-0 flex-1 truncate text-sm">{{ label }}</label>
+    <div
+        class="border-line-strong bg-surface-raised focus-within:border-brand-soft focus-within:ring-brand-soft flex h-13 items-center gap-3 rounded-[10px] border px-4 focus-within:ring-1"
+    >
+        <label :for="fieldId" class="text-ink-muted min-w-0 flex-1 truncate text-[15px]">{{ label }}</label>
         <!-- Two fields, not one with a swapped model: the percent one keeps
              the typed number while the counter follows it, so rounding never
              edits the digits under the cursor. -->
@@ -165,7 +167,7 @@ const placeholder = computed(() => (position.value ? trans('media.e_g_250') : tr
             max="100"
             step="1"
             placeholder="0"
-            class="border-line-strong text-ink focus:border-brand-soft w-20 shrink-0 border-b border-dashed bg-transparent pb-0.5 text-right text-lg font-semibold tabular-nums [color-scheme:dark] focus:outline-none"
+            class="text-ink placeholder:text-ink-faint w-24 shrink-0 bg-transparent text-right text-lg font-semibold tabular-nums [color-scheme:dark] focus:outline-none"
             @input="applyPercent"
         />
         <input
@@ -177,10 +179,11 @@ const placeholder = computed(() => (position.value ? trans('media.e_g_250') : tr
             :max="progressInputMax(media) ?? undefined"
             :step="progressInputStep(media)"
             :placeholder="placeholder"
-            class="border-line-strong text-ink focus:border-brand-soft w-20 shrink-0 border-b border-dashed bg-transparent pb-0.5 text-right text-lg font-semibold tabular-nums [color-scheme:dark] focus:outline-none"
+            class="text-ink placeholder:text-ink-faint w-24 shrink-0 bg-transparent text-right text-lg font-semibold tabular-nums [color-scheme:dark] focus:outline-none"
             @input="emit('edited')"
         />
         <span v-if="percentMode" class="text-ink-muted shrink-0 text-sm tabular-nums">%</span>
         <span v-else-if="total" class="text-ink-muted shrink-0 text-sm tabular-nums">/ {{ total }}</span>
+        <span v-else-if="!position" class="text-ink-muted shrink-0 text-sm">{{ trans('media.hours_unit') }}</span>
     </div>
 </template>

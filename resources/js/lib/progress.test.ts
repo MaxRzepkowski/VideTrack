@@ -3,6 +3,7 @@ import {
     amountTerms,
     counterView,
     episodeProgressRows,
+    episodeShare,
     formatProgress,
     formatUnitAmount,
     hasProgress,
@@ -203,5 +204,13 @@ describe('statCounts', () => {
         expect(statCounts('movie', { minutes: 250, watched: 2, plays: 2, titles: 2, estimatedMinutes: null })).toEqual(['2 movies']);
         expect(statCounts('show', { minutes: 420, watched: 10, plays: 10, titles: 1, estimatedMinutes: null })).toEqual(['1 show', '10 episodes']);
         expect(statCounts('book', { minutes: 1355, watched: 8, plays: 8, titles: 8, estimatedMinutes: 1626 })).toEqual(['8 books', '1,355 pages']);
+    });
+});
+
+describe('episodeShare', () => {
+    it('is the watched share in whole percent, never past the whole, and nothing of nothing', () => {
+        expect(episodeShare(13, 19)).toBe(68);
+        expect(episodeShare(12, 10)).toBe(100);
+        expect(episodeShare(0, 0)).toBe(0);
     });
 });

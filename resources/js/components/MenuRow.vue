@@ -57,5 +57,6 @@ withDefaults(
                 {{ description }}
             </span>
         </span>
+        <slot name="trailing" />
     </component>
 </template>
