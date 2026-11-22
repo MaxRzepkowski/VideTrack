@@ -5,7 +5,7 @@ import { computed, ref } from 'vue';
 
 // A biography, a description or a storyline, clamped to a few lines (six
 // unless told). The toggle appears only when the text actually overflows the
-// clamp.
+// clamp. Line breaks the provider kept (a book's paragraphs) stay.
 const props = withDefaults(defineProps<{ text: string; lines?: 4 | 6 }>(), { lines: 6 });
 
 // Whole class names, so Tailwind sees them.
@@ -18,7 +18,7 @@ const clamp = computed(() => (expanded.value ? '' : CLAMP[props.lines]));
 </script>
 
 <template>
-    <p ref="paragraph" class="text-ink-secondary mb-2 text-base leading-relaxed" :class="clamp">
+    <p ref="paragraph" class="text-ink-secondary mb-2 text-base leading-relaxed whitespace-pre-line" :class="clamp">
         {{ text }}
     </p>
     <button v-if="overflows" type="button" class="text-brand-soft p-0 text-base font-bold" @click="expanded = !expanded">
