@@ -7,14 +7,13 @@ import MediaCardSkeleton from '@/components/media/MediaCardSkeleton.vue';
 import MediaGrid from '@/components/media/MediaGrid.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { creatorOf, isCollection } from '@/lib/creators';
-import { kindsLabel } from '@/lib/mediaTypes';
-import { SELECT_CLASS } from '@/lib/ui';
+import { inRegistryOrder, kindGlyph, kindsLabel } from '@/lib/mediaTypes';
 import type { MediaSummary } from '@/types/media';
 import { Head, router } from '@inertiajs/vue3';
 import { useDebounceFn } from '@vueuse/core';
 import { trans } from 'laravel-vue-i18n';
-import { Search as SearchIcon } from '@lucide/vue';
-import { ref, watch } from 'vue';
+import { Search as SearchIcon, X } from '@lucide/vue';
+import { onMounted, ref, useTemplateRef, watch } from 'vue';
 
 const props = defineProps<{
     query: string;
@@ -27,10 +26,15 @@ const props = defineProps<{
 }>();
 
 const input = ref(props.query);
+const field = useTemplateRef<HTMLInputElement>('field');
 // The scope picker queries one provider at a time. It has no "All": searching
 // every module at once would stretch the wait for every keystroke.
 // Only shown when there is a choice to make.
 const activeScope = ref(props.scope);
+
+// A scope's glyphs, one per type it covers, in the registry's order: "Shows and
+// movies" wears both.
+const glyphs = (types: string[]) => inRegistryOrder(types).map((type) => ({ type, ...kindGlyph(type) }));
 const searching = ref(false);
 const failed = ref(false);
 
@@ -66,6 +70,25 @@ const search = useDebounceFn(visit, 400);
 
 watch(input, (value) => search(value.trim()));
 
+// `autofocus` only counts on a full page load; the menu reaches this page by an
+// Inertia visit, so the box takes the cursor itself.
+onMounted(() => field.value?.focus());
+
+function clear(): void {
+    input.value = '';
+    field.value?.focus();
+}
+
+// Esc first undoes the words, then lets the keyboard out of the box (to the
+// scope buttons and the results), as the box takes the cursor on its own.
+function onEscape(): void {
+    if (input.value === '') {
+        field.value?.blur();
+    } else {
+        input.value = '';
+    }
+}
+
 function setScope(scope: string): void {
     if (activeScope.value === scope) {
         return;
@@ -89,27 +112,71 @@ function setScope(scope: string): void {
             <!-- The box is the page; the heading is there for screen readers. -->
             <h1 class="sr-only">{{ trans('common.search') }}</h1>
 
-            <div class="max-w-dialog-lg relative mx-auto mb-3">
-                <SearchIcon class="text-ink-faint pointer-events-none absolute top-1/2 left-5 size-5 -translate-y-1/2" />
-                <input
-                    v-model="input"
-                    type="text"
-                    autofocus
-                    :placeholder="trans('common.search_movies_and_tv_shows')"
-                    :aria-label="trans('common.search_movies_and_tv_shows')"
-                    class="border-line bg-surface text-ink placeholder:text-ink-faint focus:border-brand w-full rounded-full border py-4 pr-5 pl-14 text-lg transition-colors duration-150 outline-none"
-                />
-            </div>
+            <div class="mx-auto max-w-220">
+                <!-- The purple ring and the Esc hint only while the box is empty:
+                     once there are words, the results below are what to look at. -->
+                <div class="relative">
+                    <input
+                        ref="field"
+                        v-model="input"
+                        type="text"
+                        :placeholder="trans('media.search_titles_and_people')"
+                        :aria-label="trans('media.search_titles_and_people')"
+                        class="peer border-line-strong bg-surface text-ink placeholder:text-ink-faint placeholder-shown:focus:border-brand-soft placeholder-shown:focus:ring-brand-soft h-13 w-full rounded-xl border pr-14 pl-13 text-xl font-medium outline-none placeholder:font-normal placeholder-shown:focus:ring-1 placeholder-shown:focus:ring-inset md:h-15 md:pl-14"
+                        @keydown.esc.prevent="onEscape"
+                    />
+                    <SearchIcon
+                        class="text-ink-secondary peer-placeholder-shown:text-ink-muted peer-placeholder-shown:peer-focus:text-brand-soft pointer-events-none absolute top-1/2 left-4.5 size-5.5 -translate-y-1/2 md:left-5"
+                        aria-hidden="true"
+                    />
+                    <kbd
+                        class="bg-surface-raised text-ink-muted pointer-events-none absolute top-1/2 right-2.5 hidden -translate-y-1/2 rounded-md px-2 py-1 font-sans text-sm font-medium md:peer-placeholder-shown:peer-focus:block"
+                        aria-hidden="true"
+                        >{{ trans('media.search_escape_key') }}</kbd
+                    >
+                    <button
+                        v-if="input !== ''"
+                        type="button"
+                        :aria-label="trans('media.clear_search')"
+                        class="bg-surface-raised text-ink-muted hover:text-ink absolute top-1/2 right-2.5 flex size-8 -translate-y-1/2 cursor-pointer items-center justify-center rounded-lg transition-colors duration-150"
+                        @click="clear"
+                    >
+                        <X class="size-4.5" />
+                    </button>
+                </div>
 
-            <div v-if="scopes.length > 1" class="max-w-dialog-lg mx-auto mb-3 flex justify-center">
-                <select
-                    :value="activeScope"
-                    :class="SELECT_CLASS"
+                <div
+                    v-if="scopes.length > 1"
+                    class="scroll-none -mx-4 mt-3 flex gap-2 overflow-x-auto px-4 md:mx-0 md:px-0"
+                    role="group"
                     :aria-label="trans('media.search_in')"
-                    @change="setScope(($event.target as HTMLSelectElement).value)"
                 >
-                    <option v-for="option in scopes" :key="option.key" :value="option.key">{{ kindsLabel(option.types) }}</option>
-                </select>
+                    <button
+                        v-for="option in scopes"
+                        :key="option.key"
+                        type="button"
+                        :aria-pressed="activeScope === option.key"
+                        class="flex h-10 shrink-0 cursor-pointer items-center gap-2 rounded-[10px] pr-3.5 pl-3 text-[15px] leading-5 transition-colors duration-150"
+                        :class="
+                            activeScope === option.key
+                                ? 'bg-surface-overlay text-ink font-semibold'
+                                : 'bg-surface text-ink-secondary hover:bg-surface-raised hover:text-ink font-medium'
+                        "
+                        @click="setScope(option.key)"
+                    >
+                        <span class="flex gap-0.5" aria-hidden="true">
+                            <component
+                                :is="glyph.icon"
+                                v-for="glyph in glyphs(option.types)"
+                                :key="glyph.type"
+                                class="size-4.5"
+                                :class="activeScope === option.key ? '' : 'text-ink-muted'"
+                                :style="activeScope === option.key ? { color: glyph.color } : undefined"
+                            />
+                        </span>
+                        {{ kindsLabel(option.types) }}
+                    </button>
+                </div>
             </div>
 
             <MediaGrid v-if="searching" class="mt-8">

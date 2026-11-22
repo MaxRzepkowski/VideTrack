@@ -1,6 +1,6 @@
 import { pageLocale } from '@/lib/pageContext';
 import type { MediaSummary, ProgressUnit } from '@/types/media';
-import { BookImage, BookOpen, BookOpenText, Building2, Clapperboard, Gamepad2, Tv, type LucideIcon } from '@lucide/vue';
+import { BookImage, BookOpen, BookOpenText, Building2, Clapperboard, Gamepad2, Layers, Tv, UsersRound, type LucideIcon } from '@lucide/vue';
 import { trans, transChoice } from 'laravel-vue-i18n';
 
 /**
@@ -121,18 +121,28 @@ export const MEDIA_TYPE_META: Record<string, MediaTypeMeta | undefined> = {
 };
 
 /**
- * What a group of positions of one kind is called. Lists, follows and search
- * also hold people, companies and collections, which are not media types but
- * still need a name beside them.
+ * What a group of positions of one kind is called, and the glyph beside it.
+ * Lists, follows and search also hold people, companies and collections, which
+ * are not media types but still need a name and a glyph.
  */
-const OTHER_KINDS: Record<string, () => string> = {
-    person: () => trans('common.people'),
-    company: () => trans('common.companies'),
-    collection: () => trans('common.collections'),
+const OTHER_KINDS: Record<string, { plural: () => string; icon: LucideIcon }> = {
+    person: { plural: () => trans('common.people'), icon: UsersRound },
+    company: { plural: () => trans('common.companies'), icon: Building2 },
+    collection: { plural: () => trans('common.collections'), icon: Layers },
 };
 
 export function kindPlural(kind: string): string {
-    return (OTHER_KINDS[kind] ?? MEDIA_TYPE_META[kind]?.plural ?? (() => kind))();
+    return (OTHER_KINDS[kind]?.plural ?? MEDIA_TYPE_META[kind]?.plural ?? (() => kind))();
+}
+
+/**
+ * The glyph a kind wears beside its name, and its colour: a media type's own;
+ * people, companies and collections are no media type and take the app's.
+ */
+export function kindGlyph(kind: string): { icon: LucideIcon; color: string } {
+    const other = OTHER_KINDS[kind];
+
+    return other ? { icon: other.icon, color: 'var(--color-brand-soft)' } : { icon: mediaTypeMeta(kind).icon, color: mediaTypeMeta(kind).color };
 }
 
 /**

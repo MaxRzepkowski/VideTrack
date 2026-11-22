@@ -5,7 +5,6 @@ import MenuDrawer from '@/components/header/MenuDrawer.vue';
 import MetaLine from '@/components/MetaLine.vue';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import UserMenuContent from '@/components/UserMenuContent.vue';
-import { PALETTE_SHORTCUT, useCommandPalette } from '@/composables/useCommandPalette';
 import { useNotificationFeed } from '@/composables/useNotificationFeed';
 import { formatTimestampDate, getInitials } from '@/lib/format';
 import { jsonFetch } from '@/lib/http';
@@ -20,10 +19,6 @@ import { computed, ref, watch } from 'vue';
 
 // The header is part of the app layout, which only a signed-in user sees.
 const viewer = computed(() => signedInUser());
-
-// The search box is the command palette's: it finds your titles and places,
-// and its last row searches everywhere.
-const palette = useCommandPalette();
 
 // Header bell: unread counter + latest notifications (null for guests). Kept
 // current while the tab stays open — the shared prop alone would age until the
@@ -94,26 +89,25 @@ async function openNotification(item: NotificationEntry, event: MouseEvent): Pro
             </div>
 
             <div class="flex shrink-0 items-center gap-2.5">
-                <button
-                    type="button"
-                    class="border-line-subtle bg-surface hover:bg-surface-raised hidden h-10 w-60 cursor-pointer items-center gap-2.5 rounded-[10px] border pr-1.5 pl-3 transition-colors duration-150 xl:flex"
-                    :aria-keyshortcuts="PALETTE_SHORTCUT"
-                    @click="palette.open.value = true"
+                <!-- The box leads to the search page; the shortcut beside it is the
+                     command palette's, which jumps to your own titles and places. -->
+                <Link
+                    :href="route('search')"
+                    class="border-line-subtle bg-surface hover:bg-surface-raised hidden h-10 w-60 items-center gap-2.5 rounded-[10px] border pr-1.5 pl-3 transition-colors duration-150 xl:flex"
                 >
                     <Search class="text-ink-muted size-4.5 shrink-0" />
-                    <span class="text-ink-muted flex-1 text-left text-[15px]">{{ trans('common.search') }}</span>
+                    <span class="text-ink-muted flex-1 text-[15px]">{{ trans('common.search') }}</span>
                     <kbd class="bg-surface-overlay text-ink-muted rounded-md px-2 py-0.5 font-sans text-sm font-medium" aria-hidden="true">
                         {{ trans('app.search_shortcut') }}
                     </kbd>
-                </button>
-                <button
-                    type="button"
+                </Link>
+                <Link
+                    :href="route('search')"
                     :aria-label="trans('common.search')"
-                    class="bg-surface hover:bg-surface-raised flex size-10 cursor-pointer items-center justify-center rounded-[10px] transition-colors duration-150 xl:hidden"
-                    @click="palette.open.value = true"
+                    class="bg-surface hover:bg-surface-raised flex size-10 items-center justify-center rounded-[10px] transition-colors duration-150 xl:hidden"
                 >
                     <Search class="text-ink size-4.5" />
-                </button>
+                </Link>
 
                 <DropdownMenu v-if="notifications" v-model:open="notificationsOpen">
                     <DropdownMenuTrigger
