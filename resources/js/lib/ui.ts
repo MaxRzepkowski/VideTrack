@@ -17,28 +17,36 @@ import type { NonEmpty } from '@/types';
  */
 export type RowTint = NavGroupId | 'danger' | 'remove' | 'watched' | 'hold' | 'progress' | 'rating' | 'watchlist' | 'favorite' | 'neutral';
 
-// Tokens of the glyph, of the square under a pointed row, and of the glyph on that square.
-const TINT_TOKENS: Record<RowTint, readonly [string, string, string]> = {
-    library: ['nav-library', 'nav-library-fill', 'nav-library-ink'],
-    discover: ['nav-discover', 'nav-discover-fill', 'nav-discover-ink'],
-    releases: ['nav-releases', 'nav-releases-fill', 'nav-releases-ink'],
-    danger: ['danger', 'danger-strong', 'on-accent'],
-    remove: ['remove', 'remove', 'on-remove'],
-    watched: ['action-watched', 'action-watched', 'on-bright'],
-    hold: ['status-onhold', 'status-onhold', 'on-bright'],
-    progress: ['status-progress', 'status-progress', 'on-bright'],
-    rating: ['action-rating', 'action-rating', 'on-bright'],
-    watchlist: ['action-watchlist', 'action-watchlist', 'on-bright'],
-    favorite: ['action-favorite', 'action-favorite', 'on-bright'],
+// The glyph, the square under a pointed row, and the glyph on that square.
+// Written out in full: Tailwind keeps a colour token only where it sees the
+// token named, and a name put together at runtime it never sees.
+const TINTS: Record<RowTint, Record<'--tint' | '--tint-fill' | '--tint-ink', string>> = {
+    library: { '--tint': 'var(--color-nav-library)', '--tint-fill': 'var(--color-nav-library-fill)', '--tint-ink': 'var(--color-nav-library-ink)' },
+    discover: {
+        '--tint': 'var(--color-nav-discover)',
+        '--tint-fill': 'var(--color-nav-discover-fill)',
+        '--tint-ink': 'var(--color-nav-discover-ink)',
+    },
+    releases: {
+        '--tint': 'var(--color-nav-releases)',
+        '--tint-fill': 'var(--color-nav-releases-fill)',
+        '--tint-ink': 'var(--color-nav-releases-ink)',
+    },
+    danger: { '--tint': 'var(--color-danger)', '--tint-fill': 'var(--color-danger-strong)', '--tint-ink': 'var(--color-on-accent)' },
+    remove: { '--tint': 'var(--color-remove)', '--tint-fill': 'var(--color-remove)', '--tint-ink': 'var(--color-on-remove)' },
+    watched: { '--tint': 'var(--color-action-watched)', '--tint-fill': 'var(--color-action-watched)', '--tint-ink': 'var(--color-on-bright)' },
+    hold: { '--tint': 'var(--color-status-onhold)', '--tint-fill': 'var(--color-status-onhold)', '--tint-ink': 'var(--color-on-bright)' },
+    progress: { '--tint': 'var(--color-status-progress)', '--tint-fill': 'var(--color-status-progress)', '--tint-ink': 'var(--color-on-bright)' },
+    rating: { '--tint': 'var(--color-action-rating)', '--tint-fill': 'var(--color-action-rating)', '--tint-ink': 'var(--color-on-bright)' },
+    watchlist: { '--tint': 'var(--color-action-watchlist)', '--tint-fill': 'var(--color-action-watchlist)', '--tint-ink': 'var(--color-on-bright)' },
+    favorite: { '--tint': 'var(--color-action-favorite)', '--tint-fill': 'var(--color-action-favorite)', '--tint-ink': 'var(--color-on-bright)' },
     // Grey has no hue to tell the glyph from the fill half-way through the fade, so the square darkens under a lighter glyph instead.
-    neutral: ['ink-secondary', 'line-strong', 'ink'],
+    neutral: { '--tint': 'var(--color-ink-secondary)', '--tint-fill': 'var(--color-line-strong)', '--tint-ink': 'var(--color-ink)' },
 };
 
 /** A tint as the custom properties a menu row (`MenuRow`) reads from an ancestor. */
 export function rowTint(tint: RowTint): Record<'--tint' | '--tint-fill' | '--tint-ink', string> {
-    const [glyph, fill, ink] = TINT_TOKENS[tint];
-
-    return { '--tint': `var(--color-${glyph})`, '--tint-fill': `var(--color-${fill})`, '--tint-ink': `var(--color-${ink})` };
+    return TINTS[tint];
 }
 
 // Written out in full: Tailwind reads class names, it cannot build them.
