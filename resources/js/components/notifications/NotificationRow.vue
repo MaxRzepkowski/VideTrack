@@ -24,8 +24,12 @@ const poster = computed(() => mediaImage(props.item.imagePath, 'w342'));
 <template>
     <!-- The title link opens the notification and its ::after stretches over
          the whole row, so the row clicks as one; an action of the row (delete)
-         sits beside it in the `actions` slot, never inside the link. -->
-    <div class="hover:bg-surface-overlay has-[a:focus-visible]:bg-surface-overlay relative flex gap-3.5 px-5 py-3 transition-colors duration-150">
+         comes through the `actions` slot, beside the link, never inside it. It
+         takes the place of the age and the unread mark while the row is pointed
+         at or holds the focus; a touch screen, with nothing to point, shows it always. -->
+    <div
+        class="group/row hover:bg-surface-overlay has-[a:focus-visible]:bg-surface-overlay relative flex gap-3.5 px-5 py-3 transition-colors duration-150"
+    >
         <img
             v-if="poster"
             :src="poster"
@@ -49,8 +53,19 @@ const poster = computed(() => mediaImage(props.item.imagePath, 'w342'));
                         ><span aria-hidden="true">{{ item.subject }}</span></template
                     ><template v-else>{{ item.subject }}</template></a
                 >
-                <span class="text-ink-muted shrink-0 text-sm">{{ notificationAge(item.createdAt) }}</span>
-                <span v-if="!item.readAt" class="bg-brand-soft size-2 shrink-0 rounded-full" aria-hidden="true" />
+                <span
+                    class="flex shrink-0 items-center gap-2.5"
+                    :class="$slots.actions ? 'pointer-fine:group-focus-within/row:hidden pointer-fine:group-hover/row:hidden' : ''"
+                >
+                    <span class="text-ink-muted text-sm">{{ notificationAge(item.createdAt) }}</span>
+                    <span v-if="!item.readAt" class="bg-brand-soft size-2 rounded-full" aria-hidden="true" />
+                </span>
+                <span
+                    v-if="$slots.actions"
+                    class="relative z-10 -my-1 hidden shrink-0 pointer-coarse:flex pointer-fine:group-focus-within/row:flex pointer-fine:group-hover/row:flex"
+                >
+                    <slot name="actions" />
+                </span>
             </span>
 
             <span v-if="item.label !== ''" class="flex items-center gap-2">
@@ -73,6 +88,5 @@ const poster = computed(() => mediaImage(props.item.imagePath, 'w342'));
             </template>
             <MetaLine v-if="item.facts.length" :parts="item.facts" class="text-ink-muted text-[15px] leading-5" />
         </span>
-        <slot name="actions" />
     </div>
 </template>

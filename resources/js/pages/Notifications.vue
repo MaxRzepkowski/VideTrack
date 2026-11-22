@@ -13,7 +13,7 @@ import type { NotificationEntry } from '@/types/notifications';
 import type { PageInfo } from '@/types/pagination';
 import { Head, router } from '@inertiajs/vue3';
 import { trans, transChoice } from 'laravel-vue-i18n';
-import { Bell, CheckCheck, Trash2, X } from '@lucide/vue';
+import { Bell, CheckCheck, Trash2 } from '@lucide/vue';
 import { computed } from 'vue';
 
 const props = defineProps<{
@@ -107,7 +107,7 @@ function goto(page: number): void {
         <div class="max-w-content mx-auto w-full flex-1 px-4 pb-20 md:px-10">
             <!-- The bell's list at full length: the same rows by day, each with
                  its own delete beside the link. -->
-            <div v-if="entries.length" class="border-line bg-surface max-w-3xl overflow-hidden rounded-xl border pb-2">
+            <div v-if="entries.length" class="border-line bg-surface overflow-hidden rounded-xl border pb-2">
                 <section v-for="day in days" :key="day.key" :aria-label="day.heading">
                     <h2 class="text-ink-muted px-5 pt-4 pb-0.5 text-sm font-medium">{{ day.heading }}</h2>
                     <NotificationRow v-for="item in day.items" :key="item.id" :item="item" @open="open(item, $event)">
@@ -116,10 +116,10 @@ function goto(page: number): void {
                                 v-tooltip="trans('notifications.delete_notification')"
                                 type="button"
                                 :aria-label="trans('notifications.delete_notification')"
-                                class="text-ink-faint hover:text-ink hover:bg-surface-raised relative z-10 flex size-8 shrink-0 cursor-pointer items-center justify-center self-center rounded-lg transition-colors duration-150"
+                                class="text-ink-muted hover:text-danger hover:bg-surface-raised flex size-7 cursor-pointer items-center justify-center rounded-md transition-colors duration-150"
                                 @click="destroy(item)"
                             >
-                                <X class="size-4" :stroke-width="2.2" />
+                                <Trash2 class="size-4" />
                             </button>
                         </template>
                     </NotificationRow>
