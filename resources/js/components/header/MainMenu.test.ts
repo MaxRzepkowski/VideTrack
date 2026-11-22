@@ -1,7 +1,8 @@
 import MainMenu from '@/components/header/MainMenu.vue';
 import { testPage } from '@/test/page';
+import { router } from '@inertiajs/vue3';
 import { flushPromises, mount } from '@vue/test-utils';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 const Link = { props: ['href'], template: '<a :href="href"><slot /></a>' };
 
@@ -45,6 +46,27 @@ describe('MainMenu', () => {
         expect(rows.map((row) => row.attributes('href'))).toEqual(['/calendar', '/countdowns']);
         expect(rows[0]!.text()).toContain('Episodes and releases day by day');
 
+        wrapper.unmount();
+    });
+
+    it("goes to a group's first place on a mouse click, and opens the panel on a key or a tap", async () => {
+        const visit = vi.spyOn(router, 'visit').mockImplementation(() => {});
+        const wrapper = menu('/dashboard');
+
+        word(wrapper, 'Library').element.dispatchEvent(new PointerEvent('click', { bubbles: true, pointerType: 'mouse' }));
+        await flushPromises();
+
+        expect(visit).toHaveBeenCalledWith('/users.history/alex');
+        expect(wrapper.findAll('li li a')).toHaveLength(0);
+
+        visit.mockClear();
+        word(wrapper, 'Releases').element.dispatchEvent(new PointerEvent('click', { bubbles: true, pointerType: 'touch' }));
+        await flushPromises();
+
+        expect(visit).not.toHaveBeenCalled();
+        expect(wrapper.findAll('li li a')).toHaveLength(2);
+
+        visit.mockRestore();
         wrapper.unmount();
     });
 
