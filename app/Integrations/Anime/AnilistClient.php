@@ -25,7 +25,7 @@ final class AnilistClient
      */
     public function query(string $query, string $username): array
     {
-        $response = $this->send('AniList', fn () => $this->throttle('anilist-api', self::RATE_LIMIT_PER_MINUTE, 60, 250_000), fn () => $this->httpClient()
+        $response = $this->send('AniList', fn () => $this->throttle('anilist-api', self::RATE_LIMIT_PER_MINUTE, 60), fn () => $this->httpClient()
             ->post(config()->string('tracker.imports.anilist_url'), [
                 'query' => $query,
                 'variables' => ['userName' => $username],

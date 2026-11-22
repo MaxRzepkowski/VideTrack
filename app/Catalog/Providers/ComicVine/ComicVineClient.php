@@ -10,7 +10,6 @@ use App\Catalog\Providers\Concerns\MakesCachedRequests;
 use App\Catalog\Providers\Concerns\SendsHttpRequests;
 use App\Catalog\Providers\Concerns\ThrottlesRequests;
 use App\Support\Payload;
-use Illuminate\Support\Facades\RateLimiter;
 
 /**
  * Thin HTTP client for the ComicVine API. All requests go through the
@@ -34,6 +33,8 @@ class ComicVineClient
 
     /** ComicVine counts its quota per resource over an hour. */
     public const BUDGET_WINDOW_SECONDS = 3600;
+
+    public const HOURLY_BUDGET = 'comicvine-api-hour';
 
     /** "Rate limit exceeded": the hour's quota is gone at ComicVine's end. */
     private const RATE_LIMITED = 107;
@@ -133,11 +134,9 @@ class ComicVineClient
     {
         // The hourly budget fails fast: waiting out an exhausted hour inside
         // a web request is never acceptable, and search degrades gracefully.
-        if (RateLimiter::attempt('comicvine-api-hour', self::RATE_LIMIT_PER_HOUR, fn () => true, self::BUDGET_WINDOW_SECONDS) === false) {
-            throw new ProviderBusy('ComicVine hourly request budget is exhausted; try again later.', max(1, RateLimiter::availableIn('comicvine-api-hour')));
-        }
+        $this->throttle(self::HOURLY_BUDGET, self::RATE_LIMIT_PER_HOUR, self::BUDGET_WINDOW_SECONDS, maxWaitSeconds: 0.0);
 
         // Velocity pacing spreads bursts across seconds.
-        $this->throttle('comicvine-api', self::RATE_LIMIT_PER_SECOND, 1, 250_000);
+        $this->throttle('comicvine-api', self::RATE_LIMIT_PER_SECOND, 1);
     }
 }

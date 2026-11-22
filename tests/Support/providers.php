@@ -1,12 +1,45 @@
 <?php
 
+use App\Catalog\Providers\Concerns\ThrottlesRequests;
 use App\Catalog\Providers\Tmdb\TmdbProvider;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Sleep;
 
 function tmdbProvider(): TmdbProvider
 {
     return app(TmdbProvider::class);
+}
+
+/**
+ * A client of a rate-limited service, asking as the provider clients do.
+ */
+function rateLimitedClient(): object
+{
+    return new class
+    {
+        use ThrottlesRequests;
+
+        public function ask(string $limiter, int $perWindow, int $windowSeconds, float $maxWaitSeconds = self::RATE_WINDOW_MAX_WAIT_SECONDS): void
+        {
+            $this->throttle($limiter, $perWindow, $windowSeconds, $maxWaitSeconds);
+        }
+    };
+}
+
+/**
+ * $requests requests to a service booked now, through the limiter every
+ * client shares; past a window's worth they are booked ahead. Sleeps are
+ * faked from here on, so booking ahead takes no time.
+ */
+function bookRateWindow(string $limiter, int $perWindow, int $windowSeconds, int $requests): void
+{
+    Sleep::fake();
+    $client = rateLimitedClient();
+
+    foreach (range(1, $requests) as $ignored) {
+        $client->ask($limiter, $perWindow, $windowSeconds, 1e9);
+    }
 }
 
 /**

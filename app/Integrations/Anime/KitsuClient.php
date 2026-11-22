@@ -27,7 +27,7 @@ final class KitsuClient
      */
     public function get(string $url, ?array $query): array
     {
-        $response = $this->send('Kitsu', fn () => $this->throttle('kitsu-api', self::RATE_LIMIT_PER_SECOND, 1, 250_000), fn () => $this->httpClient(config()->string('tracker.imports.kitsu_url'))
+        $response = $this->send('Kitsu', fn () => $this->throttle('kitsu-api', self::RATE_LIMIT_PER_SECOND, 1), fn () => $this->httpClient(config()->string('tracker.imports.kitsu_url'))
             ->get($url, $query));
 
         $this->refuseFailed('Kitsu', $response);

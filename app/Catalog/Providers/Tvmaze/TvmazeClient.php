@@ -63,7 +63,7 @@ class TvmazeClient
     private function fetch(string $path, array $params): ?array
     {
         // The window is ten seconds, so the wait may need all of it and then some.
-        $this->throttle('tvmaze-api', self::RATE_LIMIT_PER_10S, 10, 200_000, maxWaitSeconds: 15.0);
+        $this->throttle('tvmaze-api', self::RATE_LIMIT_PER_10S, 10, maxWaitSeconds: 15.0);
 
         $response = $this->guardConnection('TVmaze', fn () => $this->httpClient(config()->string('tracker.tvmaze.base_url'))
             ->get($path, $params));

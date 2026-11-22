@@ -25,6 +25,8 @@ class TmdbClient
     /** A request path: plain segments of letters, digits, "_" and "-", never "." or a query. */
     private const PATH = '#^[A-Za-z0-9_-]+(/[A-Za-z0-9_-]+)*$#';
 
+    public const RATE_LIMITER = 'tmdb-api';
+
     public const RATE_LIMIT_PER_SECOND = 30;
 
     public function __construct(private readonly ProviderCacheContext $cacheContext) {}
@@ -102,7 +104,7 @@ class TmdbClient
         }
 
         // Spread bursts (e.g. a cold locale-fallback cascade) across seconds.
-        $this->throttle('tmdb-api', self::RATE_LIMIT_PER_SECOND);
+        $this->throttle(self::RATE_LIMITER, self::RATE_LIMIT_PER_SECOND);
 
         $response = $this->guardConnection('TMDB', fn () => $this->request()->get($path, $params));
 

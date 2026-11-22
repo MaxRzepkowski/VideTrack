@@ -1,43 +1,71 @@
 <?php
 
-use App\Catalog\ProviderException;
-use App\Catalog\Providers\Concerns\ThrottlesRequests;
-use Illuminate\Support\Facades\RateLimiter;
+use App\Catalog\ProviderBusy;
+use Carbon\CarbonImmutable;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Sleep;
 use Tests\TestCase;
 
 uses(TestCase::class);
 
-function throttledClient(): object
-{
-    return new class
-    {
-        use ThrottlesRequests;
-
-        public function call(float $maxWaitSeconds): void
-        {
-            $this->throttle('test-limiter', 1, 60, 250_000, $maxWaitSeconds);
-        }
-    };
-}
-
-beforeEach(fn () => RateLimiter::clear('test-limiter'));
+beforeEach(function () {
+    // Waits are read to the millisecond: the clock stands still between the requests.
+    $this->travelTo(CarbonImmutable::parse('2026-10-10 12:00:00'));
+    Cache::flush();
+    Sleep::fake();
+});
 
 test('a free slot is taken without waiting', function () {
-    Sleep::fake();
-
-    throttledClient()->call(1.0);
+    rateLimitedClient()->ask('test-limiter', 1, 60);
 
     Sleep::assertNeverSlept();
 });
 
-test('a full window waits its share in attempts, then gives up as a provider failure', function () {
-    Sleep::fake();
-    $client = throttledClient();
-    $client->call(1.0);
+test('past the limit a request waits until the oldest one leaves the window', function () {
+    $client = rateLimitedClient();
+    $client->ask('test-limiter', 2, 60, 60.0);
+    $this->travel(20)->seconds();
+    $client->ask('test-limiter', 2, 60, 60.0);
+    $this->travel(10)->seconds();
 
-    expect(fn () => $client->call(1.0))->toThrow(ProviderException::class);
+    $client->ask('test-limiter', 2, 60, 60.0);
 
-    // 1 s of 250 ms naps: four tries at a slot, none of them on the wall clock.
-    Sleep::assertSleptTimes(4);
+    Sleep::assertSequence([Sleep::usleep(30_000_000)]);
+});
+
+test('the window rolls instead of starting afresh, so the limit holds across its edge', function () {
+    $client = rateLimitedClient();
+    $client->ask('test-limiter', 2, 60);
+    $this->travel(59)->seconds();
+    $client->ask('test-limiter', 2, 60);
+    $this->travel(2)->seconds();
+
+    // The first has left the window; the second still counts.
+    $client->ask('test-limiter', 2, 60);
+    Sleep::assertNeverSlept();
+
+    try {
+        $client->ask('test-limiter', 2, 60, 1.0);
+        $this->fail('A third request within one minute went through.');
+    } catch (ProviderBusy $busy) {
+        expect($busy->retryAfterSeconds)->toBe(58);
+    }
+});
+
+test('a wait past what the caller affords books nothing', function () {
+    $client = rateLimitedClient();
+    $client->ask('test-limiter', 1, 60);
+
+    expect(fn () => $client->ask('test-limiter', 1, 60, 1.0))->toThrow(ProviderBusy::class);
+
+    $this->travel(60)->seconds();
+    $client->ask('test-limiter', 1, 60, 1.0);
+    Sleep::assertNeverSlept();
+});
+
+test('every client of a service shares one count', function () {
+    rateLimitedClient()->ask('test-limiter', 1, 60);
+
+    expect(fn () => rateLimitedClient()->ask('test-limiter', 1, 60, 1.0))->toThrow(ProviderBusy::class);
+    rateLimitedClient()->ask('another-limiter', 1, 60, 1.0);
 });

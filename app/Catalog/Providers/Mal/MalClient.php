@@ -70,7 +70,7 @@ class MalClient
      */
     private function fetch(string $path, array $query): array
     {
-        $this->throttle(self::RATE_LIMITER, self::RATE_LIMIT_PER_MINUTE, 60, 250_000);
+        $this->throttle(self::RATE_LIMITER, self::RATE_LIMIT_PER_MINUTE, 60);
 
         $response = $this->guardConnection('MyAnimeList', fn () => $this->httpClient(config()->string('tracker.mal.base_url'))
             ->withHeaders(['X-MAL-CLIENT-ID' => $this->clientId()])
