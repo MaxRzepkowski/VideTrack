@@ -1,6 +1,7 @@
-import { durationTerms, formatNumber, formatWatchTime, type DurationTerm } from '@/lib/format';
+import { durationTerms, formatNumber, formatTimestampDate, formatWatchTime, type DurationTerm } from '@/lib/format';
 import { leafType, mediaTypeDefinition, mediaTypeMeta, readUnitOf, typeCountingIn } from '@/lib/mediaTypes';
 import type { TooltipRow } from '@/lib/tooltip';
+import type { UserMediaState } from '@/types/generated';
 import type { MediaSummary, ProgressEntry, ProgressUnit, WatchStats } from '@/types/media';
 import type { LucideIcon } from '@lucide/vue';
 import { trans, transChoice } from 'laravel-vue-i18n';
@@ -24,6 +25,42 @@ export function playActionLabels(media: MediaSummary): { done: string; mark: str
             return { done: trans('media.read'), mark: trans('media.mark_as_read'), start: trans('media.start_reading') };
         default:
             return { done: trans('media.watched'), mark: trans('media.mark_as_watched'), start: null };
+    }
+}
+
+/**
+ * How many times a title was finished: a playable title counts its completed
+ * plays, a container (a season, a show) its finished runs, not the episodes
+ * inside them.
+ */
+export function timesFinished(media: MediaSummary, state: Pick<UserMediaState, 'plays' | 'completedCycles'>): number {
+    return mediaTypeDefinition(media.type).playable ? state.plays : state.completedCycles;
+}
+
+/**
+ * When a finished title was last finished, in the type's word, and how many
+ * times once it is more than one: "Watched March 12, 2026 – 3×". Null for a
+ * title not finished, or finished on no known day.
+ */
+export function finishedOn(media: MediaSummary, state: Pick<UserMediaState, 'watched' | 'watchedAt' | 'plays' | 'completedCycles'>): string | null {
+    const date = state.watched ? formatTimestampDate(state.watchedAt) : null;
+
+    if (date === null) {
+        return null;
+    }
+
+    const times = timesFinished(media, state);
+    const replacements = { date, count: String(times) };
+
+    switch (progressUnit(media)) {
+        case 'minutes':
+            return transChoice('media.completed_on_date', times, replacements);
+        case 'pages':
+        case 'chapters':
+        case 'issues':
+            return transChoice('media.read_on_date', times, replacements);
+        default:
+            return transChoice('media.watched_on_date', times, replacements);
     }
 }
 

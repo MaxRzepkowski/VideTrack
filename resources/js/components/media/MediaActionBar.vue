@@ -5,7 +5,7 @@ import { useMediaActions } from '@/composables/useMediaActions';
 import { useMediaModals } from '@/composables/useMediaModals';
 import { onListsText } from '@/lib/lists';
 import { mediaTypeDefinition } from '@/lib/mediaTypes';
-import { playActionLabels } from '@/lib/progress';
+import { finishedOn, playActionLabels } from '@/lib/progress';
 import { ratingPercent, ratingScore } from '@/lib/ratings';
 import { shownStatus, shownStatusVisual, STATUS_VISUALS } from '@/lib/status';
 import { rowTint } from '@/lib/ui';
@@ -57,10 +57,13 @@ const watchedBackground = computed(() => watchedVisual.value?.color);
 // Every label names the action the click performs, never the state the cell is
 // already in ("Watched", "On 3 lists"). The state is carried by the colour and
 // the icon; a name that describes it would leave both sighted and screen-reader
-// users guessing what pressing the button actually does.
+// users guessing what pressing the button actually does. A finished title adds
+// when, above the action: the colour says done, not since when.
 const watchedTitle = computed(() => {
     if (status.value !== null || state.value.watched || partiallyWatched.value) {
-        return trans('media.change_status');
+        const finished = status.value === null ? finishedOn(props.media, state.value) : null;
+
+        return finished === null ? trans('media.change_status') : `${finished}\n${trans('media.change_status')}`;
     }
 
     const labels = playActionLabels(props.media);
