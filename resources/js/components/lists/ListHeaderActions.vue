@@ -12,15 +12,13 @@ import { useListActions } from '@/composables/useListActions';
 import { listCsv, listFileName, listText } from '@/lib/listText';
 import { nextFollowMode } from '@/lib/tracking';
 import type { ListDetailsData, ListItemEntry } from '@/types/media';
-import { router } from '@inertiajs/vue3';
 import { trans } from 'laravel-vue-i18n';
-import { Bell, BellOff, BellRing, Check, FileDown, FileSpreadsheet, MoreVertical, Pencil, RefreshCw, Share2 } from '@lucide/vue';
+import { Bell, BellOff, BellRing, Check, FileDown, FileSpreadsheet, MoreVertical, Pencil, Share2 } from '@lucide/vue';
 import { computed, reactive, ref } from 'vue';
-import { toast } from 'vue-sonner';
 
 // The list page's header actions: edit mode, a collection's bell, sharing,
-// and the menu (refresh, details, duplicate, visibility, delete) with the
-// details dialog it opens.
+// and the menu (details, downloads, duplicate, visibility, delete) with the
+// details dialog it opens. A collection's refresh lives in its "i" window.
 const props = defineProps<{
     list: ListDetailsData;
     /** How many positions the list holds; edit mode needs some, deleting names them. */
@@ -35,14 +33,9 @@ const lists = useListActions();
 
 const title = computed(() => props.list.displayTitle);
 
-// Only a provider collection carries the provider actions (refresh, bell) — a
-// plain user list has nothing to re-fetch and no upstream releases to be told
-// about.
+// Only a provider collection carries a bell: a plain user list has no
+// upstream releases to be told about.
 const collectionSource = computed(() => props.list.collection);
-
-const collectionRefreshUrl = computed(() =>
-    collectionSource.value ? route('collections.refresh', { provider: collectionSource.value.provider, ref: collectionSource.value.ref }) : null,
-);
 
 // The bell: the only explicit "this series interests me". A click walks it
 // by the title bell's own rule (`nextFollowMode`); nothing but the user rings
@@ -80,31 +73,6 @@ async function toggleFollow(): Promise<void> {
     } finally {
         followBusy.value = false;
     }
-}
-
-// Pulling the collection again from the provider: a menu item rather than a
-// button of its own, so the header's row stays short enough for a phone. The
-// write lands on this page, so the fresh members are simply there afterwards.
-const refreshing = ref(false);
-
-function refreshCollection(): void {
-    const url = collectionRefreshUrl.value;
-
-    if (!url || refreshing.value) {
-        return;
-    }
-
-    refreshing.value = true;
-
-    router.post(
-        url,
-        {},
-        {
-            preserveScroll: true,
-            onError: () => toast.error(trans('common.something_went_wrong_please_try_again')),
-            onFinish: () => (refreshing.value = false),
-        },
-    );
 }
 
 // ---- List actions ----
@@ -199,10 +167,7 @@ async function destroy(): Promise<void> {
             <Pencil class="size-4" />
             {{ editing ? trans('lists.done_editing') : trans('lists.edit_list') }}
         </button>
-        <!-- Collections only: follow the series to hear about new
-                     parts. Refreshing from the provider is a rarer write
-                     and a long label, so it lives in the menu instead of
-                     taking a quarter of the row on a phone. -->
+        <!-- Collections only: follow the series to hear about new parts. -->
         <button
             v-if="collectionSource"
             type="button"
@@ -232,10 +197,6 @@ async function destroy(): Promise<void> {
                 <MoreVertical class="size-4" />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" class="border-line-subtle bg-surface w-56 rounded-xl">
-                <DropdownMenuItem v-if="collectionRefreshUrl" :disabled="refreshing" @click="refreshCollection">
-                    <RefreshCw class="size-4" :class="{ 'animate-spin': refreshing }" />
-                    {{ refreshing ? trans('common.refreshing') : trans('common.refresh_from_provider') }}
-                </DropdownMenuItem>
                 <DropdownMenuItem v-if="list.isOwner && !list.systemKey" @click="openEdit">
                     {{ trans('lists.edit_details') }}
                 </DropdownMenuItem>
