@@ -412,6 +412,8 @@ return [
     'search_titles_and_people' => 'Szukaj tytułów i osób',
     'clear_search' => 'Wyczyść wyszukiwanie',
     'search_escape_key' => 'Esc',
+    'rated_score' => 'Ocena :score',
+    'on_no_list' => 'Na żadnej liście',
     'not_rated' => 'Bez oceny',
     'back_to_not_rated' => 'Tytuł wraca do stanu bez oceny',
     'save_rating' => 'Zapisz ocenę',

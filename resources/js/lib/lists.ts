@@ -1,5 +1,11 @@
 import type { UserMediaState } from '@/types/generated';
 import type { ListItemEntry, UserList } from '@/types/media';
+import { transChoice } from 'laravel-vue-i18n';
+
+/** How many of the user's lists a title or a creator is on ("On 2 lists"); nothing when it is on none. */
+export function onListsText(count: number): string | null {
+    return count === 0 ? null : transChoice('media.on_count_list', count, { count: String(count) });
+}
 
 /** The system list behind "Backlog". */
 export const WATCHLIST_KEY = 'watchlist';

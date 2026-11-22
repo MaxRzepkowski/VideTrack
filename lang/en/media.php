@@ -412,6 +412,8 @@ return [
     'search_titles_and_people' => 'Search titles and people',
     'clear_search' => 'Clear search',
     'search_escape_key' => 'Esc',
+    'rated_score' => 'Rated :score',
+    'on_no_list' => 'Not on any list',
     'not_rated' => 'Not rated',
     'back_to_not_rated' => 'Back to not rated',
     'save_rating' => 'Save rating',

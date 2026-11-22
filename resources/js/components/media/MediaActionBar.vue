@@ -1,14 +1,18 @@
 <script setup lang="ts">
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import MenuRow from '@/components/MenuRow.vue';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { useMediaActions } from '@/composables/useMediaActions';
 import { useMediaModals } from '@/composables/useMediaModals';
+import { onListsText } from '@/lib/lists';
 import { mediaTypeDefinition } from '@/lib/mediaTypes';
 import { playActionLabels } from '@/lib/progress';
-import { ratingPercent } from '@/lib/ratings';
+import { ratingPercent, ratingScore } from '@/lib/ratings';
 import { shownStatus, shownStatusVisual, STATUS_VISUALS } from '@/lib/status';
+import { rowTint } from '@/lib/ui';
 import type { MediaSummary } from '@/types/media';
 import { trans } from 'laravel-vue-i18n';
 import { Heart, List, MoreHorizontal, Star } from '@lucide/vue';
+import { DropdownMenuArrow, DropdownMenuItem } from 'radix-vue';
 import { computed } from 'vue';
 
 const props = defineProps<{
@@ -75,6 +79,13 @@ const favoriteTitle = computed(() => (state.value.favorite ? trans('common.remov
 // The cell shows the community average, but clicking it opens the rate modal —
 // so the label is the action, in both the rated and the unrated state.
 const ratingTitle = computed(() => trans('media.rate'));
+
+// Under each row of the narrow card's menu, where the title stands with it: the marks it sets are folded away there.
+const ratingState = computed(() =>
+    state.value.rating === null ? trans('media.not_rated') : trans('media.rated_score', { score: ratingScore(state.value.rating) }),
+);
+
+const listsState = computed(() => onListsText(state.value.listIds.length) ?? trans('media.on_no_list'));
 </script>
 
 <template>
@@ -111,7 +122,7 @@ const ratingTitle = computed(() => trans('media.rate'));
             <DropdownMenu>
                 <DropdownMenuTrigger
                     v-tooltip="trans('common.more_options')"
-                    class="text-ink-secondary hover:text-ink hover:bg-highlight/5 flex min-w-0 items-center justify-center py-2.5 transition-colors duration-150"
+                    class="text-ink-secondary hover:text-ink hover:bg-highlight/5 data-[state=open]:bg-surface-overlay data-[state=open]:text-ink flex min-w-0 items-center justify-center py-2.5 transition-colors duration-150"
                 >
                     <MoreHorizontal class="size-6" :stroke-width="2.2" />
                 </DropdownMenuTrigger>
@@ -120,23 +131,28 @@ const ratingTitle = computed(() => trans('media.rate'));
                     :collision-padding="12"
                     sticky="always"
                     :prioritize-position="true"
-                    class="border-line-subtle bg-surface max-h-[calc(100dvh-1.5rem)] w-52 max-w-[calc(100vw-1.5rem)] overflow-y-auto rounded-xl p-1.5"
+                    class="border-line-strong bg-surface w-64 max-w-[calc(100vw-1.5rem)] overflow-visible rounded-xl px-0 py-1.5 shadow-lg"
                 >
-                    <!-- Every row wears its action's colour, lit or not: what the
-                         title already carries is said by the marks on the poster
-                         above, so colour here names the action instead. -->
-                    <DropdownMenuItem class="rounded-lg px-3 py-2.5 text-base font-semibold" @click="openRate(media)">
-                        <Star class="fill-action-rating text-action-rating" :stroke-width="1" />
-                        <span>{{ ratingTitle }}</span>
+                    <!-- Each row wears the colour of the mark it sets and says where the title stands with it. -->
+                    <DropdownMenuItem as-child>
+                        <MenuRow :icon="Star" :label="ratingTitle" :description="ratingState" :style="rowTint('rating')" @click="openRate(media)" />
                     </DropdownMenuItem>
-                    <DropdownMenuItem class="rounded-lg px-3 py-2.5 text-base font-semibold" @click="openLists(media)">
-                        <List class="text-action-watchlist" :stroke-width="2.2" />
-                        <span>{{ listsTitle }}</span>
+                    <DropdownMenuItem as-child>
+                        <MenuRow :icon="List" :label="listsTitle" :description="listsState" :style="rowTint('watchlist')" @click="openLists(media)" />
                     </DropdownMenuItem>
-                    <DropdownMenuItem class="rounded-lg px-3 py-2.5 text-base font-semibold" @click="toggleFavorite(media)">
-                        <Heart class="text-action-favorite" :stroke-width="2.2" />
-                        <span>{{ favoriteTitle }}</span>
+                    <DropdownMenuItem as-child>
+                        <MenuRow
+                            :icon="Heart"
+                            :label="favoriteTitle"
+                            :description="state.favorite ? trans('media.in_favorites') : undefined"
+                            :style="rowTint('favorite')"
+                            @click="toggleFavorite(media)"
+                        />
                     </DropdownMenuItem>
+                    <!-- The nose points at the button that opened the menu; its open side lets the panel's edge through. -->
+                    <DropdownMenuArrow :width="18" :height="8" class="-mt-px overflow-visible">
+                        <path d="M0 0 L15 10 L30 0" class="fill-surface stroke-line-strong" vector-effect="non-scaling-stroke" />
+                    </DropdownMenuArrow>
                 </DropdownMenuContent>
             </DropdownMenu>
         </div>

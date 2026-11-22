@@ -2,9 +2,10 @@
 import UserRatingBadge from '@/components/media/UserRatingBadge.vue';
 import { useMediaActions } from '@/composables/useMediaActions';
 import { useMediaModals } from '@/composables/useMediaModals';
+import { onListsText } from '@/lib/lists';
 import { trackedBecause } from '@/lib/tracking';
 import type { MediaSummary } from '@/types/media';
-import { trans, transChoice } from 'laravel-vue-i18n';
+import { trans } from 'laravel-vue-i18n';
 import { Bell, BellOff, BellRing, Heart, List, Star } from '@lucide/vue';
 import { computed } from 'vue';
 
@@ -75,11 +76,7 @@ const rows = computed(() => [
     },
     {
         icon: List,
-        label: inList.value
-            ? transChoice('media.on_count_list', state.value.listIds.length, {
-                  count: String(state.value.listIds.length),
-              })
-            : trans('media.add_to_list'),
+        label: onListsText(state.value.listIds.length) ?? trans('media.add_to_list'),
         ratingValue: null,
         active: inList.value,
         background: 'var(--color-action-watchlist)',

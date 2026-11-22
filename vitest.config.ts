@@ -37,7 +37,7 @@ export default defineConfig({
             // wobble between runs. Measured by Vitest 5, which maps
             // V8 coverage onto the source's syntax tree: a Vue file counts its
             // script, not its compiled render function.
-            thresholds: { lines: 75.8, statements: 74.8, branches: 67.1, functions: 68.1 },
+            thresholds: { lines: 76, statements: 75, branches: 67.3, functions: 68.4 },
         },
     },
 });
