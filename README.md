@@ -63,7 +63,7 @@ tells you when the next episode or release is out, and keeps all of it on your o
     <td width="50%" align="center"><a href="docs/screenshots/lists.webp"><img src="docs/screenshots/lists.webp" alt="Lists" /></a><br /><sub>Lists</sub></td>
   </tr>
   <tr>
-    <td colspan="2" align="center"><a href="docs/screenshots/mobile.webp"><img src="docs/screenshots/mobile.webp" alt="Dashboard, show page, statistics and the status dialog on a phone" /></a><br /><sub>On a phone</sub></td>
+    <td colspan="2" align="center"><a href="docs/screenshots/mobile.webp"><img src="docs/screenshots/mobile.webp" alt="Dashboard, show page, its status dialog and statistics on a phone" /></a><br /><sub>On a phone</sub></td>
   </tr>
 </table>
 
