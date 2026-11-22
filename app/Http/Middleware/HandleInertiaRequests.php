@@ -17,6 +17,7 @@ use App\Library\Data\UserMediaState;
 use App\Models\MediaList;
 use App\Models\User;
 use App\Notifications\Data\NotificationFeed;
+use App\Support\QueryRow;
 use App\Tracking\Data\EventEntry;
 use App\Tracking\Events\VisibleEvents;
 use Illuminate\Http\Request;
@@ -119,10 +120,13 @@ class HandleInertiaRequests extends Middleware
                 // The manual list order, exactly as the lists index reads it:
                 // the modal is the same set of lists, so someone who dragged
                 // theirs into an order must meet it here too.
+                // One count of every kind together: a list may hold titles,
+                // people, companies, collections and events side by side.
                 return $user->lists()
                     ->inManualOrder()
+                    ->withCount('items')
                     ->get()
-                    ->map(fn (MediaList $list) => new UserList($list->id, $list->displayTitle(), $list->system_key))
+                    ->map(fn (MediaList $list) => new UserList($list->id, $list->displayTitle(), $list->system_key, QueryRow::int($list, 'items_count')))
                     ->all();
             },
         ];

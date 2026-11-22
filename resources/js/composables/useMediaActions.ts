@@ -156,24 +156,37 @@ export function useMediaActions() {
         );
     };
 
-    /** Puts the title on one list or takes it off; its other memberships stay. */
-    const toggleList = (media: MediaSummary, listId: number): void => {
-        void writeState(media, () => {
-            const ids = settledState(stateKey(media)).listIds;
+    /** Puts the title on one list or takes it off, its other memberships staying; reloads what it names after. */
+    const putOnList = (media: MediaSummary, listId: number, reload: string[]): void => {
+        void writeState(
+            media,
+            () => {
+                const ids = settledState(stateKey(media)).listIds;
 
-            return jsonFetch(route('ui.media.lists.update', target(media)), {
-                method: 'PUT',
-                body: { list_ids: ids.includes(listId) ? ids.filter((id) => id !== listId) : [...ids, listId] },
-            });
-        });
+                return jsonFetch(route('ui.media.lists.update', target(media)), {
+                    method: 'PUT',
+                    body: { list_ids: ids.includes(listId) ? ids.filter((id) => id !== listId) : [...ids, listId] },
+                });
+            },
+            reload,
+        );
     };
 
-    /** Quick toggle of the system watchlist alone. */
+    /**
+     * A tick in the lists dialog. The dialog counts what each list holds, and
+     * only the server knows that, so the tick reloads the lists too.
+     */
+    const toggleList = (media: MediaSummary, listId: number): void => putOnList(media, listId, ['userLists']);
+
+    /**
+     * Quick toggle of the system watchlist alone, from a card: no count is on
+     * screen there, and a reload would keep the card's loader up for nothing.
+     */
     const toggleWatchlist = (media: MediaSummary): void => {
         const watchlist = backlogOf(page.props.userLists);
 
         if (watchlist) {
-            toggleList(media, watchlist.id);
+            putOnList(media, watchlist.id, []);
         }
     };
 

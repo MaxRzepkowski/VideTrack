@@ -37,7 +37,7 @@ let reloads: { only: string[]; onFinish: () => void }[] = [];
 beforeEach(() => {
     useMediaTypes();
     vi.useFakeTimers({ now: new Date('2026-10-10T12:00:00Z') });
-    setPageProps({ userLists: [{ id: 5, systemKey: 'watchlist' }] });
+    setPageProps({ userLists: [{ id: 5, systemKey: 'watchlist', itemCount: 0 }] });
     calls.length = 0;
     reloads = [];
     vi.spyOn(router, 'reload').mockImplementation(((options: { only: string[]; onFinish: () => void }) => {
@@ -65,10 +65,20 @@ function pageReloading(only: string[]) {
     return mount(defineComponent({ setup: () => useReloadAfterWrites(only), template: '<div />' }));
 }
 
-/** The write lands with these states; the loader's minimum then runs out. */
+/** The lists a tick in the lists dialog reloaded come back. */
+async function listsReloaded(): Promise<void> {
+    await vi.advanceTimersByTimeAsync(0);
+    reloads.filter((reload) => reload.only.length === 1 && reload.only[0] === 'userLists').forEach((reload) => reload.onFinish());
+    await vi.advanceTimersByTimeAsync(300);
+}
+
+/**
+ * The write lands with these states; the lists it reloads (a tick in the lists
+ * dialog asks for them) come back with it; the loader's minimum then runs out.
+ */
 async function land(states: UserStatesMap, call = calls.at(-1)): Promise<void> {
     await call?.answer(200, { data: {}, states });
-    vi.advanceTimersByTime(300);
+    await listsReloaded();
 }
 
 describe('reading a state', () => {
@@ -242,8 +252,8 @@ describe('a write', () => {
         // `userStates` object rides along untouched.
         reloadProps({
             userLists: [
-                { id: 5, systemKey: 'watchlist' },
-                { id: 3, systemKey: null },
+                { id: 5, systemKey: 'watchlist', itemCount: 0 },
+                { id: 3, systemKey: null, itemCount: 0 },
             ],
         });
         await nextTick();
@@ -376,9 +386,11 @@ describe('the requests', () => {
         expect(calls).toHaveLength(1);
 
         await nth(calls, 0).answer(200, { states: { 'movie:m1': userState({ listIds: [3] }) } });
+        await listsReloaded();
         expect(nth(calls, 1).body).toEqual({ list_ids: [3, 4] });
 
         await nth(calls, 1).answer(200, { states: { 'movie:m1': userState({ listIds: [3, 4] }) } });
+        await listsReloaded();
         expect(nth(calls, 2).body).toEqual({ favorite: true });
 
         await nth(calls, 2).answer(200, { states: { 'movie:m1': userState({ listIds: [3, 4], favorite: true }) } });

@@ -37,7 +37,7 @@ function work(credits: PersonCredit[]) {
 
 beforeEach(() => {
     useMediaTypes();
-    setPageProps({ userLists: [{ id: 5, systemKey: 'watchlist' }] });
+    setPageProps({ userLists: [{ id: 5, systemKey: 'watchlist', itemCount: 0 }] });
 });
 
 describe('PersonWork', () => {

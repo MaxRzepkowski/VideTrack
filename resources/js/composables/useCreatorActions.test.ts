@@ -47,7 +47,7 @@ describe('useCreatorActions', () => {
         expect(error).toHaveBeenCalledWith('Something went wrong. Please try again.');
     });
 
-    it('puts the creator on one list, keeping its other lists, and takes the new state from the answer', async () => {
+    it('puts the creator on one list, keeping its other lists, takes the new state from the answer and reloads the counts', async () => {
         const keanu: Creator = { kind: 'person', provider: 'tmdb', ref: '6384' };
         setPageProps({ creatorStates: { 'person:tmdb:6384': { followed: false, listIds: [2] } } });
         answers = [{ status: 200, body: { creatorStates: { 'person:tmdb:6384': { followed: false, listIds: [2, 4] } } } }];
@@ -56,7 +56,8 @@ describe('useCreatorActions', () => {
 
         expect(calls[0]).toMatchObject({ url: '/ui.people.lists.update/tmdb/6384', options: { method: 'PUT', body: { list_ids: [2, 4] } } });
         expect(useCreatorState(keanu).value.listIds).toEqual([2, 4]);
-        expect(router.reload).not.toHaveBeenCalled();
+        // The lists dialog counts what each list holds; only the server knows it.
+        expect(router.reload).toHaveBeenCalledWith(expect.objectContaining({ only: ['userLists'] }));
     });
 
     it("sends a creator's second click after the first has landed, built from the state it left", async () => {

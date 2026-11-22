@@ -5,10 +5,10 @@ import { describe, expect, it, vi } from 'vitest';
 
 describe('backlogOf', () => {
     it('finds the system backlog among custom lists, and nothing without one', () => {
-        const backlog = { id: 5, title: 'Watchlist', systemKey: 'watchlist' };
+        const backlog = { id: 5, title: 'Watchlist', systemKey: 'watchlist', itemCount: 0 };
 
-        expect(backlogOf([{ id: 3, title: 'Favourites', systemKey: null }, backlog])).toBe(backlog);
-        expect(backlogOf([{ id: 3, title: 'Favourites', systemKey: null }])).toBeUndefined();
+        expect(backlogOf([{ id: 3, title: 'Favourites', systemKey: null, itemCount: 0 }, backlog])).toBe(backlog);
+        expect(backlogOf([{ id: 3, title: 'Favourites', systemKey: null, itemCount: 0 }])).toBeUndefined();
         expect(backlogOf(undefined)).toBeUndefined();
     });
 });
