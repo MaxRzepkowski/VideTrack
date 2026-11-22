@@ -1,5 +1,4 @@
 /.phpunit.cache
-/lang/php_*.json
 /node_modules
 /public/build
 /public/sw.js

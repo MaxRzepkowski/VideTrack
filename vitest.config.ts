@@ -3,10 +3,8 @@ import path from 'path';
 import { defineConfig } from 'vitest/config';
 
 // The front's tests: the app's Vue plugin, a DOM without a browser, and
-// coverage over everything the app ships. Not the i18n plugin: it deletes the
-// lang/php_*.json it generated when it stops, which would pull the translations
-// out from under the running dev server — the tests read the PHP lang files
-// in memory instead (resources/js/test/setup.ts).
+// coverage over everything the app ships. The texts are the PHP lang files,
+// read in memory (resources/js/test/setup.ts).
 export default defineConfig({
     plugins: [vue()],
     resolve: {
@@ -37,7 +35,7 @@ export default defineConfig({
             // wobble between runs. Measured by Vitest 5, which maps
             // V8 coverage onto the source's syntax tree: a Vue file counts its
             // script, not its compiled render function.
-            thresholds: { lines: 76, statements: 75, branches: 67.3, functions: 68.4 },
+            thresholds: { lines: 76, statements: 75, branches: 67.3, functions: 68.7 },
         },
     },
 });

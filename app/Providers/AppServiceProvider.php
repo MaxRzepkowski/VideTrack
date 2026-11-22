@@ -6,6 +6,7 @@ use App\Catalog\ProviderCacheContext;
 use App\Library\LibraryProjector;
 use App\Library\MutationContext;
 use App\Policies\PersonalAccessTokenPolicy;
+use App\Support\LangFiles;
 use App\Support\PublicUrl;
 use Dedoc\Scramble\Scramble;
 use Illuminate\Auth\Notifications\ResetPassword;
@@ -44,6 +45,8 @@ class AppServiceProvider extends ServiceProvider
         // One per request or job: the batch an import opens has to be the
         // one its writes' listener sees, and the next job starts without it.
         $this->app->scoped(LibraryProjector::class);
+
+        $this->app->bind(LangFiles::class, fn (): LangFiles => new LangFiles(lang_path()));
     }
 
     /**

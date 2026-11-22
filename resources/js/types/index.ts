@@ -42,6 +42,8 @@ export type SharedData = {
     /** The identity providers this instance signs in with, in the order the login page offers them. */
     identityProviders: IdentityProviderOption[];
     locale: string;
+    /** Where the texts of that language are, fingerprinted: a browser keeps them until they change. */
+    translations: string;
     imageBase: string;
     /** The running release ("1.4.0"), or a build label such as "dev". */
     version: string;
