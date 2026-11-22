@@ -7,12 +7,14 @@ use App\Catalog\ProviderException;
 use App\Catalog\ProviderRejected;
 use App\Exceptions\LibraryRefusal;
 use App\Http\Controllers\HealthController;
+use App\Http\Controllers\TranslationsController;
 use App\Http\Middleware\EnsureMcpIsEnabled;
 use App\Http\Middleware\EnsureUserIsNotBlocked;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\RequireTokenAbility;
 use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\SetUserLocale;
+use App\Support\FrontTranslations;
 use Illuminate\Contracts\Auth\Middleware\AuthenticatesRequests;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -35,6 +37,13 @@ return Application::configure(basePath: dirname(__DIR__))
             // Outside `web` like the framework's: a health probe carries no
             // session and must not start one.
             Route::get('up', HealthController::class);
+
+            // The front's texts, outside `web` for the same reason: an answer
+            // every browser may keep must not set a session cookie.
+            // Which locales exist is the controller's to say; the pattern only keeps the dots apart.
+            Route::get('lang/{locale}.{version}.json', TranslationsController::class)
+                ->where(['locale' => '[^/.]+', 'version' => '[0-9a-f]{'.FrontTranslations::VERSION_LENGTH.'}'])
+                ->name('translations');
 
             // Incoming webhooks get a group of their own: no session, no CSRF,
             // no Inertia share — a media server posting JSON has none of those,

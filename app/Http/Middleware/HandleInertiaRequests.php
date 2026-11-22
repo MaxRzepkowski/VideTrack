@@ -17,11 +17,13 @@ use App\Library\Data\UserMediaState;
 use App\Models\MediaList;
 use App\Models\User;
 use App\Notifications\Data\NotificationFeed;
+use App\Support\FrontTranslations;
 use App\Support\QueryRow;
 use App\Tracking\Data\EventEntry;
 use App\Tracking\Events\VisibleEvents;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
+use Inertia\Inertia;
 use Inertia\Middleware;
 
 class HandleInertiaRequests extends Middleware
@@ -34,6 +36,7 @@ class HandleInertiaRequests extends Middleware
         private readonly Registration $registration,
         private readonly PasswordLogin $passwordLogin,
         private readonly IdentityProviderRegistry $identityProviders,
+        private readonly FrontTranslations $translations,
     ) {}
 
     /**
@@ -67,6 +70,14 @@ class HandleInertiaRequests extends Middleware
             'passwordLogin' => $this->passwordLogin->isEnabled(),
             'identityProviders' => fn (): array => array_map(IdentityProviderOption::of(...), $this->identityProviders->all()),
             'locale' => App::getLocale(),
+            // Where that language's texts are: the page shell preloads them,
+            // and a language changed in the settings is fetched from here.
+            // Always sent, a partial reload included: the shell names it on
+            // any page it draws.
+            'translations' => Inertia::always(fn (): string => route('translations', [
+                'locale' => App::getLocale(),
+                'version' => $this->translations->version(App::getLocale()),
+            ], absolute: false)),
             'imageBase' => ImageUrls::base(),
             // The footer names the running version and links its source on
             // every page: the AGPL asks each instance to offer its users the code.

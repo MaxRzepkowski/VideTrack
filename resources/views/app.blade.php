@@ -12,6 +12,9 @@
 
         <title data-inertia>{{ config('app.name', 'Laravel') }}</title>
 
+        {{-- Fetched beside the app's code; the app waits for it so its first paint already speaks the reader's language. --}}
+        <link rel="preload" href="{{ $page['props']['translations'] }}" as="fetch" crossorigin="anonymous" data-translations>
+
         @routes(nonce: Vite::cspNonce())
         @vite(['resources/js/app.ts'])
         @inertiaHead

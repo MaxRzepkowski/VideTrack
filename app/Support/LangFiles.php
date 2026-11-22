@@ -33,6 +33,32 @@ final readonly class LangFiles
         return array_keys($this->entries($locale));
     }
 
+    /**
+     * Every text a locale defines, under the key the code names it by.
+     *
+     * @return array<string, string>
+     */
+    public function texts(string $locale): array
+    {
+        return array_filter($this->entries($locale), is_string(...));
+    }
+
+    /** A fingerprint of everything the locales' files say: it moves when any text does. */
+    public function fingerprint(string ...$locales): string
+    {
+        $context = hash_init('xxh128');
+
+        foreach ($locales as $locale) {
+            foreach ([...array_values($this->groupFiles($locale)), $this->jsonFile($locale)] as $file) {
+                if (is_file($file)) {
+                    hash_update($context, $locale.'/'.basename($file)."\0".file_get_contents($file)."\0");
+                }
+            }
+        }
+
+        return hash_final($context);
+    }
+
     /** @return array<string, mixed> "group.path" for the group files, the bare string for the framework's JSON */
     private function entries(string $locale): array
     {

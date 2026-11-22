@@ -12,8 +12,8 @@ import { resetPage, testPage } from './page';
 import { route } from './route';
 
 // Real English texts, so a test reads what a user reads: the framework's
-// lang/en.json plus our group files, parsed from PHP in memory — nothing is
-// written to lang/, where the dev server keeps its own generated copy.
+// lang/en.json plus our group files, parsed from PHP in memory, as the server
+// reads them for the page.
 const langs = import.meta.glob<{ default: Record<string, string> }>('../../../lang/*.json', { eager: true });
 const groups = Object.fromEntries(parseAll(resolve('lang')).map(({ name, translations }) => [name, translations]));
 
