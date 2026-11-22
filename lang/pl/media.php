@@ -419,4 +419,6 @@ return [
     'search_escape_key' => 'Esc',
     'not_rated' => 'Bez oceny',
     'back_to_not_rated' => 'Tytuł wraca do stanu bez oceny',
+    'save_rating' => 'Zapisz ocenę',
+    'save_rating_of' => 'Zapisz ocenę :score',
 ];

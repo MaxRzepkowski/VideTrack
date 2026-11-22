@@ -1,6 +1,7 @@
 import MonthGrid from '@/components/calendar/MonthGrid.vue';
 import { vTooltip } from '@/directives/tooltip';
 import { mediaSummary, useMediaTypes } from '@/test/factories';
+import { stubMediaQueries } from '@/test/media';
 import type { CalendarMonth } from '@/types/media';
 import { mount } from '@vue/test-utils';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -35,11 +36,7 @@ const month: CalendarMonth = {
 
 /** A screen that hovers (a desktop) or one that is a phone: which of the grid's two queries match. */
 function screen(kind: 'desktop' | 'phone'): void {
-    vi.stubGlobal('matchMedia', (query: string) => ({
-        matches: kind === 'desktop' ? query.includes('hover: hover') : query.includes('max-width'),
-        addEventListener: () => undefined,
-        removeEventListener: () => undefined,
-    }));
+    stubMediaQueries((query) => (kind === 'desktop' ? query.includes('hover: hover') : query.includes('max-width')));
 }
 
 const grid = () =>

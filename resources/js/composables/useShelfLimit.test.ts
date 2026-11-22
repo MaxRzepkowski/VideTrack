@@ -1,11 +1,9 @@
 import { usePosterColumns, usePosterShelf, useShelfLimit, wholeRows } from '@/composables/useShelfLimit';
-import { describe, expect, it, vi } from 'vitest';
+import { stubMediaQueries } from '@/test/media';
+import { describe, expect, it } from 'vitest';
 
 // The window this suite sees: sm and lg match, xl does not — four columns.
-vi.stubGlobal('matchMedia', (query: string) => ({
-    matches: !query.includes('80rem'),
-    addEventListener: () => undefined,
-}));
+stubMediaQueries((query) => !query.includes('80rem'));
 
 describe('poster shelves', () => {
     it('counts the columns of the widest step that matches', () => {

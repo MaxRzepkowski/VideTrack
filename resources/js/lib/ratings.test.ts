@@ -1,4 +1,4 @@
-import { RATING_TIERS, ratingPercent, ratingTier } from '@/lib/ratings';
+import { RATING_MAX, RATING_MIN, RATING_TIERS, ratingAt, ratingPercent, ratingScore, ratingTier } from '@/lib/ratings';
 import { describe, expect, it } from 'vitest';
 
 describe('ratingPercent', () => {
@@ -31,5 +31,25 @@ describe('ratingTier', () => {
         const floors = RATING_TIERS.map((tier) => tier.min);
 
         expect(floors).toEqual([...floors].sort((a, b) => b - a));
+    });
+});
+
+describe('ratingScore', () => {
+    it('reads a rating beside the scale', () => {
+        expect(ratingScore(7)).toBe(`7/${RATING_MAX}`);
+    });
+});
+
+describe('ratingAt', () => {
+    it('gives each star an equal slice of the row, holding the ends past them', () => {
+        const slice = 30;
+        const width = slice * (RATING_MAX - RATING_MIN + 1);
+
+        expect(ratingAt(0, width)).toBe(RATING_MIN);
+        expect(ratingAt(slice - 1, width)).toBe(RATING_MIN);
+        expect(ratingAt(slice, width)).toBe(RATING_MIN + 1);
+        expect(ratingAt(width - 1, width)).toBe(RATING_MAX);
+        expect(ratingAt(-40, width)).toBe(RATING_MIN);
+        expect(ratingAt(width + 200, width)).toBe(RATING_MAX);
     });
 });

@@ -419,4 +419,6 @@ return [
     'search_escape_key' => 'Esc',
     'not_rated' => 'Not rated',
     'back_to_not_rated' => 'Back to not rated',
+    'save_rating' => 'Save rating',
+    'save_rating_of' => 'Save rating :score',
 ];
