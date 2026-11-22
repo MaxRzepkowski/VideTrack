@@ -44,6 +44,7 @@ const along = (value: number): string => `${ratingShare(value) * 100}%`;
                 />
                 <span class="flex min-w-0 flex-1 flex-col">
                     <Link
+                        v-tooltip.truncated="title.media.title"
                         :href="mediaUrl(title.media)"
                         class="text-ink-secondary focus-visible:ring-brand truncate rounded text-base hover:underline focus-visible:ring-2 focus-visible:outline-hidden"
                     >

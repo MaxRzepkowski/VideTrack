@@ -1,4 +1,3 @@
-import { vTooltip } from '@/directives/tooltip';
 import { jsonFetch } from '@/lib/http';
 import Tasks from '@/pages/settings/Tasks.vue';
 import { router } from '@inertiajs/vue3';
@@ -57,7 +56,6 @@ function page(runs: Run[], schedule: Entry[] = [], canClear = false) {
     return mount(Tasks, {
         props: { runs, schedule, canClear },
         global: {
-            directives: { tooltip: vTooltip },
             stubs: { AppLayout: { template: '<div><slot /></div>' }, SettingsLayout: { template: '<div><slot /></div>' } },
         },
     });

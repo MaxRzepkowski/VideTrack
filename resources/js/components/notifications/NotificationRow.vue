@@ -44,6 +44,7 @@ const poster = computed(() => mediaImage(props.item.imagePath, 'w342'));
         <span class="flex min-w-0 flex-1 flex-col gap-1">
             <span class="flex items-center gap-2.5">
                 <a
+                    v-tooltip.truncated="item.subject"
                     :href="item.href"
                     class="text-ink min-w-0 flex-1 truncate text-base leading-[22px] font-semibold outline-none after:absolute after:inset-0"
                     @click="$emit('open', $event)"

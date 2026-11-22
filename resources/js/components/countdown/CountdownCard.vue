@@ -123,7 +123,9 @@ const releaseDay = computed(() => formatReleaseDate(props.entry.media.releaseDat
             </div>
 
             <div class="absolute inset-x-0 bottom-0 p-3.5">
-                <div class="text-on-photo truncate text-lg font-bold">{{ entry.showTitle ?? entry.media.title }}</div>
+                <div v-tooltip.truncated="entry.showTitle ?? entry.media.title" class="text-on-photo truncate text-lg font-bold">
+                    {{ entry.showTitle ?? entry.media.title }}
+                </div>
                 <div class="flex items-center gap-2">
                     <!-- This line lies on the backdrop, not on the card: the
                          rule takes the tone that rides a photograph. -->

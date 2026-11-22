@@ -1,5 +1,4 @@
 import MediaTitleHeader from '@/components/media/MediaTitleHeader.vue';
-import { vTooltip } from '@/directives/tooltip';
 import { mediaSummary, useMediaTypes } from '@/test/factories';
 import type { CertificationRow, Chip, MediaDetails } from '@/types/media';
 import { mount } from '@vue/test-utils';
@@ -42,7 +41,7 @@ function details(overrides: Partial<MediaDetails> = {}): MediaDetails {
 function header(chips: Chip[], props: { details?: MediaDetails; ratingHint?: { label: string; value: string }[] | null } = {}) {
     return mount(MediaTitleHeader, {
         props: { details: props.details ?? details(), chips, detailRows: [], ratingHint: props.ratingHint ?? null },
-        global: { stubs: { CertificationModal, DetailsModal: true, Link: true }, directives: { tooltip: vTooltip } },
+        global: { stubs: { CertificationModal, DetailsModal: true, Link: true } },
     });
 }
 
@@ -88,7 +87,7 @@ describe('MediaTitleHeader', () => {
                 chips: [],
                 detailRows: [],
             },
-            global: { stubs: { CertificationModal, DetailsModal: true, Link: true }, directives: { tooltip: vTooltip } },
+            global: { stubs: { CertificationModal, DetailsModal: true, Link: true } },
         });
         const modal = wrapper.findComponent({ name: 'DetailsModal' });
 

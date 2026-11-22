@@ -20,7 +20,7 @@ const meta = computed(() => mediaTypeMeta(props.item.type));
     </span>
 
     <span class="min-w-0 flex-1">
-        <span class="block truncate font-medium">{{ item.title }}</span>
+        <span v-tooltip.truncated="item.title" class="block truncate font-medium">{{ item.title }}</span>
         <!-- Type and year are two facts on one line, so the shared rule sets
              them apart and drops the year on its own when there is none. -->
         <MetaLine :parts="[meta.label(), item.year === null ? null : String(item.year)]" class="text-ink-muted text-sm" />

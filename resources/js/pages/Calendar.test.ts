@@ -1,4 +1,3 @@
-import { vTooltip } from '@/directives/tooltip';
 import Calendar from '@/pages/Calendar.vue';
 import { setPageProps } from '@/test/page';
 import { router } from '@inertiajs/vue3';
@@ -30,7 +29,6 @@ function dateField() {
             rssUrl: '/rss',
         },
         global: {
-            directives: { tooltip: vTooltip },
             stubs: { AppLayout: { template: '<div><slot /></div>' }, MonthGrid: true, Head: true, Link: true },
         },
     }).find('input[type="date"]');

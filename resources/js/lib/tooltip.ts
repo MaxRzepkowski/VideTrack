@@ -59,7 +59,12 @@ let shownGroup: Element | null = null;
 /** The trigger whose bubble is waiting out its delay. */
 let pending: HTMLElement | null = null;
 
-export function showTooltip(el: HTMLElement, content: TooltipContent): void {
+/**
+ * Opens the bubble after the hover delay. `stillWanted`, when given, is asked
+ * at that moment rather than now: what it measures (a title cut short) may
+ * change while the pointer rests, a row sliding open under it for one.
+ */
+export function showTooltip(el: HTMLElement, content: TooltipContent, stillWanted: () => boolean = () => true): void {
     clearTimeout(timer);
     pending = el;
 
@@ -69,6 +74,11 @@ export function showTooltip(el: HTMLElement, content: TooltipContent): void {
     timer = setTimeout(
         () => {
             pending = null;
+
+            if (!stillWanted()) {
+                return;
+            }
+
             shownGroup = group;
             tooltip.value = { content, rect: el.getBoundingClientRect(), trigger: el };
         },

@@ -1,7 +1,6 @@
 import WatchedModal from '@/components/media/WatchedModal.vue';
 import { absorbUserStates } from '@/composables/useMediaActions';
 import { useMediaModals } from '@/composables/useMediaModals';
-import { vTooltip } from '@/directives/tooltip';
 import type { JsonFetchOptions } from '@/lib/http';
 import { mediaSummary, useMediaTypes, userState } from '@/test/factories';
 import { nth } from '@/test/lists';
@@ -41,7 +40,7 @@ beforeEach(() => {
     history.plays = [];
     history.cycles = [];
     answerConfirm.mockResolvedValue(true);
-    wrapper = mount(WatchedModal, { global: { directives: { tooltip: vTooltip } } });
+    wrapper = mount(WatchedModal);
 });
 
 afterEach(() => {

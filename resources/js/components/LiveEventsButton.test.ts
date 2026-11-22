@@ -1,5 +1,4 @@
 import LiveEventsButton from '@/components/LiveEventsButton.vue';
-import { vTooltip } from '@/directives/tooltip';
 import { setPageProps } from '@/test/page';
 import type { EventEntry } from '@/types/generated';
 import { mount } from '@vue/test-utils';
@@ -21,7 +20,7 @@ const event = (ref: string, startsAt: string, endsAt: string): EventEntry => ({
 function button(liveEvents: EventEntry[]) {
     setPageProps({ liveEvents });
 
-    return mount(LiveEventsButton, { global: { stubs: { Link }, directives: { tooltip: vTooltip } } });
+    return mount(LiveEventsButton, { global: { stubs: { Link } } });
 }
 
 afterEach(() => window.localStorage.clear());

@@ -1,5 +1,4 @@
 import CertificationModal from '@/components/media/CertificationModal.vue';
-import { vTooltip } from '@/directives/tooltip';
 import type { CertificationRow } from '@/types/media';
 import { DOMWrapper, flushPromises, mount, type VueWrapper } from '@vue/test-utils';
 import { afterEach, describe, expect, it } from 'vitest';
@@ -24,7 +23,6 @@ const screen = () => new DOMWrapper(document.body);
 async function open(rows: CertificationRow[]): Promise<void> {
     wrapper = mount(CertificationModal, {
         props: { label: 'PEGI 18', meaning: null, rows },
-        global: { directives: { tooltip: vTooltip } },
         attachTo: document.body,
     });
     await wrapper.find('button').trigger('click');
@@ -86,7 +84,6 @@ describe('CertificationModal', () => {
                     row({ key: 'GRAC', name: 'GRAC', code: '18+' }),
                 ],
             },
-            global: { directives: { tooltip: vTooltip } },
             attachTo: document.body,
         });
 

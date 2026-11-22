@@ -55,7 +55,9 @@ const rating = (title: RatedTitle): { value: string; whose: string } | null => {
                 >
                     <PosterThumb :path="title.media.posterPath" size="w92" :width="92" :height="138" class="aspect-poster w-11 rounded" />
                     <span class="flex min-w-0 flex-1 flex-col gap-0.5">
-                        <span class="text-ink truncate text-base font-semibold group-hover:underline">{{ title.media.title }}</span>
+                        <span v-tooltip.truncated="title.media.title" class="text-ink truncate text-base font-semibold group-hover:underline">{{
+                            title.media.title
+                        }}</span>
                         <span class="text-ink-muted truncate text-sm">
                             {{ typeAndYear(title.media.type, title.media.year) }}
                         </span>

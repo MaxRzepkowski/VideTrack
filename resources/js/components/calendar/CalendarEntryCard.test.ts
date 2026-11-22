@@ -1,5 +1,4 @@
 import CalendarEntryCard from '@/components/calendar/CalendarEntryCard.vue';
-import { vTooltip } from '@/directives/tooltip';
 import { mediaSummary, useMediaTypes, userPreferences } from '@/test/factories';
 import { setPageProps } from '@/test/page';
 import type { CalendarEntry } from '@/types/media';
@@ -11,7 +10,7 @@ const Link = { props: ['href'], template: '<a :href="href"><slot /></a>' };
 function card(entry: CalendarEntry) {
     return mount(CalendarEntryCard, {
         props: { entry, noImage: true },
-        global: { stubs: { Link }, directives: { tooltip: vTooltip } },
+        global: { stubs: { Link } },
     });
 }
 

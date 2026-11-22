@@ -1,5 +1,4 @@
 import WatchProvidersSection from '@/components/media/WatchProvidersSection.vue';
-import { vTooltip } from '@/directives/tooltip';
 import type { WatchAvailability } from '@/types/media';
 import { mount } from '@vue/test-utils';
 import { describe, expect, it } from 'vitest';
@@ -9,7 +8,7 @@ function availability(offers: Partial<WatchAvailability>): WatchAvailability {
 }
 
 function section(providers: WatchAvailability | null) {
-    return mount(WatchProvidersSection, { props: { providers }, global: { directives: { tooltip: vTooltip } } });
+    return mount(WatchProvidersSection, { props: { providers } });
 }
 
 describe('WatchProvidersSection', () => {

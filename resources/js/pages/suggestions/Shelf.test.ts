@@ -2,7 +2,6 @@ import MediaCard from '@/components/media/MediaCard.vue';
 import SortControl from '@/components/SortControl.vue';
 import SubjectCard from '@/components/suggestions/SubjectCard.vue';
 import TypeFilter from '@/components/TypeFilter.vue';
-import { vTooltip } from '@/directives/tooltip';
 import Shelf from '@/pages/suggestions/Shelf.vue';
 import { mediaSummary, useMediaTypes } from '@/test/factories';
 import { setPageProps } from '@/test/page';
@@ -41,7 +40,6 @@ function page(given: {
             pagination: { currentPage: 1, totalPages: 3, total: 2 },
         },
         global: {
-            directives: { tooltip: vTooltip },
             stubs: {
                 AppLayout: { template: '<div><slot /></div>' },
                 PageToolbar: { template: '<div><slot name="search" /><slot name="filters" /><slot name="sort" /></div>' },

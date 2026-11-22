@@ -1,6 +1,5 @@
 import StatTile from '@/components/dashboard/StatTile.vue';
 import TypeFilter from '@/components/TypeFilter.vue';
-import { vTooltip } from '@/directives/tooltip';
 import { RATING_MAX, RATING_MIN } from '@/lib/ratings';
 import Statistics from '@/pages/Statistics.vue';
 import { mediaSummary, useMediaTypes } from '@/test/factories';
@@ -76,7 +75,6 @@ function page(props: StatisticsPage) {
     return mount(Statistics, {
         props: { page: props },
         global: {
-            directives: { tooltip: vTooltip },
             stubs: {
                 AppLayout: { template: '<div><slot /></div>' },
                 Head: true,

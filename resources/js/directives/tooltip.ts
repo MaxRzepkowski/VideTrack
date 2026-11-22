@@ -9,12 +9,24 @@ const labels = new WeakMap<HTMLElement, TooltipContent>();
 /** Elements whose `aria-label` we wrote ourselves, so we may rewrite it. */
 const named = new WeakSet<HTMLElement>();
 
+/** Elements that show their bubble only while their text is cut short (`v-tooltip.truncated`). */
+const whenCut = new WeakSet<HTMLElement>();
+
+/**
+ * Whether an element's bubble says something its text does not already show:
+ * any hint does; a `truncated` one only while its text is cut short.
+ */
+function adds(el: HTMLElement): boolean {
+    return !whenCut.has(el) || el.scrollWidth > el.clientWidth + 1 || el.scrollHeight > el.clientHeight + 1;
+}
+
 function open(event: Event): void {
     const el = event.currentTarget as HTMLElement;
     const content = labels.get(el);
 
+    // Measured when the bubble would open, after the hover delay, not on entry.
     if (content !== undefined) {
-        showTooltip(el, content);
+        showTooltip(el, content, () => adds(el));
     }
 }
 
@@ -62,7 +74,7 @@ function onClick(event: Event): void {
 
     const content = labels.get(el);
 
-    if (content !== undefined) {
+    if (content !== undefined && adds(el)) {
         showTooltipImmediately(el, content);
     }
 }
@@ -129,11 +141,19 @@ function sync(el: HTMLElement, value: TooltipContent | null | undefined): void {
 /**
  * `v-tooltip="label"` on any element — button, link, truncated text. The value
  * is a sentence, or label/value rows for a table of numbers. A falsy value
- * disables it, so a conditional hint is just a ternary.
+ * disables it, so a conditional hint is just a ternary. `v-tooltip.truncated`
+ * on text that may be cut short (a long title) shows the full text only while
+ * it is cut: a title shown whole needs no bubble repeating it.
  */
-export const vTooltip: Directive<HTMLElement, TooltipContent | null | undefined> = {
+export const vTooltip: Directive<HTMLElement, TooltipContent | null | undefined, 'truncated'> = {
     mounted(el, binding) {
         events.forEach(([name, handler]) => el.addEventListener(name, handler));
+
+        // Modifiers are written into the template: an element keeps the ones it was born with.
+        if (binding.modifiers.truncated === true) {
+            whenCut.add(el);
+        }
+
         sync(el, binding.value);
     },
     updated(el, binding) {

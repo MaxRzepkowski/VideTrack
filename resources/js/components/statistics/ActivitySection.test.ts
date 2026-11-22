@@ -2,7 +2,6 @@ import ActivitySection from '@/components/statistics/ActivitySection.vue';
 import ColumnChart from '@/components/statistics/ColumnChart.vue';
 import DayHeatmap from '@/components/statistics/DayHeatmap.vue';
 import MonthGrid from '@/components/statistics/MonthGrid.vue';
-import { vTooltip } from '@/directives/tooltip';
 import { useMediaTypes } from '@/test/factories';
 import { setPageProps } from '@/test/page';
 import type { PeriodSpan, StatisticsActivity } from '@/types/generated';
@@ -38,7 +37,7 @@ const activity = (overrides: Partial<StatisticsActivity> = {}): StatisticsActivi
 });
 
 const mountSection = (props: { activity: StatisticsActivity; period?: PeriodSpan; type?: string | null }) =>
-    mount(ActivitySection, { props: { period: year, type: null, ...props }, global: { directives: { tooltip: vTooltip } } });
+    mount(ActivitySection, { props: { period: year, type: null, ...props } });
 
 describe('ActivitySection', () => {
     it('draws a chart per type, an empty one for a type with nothing finished', () => {

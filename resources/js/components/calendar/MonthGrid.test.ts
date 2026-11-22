@@ -1,5 +1,4 @@
 import MonthGrid from '@/components/calendar/MonthGrid.vue';
-import { vTooltip } from '@/directives/tooltip';
 import { mediaSummary, useMediaTypes } from '@/test/factories';
 import { stubMediaQueries } from '@/test/media';
 import type { CalendarMonth } from '@/types/media';
@@ -42,7 +41,7 @@ function screen(kind: 'desktop' | 'phone'): void {
 const grid = () =>
     mount(MonthGrid, {
         props: { grid: month, today: '2026-10-10', label: 'October' },
-        global: { directives: { tooltip: vTooltip }, stubs: { Link, teleport: true } },
+        global: { stubs: { Link, teleport: true } },
     });
 
 const card = (wrapper: ReturnType<typeof grid>, href: string) => wrapper.find(`a[href="${href}"]`);

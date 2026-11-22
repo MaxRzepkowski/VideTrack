@@ -124,7 +124,10 @@ const viewing = computed(() => splitAtPlaceholder(trans('media.currently_viewing
                         />
                         <div v-else class="from-surface-raised to-line h-full w-full bg-gradient-to-br"></div>
                     </div>
-                    <div class="text-ink-secondary group-hover:text-ink mt-2 truncate text-sm font-semibold transition-colors duration-150">
+                    <div
+                        v-tooltip.truncated="item.title"
+                        class="text-ink-secondary group-hover:text-ink mt-2 truncate text-sm font-semibold transition-colors duration-150"
+                    >
                         {{ item.title }}
                     </div>
                 </Link>

@@ -1,5 +1,4 @@
 import PhotosSection from '@/components/media/PhotosSection.vue';
-import { vTooltip } from '@/directives/tooltip';
 import { flushPromises, mount } from '@vue/test-utils';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -25,7 +24,6 @@ describe('the photo lightbox', () => {
     it("opens on the tile's own size under the full image, and steps to the next photo", async () => {
         const wrapper = mount(PhotosSection, {
             props: { backdrops: ['/a.jpg', '/b.jpg'], posters: [] },
-            global: { directives: { tooltip: vTooltip } },
             attachTo: document.body,
         });
 
@@ -53,7 +51,6 @@ describe('the photo lightbox', () => {
                     backdrops: Array.from({ length: backdrops }, (_, n) => `/b${n}.jpg`),
                     posters: Array.from({ length: posters }, (_, n) => `/p${n}.jpg`),
                 },
-                global: { directives: { tooltip: vTooltip } },
             })
                 .findAll('section > div > button')
                 .map((tile) => (tile.find('img').exists() ? 'photo' : tile.text()));

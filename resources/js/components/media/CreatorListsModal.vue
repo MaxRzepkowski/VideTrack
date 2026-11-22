@@ -77,7 +77,7 @@ function toggle(list: UserList): void {
 <template>
     <AppModal :open="target !== null" :title="trans('media.add_to_lists')" @update:open="(open: boolean) => !open && close()">
         <template v-if="target" #meta>
-            <span class="text-ink-muted truncate">{{ target.name }}</span>
+            <span v-tooltip.truncated="target.name" class="text-ink-muted truncate">{{ target.name }}</span>
         </template>
 
         <!-- The membership is read when the dialog opens; until it lands nothing can be ticked. -->

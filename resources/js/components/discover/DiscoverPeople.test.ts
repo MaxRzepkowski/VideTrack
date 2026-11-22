@@ -1,6 +1,5 @@
 import DiscoverPeople from '@/components/discover/DiscoverPeople.vue';
 import Pagination from '@/components/Pagination.vue';
-import { vTooltip } from '@/directives/tooltip';
 import { mediaSummary, useMediaTypes } from '@/test/factories';
 import { router } from '@inertiajs/vue3';
 import { mount, type VueWrapper } from '@vue/test-utils';
@@ -9,7 +8,7 @@ import { afterEach, beforeEach, describe, expect, it, vi, type MockInstance } fr
 let visits: MockInstance<typeof router.get>;
 let wrapper: VueWrapper;
 
-const global = { directives: { tooltip: vTooltip }, stubs: { CreatorCard: true } };
+const global = { stubs: { CreatorCard: true } };
 
 beforeEach(() => {
     useMediaTypes();

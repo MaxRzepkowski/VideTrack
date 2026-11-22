@@ -10,7 +10,11 @@ defineProps<{ title: string; itemCount: number; isPublic: boolean; linked?: bool
 <template>
     <div class="flex items-center justify-between gap-3 p-4">
         <div class="min-w-0">
-            <div class="text-ink truncate text-base font-bold" :class="linked ? 'group-hover:text-brand-soft transition-colors duration-150' : ''">
+            <div
+                v-tooltip.truncated="title"
+                class="text-ink truncate text-base font-bold"
+                :class="linked ? 'group-hover:text-brand-soft transition-colors duration-150' : ''"
+            >
                 {{ title }}
             </div>
             <div class="text-ink-muted mt-0.5 text-sm font-semibold">

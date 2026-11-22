@@ -3,7 +3,6 @@ import DiscoverFilters from '@/components/discover/DiscoverFilters.vue';
 import MediaCardSkeleton from '@/components/media/MediaCardSkeleton.vue';
 import Pagination from '@/components/Pagination.vue';
 import SortControl from '@/components/SortControl.vue';
-import { vTooltip } from '@/directives/tooltip';
 import { mediaSummary, useMediaTypes } from '@/test/factories';
 import { nth } from '@/test/lists';
 import type { DiscoverActiveFilters, DiscoverFilter } from '@/types/media';
@@ -58,7 +57,6 @@ function render(activeFilters: DiscoverActiveFilters = {}): VueWrapper {
             failed: false,
         },
         global: {
-            directives: { tooltip: vTooltip },
             stubs: {
                 DiscoverSections: true,
                 Dialog: { template: '<div><slot /></div>' },
@@ -167,7 +165,7 @@ describe('DiscoverFiltered', () => {
                 filteredPagination: null,
                 failed: true,
             },
-            global: { directives: { tooltip: vTooltip }, stubs: { DiscoverSections: true } },
+            global: { stubs: { DiscoverSections: true } },
         });
 
         expect(wrapper.text()).toContain('Temporarily unavailable');

@@ -28,6 +28,7 @@ withDefaults(
     <div class="xs:min-h-17.5 xs:p-3 flex min-h-15 flex-col justify-center p-2 text-center">
         <component
             :is="href ? Link : 'div'"
+            v-tooltip.truncated="title"
             :href="href ?? undefined"
             class="text-ink xs:text-base block truncate text-sm font-bold transition-colors duration-150"
             :class="href ? 'hover:text-brand-soft' : undefined"
@@ -37,6 +38,7 @@ withDefaults(
         <component
             :is="subtitleHref ? Link : 'div'"
             v-if="Array.isArray(subtitle) ? subtitle.length : subtitle"
+            v-tooltip.truncated="Array.isArray(subtitle) ? null : subtitle"
             :href="subtitleHref ?? undefined"
             class="text-ink-muted mt-0.5 block truncate text-sm font-semibold transition-colors duration-150"
             :class="subtitleHref ? 'hover:text-brand-soft' : undefined"

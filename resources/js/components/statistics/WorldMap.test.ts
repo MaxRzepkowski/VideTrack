@@ -1,6 +1,5 @@
 import WorldMap from '@/components/statistics/WorldMap.vue';
 import { ZOOM_STEP } from '@/composables/useZoom';
-import { vTooltip } from '@/directives/tooltip';
 import { MAP_GROUND } from '@/lib/origins';
 import { setPageProps } from '@/test/page';
 import { mount } from '@vue/test-utils';
@@ -13,7 +12,6 @@ beforeEach(() => {
 const mountMap = () =>
     mount(WorldMap, {
         props: { counts: { US: 12, PL: 2 }, describe: (code: string, titles: number) => `${code}: ${titles}` },
-        global: { directives: { tooltip: vTooltip } },
     });
 
 describe('WorldMap', () => {
