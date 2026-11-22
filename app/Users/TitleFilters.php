@@ -2,6 +2,7 @@
 
 namespace App\Users;
 
+use App\Catalog\StoredGenres;
 use App\Models\User;
 use App\Support\LikePattern;
 use App\Users\Data\ActivityFilters;
@@ -65,20 +66,10 @@ final readonly class TitleFilters
         }
 
         if ($filters->genre !== null) {
-            // Genres live in the ROOT item's metadata (episode → season →
-            // show). SQLite's json_each scans the persisted genre names directly.
-            $query
-                ->whereRaw(<<<'SQL'
-                    exists (
-                        select 1 from json_each(coalesce(
-                            case
-                                when grandparents.id is not null then grandparents.metadata
-                                when parents.id is not null then parents.metadata
-                                else media_items.metadata
-                            end, '{}'), '$.genres') as genre_entry
-                        where genre_entry.value = ?
-                    )
-                    SQL, [$filters->genre]);
+            // Genres live in the ROOT item's metadata (episode → season → show).
+            $root = 'case when grandparents.id is not null then grandparents.metadata when parents.id is not null then parents.metadata else media_items.metadata end';
+
+            $query->whereRaw('exists (select 1 from '.StoredGenres::entries($root).' as genre_entry where genre_entry.value = ?)', [$filters->genre]);
         }
 
         if ($filters->hideRated) {
