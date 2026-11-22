@@ -514,6 +514,24 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Related titles
+    |--------------------------------------------------------------------------
+    |
+    | Ratings a title needs at its provider, by type, to be shown beside
+    | another one merely for sharing its franchise: a universe also holds its
+    | shorts, specials and shop-floor tie-ins. The scale is the provider's
+    | own (a show gathers far fewer ratings than a film); a type not listed
+    | has no bar.
+    |
+    */
+
+    'widely_known_votes' => [
+        'movie' => 600,
+        'show' => 200,
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Suggestions
     |--------------------------------------------------------------------------
     |

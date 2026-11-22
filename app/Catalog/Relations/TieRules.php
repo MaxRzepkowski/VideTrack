@@ -27,16 +27,6 @@ use App\Models\MediaItem;
  */
 final readonly class TieRules
 {
-    /**
-     * Ratings a film needs at its provider to be shown merely for sharing a
-     * franchise. The shorts, TV specials and tie-ins of a universe typically
-     * gather a few hundred, its films thousands.
-     */
-    public const UNIVERSE_MIN_FILM_VOTES = 600;
-
-    /** The same bar for anything else: a show gathers far fewer ratings than a film. */
-    public const UNIVERSE_MIN_VOTES = 200;
-
     /** Which word about a pair stands when the source has several; the lowest wins. */
     private const CLOSENESS = [
         TitleRelation::SpinOff->value => 0,
@@ -133,7 +123,9 @@ final readonly class TieRules
 
     private function minVotes(TitleTie $tie): int
     {
-        return $tie->media->type === MediaKind::Movie->value ? self::UNIVERSE_MIN_FILM_VOTES : self::UNIVERSE_MIN_VOTES;
+        $key = "tracker.widely_known_votes.{$tie->media->type}";
+
+        return config()->has($key) ? config()->integer($key) : 0;
     }
 
     /** The later release continues the earlier one; without both dates, the source's word stands. */
