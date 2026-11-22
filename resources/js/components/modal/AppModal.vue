@@ -10,9 +10,10 @@ import { DialogClose, DialogContent, DialogDescription, DialogOverlay, DialogPor
  * The app's dialog: centred on a desktop, a sheet rising from the bottom on a
  * phone (pulled down by its handle to close), where the thumb reaches it. The
  * heading is the title, a line of facts under it (`meta`) and the close
- * button; the body comes in the default slot. A confirmation is narrower.
+ * button; the body comes in the default slot. A confirmation is narrower; a
+ * dialog that reads rather than acts (a title's details) is wider.
  */
-withDefaults(defineProps<{ title: string; size?: 'base' | 'confirm' }>(), { size: 'base' });
+withDefaults(defineProps<{ title: string; size?: 'base' | 'confirm' | 'wide' }>(), { size: 'base' });
 
 const open = defineModel<boolean>('open', { required: true });
 
@@ -24,11 +25,13 @@ const { followFinger } = drag;
 const LAYER = {
     base: 'z-50',
     confirm: 'z-60',
+    wide: 'z-50',
 };
 
 const WIDTH = {
     base: 'md:w-110',
     confirm: 'md:w-100',
+    wide: 'md:w-140',
 };
 </script>
 

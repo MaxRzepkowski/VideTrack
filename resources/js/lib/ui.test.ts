@@ -12,6 +12,15 @@ describe('ui classes', () => {
         expect(rowTint('remove')['--tint-ink']).toBe('var(--color-on-remove)');
     });
 
+    it("darkens a neutral row's square under a light glyph, never a grey fill under a grey glyph", () => {
+        expect(rowTint('neutral')).toEqual({
+            '--tint': 'var(--color-ink-secondary)',
+            '--tint-fill': 'var(--color-line-strong)',
+            '--tint-ink': 'var(--color-ink)',
+        });
+    });
+
+
     it('lights the menu word of the page you are on, and only it', () => {
         expect(navWordState(true)).toBe('bg-surface-raised text-ink');
         expect(navWordState(false)).not.toContain('bg-surface-raised');
