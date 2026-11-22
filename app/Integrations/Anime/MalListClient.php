@@ -27,7 +27,7 @@ final class MalListClient
      */
     public function page(string $username, string $medium, int $offset, int $limit): array
     {
-        $response = $this->send('MyAnimeList', fn () => $this->throttle(MalClient::RATE_LIMITER, MalClient::RATE_LIMIT_PER_MINUTE, 60, 250_000), fn () => $this->httpClient(config()->string('tracker.mal.base_url'))
+        $response = $this->send('MyAnimeList', fn () => $this->throttle(MalClient::RATE_LIMITER, MalClient::RATE_LIMIT_PER_MINUTE, 60), fn () => $this->httpClient(config()->string('tracker.mal.base_url'))
             ->withHeaders(['X-MAL-CLIENT-ID' => $this->credential('tracker.mal.client_id', 'MAL_CLIENT_ID')])
             ->get('users/'.rawurlencode($username).'/'.$medium.'list', [
                 'fields' => 'num_episodes,num_chapters,list_status{comments,num_times_rewatched,num_times_reread}',

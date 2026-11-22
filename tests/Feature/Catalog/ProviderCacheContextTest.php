@@ -1,26 +1,25 @@
 <?php
 
+use App\Catalog\ProviderBusy;
 use App\Catalog\ProviderCacheContext;
 use App\Catalog\Providers\Tmdb\TmdbClient;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\RateLimiter;
 
 // A manual refresh bypasses the provider response cache and nothing else. The
 // rate limiters that keep us under third-party API limits, and every atomic
 // Cache::add() in the app, must behave exactly as outside a refresh.
 
 test('a manual refresh does not reset the rate limiters', function () {
-    RateLimiter::hit('tmdb-api');
-    RateLimiter::hit('tmdb-api');
+    $seconds = (int) TmdbClient::RATE_WINDOW_MAX_WAIT_SECONDS + 1;
+    bookRateWindow(TmdbClient::RATE_LIMITER, TmdbClient::RATE_LIMIT_PER_SECOND, 1, TmdbClient::RATE_LIMIT_PER_SECOND * $seconds);
+    Http::fake();
 
     app(ProviderCacheContext::class)->fresh(function (): void {
-        expect(RateLimiter::attempts('tmdb-api'))->toBe(2);
-
-        RateLimiter::hit('tmdb-api');
+        expect(fn () => app(TmdbClient::class)->get('movie/603', [], 3600))->toThrow(ProviderBusy::class);
     });
 
-    expect(RateLimiter::attempts('tmdb-api'))->toBe(3);
+    Http::assertNothingSent();
 });
 
 test('Cache::add stays atomic during a manual refresh', function () {

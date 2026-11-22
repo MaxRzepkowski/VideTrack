@@ -55,7 +55,7 @@ class HardcoverClient
      */
     private function fetch(string $graphql, array $variables): array
     {
-        $this->throttle('hardcover-api', self::RATE_LIMIT_PER_MINUTE, 60, 250_000);
+        $this->throttle('hardcover-api', self::RATE_LIMIT_PER_MINUTE, 60);
 
         $response = $this->guardConnection('Hardcover', fn () => $this->httpClient()
             ->withToken($this->apiKey())

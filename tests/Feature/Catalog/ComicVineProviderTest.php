@@ -10,7 +10,6 @@ use App\Catalog\ProviderRejected;
 use App\Catalog\Providers\ComicVine\ComicVineClient;
 use App\Catalog\Providers\ComicVine\ComicVineProvider;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\RateLimiter;
 
 function comicVineProvider(): ComicVineProvider
 {
@@ -139,7 +138,7 @@ test('the rate limit asks to be waited out for the hour', function () {
 test('a spent hourly budget names when the next request is welcome', function () {
     enableComicsModule();
     Http::fake();
-    RateLimiter::increment('comicvine-api-hour', ComicVineClient::BUDGET_WINDOW_SECONDS, ComicVineClient::RATE_LIMIT_PER_HOUR);
+    bookRateWindow(ComicVineClient::HOURLY_BUDGET, ComicVineClient::RATE_LIMIT_PER_HOUR, ComicVineClient::BUDGET_WINDOW_SECONDS, ComicVineClient::RATE_LIMIT_PER_HOUR);
     $this->travel(20)->minutes();
 
     try {

@@ -4,8 +4,6 @@ use App\Catalog\ProviderBusy;
 use App\Catalog\ProviderException;
 use App\Catalog\Providers\Tmdb\TmdbClient;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\RateLimiter;
-use Illuminate\Support\Sleep;
 
 test('a degraded listing (empty required key) is not cached, so the next request self-heals', function () {
     // A transient provider hiccup returns an empty listing, then real data.
@@ -99,10 +97,9 @@ test('a 429 is a busy provider that says when to ask again', function (array $he
     'without it' => [[], ProviderBusy::DEFAULT_RETRY_AFTER_SECONDS],
 ]);
 
-test('a limiter that never frees a slot makes the provider busy, not hung', function () {
-    Sleep::fake();
-    // The frozen clock never lets the one-second window pass.
-    RateLimiter::increment('tmdb-api', 1, TmdbClient::RATE_LIMIT_PER_SECOND);
+test('a limiter booked further ahead than a request waits makes the provider busy, not hung', function () {
+    $seconds = (int) TmdbClient::RATE_WINDOW_MAX_WAIT_SECONDS + 1;
+    bookRateWindow(TmdbClient::RATE_LIMITER, TmdbClient::RATE_LIMIT_PER_SECOND, 1, TmdbClient::RATE_LIMIT_PER_SECOND * $seconds);
     Http::fake();
 
     expect(fn () => app(TmdbClient::class)->get('movie/603', [], 3600))->toThrow(ProviderBusy::class);
