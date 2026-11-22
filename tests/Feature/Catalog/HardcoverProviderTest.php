@@ -105,6 +105,19 @@ test('book details map hardcover fields to the shared shape', function () {
         ->and($book->runtime)->toBeNull();
 });
 
+test('a book dated before the common era carries no date and no year', function () {
+    enableBooksModule();
+    $answer = jsonFixture('hardcover/book');
+    $answer['data']['books_by_pk']['release_date'] = '0701-01-01 BC';
+    $answer['data']['books_by_pk']['release_year'] = -700;
+    Http::fake(['api.hardcover.app/*' => Http::response($answer)]);
+
+    $book = hardcoverProvider()->details('book', '2459845', 'en');
+
+    expect($book->summary->releaseDate)->toBeNull()
+        ->and($book->summary->year)->toBeNull();
+});
+
 test("a book's page links to the series Hardcover features on it", function () {
     enableBooksModule();
     fakeHardcover(['Details' => 'book']);

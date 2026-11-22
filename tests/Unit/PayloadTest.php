@@ -204,6 +204,7 @@ test('a calendar day is read only when the value opens with one, year first', fu
     'a year alone' => ['2019', null],
     'a placeholder' => ['None', null],
     'day first' => ['16.11.2026', null],
+    'before the common era' => ['0701-01-01 BC', null],
     'not text' => [20240425, null],
 ]);
 
