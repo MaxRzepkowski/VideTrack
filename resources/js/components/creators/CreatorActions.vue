@@ -3,7 +3,8 @@ import { useCreatorState } from '@/composables/useCreatorState';
 import { useEntityFollow } from '@/composables/useEntityFollow';
 import { useMediaModals } from '@/composables/useMediaModals';
 import type { Creator } from '@/lib/creators';
-import { trans, transChoice } from 'laravel-vue-i18n';
+import { onListsText } from '@/lib/lists';
+import { trans } from 'laravel-vue-i18n';
 import { Bell, BellRing, List } from '@lucide/vue';
 import { computed } from 'vue';
 
@@ -16,9 +17,7 @@ const props = defineProps<{ creator: Creator; name: string }>();
 const state = useCreatorState(() => props.creator);
 const onLists = computed(() => state.value.listIds.length);
 
-const listsLabel = computed(() =>
-    onLists.value > 0 ? transChoice('media.on_count_list', onLists.value, { count: String(onLists.value) }) : trans('media.add_to_list'),
-);
+const listsLabel = computed(() => onListsText(onLists.value) ?? trans('media.add_to_list'));
 
 const { openCreatorLists } = useMediaModals();
 const { followed, busy, toggle } = useEntityFollow(() => props.creator);

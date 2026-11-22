@@ -1,7 +1,15 @@
-import { backlogOf, matchesListFilters, sortListItems, type ListFilters } from '@/lib/lists';
+import { backlogOf, matchesListFilters, onListsText, sortListItems, type ListFilters } from '@/lib/lists';
 import { mediaSummary, userState } from '@/test/factories';
 import type { ListItemEntry } from '@/types/media';
 import { describe, expect, it, vi } from 'vitest';
+
+describe('onListsText', () => {
+    it('counts the lists a title is on, and says nothing when it is on none', () => {
+        expect(onListsText(0)).toBeNull();
+        expect(onListsText(1)).toBe('On 1 list');
+        expect(onListsText(3)).toBe('On 3 lists');
+    });
+});
 
 describe('backlogOf', () => {
     it('finds the system backlog among custom lists, and nothing without one', () => {

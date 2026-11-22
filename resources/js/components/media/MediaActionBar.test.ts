@@ -3,8 +3,8 @@ import { vTooltip } from '@/directives/tooltip';
 import { mediaSummary, useMediaTypes, userState } from '@/test/factories';
 import { setPageProps } from '@/test/page';
 import type { UserMediaState } from '@/types/generated';
-import { mount } from '@vue/test-utils';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { flushPromises, mount } from '@vue/test-utils';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 const game = mediaSummary({ type: 'game', ref: 'g1' });
 
@@ -18,6 +18,37 @@ function statusCell(state: Partial<UserMediaState>) {
         'button[aria-haspopup="dialog"]',
     )[1];
 }
+
+/** The narrow card's "…" menu, opened from the keyboard, as its rows read for a game in this state. */
+async function menuRows(state: Partial<UserMediaState>): Promise<string[]> {
+    setPageProps({ userLists: [], userStates: { 'game:g1': userState(state) } });
+    const bar = mount(MediaActionBar, { props: { media: game }, attachTo: document.body, global: { directives: { tooltip: vTooltip } } });
+    await bar.find('button[aria-haspopup="menu"]').trigger('keydown', { key: 'Enter' });
+    await flushPromises();
+
+    // Each row's name and, under it, where the title stands.
+    return [...document.querySelectorAll('[role="menuitem"]')].map((row) =>
+        [...row.querySelectorAll(':scope > span:nth-child(2) > span')].map((line) => line.textContent?.trim()).join(' / '),
+    );
+}
+
+afterEach(() => {
+    document.body.innerHTML = '';
+});
+
+describe('the narrow card menu', () => {
+    it('says where an untouched title stands with each mark', async () => {
+        expect(await menuRows({})).toEqual(['Rate / Not rated', 'Add to list / Not on any list', 'Add to favorites']);
+    });
+
+    it('says the rating, the lists and the heart a title holds', async () => {
+        expect(await menuRows({ rating: 7, listIds: [3, 5], favorite: true })).toEqual([
+            'Rate / Rated 7/10',
+            'Manage lists / On 2 lists',
+            'Remove from favorites / In favorites',
+        ]);
+    });
+});
 
 describe('MediaActionBar', () => {
     it.each([

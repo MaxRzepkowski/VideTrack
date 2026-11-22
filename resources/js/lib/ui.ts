@@ -12,9 +12,10 @@ import type { NonEmpty } from '@/types';
 /**
  * The colours a menu row can wear: its group's; the danger colour for a row
  * that is not a place; in a dialog, the colour of the write it makes (a play,
- * a hold, progress, taking something away) or none in particular.
+ * a hold, progress, taking something away) or none in particular; on a
+ * card's menu, the colour of the mark the row sets (a rating, a list, a heart).
  */
-export type RowTint = NavGroupId | 'danger' | 'remove' | 'watched' | 'hold' | 'progress' | 'neutral';
+export type RowTint = NavGroupId | 'danger' | 'remove' | 'watched' | 'hold' | 'progress' | 'rating' | 'watchlist' | 'favorite' | 'neutral';
 
 // Tokens of the glyph, of the square under a pointed row, and of the glyph on that square.
 const TINT_TOKENS: Record<RowTint, readonly [string, string, string]> = {
@@ -26,6 +27,9 @@ const TINT_TOKENS: Record<RowTint, readonly [string, string, string]> = {
     watched: ['action-watched', 'action-watched', 'on-bright'],
     hold: ['status-onhold', 'status-onhold', 'on-bright'],
     progress: ['status-progress', 'status-progress', 'on-bright'],
+    rating: ['action-rating', 'action-rating', 'on-bright'],
+    watchlist: ['action-watchlist', 'action-watchlist', 'on-bright'],
+    favorite: ['action-favorite', 'action-favorite', 'on-bright'],
     neutral: ['ink-secondary', 'ink-secondary', 'on-bright'],
 };
 
