@@ -47,7 +47,6 @@ export type SharedData = {
     version: string;
     /** Where the running code can be read. */
     sourceUrl: string;
-    discoverTypes: string[];
     mediaTypes: MediaTypeDefinition[];
     userLists: UserList[];
     /** The state of a title the user never touched; null for guests. */

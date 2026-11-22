@@ -108,6 +108,8 @@ Route::middleware(['auth', 'throttle:web'])->group(function () {
     });
 
     Route::get('lists', [ListController::class, 'index'])->name('lists.index');
+    // The menu's shortcut to the signed-in user's Backlog, a list with an id of its own.
+    Route::get('backlog', [ListController::class, 'backlog'])->name('lists.backlog');
 
     // One user view, one URL and one controller per panel: the profile is the
     // root, everything else hangs off it. Nothing here switches on a tab —

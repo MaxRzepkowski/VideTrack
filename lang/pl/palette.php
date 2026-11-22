@@ -44,4 +44,6 @@ return [
     'keywords_log_out' => 'wyloguj, log out, logout, sign out',
     'keywords_settings_channels' => 'powiadomienia, kanały, discord, apprise, przegląd, webhook, notifications, channels',
     'keywords_settings_webhooks' => 'webhook, webhooki, n8n, home assistant, automatyzacja, ustawienia, settings',
+    'keywords_trending' => 'na czasie, popularne, trendy, trending, popular',
+    'keywords_backlog' => 'backlog, na później, do obejrzenia, watchlist',
 ];

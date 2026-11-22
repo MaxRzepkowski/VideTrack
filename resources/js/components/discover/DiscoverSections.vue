@@ -3,6 +3,7 @@ import MediaCard from '@/components/media/MediaCard.vue';
 import MediaGrid from '@/components/media/MediaGrid.vue';
 import SectionHeading from '@/components/SectionHeading.vue';
 import { usePosterColumns, wholeRows } from '@/composables/useShelfLimit';
+import { TRENDING_SHELF } from '@/lib/discover';
 import { awaitedLabel } from '@/lib/releases';
 import type { MediaSummary } from '@/types/media';
 import { trans } from 'laravel-vue-i18n';
@@ -19,7 +20,7 @@ const props = defineProps<{
 
 const sections = computed(() =>
     [
-        { key: 'trending', heading: trans('discover.trending_now'), items: props.trending },
+        { key: TRENDING_SHELF, heading: trans('discover.trending_now'), items: props.trending },
         { key: 'popular', heading: trans('discover.popular'), items: props.popular },
         { key: 'upcoming', heading: props.type === 'show' ? trans('discover.on_the_air') : trans('discover.upcoming'), items: props.upcoming },
     ].filter((section) => section.items.length > 0),
@@ -32,7 +33,8 @@ const posterColumns = usePosterColumns(props.columns);
 </script>
 
 <template>
-    <section v-for="section in sections" :key="section.key" class="mb-12 last:mb-0">
+    <!-- Each section is an anchor (the menu's "Trending" lands on its own), clear of the sticky header. -->
+    <section v-for="section in sections" :id="section.key" :key="section.key" class="mb-12 scroll-mt-24 last:mb-0">
         <SectionHeading :title="section.heading" />
         <MediaGrid :columns="columns">
             <MediaCard

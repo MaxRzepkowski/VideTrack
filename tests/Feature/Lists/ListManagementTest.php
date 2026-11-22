@@ -33,6 +33,15 @@ test('guests are redirected to login', function () {
     $this->get(listPage($list))->assertRedirect(route('login'));
 });
 
+test('the backlog address leads to the signed-in user\'s own backlog', function () {
+    $user = User::factory()->create();
+    User::factory()->create();
+
+    $this->actingAs($user)
+        ->get(route('lists.backlog'))
+        ->assertRedirect(listPage($user->watchlist()));
+});
+
 test('the index shows own lists with the watchlist first', function () {
     $user = User::factory()->create();
     makeList($user, [], 2);
