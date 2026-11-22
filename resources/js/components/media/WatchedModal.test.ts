@@ -75,6 +75,19 @@ function button(text: string) {
     return found;
 }
 
+/** A row under the one action, by its name: its line says what it does after it. */
+function row(label: string) {
+    const found = screen()
+        .findAll('button')
+        .find((candidate) => candidate.find('span.font-semibold').exists() && candidate.find('span.font-semibold').text() === label);
+
+    if (!found) {
+        throw new Error(`No row "${label}"`);
+    }
+
+    return found;
+}
+
 const writes = () => calls.filter((call) => call.method !== 'GET');
 
 const movie = mediaSummary({ type: 'movie', ref: 'm1', title: 'Heat', releaseDate: '1995-12-15' });
@@ -102,9 +115,17 @@ describe('completing', () => {
     it('dates the play to the release', async () => {
         await open(movie);
 
-        // The date line reads the moment it stands for.
-        await button('Oct 10, 2026, 12:00 PM').trigger('click');
-        await button('Release date').trigger('click');
+        // The action's right side picks when.
+        await screen().find('button[aria-label="Change the date"]').trigger('keydown', { key: 'Enter' });
+        await flushPromises();
+        await screen()
+            .findAll('[role=menuitem]')
+            .find((item) => item.text() === 'Release date')!
+            .trigger('click');
+        await flushPromises();
+
+        expect(screen().find('button[aria-label="Change the date"]').text()).toBe('Dec 15');
+
         await button('Mark as watched').trigger('click');
 
         expect(nth(writes(), 0).body).toMatchObject({ watched_at: 'release' });
@@ -151,17 +172,43 @@ describe('the counter', () => {
     });
 });
 
+describe('the steps', () => {
+    it('opens a step from its row, names it, and comes back without writing', async () => {
+        await open(game, { status: 'in_progress', progress: 60 });
+
+        await row('Drop').trigger('click');
+
+        expect(screen().text()).toContain('Drop this title');
+        expect(screen().find('button[aria-label="Back"]').exists()).toBe(true);
+
+        await screen().find('button[aria-label="Back"]').trigger('click');
+
+        expect(button('Add session').exists()).toBe(true);
+        expect(writes()).toEqual([]);
+    });
+
+    it("corrects a game's total in a step of its own, overwriting it", async () => {
+        await open(game, { status: 'in_progress', progress: 60 });
+
+        await row('Correct the total').trigger('click');
+        await screen().find('input[type="number"]').setValue('2');
+        await button('Save').trigger('click');
+
+        expect(writes()).toEqual([{ url: '/ui.media.progress.update/game/g1', method: 'PUT', body: { set: 120 } }]);
+    });
+});
+
 describe('what asks first', () => {
     it('throws the open attempt away only once confirmed', async () => {
         await open(game, { status: 'in_progress', progress: 60 });
 
         answerConfirm.mockResolvedValueOnce(false);
-        await button('Remove progress').trigger('click');
+        await row('Remove progress').trigger('click');
         await flushPromises();
 
         expect(writes()).toEqual([]);
 
-        await button('Remove progress').trigger('click');
+        await row('Remove progress').trigger('click');
         await flushPromises();
 
         expect(writes()[0]).toMatchObject({ url: '/ui.media.status.update/game/g1', body: { discard_progress: true } });
@@ -171,13 +218,13 @@ describe('what asks first', () => {
         await open(show, { watched: true, watchedEpisodes: 9, airedEpisodes: 9, plays: 9, cycle: 1 });
 
         answerConfirm.mockResolvedValueOnce(false);
-        await button('Mark as unwatched; removes plays from 9 episodes').trigger('click');
+        await row('Mark as unwatched').trigger('click');
         await flushPromises();
 
         expect(answerConfirm).toHaveBeenCalledWith(expect.objectContaining({ message: 'This deletes the plays of 9 episodes from your history.' }));
         expect(writes()).toEqual([]);
 
-        await button('Mark as unwatched; removes plays from 9 episodes').trigger('click');
+        await row('Mark as unwatched').trigger('click');
         await flushPromises();
 
         expect(writes()).toEqual([{ url: '/ui.media.plays.destroy/show/s1', method: 'DELETE', body: undefined }]);
@@ -190,7 +237,7 @@ describe('what asks first', () => {
         ];
         await open(movie, { watched: true, plays: 2 });
 
-        await button('History (2)').trigger('click');
+        await row('History').trigger('click');
         await screen().find('button[aria-label="Remove this play"]').trigger('click');
         await flushPromises();
 
@@ -205,7 +252,7 @@ describe('the history', () => {
         history.plays = [{ id: 7, watchedAt: '2026-10-01T20:00:00Z', outcome: 'completed', amount: null, cycle: 1 }];
         await open(movie, { watched: true, plays: 1 });
 
-        await button('History (1)').trigger('click');
+        await row('History').trigger('click');
         await screen().find('button[aria-label="Remove this play"]').trigger('click');
         await flushPromises();
 
@@ -221,7 +268,8 @@ describe('the history', () => {
         ];
         await open(show, { watchedEpisodes: 3, airedEpisodes: 9, plays: 12, cycle: 2 });
 
-        await button('Undo the reset').trigger('click');
+        await row('Watch cycles').trigger('click');
+        await row('Undo the reset').trigger('click');
         await flushPromises();
 
         expect(answerConfirm).toHaveBeenCalledWith(
@@ -233,12 +281,17 @@ describe('the history', () => {
 });
 
 describe('a status already on', () => {
-    it('opens on taking it off', async () => {
+    it('opens on taking it off: resuming a hold, removing a drop', async () => {
         await open(movie, { status: 'on_hold' });
 
-        await button('Remove status').trigger('click');
+        await button('Resume').trigger('click');
 
         expect(writes()[0]).toMatchObject({ url: '/ui.media.status.update/movie/m1', body: { status: null } });
+
+        await open(mediaSummary({ type: 'movie', ref: 'm2', title: 'Ronin' }), { status: 'dropped' });
+        await button('Remove status').trigger('click');
+
+        expect(writes()[1]).toMatchObject({ url: '/ui.media.status.update/movie/m2', body: { status: null } });
     });
 
     it('drops with the moment it happened', async () => {

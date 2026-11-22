@@ -158,4 +158,5 @@ return [
     'zoom_reset' => 'Pokaż całość',
     'webhooks' => 'Webhooki',
     'yesterday' => 'Wczoraj',
+    'back' => 'Wstecz',
 ];

@@ -90,6 +90,8 @@
     /* The fill of a dialog's destructive action (delete, drop, remove), and the text on it. */
     --color-remove: #ff5c5c;
     --color-on-remove: #0a0a0d;
+    /* Text and glyphs on a bright fill: the green of a play, the orange of a hold, a light row square. */
+    --color-on-bright: #0a0a0d;
 
     /* On the air: the red mark of an event streaming now, the one sign a live show wears everywhere. */
     --color-live: #ff3b47;

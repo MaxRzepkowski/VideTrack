@@ -5,7 +5,7 @@ import { useMediaActions } from '@/composables/useMediaActions';
 import { useMediaModals } from '@/composables/useMediaModals';
 import { formatDateTime } from '@/lib/format';
 import { backlogOf } from '@/lib/lists';
-import { formatProgress, hasProgress, isPositionCounter, playActionLabels } from '@/lib/progress';
+import { episodeShare, formatProgress, hasProgress, isPositionCounter, playActionLabels } from '@/lib/progress';
 import { shownStatus, shownStatusVisual, STATUS_VISUALS } from '@/lib/status';
 import type { SharedData } from '@/types';
 import type { MediaSummary } from '@/types/media';
@@ -157,11 +157,7 @@ const statusValue = computed<(string | null)[]>(() => {
 // ---- Containers: the episode progress bar (the "watch next" shortcut is
 // its own block below — WatchNextPanel) ----
 
-const progress = computed(() => {
-    const total = state.value.airedEpisodes ?? 0;
-
-    return total > 0 ? Math.round(((state.value.watchedEpisodes ?? 0) / total) * 100) : 0;
-});
+const progress = computed(() => episodeShare(state.value.watchedEpisodes ?? 0, state.value.airedEpisodes ?? 0));
 
 // The status modal opens on the view matching the current status — a
 // dropped title lands straight on its "remove status" view, a game being

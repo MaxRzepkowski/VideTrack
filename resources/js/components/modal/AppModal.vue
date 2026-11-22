@@ -19,6 +19,13 @@ const open = defineModel<boolean>('open', { required: true });
 const drag = useSheetDrag(open);
 const { followFinger } = drag;
 
+// A confirmation asks about a write another dialog started, so it always
+// stands over that dialog, whichever of the two the page put first.
+const LAYER = {
+    base: 'z-50',
+    confirm: 'z-60',
+};
+
 const WIDTH = {
     base: 'md:w-110',
     confirm: 'md:w-100',
@@ -28,16 +35,18 @@ const WIDTH = {
 <template>
     <DialogRoot v-model:open="open">
         <DialogPortal>
-            <DialogOverlay :class="DIALOG_OVERLAY_CLASS" />
+            <DialogOverlay :class="[DIALOG_OVERLAY_CLASS, LAYER[size]]" />
             <DialogContent
                 v-bind="$slots.meta ? {} : { 'aria-describedby': undefined }"
-                class="border-line-strong bg-surface text-ink shadow-scrim/60 data-[state=open]:animate-in data-[state=closed]:animate-out max-md:data-[state=open]:slide-in-from-bottom max-md:data-[state=closed]:slide-out-to-bottom md:data-[state=open]:fade-in md:data-[state=open]:zoom-in-95 md:data-[state=closed]:fade-out md:data-[state=closed]:zoom-out-95 fixed z-50 flex max-h-[90dvh] flex-col border shadow-[0_8px_32px] max-md:inset-x-2 max-md:bottom-0 max-md:rounded-t-2xl max-md:border-b-0 max-md:pb-6 max-md:duration-300 md:top-1/2 md:left-1/2 md:max-w-[calc(100vw-2rem)] md:-translate-x-1/2 md:-translate-y-1/2 md:rounded-xl md:pb-1 md:duration-200"
-                :class="WIDTH[size]"
+                class="border-line-strong bg-surface text-ink shadow-scrim/60 data-[state=open]:animate-in data-[state=closed]:animate-out max-md:data-[state=open]:slide-in-from-bottom max-md:data-[state=closed]:slide-out-to-bottom md:data-[state=open]:fade-in md:data-[state=open]:zoom-in-95 md:data-[state=closed]:fade-out md:data-[state=closed]:zoom-out-95 fixed flex max-h-[90dvh] flex-col border shadow-[0_8px_32px] max-md:inset-x-2 max-md:bottom-0 max-md:rounded-t-2xl max-md:border-b-0 max-md:pb-6 max-md:duration-300 md:top-1/2 md:left-1/2 md:max-w-[calc(100vw-2rem)] md:-translate-x-1/2 md:-translate-y-1/2 md:rounded-xl md:pb-1 md:duration-200"
+                :class="[WIDTH[size], LAYER[size]]"
                 :style="followFinger"
             >
                 <SheetHandle :drag="drag" class="md:hidden" />
 
                 <div class="flex items-start gap-3 pt-1 pr-4 pb-3.5 pl-5 md:pt-4.5">
+                    <!-- A step of a longer dialog puts its way back here. -->
+                    <slot name="leading" />
                     <div class="min-w-0 flex-1">
                         <DialogTitle class="text-ink text-xl leading-7 font-semibold">{{ title }}</DialogTitle>
                         <DialogDescription v-if="$slots.meta" as="div" class="mt-0.5 flex items-center gap-2 text-sm">

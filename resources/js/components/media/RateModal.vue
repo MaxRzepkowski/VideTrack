@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import Hairline from '@/components/Hairline.vue';
 import MenuRow from '@/components/MenuRow.vue';
 import AppModal from '@/components/modal/AppModal.vue';
 import { shownState, stateKey, useMediaActions } from '@/composables/useMediaActions';
@@ -80,7 +81,7 @@ function remove(): void {
         <template v-if="state" #meta>
             <template v-if="state.rating !== null">
                 <span class="text-ink-muted">{{ trans('media.your_rating') }}</span>
-                <span class="bg-line-strong h-3 w-px shrink-0" aria-hidden="true" />
+                <Hairline class="mx-0" />
                 <span class="text-action-rating font-medium">{{ ratingScore(state.rating) }}</span>
             </template>
             <span v-else class="text-ink-muted">{{ trans('media.not_rated') }}</span>

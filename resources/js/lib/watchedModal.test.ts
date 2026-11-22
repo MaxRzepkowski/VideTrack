@@ -1,11 +1,18 @@
 import {
     actionLabel,
+    actionTone,
     completeLabel,
     dropDescription,
     episodeStep,
+    nextEpisodeLabel,
     openingIntent,
     statusCaption,
     statusDescription,
+    statusFacts,
+    statusRows,
+    statusRowText,
+    stepName,
+    unmarkCount,
     watchedAtChoice,
 } from '@/lib/watchedModal';
 import { mediaSummary, useMediaTypes, userState } from '@/test/factories';
@@ -143,5 +150,149 @@ describe('the moment to write', () => {
 
     it('refuses a picked date that is not a date', () => {
         expect(watchedAtChoice('custom', '')).toBeNull();
+    });
+});
+
+describe('the rows under the one action', () => {
+    const episode = () => mediaSummary({ type: 'episode' });
+    const pointer = { type: 'episode', ref: '1:2:4', title: 'Woe', number: 4, seasonNumber: 2 };
+
+    it.each([
+        ['an unwatched movie', movie, {}, 'complete', { history: false, cycles: false }, ['hold', 'drop']],
+        ['a watched movie, with its history', movie, { watched: true, plays: 1 }, 'complete', { history: true, cycles: false }, ['hold', 'history']],
+        ['a dropped movie', movie, { status: 'dropped' }, 'status', { history: false, cycles: false }, ['complete']],
+        ['an untouched show', show, { airedEpisodes: 10 }, 'complete', { history: false, cycles: false }, ['wholeRun', 'hold', 'drop']],
+        [
+            'a show under way',
+            show,
+            { watchedEpisodes: 13, airedEpisodes: 19, plays: 13, nextEpisode: pointer },
+            'complete',
+            { history: false, cycles: false },
+            ['wholeRun', 'hold', 'drop', 'unmark'],
+        ],
+        [
+            'a completed show',
+            show,
+            { watched: true, watchedEpisodes: 62, airedEpisodes: 62, plays: 62 },
+            'complete',
+            { history: false, cycles: false },
+            ['hold', 'drop', 'unmark'],
+        ],
+        [
+            'a show on hold',
+            show,
+            { status: 'on_hold', watchedEpisodes: 28, nextEpisode: pointer },
+            'status',
+            { history: false, cycles: false },
+            ['nextEpisode', 'drop'],
+        ],
+        ['a watched episode', episode, { watched: true, plays: 1 }, 'complete', { history: true, cycles: false }, ['history']],
+        [
+            'a game in progress',
+            game,
+            { status: 'in_progress', progress: 1140 },
+            'session',
+            { history: false, cycles: false },
+            ['correctTotal', 'complete', 'hold', 'drop', 'removeProgress'],
+        ],
+        ['an untouched game', game, {}, 'session', { history: false, cycles: false }, ['complete', 'hold', 'drop']],
+        [
+            'a completed game',
+            game,
+            { watched: true, plays: 1, playedAmount: 3720 },
+            'complete',
+            { history: true, cycles: false },
+            ['addSession', 'hold', 'history'],
+        ],
+        [
+            'a book being read',
+            book,
+            { status: 'in_progress', progress: 412 },
+            'session',
+            { history: false, cycles: false },
+            ['complete', 'hold', 'drop', 'removeProgress'],
+        ],
+    ] as const)('offers %s what can be done to it', (_, media, overrides, intent, has, rows) => {
+        expect(statusRows(media(), userState(overrides), intent, has)).toEqual(rows);
+    });
+
+    it('offers nothing to unmark in a run just started over, though plays of the one before stand', () => {
+        const rows = statusRows(show(), userState({ watchedEpisodes: 0, airedEpisodes: 9, plays: 9, cycle: 2 }), 'complete', {
+            history: false,
+            cycles: true,
+        });
+
+        expect(rows).not.toContain('unmark');
+        expect(rows).toContain('cycles');
+    });
+
+    it('offers the runs of a show started over, before its history', () => {
+        expect(
+            statusRows(show(), userState({ watchedEpisodes: 3, airedEpisodes: 9, plays: 12, cycle: 2 }), 'complete', {
+                history: false,
+                cycles: true,
+            }),
+        ).toContain('cycles');
+    });
+
+    it('offers no rows in a step, only its own action', () => {
+        expect(statusRows(movie(), userState(), 'drop', { history: true, cycles: true })).toEqual([]);
+    });
+
+    it('says what each row does to this title', () => {
+        const history = { count: 2, last: '2026-09-05T20:00:00Z' };
+
+        expect(statusRowText('wholeRun', show(), userState({ watchedEpisodes: 13, remainingEpisodes: 6 }), history).description).toBe(
+            'The remaining 6 episodes',
+        );
+        expect(statusRowText('wholeRun', show(), userState({ airedEpisodes: 10 }), history).description).toBe('All 10 episodes with the same date');
+        expect(statusRowText('unmark', show(), userState({ watchedEpisodes: 13 }), history).description).toBe('Removes plays from 13 episodes');
+        expect(statusRowText('history', movie(), userState(), history).description).toMatch(/^2 plays, last on /);
+        expect(statusRowText('complete', movie(), userState({ status: 'dropped' }), history)).toEqual({
+            label: 'Mark as watched',
+            description: 'Logged with today’s date',
+        });
+    });
+});
+
+describe('the one action', () => {
+    it('reads its kind of write in its colour', () => {
+        expect(actionTone('complete', userState())).toBe('watched');
+        expect(actionTone('session', userState())).toBe('progress');
+        expect(actionTone('drop', userState())).toBe('drop');
+        expect(actionTone('status', userState({ status: 'dropped' }))).toBe('drop');
+        expect(actionTone('status', userState({ status: 'on_hold' }))).toBe('hold');
+    });
+
+    it('names the episode a show is at', () => {
+        expect(nextEpisodeLabel(userState({ nextEpisode: { type: 'episode', ref: 'x', title: 'Woe', number: 4, seasonNumber: 2 } }))).toBe(
+            'Watch S02E04',
+        );
+        expect(nextEpisodeLabel(userState())).toBe('Watch the next episode');
+    });
+});
+
+describe('the facts and the steps under the title', () => {
+    it('names the code, the show, the size of an untouched run and the day of a drop', () => {
+        expect(statusFacts(show(), userState({ airedEpisodes: 10 }), false)).toEqual(['10 episodes']);
+        expect(statusFacts(show(), userState({ airedEpisodes: 10, watchedEpisodes: 3 }), true)).toEqual([]);
+        expect(statusFacts(movie(), userState({ status: 'dropped', droppedAt: '2026-11-08T20:00:00Z' }), true)).toEqual(['November 8, 2026']);
+    });
+
+    it('names each step in the colour of its write', () => {
+        expect(stepName(movie(), { intent: 'drop', correcting: false, cycles: false }).text).toBe('Drop');
+        expect(stepName(game(), { intent: 'session', correcting: true, cycles: false }).text).toBe('Correct the total');
+        expect(stepName(show(), { intent: 'complete', correcting: false, cycles: true }).text).toBe('Watch cycles');
+    });
+
+    it('counts what unmarking empties: the current run, or the plays where no episode is counted', () => {
+        expect(unmarkCount(userState({ watchedEpisodes: 0, plays: 9 }))).toBe(0);
+        expect(unmarkCount(userState({ watchedEpisodes: null, plays: 4 }))).toBe(4);
+    });
+
+    it('says a run started over loses only its own plays', () => {
+        expect(statusRowText('unmark', show(), userState({ watchedEpisodes: 3, cycle: 2 }), { count: 0, last: null }).description).toBe(
+            'Removes plays from 3 episodes of this cycle',
+        );
     });
 });

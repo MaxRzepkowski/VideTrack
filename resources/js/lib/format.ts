@@ -178,6 +178,30 @@ export function formatReleaseDate(date: string | null, precision: DatePrecision 
     }
 }
 
+/**
+ * A release date as short as a button has room for: "Dec 15" for a known day,
+ * else as far as it is known ("March 2028", "2028"). Calendar date, so UTC.
+ */
+export function formatShortReleaseDate(date: string, precision: DatePrecision = 'day'): string {
+    if (precision !== 'day') {
+        return formatReleaseDate(date, precision) ?? date;
+    }
+
+    return new Intl.DateTimeFormat(pageLocale(), { month: 'short', day: 'numeric', timeZone: 'UTC' }).format(new Date(`${date}T00:00:00Z`));
+}
+
+/** The day of a moment as short as a button has room for ("Nov 20"), on the viewer's calendar. */
+export function formatShortDay(instant: Date): string {
+    return new Intl.DateTimeFormat(pageLocale(), { month: 'short', day: 'numeric', timeZone: viewerTimeZone() }).format(instant);
+}
+
+/** From one timestamp's day to another's, on the viewer's calendar; one day when both fall on it. */
+export function formatTimestampRange(from: string, to: string): string {
+    const format = new Intl.DateTimeFormat(pageLocale(), { dateStyle: 'long', timeZone: viewerTimeZone() });
+
+    return format.formatRange(new Date(from), new Date(to));
+}
+
 /** Localized long date of a timestamp (ISO 8601 with offset), on the viewer's calendar. */
 export function formatTimestampDate(timestamp: string | null): string | null {
     if (!timestamp) {

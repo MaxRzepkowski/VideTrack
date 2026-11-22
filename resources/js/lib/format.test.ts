@@ -14,8 +14,11 @@ import {
     formatNumber,
     formatReleaseDate,
     formatRuntime,
+    formatShortDay,
+    formatShortReleaseDate,
     formatTime,
     formatTimestampDate,
+    formatTimestampRange,
     formatTotalRuntime,
     formatWatchTime,
     formatYearSpan,
@@ -275,5 +278,21 @@ describe('versionLabel', () => {
         expect(versionLabel('1.4.0')).toBe('v1.4.0');
         expect(versionLabel('dev')).toBe('dev');
         expect(versionLabel('main-0123abc')).toBe('main-0123abc');
+    });
+});
+
+describe('short dates for a button', () => {
+    it('reads a known release day short, and a vaguer one as far as it is known', () => {
+        expect(formatShortReleaseDate('1995-12-15')).toBe('Dec 15');
+        expect(formatShortReleaseDate('2028-01-01', 'year')).toBe('2028');
+    });
+
+    it('reads the day of a moment short', () => {
+        expect(formatShortDay(new Date('2026-11-20T21:30:00Z'))).toBe('Nov 20');
+    });
+
+    it('spans two days, or names one when both fall on it', () => {
+        expect(formatTimestampRange('2026-09-01T20:00:00Z', '2026-10-01T20:00:00Z')).toMatch(/^September 1\s–\sOctober 1, 2026$/u);
+        expect(formatTimestampRange('2026-09-01T10:00:00Z', '2026-09-01T20:00:00Z')).toBe('September 1, 2026');
     });
 });
