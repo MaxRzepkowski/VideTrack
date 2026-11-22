@@ -1,5 +1,4 @@
 import MediaStatusPanel from '@/components/media/MediaStatusPanel.vue';
-import { vTooltip } from '@/directives/tooltip';
 import { mediaSummary, useMediaTypes, userState } from '@/test/factories';
 import { setPageProps } from '@/test/page';
 import type { UserMediaState } from '@/types/generated';
@@ -12,7 +11,7 @@ beforeEach(() => useMediaTypes());
 function statusRow(type: string, state: Partial<UserMediaState>): string {
     setPageProps({ userLists: [{ id: 5, systemKey: 'watchlist', itemCount: 0 }], userStates: { [`${type}:1`]: userState(state) } });
 
-    return mount(MediaStatusPanel, { props: { media: mediaSummary({ type, ref: '1' }) }, global: { directives: { tooltip: vTooltip } } })
+    return mount(MediaStatusPanel, { props: { media: mediaSummary({ type, ref: '1' }) } })
         .find('button')
         .text();
 }

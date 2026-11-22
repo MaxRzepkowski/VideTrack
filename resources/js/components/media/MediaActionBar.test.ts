@@ -1,5 +1,4 @@
 import MediaActionBar from '@/components/media/MediaActionBar.vue';
-import { vTooltip } from '@/directives/tooltip';
 import { mediaSummary, useMediaTypes, userState } from '@/test/factories';
 import { setPageProps } from '@/test/page';
 import type { UserMediaState } from '@/types/generated';
@@ -14,15 +13,13 @@ beforeEach(() => useMediaTypes());
 function statusCell(state: Partial<UserMediaState>) {
     setPageProps({ userLists: [], userStates: { 'game:g1': userState(state) } });
 
-    return mount(MediaActionBar, { props: { media: game }, global: { directives: { tooltip: vTooltip } } }).findAll(
-        'button[aria-haspopup="dialog"]',
-    )[1];
+    return mount(MediaActionBar, { props: { media: game } }).findAll('button[aria-haspopup="dialog"]')[1];
 }
 
 /** The narrow card's "…" menu, opened from the keyboard, as its rows read for a game in this state. */
 async function menuRows(state: Partial<UserMediaState>): Promise<string[]> {
     setPageProps({ userLists: [], userStates: { 'game:g1': userState(state) } });
-    const bar = mount(MediaActionBar, { props: { media: game }, attachTo: document.body, global: { directives: { tooltip: vTooltip } } });
+    const bar = mount(MediaActionBar, { props: { media: game }, attachTo: document.body });
     await bar.find('button[aria-haspopup="menu"]').trigger('keydown', { key: 'Enter' });
     await flushPromises();
 

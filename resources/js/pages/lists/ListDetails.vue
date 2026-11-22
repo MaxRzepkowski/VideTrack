@@ -324,7 +324,7 @@ function removeItem(id: number): void {
                             />
                         </PosterArt>
                         <div class="p-3 text-center">
-                            <div class="text-ink truncate text-base font-bold">{{ item.media.title }}</div>
+                            <div v-tooltip.truncated="item.media.title" class="text-ink truncate text-base font-bold">{{ item.media.title }}</div>
                         </div>
                     </div>
                 </div>

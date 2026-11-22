@@ -1,5 +1,4 @@
 import ListHeaderActions from '@/components/lists/ListHeaderActions.vue';
-import { vTooltip } from '@/directives/tooltip';
 import { mediaSummary } from '@/test/factories';
 import { setPageProps } from '@/test/page';
 import type { FollowMode } from '@/types/generated';
@@ -38,7 +37,6 @@ function collectionList(followMode: FollowMode | null): ListDetailsData {
 function bell(followMode: FollowMode | null) {
     const wrapper = mount(ListHeaderActions, {
         props: { list: collectionList(followMode), itemCount: 3, editing: false, positions: [] },
-        global: { directives: { tooltip: vTooltip } },
     });
 
     return wrapper.findAll('button').find((button) => button.attributes('aria-pressed') !== undefined);
@@ -91,7 +89,7 @@ describe('the list menu', () => {
     ) {
         return mount(ListHeaderActions, {
             props: { list: collectionList(null), itemCount: 3, editing: false, positions },
-            global: { directives: { tooltip: vTooltip }, stubs: menuStubs },
+            global: { stubs: menuStubs },
         });
     }
 

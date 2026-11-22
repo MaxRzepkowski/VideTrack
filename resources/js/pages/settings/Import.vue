@@ -345,7 +345,9 @@ function submit(): void {
                                                 :checked="selectedLists.has(list.id)"
                                                 @update:checked="(v: boolean) => toggleList(list.id, v)"
                                             />
-                                            <span class="text-ink min-w-0 flex-1 truncate text-sm">{{ list.name }}</span>
+                                            <span v-tooltip.truncated="list.name" class="text-ink min-w-0 flex-1 truncate text-sm">{{
+                                                list.name
+                                            }}</span>
                                             <span class="text-ink-muted shrink-0 text-sm">
                                                 {{ transChoice('common.count_item', list.itemCount, { count: String(list.itemCount) }) }}
                                             </span>

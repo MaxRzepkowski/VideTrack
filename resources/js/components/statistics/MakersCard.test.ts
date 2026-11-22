@@ -1,5 +1,4 @@
 import MakersCard from '@/components/statistics/MakersCard.vue';
-import { vTooltip } from '@/directives/tooltip';
 import { mediaSummary, useMediaTypes } from '@/test/factories';
 import { setPageProps } from '@/test/page';
 import type { MakerTally, RatedTitle } from '@/types/generated';
@@ -31,7 +30,7 @@ const mountCard = () =>
             period: '2025',
             scope: 'shows',
         },
-        global: { directives: { tooltip: vTooltip }, stubs: { Link: { props: ['href'], template: '<a :href="href"><slot /></a>' } } },
+        global: { stubs: { Link: { props: ['href'], template: '<a :href="href"><slot /></a>' } } },
     });
 
 describe('MakersCard', () => {

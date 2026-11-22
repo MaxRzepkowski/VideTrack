@@ -1,13 +1,12 @@
 import CreatorCard from '@/components/media/CreatorCard.vue';
 import { useMediaModals } from '@/composables/useMediaModals';
-import { vTooltip } from '@/directives/tooltip';
 import { mediaSummary } from '@/test/factories';
 import { nth } from '@/test/lists';
 import { setPageProps } from '@/test/page';
 import { mount } from '@vue/test-utils';
 import { afterEach, describe, expect, it } from 'vitest';
 
-const global = { directives: { tooltip: vTooltip }, stubs: { Link: { props: ['href'], template: '<a :href="href"><slot /></a>' } } };
+const global = { stubs: { Link: { props: ['href'], template: '<a :href="href"><slot /></a>' } } };
 
 afterEach(() => useMediaModals().close());
 

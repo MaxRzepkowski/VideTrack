@@ -1,6 +1,5 @@
 import CreatorListsModal from '@/components/media/CreatorListsModal.vue';
 import { useMediaModals } from '@/composables/useMediaModals';
-import { vTooltip } from '@/directives/tooltip';
 import type { JsonFetchOptions } from '@/lib/http';
 import { setPageProps } from '@/test/page';
 import { router } from '@inertiajs/vue3';
@@ -45,7 +44,7 @@ beforeEach(() => {
             { id: 7, title: 'Actors', systemKey: null, itemCount: 0 },
         ],
     });
-    wrapper = mount(CreatorListsModal, { global: { directives: { tooltip: vTooltip } } });
+    wrapper = mount(CreatorListsModal);
 });
 
 afterEach(() => {

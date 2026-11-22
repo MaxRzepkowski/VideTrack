@@ -1,10 +1,9 @@
 import Pagination from '@/components/Pagination.vue';
-import { vTooltip } from '@/directives/tooltip';
 import { mount } from '@vue/test-utils';
 import { describe, expect, it } from 'vitest';
 
 function pager(currentPage: number, totalPages: number) {
-    return mount(Pagination, { props: { currentPage, totalPages }, global: { directives: { tooltip: vTooltip } } });
+    return mount(Pagination, { props: { currentPage, totalPages } });
 }
 
 /** What the pager reads like: page numbers, `…` for a gap. */

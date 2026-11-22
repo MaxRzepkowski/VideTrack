@@ -2,7 +2,6 @@ import EventCountdownCard from '@/components/events/EventCountdownCard.vue';
 import MediaTypeBadge from '@/components/media/MediaTypeBadge.vue';
 import SortControl from '@/components/SortControl.vue';
 import TypeFilter from '@/components/TypeFilter.vue';
-import { vTooltip } from '@/directives/tooltip';
 import Countdowns from '@/pages/Countdowns.vue';
 import { useMediaTypes } from '@/test/factories';
 import { setPageProps } from '@/test/page';
@@ -41,7 +40,6 @@ function page(entries: EventCountdown[] = [], types: TypeCount[] = []) {
             pagination: { currentPage: 1, totalPages: 1, total: 5 },
         },
         global: {
-            directives: { tooltip: vTooltip },
             stubs: {
                 AppLayout: { template: '<div><slot /></div>' },
                 PageToolbar: { template: '<div><slot name="search" /><slot name="filters" /><slot name="sort" /></div>' },

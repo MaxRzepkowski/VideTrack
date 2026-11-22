@@ -34,7 +34,7 @@ function create(title: string): void {
 <template>
     <AppModal :open="media !== null" :title="trans('media.add_to_lists')" @update:open="(open: boolean) => !open && close()">
         <template v-if="media" #meta>
-            <span class="text-ink-muted truncate">{{ media.title }}</span>
+            <span v-tooltip.truncated="media.title" class="text-ink-muted truncate">{{ media.title }}</span>
         </template>
 
         <ListPicker v-if="media && state" :lists="lists" :on="state.listIds" @toggle="toggle" @create="create" />

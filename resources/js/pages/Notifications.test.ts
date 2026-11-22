@@ -1,4 +1,3 @@
-import { vTooltip } from '@/directives/tooltip';
 import Notifications from '@/pages/Notifications.vue';
 import { notificationEntry } from '@/test/factories';
 import type { NotificationEntry } from '@/types/notifications';
@@ -25,7 +24,7 @@ const notification = notificationEntry;
 function page(notifications: NotificationEntry[]) {
     return mount(Notifications, {
         props: { entries: notifications, pagination: { currentPage: 1, totalPages: 1, total: notifications.length, perPage: 20 } },
-        global: { directives: { tooltip: vTooltip }, stubs: { AppLayout: { template: '<div><slot /></div>' } } },
+        global: { stubs: { AppLayout: { template: '<div><slot /></div>' } } },
     });
 }
 
@@ -126,7 +125,7 @@ describe('Notifications', () => {
         const get = vi.spyOn(router, 'get').mockImplementation(() => undefined);
         const wrapper = mount(Notifications, {
             props: { entries: [notification()], pagination: { currentPage: 1, totalPages: 3, total: 50, perPage: 20 } },
-            global: { directives: { tooltip: vTooltip }, stubs: { AppLayout: { template: '<div><slot /></div>' } } },
+            global: { stubs: { AppLayout: { template: '<div><slot /></div>' } } },
         });
 
         await wrapper.find('button[aria-label="Next"]').trigger('click');

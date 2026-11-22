@@ -42,7 +42,9 @@ defineSlots<{
                     sizes="9rem"
                     class="aspect-poster w-full rounded-lg"
                 />
-                <span class="text-ink truncate text-base font-semibold group-hover:underline">{{ title.media.title }}</span>
+                <span v-tooltip.truncated="title.media.title" class="text-ink truncate text-base font-semibold group-hover:underline">{{
+                    title.media.title
+                }}</span>
                 <TypeYear :type="title.media.type" :year="title.media.year" />
                 <slot name="detail" :title="title" />
             </Link>

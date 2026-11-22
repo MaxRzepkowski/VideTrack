@@ -1,6 +1,7 @@
 // The setup runs in Node (it reads the PHP lang files from disk); the app's
 // own code is browser code and keeps Node's types out of its globals.
 /// <reference types="node" />
+import { vTooltip } from '@/directives/tooltip';
 import { followPage } from '@/stores/library';
 import { config } from '@vue/test-utils';
 import { i18nVue } from 'laravel-vue-i18n';
@@ -24,6 +25,9 @@ createApp({}).use(i18nVue, {
 
 globalThis.route = route as typeof globalThis.route;
 config.global.mocks.route = route;
+// Registered for every component, as the app registers it: a component a test
+// mounts may carry a hint without the test having to know.
+config.global.directives = { ...config.global.directives, tooltip: vTooltip };
 // usePage() and <Head> are stand-ins, the rest of Inertia is real: usePage()
 // answers from the test's page, and <Head> writes through the head manager
 // the Inertia app sets up, which a mounted page has none of.

@@ -1,5 +1,4 @@
 import CountdownCard from '@/components/countdown/CountdownCard.vue';
-import { vTooltip } from '@/directives/tooltip';
 import { mediaSummary, useMediaTypes, userPreferences } from '@/test/factories';
 import { setPageProps } from '@/test/page';
 import type { CountdownEntry } from '@/types/generated';
@@ -11,7 +10,7 @@ const Link = { props: ['href'], template: '<a :href="href"><slot /></a>' };
 function card(media: Partial<CountdownEntry['media']>) {
     return mount(CountdownCard, {
         props: { entry: { media: mediaSummary({ type: 'game', ref: '7', title: 'The Witcher IV', ...media }), showTitle: null, filterType: 'game' } },
-        global: { stubs: { Link }, directives: { tooltip: vTooltip } },
+        global: { stubs: { Link } },
     });
 }
 

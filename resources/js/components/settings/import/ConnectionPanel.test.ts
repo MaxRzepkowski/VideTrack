@@ -1,5 +1,4 @@
 import ConnectionPanel from '@/components/settings/import/ConnectionPanel.vue';
-import { vTooltip } from '@/directives/tooltip';
 import { jsonFetch } from '@/lib/http';
 import { testPage } from '@/test/page';
 import type { ConnectDef, ConnectionCard } from '@/types/integrations';
@@ -55,7 +54,6 @@ const card: ConnectionCard = {
 const mountPanel = (connect: ConnectDef = simkl, connection: ConnectionCard | null = null) => {
     const panel = mount(ConnectionPanel, {
         props: { connect, connection, 'onUpdate:connection': (next: ConnectionCard | null) => panel.setProps({ connection: next }) },
-        global: { directives: { tooltip: vTooltip } },
     });
 
     return panel;

@@ -1,6 +1,5 @@
 import MediaGrid from '@/components/media/MediaGrid.vue';
 import ActivityPanel from '@/components/users/ActivityPanel.vue';
-import { vTooltip } from '@/directives/tooltip';
 import { mediaSummary, useMediaTypes } from '@/test/factories';
 import type { ActivitySort } from '@/types/generated';
 import type { ActivityEntry, ActivityFilters } from '@/types/media';
@@ -64,7 +63,6 @@ function panel(props: {
             ...props,
         },
         global: {
-            directives: { tooltip: vTooltip },
             stubs: {
                 MediaCard: true,
                 SearchInput: true,

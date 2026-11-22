@@ -1,5 +1,4 @@
 import PersonWork from '@/components/creators/PersonWork.vue';
-import { vTooltip } from '@/directives/tooltip';
 import { mediaSummary, useMediaTypes, userState } from '@/test/factories';
 import { nth } from '@/test/lists';
 import { setPageProps } from '@/test/page';
@@ -32,7 +31,7 @@ function person(credits: PersonCredit[]): PersonDetails {
 }
 
 function work(credits: PersonCredit[]) {
-    return mount(PersonWork, { props: { person: person(credits) }, global: { stubs: { MediaCard }, directives: { tooltip: vTooltip } } });
+    return mount(PersonWork, { props: { person: person(credits) }, global: { stubs: { MediaCard } } });
 }
 
 beforeEach(() => {

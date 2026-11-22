@@ -74,6 +74,7 @@ const ICON_BUTTON = 'text-ink-muted hover:text-ink flex size-7 shrink-0 items-ce
             >
                 <div v-for="event in live" :key="eventKey(event)" class="flex items-center gap-0.5 rounded-xl p-0.5">
                     <Link
+                        v-tooltip.truncated="event.name"
                         :href="pageHref(event)"
                         class="text-ink hover:text-brand-soft min-w-0 flex-1 truncate rounded-lg px-2 py-1.5 text-sm font-semibold transition-colors duration-150"
                     >

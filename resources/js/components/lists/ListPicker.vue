@@ -56,7 +56,7 @@ function create(): void {
                     <Check v-if="on.includes(list.id)" class="text-on-bright size-4" :stroke-width="3" />
                 </span>
                 <span class="min-w-0 flex-1">
-                    <span class="text-ink block truncate text-base font-semibold">{{ list.title }}</span>
+                    <span v-tooltip.truncated="list.title" class="text-ink block truncate text-base font-semibold">{{ list.title }}</span>
                     <span class="text-ink-muted block text-sm">{{ count(list) }}</span>
                 </span>
             </button>

@@ -1,7 +1,6 @@
 import DiscoverBrowse from '@/components/discover/DiscoverBrowse.vue';
 import DiscoverSections from '@/components/discover/DiscoverSections.vue';
 import Pagination from '@/components/Pagination.vue';
-import { vTooltip } from '@/directives/tooltip';
 import { mediaSummary, useMediaTypes } from '@/test/factories';
 import { nth } from '@/test/lists';
 import type { MediaSummary } from '@/types/media';
@@ -12,7 +11,7 @@ import { afterEach, beforeEach, describe, expect, it, vi, type MockInstance } fr
 let visits: MockInstance<typeof router.get>;
 let wrapper: VueWrapper;
 
-const global = { directives: { tooltip: vTooltip }, stubs: { MediaCard: true, CreatorCard: true } };
+const global = { stubs: { MediaCard: true, CreatorCard: true } };
 
 function browse(props: { genre?: string | null; genreItems?: MediaSummary[]; trending?: MediaSummary[] } = {}): VueWrapper {
     wrapper = mount(DiscoverBrowse, {

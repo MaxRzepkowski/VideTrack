@@ -1,5 +1,4 @@
 import AppHeader from '@/components/AppHeader.vue';
-import { vTooltip } from '@/directives/tooltip';
 import type { JsonFetchOptions } from '@/lib/http';
 import { setPageProps } from '@/test/page';
 import { flushPromises, mount } from '@vue/test-utils';
@@ -24,7 +23,6 @@ function header(unread: number) {
 
     return mount(AppHeader, {
         global: {
-            directives: { tooltip: vTooltip },
             stubs: {
                 Link,
                 MainMenu: true,

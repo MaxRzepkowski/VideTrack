@@ -1,5 +1,4 @@
 import DeliveryLog from '@/components/settings/integrations/DeliveryLog.vue';
-import { vTooltip } from '@/directives/tooltip';
 import type { DeliveryNote } from '@/types/generated';
 import type { DeliveryRow } from '@/types/integrations';
 import { mount } from '@vue/test-utils';
@@ -9,7 +8,7 @@ function delivery(overrides: Partial<DeliveryRow>): DeliveryRow {
     return { id: 1, status: 'ignored', kind: null, label: null, message: null, at: null, payload: null, ...overrides };
 }
 
-const mountLog = (deliveries: DeliveryRow[]) => mount(DeliveryLog, { props: { deliveries }, global: { directives: { tooltip: vTooltip } } });
+const mountLog = (deliveries: DeliveryRow[]) => mount(DeliveryLog, { props: { deliveries } });
 
 describe('DeliveryLog', () => {
     it('names a saved delivery by its title and says it reached the library', () => {

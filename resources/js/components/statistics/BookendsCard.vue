@@ -73,9 +73,11 @@ const sides = computed(() => [
 
                 <span class="flex min-w-0 flex-col gap-0.5">
                     <span class="text-ink-muted text-sm">{{ side.heading }}</span>
-                    <span class="text-ink line-clamp-2 text-base font-semibold group-hover:underline md:line-clamp-1">{{
-                        titleOf(side.bookend)
-                    }}</span>
+                    <span
+                        v-tooltip.truncated="titleOf(side.bookend)"
+                        class="text-ink line-clamp-2 text-base font-semibold group-hover:underline md:line-clamp-1"
+                        >{{ titleOf(side.bookend) }}</span
+                    >
                     <span class="text-ink-secondary flex items-center gap-1.5 text-sm" :class="index === 1 ? 'md:justify-end' : ''">
                         <component
                             :is="mediaTypeMeta(side.bookend.media.type).icon"

@@ -1,5 +1,4 @@
 import SortControl from '@/components/SortControl.vue';
-import { vTooltip } from '@/directives/tooltip';
 import FranchisePage from '@/pages/media/FranchisePage.vue';
 import { mediaSummary, useMediaTypes } from '@/test/factories';
 import { mount } from '@vue/test-utils';
@@ -17,7 +16,6 @@ function page(series = [game('Resident Evil', '1996-03-22', 8.8), game('Resident
             franchise: { ref: '7', name: 'Resident Evil', series, others: [game('Resident Evil Survivor', '2000-01-27', 4.1)] },
         },
         global: {
-            directives: { tooltip: vTooltip },
             stubs: { AppLayout: { template: '<div><slot /></div>' }, Head: true, MediaCard },
         },
     });
@@ -59,7 +57,7 @@ describe('FranchisePage', () => {
     it('needs no choice when the franchise is one series', () => {
         const wrapper = mount(FranchisePage, {
             props: { provider: 'igdb', franchise: { ref: '7', name: 'X', series: [game('A', '2000-01-01')], others: [] } },
-            global: { directives: { tooltip: vTooltip }, stubs: { AppLayout: { template: '<div><slot /></div>' }, Head: true, MediaCard } },
+            global: { stubs: { AppLayout: { template: '<div><slot /></div>' }, Head: true, MediaCard } },
         });
 
         // The sort control's own select only.

@@ -1,9 +1,8 @@
 import ExternalLinks from '@/components/media/ExternalLinks.vue';
-import { vTooltip } from '@/directives/tooltip';
 import { mount } from '@vue/test-utils';
 import { describe, expect, it } from 'vitest';
 
-const mountLinks = (links: Record<string, string>) => mount(ExternalLinks, { props: { links }, global: { directives: { tooltip: vTooltip } } });
+const mountLinks = (links: Record<string, string>) => mount(ExternalLinks, { props: { links } });
 
 describe('ExternalLinks', () => {
     it('opens each service in a new tab, a brand glyph where one exists', () => {

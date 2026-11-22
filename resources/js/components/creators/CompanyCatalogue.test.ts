@@ -1,5 +1,4 @@
 import CompanyCatalogue from '@/components/creators/CompanyCatalogue.vue';
-import { vTooltip } from '@/directives/tooltip';
 import { mediaSummary, useMediaTypes } from '@/test/factories';
 import { nth } from '@/test/lists';
 import type { CompanyCredit, CompanyDetails } from '@/types/media';
@@ -31,7 +30,7 @@ function company(credits: CompanyCredit[]): CompanyDetails {
 function catalogue(kind: 'company' | 'network', credits: CompanyCredit[]) {
     return mount(CompanyCatalogue, {
         props: { provider: 'tmdb', kind, company: company(credits) },
-        global: { stubs: { MediaCard }, directives: { tooltip: vTooltip } },
+        global: { stubs: { MediaCard } },
     });
 }
 

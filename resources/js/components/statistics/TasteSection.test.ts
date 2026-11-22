@@ -2,7 +2,6 @@ import GenresCard from '@/components/statistics/GenresCard.vue';
 import LengthCard from '@/components/statistics/LengthCard.vue';
 import ReleaseChart from '@/components/statistics/ReleaseChart.vue';
 import TasteSection from '@/components/statistics/TasteSection.vue';
-import { vTooltip } from '@/directives/tooltip';
 import { mediaSummary, useMediaTypes } from '@/test/factories';
 import { setPageProps } from '@/test/page';
 import type { GenreStat, PeriodSpan, StatisticsOrigins, StatisticsTaste } from '@/types/generated';
@@ -58,7 +57,6 @@ const mountSection = (props: { taste: StatisticsTaste; origins?: StatisticsOrigi
     mount(TasteSection, {
         props: { period: year, type: null, origins: noOrigins, ...props },
         global: {
-            directives: { tooltip: vTooltip },
             stubs: { Link: { props: ['href'], template: '<a :href="href"><slot /></a>' }, WorldMap: true },
         },
     });
