@@ -523,8 +523,10 @@ test('the notifications page, single read and read-all work', function () {
         ->get(route('notifications.index'))
         ->assertInertia(fn ($page) => $page
             ->component('Notifications')
-            ->has('notifications', 1)
-            ->where('notifications.0.readAt', null));
+            ->has('entries', 1)
+            ->where('entries.0.readAt', null)
+            // The page's own list leaves the bell's shared prop alone.
+            ->where('notifications.unread', 1));
 
     // The shared header prop carries the unread counter.
     $this->actingAs($user)
@@ -642,7 +644,7 @@ test('the bell, the notifications page and the API carry the copy, worded in the
 
     $this->actingAs($user)
         ->get(route('notifications.index'))
-        ->assertInertia(fn ($page) => $page->where('notifications.0.title', 'Dziś premiera: Diuna'));
+        ->assertInertia(fn ($page) => $page->where('entries.0.title', 'Dziś premiera: Diuna'));
 
     Sanctum::actingAs($user->forceFill(['locale' => 'en']), ['read']);
 

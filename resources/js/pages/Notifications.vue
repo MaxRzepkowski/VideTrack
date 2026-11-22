@@ -17,16 +17,16 @@ import { Bell, CheckCheck, Trash2, X } from '@lucide/vue';
 import { computed } from 'vue';
 
 const props = defineProps<{
-    notifications: NotificationEntry[];
+    entries: NotificationEntry[];
     pagination: PageInfo;
 }>();
 
-const hasUnread = computed(() => props.notifications.some((item) => item.readAt === null));
-const days = computed(() => notificationDays(props.notifications));
+const hasUnread = computed(() => props.entries.some((item) => item.readAt === null));
+const days = computed(() => notificationDays(props.entries));
 
 function markAllRead(): void {
     void jsonFetch(route('ui.notifications.read-all'), { method: 'POST' })
-        .then(() => router.reload({ only: ['notifications'] }))
+        .then(() => router.reload({ only: ['entries'] }))
         .catch(() => undefined);
 }
 
@@ -35,7 +35,7 @@ async function open(item: NotificationEntry, event: MouseEvent): Promise<void> {
     const target = clickTarget(event);
 
     if (target === 'elsewhere') {
-        void markRead(item).then(() => router.reload({ only: ['notifications'] }));
+        void markRead(item).then(() => router.reload({ only: ['entries'] }));
     }
 
     if (target !== 'here') {
@@ -92,7 +92,7 @@ function goto(page: number): void {
                     {{ trans('common.mark_all_as_read') }}
                 </button>
                 <button
-                    v-if="notifications.length"
+                    v-if="entries.length"
                     type="button"
                     data-toolbar-control
                     class="border-line text-danger hover:border-danger-line flex h-10 items-center gap-2 rounded-lg border px-4 text-base font-semibold transition-colors duration-150"
@@ -107,7 +107,7 @@ function goto(page: number): void {
         <div class="max-w-content mx-auto w-full flex-1 px-4 pb-20 md:px-10">
             <!-- The bell's list at full length: the same rows by day, each with
                  its own delete beside the link. -->
-            <div v-if="notifications.length" class="border-line bg-surface max-w-3xl overflow-hidden rounded-xl border pb-2">
+            <div v-if="entries.length" class="border-line bg-surface max-w-3xl overflow-hidden rounded-xl border pb-2">
                 <section v-for="day in days" :key="day.key" :aria-label="day.heading">
                     <h2 class="text-ink-muted px-5 pt-4 pb-0.5 text-sm font-medium">{{ day.heading }}</h2>
                     <NotificationRow v-for="item in day.items" :key="item.id" :item="item" @open="open(item, $event)">
