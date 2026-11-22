@@ -8,6 +8,7 @@ use App\Catalog\ReaderTitleSql;
 use App\Library\LibraryHolders;
 use App\Models\MediaItem;
 use App\Models\User;
+use App\Support\LikePattern;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\App;
 
@@ -39,7 +40,7 @@ final readonly class SearchLibrary
             return [];
         }
 
-        $pattern = $this->escapeLike($term);
+        $containing = LikePattern::containing($term);
         $locale = App::getLocale();
 
         return array_values(MediaItem::query()
@@ -47,27 +48,17 @@ final readonly class SearchLibrary
             // The name on the reader's card, or the row's own: a title is
             // found by either of the names it is known by.
             ->where(fn (Builder $where) => $where
-                ->whereRaw(new ReaderTitleSql($locale, "%s like ? escape '\\'"), ['%'.$pattern.'%'])
-                ->orWhereRaw("title like ? escape '\\'", ['%'.$pattern.'%']))
+                ->whereRaw(new ReaderTitleSql($locale, '%s like ? escape ?'), [$containing, LikePattern::ESCAPE])
+                ->orWhereRaw('title like ? escape ?', [$containing, LikePattern::ESCAPE]))
             // A prefix match is what was meant far more often than a hit in the
             // middle of a title ("matrix" → "The Matrix" before "Dual Matrix").
             // orderBy() takes no bindings, so the prefix joins the order's own.
-            ->orderBy(new ReaderTitleSql($locale, "case when %s like ? escape '\\' then 0 else 1 end"))
-            ->addBinding($pattern.'%', 'order')
+            ->orderBy(new ReaderTitleSql($locale, 'case when %s like ? escape ? then 0 else 1 end'))
+            ->addBinding([LikePattern::startingWith($term), LikePattern::ESCAPE], 'order')
             ->orderBy(new ReaderTitleSql($locale))
             ->limit($limit)
             ->get()
             ->map(fn (MediaItem $item): MediaSummary => MediaItemSummaries::summary($item))
             ->all());
-    }
-
-    /**
-     * A typed `%` or `_` is a literal here, not a wildcard — a search for
-     * "100%" must not match every title. Paired with an explicit `escape`
-     * clause, because neither SQLite nor Laravel assumes one.
-     */
-    private function escapeLike(string $term): string
-    {
-        return str_replace(['\\', '%', '_'], ['\\\\', '\%', '\_'], $term);
     }
 }

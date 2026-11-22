@@ -3,6 +3,7 @@
 namespace App\Users;
 
 use App\Models\User;
+use App\Support\LikePattern;
 use App\Users\Data\ActivityFilters;
 use Illuminate\Contracts\Database\Query\Builder as QueryBuilder;
 use Illuminate\Database\Eloquent\Builder;
@@ -54,14 +55,13 @@ final readonly class TitleFilters
         }
 
         if ($filters->q !== null) {
-            // Wildcard-escape the term so a literal % / _ typed by the user
-            // stays literal; match the item or any ancestor's title.
-            $like = '%'.addcslashes($filters->q, '\\%_').'%';
+            // An episode is found by its show's name as well as its own.
+            $like = LikePattern::containing($filters->q);
 
             $query->where(fn (Builder $sub) => $sub
-                ->whereRaw('media_items.title like ? escape ?', [$like, '\\'])
-                ->orWhereRaw('parents.title like ? escape ?', [$like, '\\'])
-                ->orWhereRaw('grandparents.title like ? escape ?', [$like, '\\']));
+                ->whereRaw('media_items.title like ? escape ?', [$like, LikePattern::ESCAPE])
+                ->orWhereRaw('parents.title like ? escape ?', [$like, LikePattern::ESCAPE])
+                ->orWhereRaw('grandparents.title like ? escape ?', [$like, LikePattern::ESCAPE]));
         }
 
         if ($filters->genre !== null) {
