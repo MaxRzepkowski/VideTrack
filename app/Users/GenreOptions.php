@@ -3,7 +3,7 @@
 namespace App\Users;
 
 use App\Catalog\Hierarchy;
-use App\Catalog\ItemMetadata;
+use App\Catalog\StoredGenres;
 use App\Enums\PlayOutcome;
 use App\Models\Favorite;
 use App\Models\LibraryEntry;
@@ -40,12 +40,11 @@ final readonly class GenreOptions
             ->merge(Favorite::query()->where('user_id', $user->id)->pluck('media_item_id'))
             ->unique();
 
-        return array_values(MediaItem::query()
-            ->whereIn('id', $played->merge($this->hierarchy->rootIds(Numbers::ints($marked)))->unique())
-            ->get(['metadata'])
-            ->flatMap(fn (MediaItem $root) => ItemMetadata::fromStored($root->metadata)->genres)
-            ->unique()
-            ->sort(SORT_NATURAL | SORT_FLAG_CASE)
-            ->all());
+        $genres = StoredGenres::of(MediaItem::query()
+            ->whereIn('id', $played->merge($this->hierarchy->rootIds(Numbers::ints($marked)))->unique()));
+
+        sort($genres, SORT_NATURAL | SORT_FLAG_CASE);
+
+        return $genres;
     }
 }
