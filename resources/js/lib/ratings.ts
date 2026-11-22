@@ -4,6 +4,22 @@ import { trans } from 'laravel-vue-i18n';
 export const RATING_MIN = 1;
 export const RATING_MAX = 10;
 
+/** A user's rating as it reads beside the scale: "7/10". */
+export function ratingScore(rating: number): string {
+    return `${rating}/${RATING_MAX}`;
+}
+
+/**
+ * The rating under a finger resting `offset` pixels into a row of stars
+ * `width` pixels wide: each star holds an equal slice, and past either end
+ * the row holds its first or last.
+ */
+export function ratingAt(offset: number, width: number): number {
+    const slice = width / (RATING_MAX - RATING_MIN + 1);
+
+    return Math.min(RATING_MAX, Math.max(RATING_MIN, RATING_MIN + Math.floor(offset / slice)));
+}
+
 /** Community rating (0–10) as the percentage badge used across the app. */
 export function ratingPercent(rating: number | null): string | null {
     return rating === null ? null : `${Math.round(rating * 10)}%`;

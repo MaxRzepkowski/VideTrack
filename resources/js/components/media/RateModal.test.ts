@@ -1,6 +1,8 @@
 import RateModal from '@/components/media/RateModal.vue';
 import { useMediaModals } from '@/composables/useMediaModals';
+import { RATING_MAX } from '@/lib/ratings';
 import { mediaSummary, userState } from '@/test/factories';
+import { stubMediaQueries } from '@/test/media';
 import { flushPromises, mount } from '@vue/test-utils';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -26,7 +28,10 @@ const stars = () => [...document.querySelectorAll<HTMLButtonElement>('[role=dial
 const dialogText = () => document.querySelector('[role=dialog]')?.textContent ?? '';
 
 beforeEach(() => rate.mockClear());
-afterEach(() => useMediaModals().close());
+afterEach(() => {
+    useMediaModals().close();
+    vi.unstubAllGlobals();
+});
 
 describe('RateModal', () => {
     it('offers ten stars to a title not rated yet, and rates and closes on one', async () => {
@@ -60,6 +65,45 @@ describe('RateModal', () => {
         await flushPromises();
 
         expect(rate).toHaveBeenCalledWith(DUNE, null);
+
+        wrapper.unmount();
+    });
+
+    it('only chooses with a finger, tapped or slid, and rates on save', async () => {
+        stubMediaQueries((query) => query === '(any-pointer: coarse)');
+        const wrapper = modal(null);
+        await flushPromises();
+
+        const save = () =>
+            [...document.querySelectorAll<HTMLButtonElement>('[role=dialog] button')].find((button) => button.textContent?.includes('Save rating'))!;
+        const row = stars()[0]!.parentElement!;
+        const finger = (type: string, x: number, init: PointerEventInit = {}) =>
+            new PointerEvent(type, { pointerType: 'touch', clientX: x, buttons: 1, bubbles: true, ...init });
+
+        expect(save().disabled).toBe(true);
+
+        // A tap: the browser's mouse events after it preview nothing.
+        stars()[6]!.dispatchEvent(finger('pointerenter', 0, { pointerType: 'mouse' }));
+        stars()[6]!.dispatchEvent(new PointerEvent('click', { pointerType: 'touch', bubbles: true }));
+        await flushPromises();
+
+        expect(rate).not.toHaveBeenCalled();
+        expect(save().textContent).toContain(`Save rating 7/${RATING_MAX}`);
+
+        // A slide: the star under the finger is the choice.
+        row.getBoundingClientRect = () => ({ left: 0, width: 300 }) as DOMRect;
+        vi.setSystemTime(Date.now() + 1000);
+        row.dispatchEvent(finger('pointerdown', 10));
+        row.dispatchEvent(finger('pointermove', 95));
+        await flushPromises();
+
+        expect(stars()[3]!.getAttribute('aria-pressed')).toBe('true');
+        expect(save().textContent).toContain(`Save rating 4/${RATING_MAX}`);
+
+        save().click();
+        await flushPromises();
+
+        expect(rate).toHaveBeenCalledWith(DUNE, 4);
 
         wrapper.unmount();
     });
