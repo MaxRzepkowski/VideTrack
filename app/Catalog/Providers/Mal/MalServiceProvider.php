@@ -27,7 +27,7 @@ final class MalServiceProvider extends ServiceProvider
                     searchable: true,
                     userStatus: true,
                     progressUnit: ProgressUnit::Chapters,
-                    pluralLabel: 'common.manga',
+                    pluralLabel: 'common.manga_plural',
                     emoji: '📖',
                     color: '#d946ef',
                 ));

@@ -100,7 +100,7 @@ export const MEDIA_TYPE_META: Record<string, MediaTypeMeta | undefined> = {
     },
     manga: {
         label: () => trans('common.manga'),
-        plural: () => trans('common.manga'),
+        plural: () => trans('common.manga_plural'),
         count: (count) => transChoice('dashboard.count_manga', count),
         countHeading: () => trans('lists.number_of_manga'),
         icon: BookOpenText,

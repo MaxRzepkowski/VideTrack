@@ -106,7 +106,7 @@ return [
     'update_password' => 'Zmień hasło',
     'update_your_profile_and_account_details' => 'Zaktualizuj swój profil i dane konta',
     'warning' => 'Uwaga',
-    'watch_dates_and_times_are_shown' => 'Daty i godziny obejrzeń są pokazywane w tej strefie.',
+    'watch_dates_and_times_are_shown' => 'Daty i godziny w historii są pokazywane w tej strefie.',
     'what_feeds_your_calendar_countdowns_and' => 'Co zasila Twój kalendarz, odliczania i powiadomienia.',
     'which_departments_of_a_followed_person' => 'Które działy twórczości śledzonej osoby się liczą. Główny dział sprawia, że zapracowany człowiek-orkiestra nie zaleje Cię tytułami.',
     'which_games_of_a_followed_studio' => 'Które gry śledzonego studia lub wydawcy się liczą. Płodny wydawca może cię zalać, więc możesz to zawęzić.',

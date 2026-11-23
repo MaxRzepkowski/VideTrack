@@ -62,7 +62,7 @@ const { followed, busy, toggle } = useEntityFollow(() => props.creator);
                 class="flex-1 text-left text-base font-semibold transition-colors duration-150"
                 :class="followed ? 'text-on-accent' : 'text-ink-muted'"
             >
-                {{ followed ? trans('common.following') : trans('common.follow_releases') }}
+                {{ followed ? trans('common.following_active') : trans('common.follow_releases') }}
             </span>
         </button>
     </div>

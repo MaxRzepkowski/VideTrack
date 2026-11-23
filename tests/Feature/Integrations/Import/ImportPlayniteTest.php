@@ -59,7 +59,7 @@ test('the selection names each completion status with what it does, unplayed gam
         ->and(array_map(fn (ManifestCategory $category) => [$category->key, $category->label, $category->count, $category->preselected], $manifest->categories))->toBe([
             ['status:Beaten', 'Beaten: played, with the play time', 1, true],
             ['status:Completed', 'Completed: played, with the play time', 1, true],
-            ['status:Plan to Play', 'Plan to Play: on the watchlist', 1, true],
+            ['status:Plan to Play', 'Plan to Play: on the Backlog', 1, true],
             ['status:Playing', 'Playing: in progress', 1, true],
             ['status:Not Played', 'Not Played: only on the Playnite list', 1, false],
             ['status:Replaying', 'Replaying: only on the Playnite list', 1, false],

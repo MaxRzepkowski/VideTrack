@@ -47,7 +47,7 @@ const followRow = computed(() => {
     }
 
     if (mode === 'follow') {
-        const label = state.value.followVia ? trans('media.following_name', { name: state.value.followVia }) : trans('common.following');
+        const label = state.value.followVia ? trans('media.following_name', { name: state.value.followVia }) : trans('common.following_active');
 
         return { icon: BellRing, label, active: true };
     }

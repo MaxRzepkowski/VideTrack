@@ -46,7 +46,7 @@ const followState = computed(() => {
     const next = nextFollowMode({ follow: props.list.followMode, followSource: null, followVia: null });
 
     if (props.list.followMode === 'follow') {
-        return { icon: BellRing, label: trans('common.following'), active: true, next };
+        return { icon: BellRing, label: trans('common.following_active'), active: true, next };
     }
 
     if (props.list.followMode === 'mute') {
