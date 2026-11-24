@@ -45,6 +45,7 @@ return [
     'set_password' => 'Set password',
     'set_a_password_to_log_in' => 'Add a password to log in without a connected account',
     'username_does_not_match' => 'That is not your username.',
+    'confirm_the_new_address' => 'Confirm the new address.',
     'type_your_username_to_confirm' => 'Type your username, :username, to confirm',
     'episode_still' => 'Episode still',
     'episode_thumbnails' => 'Episode thumbnails',

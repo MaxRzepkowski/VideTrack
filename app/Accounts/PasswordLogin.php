@@ -28,8 +28,9 @@ final readonly class PasswordLogin
     }
 
     /**
-     * Whether this user signs in with a password, and so confirms with it
-     * what cannot be undone; without one, they confirm with their username.
+     * Whether this user signs in with a password, and so confirms with it a
+     * change that hands the account over or cannot be undone; without one,
+     * they confirm with their username.
      */
     public function isWayInFor(User $user): bool
     {
