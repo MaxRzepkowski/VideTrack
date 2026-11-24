@@ -289,9 +289,37 @@ export function relativeTime(date: string | null): string | null {
 }
 
 /**
- * Runtime in minutes as "2h 16min" — the compact units read the same in both
- * languages, so only the numbers need locale formatting (a decimal never shows
- * here, but large hour counts still get the locale thousands separator).
+ * Duration terms side by side the language's way: "2h 16min", "3 days 7 hours";
+ * a language that writes them with no space between says so in its keys.
+ */
+function joinTerms(terms: string[]): string {
+    const [first, second, third] = terms;
+
+    if (first === undefined) {
+        throw new Error('A duration has at least one term.');
+    }
+
+    if (second === undefined) {
+        return first;
+    }
+
+    return third === undefined ? trans('media.duration_two', { first, second }) : trans('media.duration_three', { first, second, third });
+}
+
+/** A number and a compact unit as one term: "2h", "16min". */
+function shortTerm(value: string, unit: string): string {
+    return trans('media.duration_term_short', { value, unit });
+}
+
+/** Hours as a compact term, a decimal allowed: "12,5h". */
+export function formatShortHours(hours: number): string {
+    return shortTerm(formatNumber(hours, 1), trans('media.hours_short'));
+}
+
+/**
+ * Runtime in minutes as "2h 16min": the numbers take locale formatting (a
+ * decimal never shows here, but large hour counts still get the locale
+ * thousands separator), the units and their order come from the language.
  */
 export function formatRuntime(minutes: number | null): string | null {
     if (!minutes) {
@@ -301,7 +329,9 @@ export function formatRuntime(minutes: number | null): string | null {
     const h = Math.floor(minutes / 60);
     const m = minutes % 60;
 
-    return h > 0 ? `${formatNumber(h)}h ${m}min` : `${m}min`;
+    return h > 0
+        ? joinTerms([shortTerm(formatNumber(h), trans('media.hours_short')), shortTerm(String(m), trans('media.minutes_short'))])
+        : shortTerm(String(m), trans('media.minutes_short'));
 }
 
 /**
@@ -319,19 +349,19 @@ export function formatTotalRuntime(minutes: number | null): string | null {
         return formatRuntime(minutes);
     }
 
-    const parts = [`${formatNumber(Math.floor(minutes / 1440))}d`];
+    const parts = [shortTerm(formatNumber(Math.floor(minutes / 1440)), trans('media.days_short'))];
     const h = Math.floor((minutes % 1440) / 60);
     const m = minutes % 60;
 
     if (h > 0) {
-        parts.push(`${h}h`);
+        parts.push(shortTerm(String(h), trans('media.hours_short')));
     }
 
     if (m > 0) {
-        parts.push(`${m}min`);
+        parts.push(shortTerm(String(m), trans('media.minutes_short')));
     }
 
-    return parts.join(' ');
+    return joinTerms(parts);
 }
 
 /** One term of a spelled-out duration: the number, and its own unit word. */
@@ -362,9 +392,7 @@ export function durationTerms(minutes: number): DurationTerm[] {
 
 /** {@see durationTerms} as one string, for places that cannot set the terms apart. */
 export function formatWatchTime(minutes: number): string {
-    return durationTerms(minutes)
-        .map((term) => `${term.value} ${term.unit}`)
-        .join(' ');
+    return joinTerms(durationTerms(minutes).map((term) => trans('media.duration_term', term)));
 }
 
 /** USD amounts from TMDB (budget / revenue). */

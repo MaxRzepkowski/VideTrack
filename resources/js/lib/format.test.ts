@@ -35,6 +35,7 @@ import {
     yearsBetween,
 } from '@/lib/format';
 import { setPageProps } from '@/test/page';
+import { loadLanguageAsync } from 'laravel-vue-i18n';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 function prefer(preferences: Record<string, unknown>): void {
@@ -190,6 +191,18 @@ describe('durations and numbers', () => {
         expect(formatWatchTime(1440 + 1)).toBe('1 day 1 minute');
         expect(formatWatchTime(0)).toBe('0 minutes');
         expect(durationTerms(60)).toEqual([{ value: '1', unit: 'hour' }]);
+    });
+
+    it('takes the units from the language', async () => {
+        await loadLanguageAsync('zh_CN');
+
+        try {
+            expect(formatRuntime(136)).toBe('2 小时 16 分钟');
+            expect(formatTotalRuntime(3 * 1440 + 20)).toBe('3 天 20 分钟');
+            expect(formatWatchTime(1440 + 1)).toBe('1 天 1 分钟');
+        } finally {
+            await loadLanguageAsync('en');
+        }
     });
 
     it('formats numbers and money for the UI language', () => {

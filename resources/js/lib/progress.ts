@@ -1,4 +1,4 @@
-import { durationTerms, formatNumber, formatTimestampDate, formatWatchTime, type DurationTerm } from '@/lib/format';
+import { durationTerms, formatNumber, formatShortHours, formatTimestampDate, formatWatchTime, type DurationTerm } from '@/lib/format';
 import { leafType, mediaTypeDefinition, mediaTypeMeta, readUnitOf, typeCountingIn } from '@/lib/mediaTypes';
 import type { TooltipRow } from '@/lib/tooltip';
 import type { UserMediaState } from '@/types/generated';
@@ -344,7 +344,7 @@ export function formatProgress(media: MediaSummary, amount: number | null): stri
         return null;
     }
 
-    return unit === 'minutes' ? `${formatNumber(Math.round((amount / 60) * 10) / 10, 1)}h` : formatUnitAmount(unit, amount);
+    return unit === 'minutes' ? formatShortHours(Math.round((amount / 60) * 10) / 10) : formatUnitAmount(unit, amount);
 }
 
 /**

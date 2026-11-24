@@ -118,6 +118,10 @@ final readonly class PersonTitles implements CreatorTitleSource
             'себя саму',
             'самих себя',
         ],
+        'zh_CN' => [
+            '本人',
+            '自己',
+        ],
     ];
 
     public function __construct(
