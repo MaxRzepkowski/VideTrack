@@ -831,7 +831,7 @@ test('calendar entries carry the followed person behind them', function () {
         ->and($days[0]->entries[0]->media->extra['followedVia'])->toBe('Keanu Reeves');
 });
 
-test('a language written without spaces takes a whole role as themselves, never a word around it', function (string $locale, string $role, bool $self) {
+test('a language whose words run together takes a whole role as themselves, never a word around it', function (string $locale, string $role, bool $self) {
     expect(app(PersonTitles::class)->isSelfAppearance($role, [], $locale))->toBe($self);
 })->with([
     'the word alone' => ['zh_CN', '本人', true],
@@ -840,6 +840,8 @@ test('a language written without spaces takes a whole role as themselves, never 
     'a role around it' => ['zh_CN', '日本人游客', false],
     'Japanese, as a role' => ['ja', '本人役', true],
     'Japanese, a tourist' => ['ja', '日本人観光客', false],
+    'Korean, as a role' => ['ko', '본인 역', true],
+    'Korean, a word around it' => ['ko', '자신감 넘치는 남자', false],
 ]);
 
 test('every UI language knows how its credits say "as themselves"', function () {
