@@ -52,7 +52,7 @@ const KIND_LABELS: Record<Kind, () => string> = {
     theatrical: () => trans('media.theatrical'),
     digital: () => trans('media.digital'),
     disc: () => trans('media.disc'),
-    tv: () => trans('media.tv'),
+    tv: () => trans('media.release_kind_tv'),
 };
 
 const kindLabel = (kind: Kind): string => KIND_LABELS[kind]();

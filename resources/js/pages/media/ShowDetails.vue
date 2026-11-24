@@ -89,7 +89,7 @@ const chips = computed<Chip[]>(() => {
 // text, in the Details modal.
 const createdBy = computed(() => props.show.extra.createdBy ?? []);
 
-const crewPeople = computed(() => createdBy.value.map((person) => ({ ...person, roles: [trans('media.creator')] })));
+const crewPeople = computed(() => createdBy.value.map((person) => ({ ...person, roles: [trans('media.job_creator')] })));
 
 // Episodes that also played in cinemas, as their codes ("S02E05, S04E01").
 // An anniversary special or a feature-length finale — a handful of shows have

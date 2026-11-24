@@ -62,7 +62,7 @@ abstract class AnimeListSource implements ExplainsSetup, ImportSource
 
         return ImportManifest::whole([
             new ManifestCategory('anime', __('import.anime'), $counts['anime']),
-            new ManifestCategory('manga', __('common.manga'), $counts['manga']),
+            new ManifestCategory('manga', __('common.manga_plural'), $counts['manga']),
             new ManifestCategory('unplaced', __('common.skipped'), $counts['unplaced']),
         ]);
     }

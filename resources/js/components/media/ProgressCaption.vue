@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { trans } from 'laravel-vue-i18n';
+import { transChoice } from 'laravel-vue-i18n';
 
 // The line under a progress bar, shared by every shelf that shows one (up
 // next, currently playing / reading, the In Progress tab): where the title
@@ -16,7 +16,7 @@ withDefaults(defineProps<{ text: string; mobileText?: string | null; remaining?:
         </span>
         <template v-if="remaining !== null && remaining !== undefined">
             <span class="bg-line h-2 w-px shrink-0" aria-hidden="true"></span>
-            <span class="text-ink-muted truncate">{{ trans('media.count_remaining', { count: String(remaining) }) }}</span>
+            <span class="text-ink-muted truncate">{{ transChoice('media.count_remaining', remaining) }}</span>
         </template>
     </div>
 </template>

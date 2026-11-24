@@ -31,7 +31,7 @@ const submit = () => {
         <form class="flex flex-col gap-6" @submit.prevent="submit">
             <div class="grid gap-6">
                 <div class="grid gap-2">
-                    <Label for="name">{{ trans('common.name') }}</Label>
+                    <Label for="name">{{ trans('account.your_name') }}</Label>
                     <Input
                         id="name"
                         v-model="form.name"

@@ -13,6 +13,7 @@ return [
     'forgot_password' => 'Forgot password',
     'forgot_password_2' => 'Forgot password?',
     'full_name' => 'Full name',
+    'your_name' => 'Name',
     'log_in_with_provider' => 'Log in with :provider',
     'single_sign_on' => 'single sign-on',
     'or_divider' => 'or',

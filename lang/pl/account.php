@@ -13,6 +13,7 @@ return [
     'forgot_password' => 'Nie pamiętasz hasła',
     'forgot_password_2' => 'Nie pamiętasz hasła?',
     'full_name' => 'Imię i nazwisko',
+    'your_name' => 'Imię',
     'log_in_with_provider' => 'Zaloguj się przez :provider',
     'single_sign_on' => 'SSO',
     'or_divider' => 'albo',

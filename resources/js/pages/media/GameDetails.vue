@@ -66,7 +66,7 @@ const companyPeople = computed(() => {
     };
 
     add('developerLinks', trans('media.developer'));
-    add('publisherLinks', trans('media.publisher'));
+    add('publisherLinks', trans('media.game_publisher'));
 
     return [...byKey.values()];
 });

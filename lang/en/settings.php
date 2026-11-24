@@ -106,7 +106,7 @@ return [
     'update_password' => 'Update password',
     'update_your_profile_and_account_details' => 'Update your profile and account details',
     'warning' => 'Warning',
-    'watch_dates_and_times_are_shown' => 'Watch dates and times are shown in this timezone.',
+    'watch_dates_and_times_are_shown' => 'Dates and times in your history are shown in this timezone.',
     'what_feeds_your_calendar_countdowns_and' => 'What feeds your calendar, countdowns and notifications.',
     'which_departments_of_a_followed_person' => 'Which departments of a followed person count. Their main field keeps a busy multi-hat person from flooding you.',
     'which_games_of_a_followed_studio' => 'Which games of a followed studio or publisher count. A prolific publisher can flood you, so you can narrow it.',
