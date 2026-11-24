@@ -1,0 +1,25 @@
+<?php
+
+return [
+    'all_episodes_watched' => 'Todos los episodios vistos',
+    'chapter' => 'capítulo|capítulos',
+    'continue_watching_the_shows_you_have' => 'Sigue viendo las series que empezaste.',
+    'count_book' => ':count libro|:count libros',
+    'count_comic' => ':count cómic|:count cómics',
+    'count_game' => ':count juego|:count juegos',
+    'count_manga' => ':count manga|:count mangas',
+    'count_show' => ':count serie|:count series',
+    'currently_playing' => 'Jugando ahora',
+    'currently_reading' => 'Leyendo ahora',
+    'issue' => 'número|números',
+    'no_upcoming_releases_for_your_shows' => 'No hay próximos estrenos de tus series ni de lo que tienes en Pendientes.',
+    'nothing_here_yet_mark_an_episode' => 'Todavía no hay nada aquí. Marca un episodio como visto y tus series aparecerán aquí.',
+    'nothing_left_to_watch' => 'No queda nada por ver',
+    'page' => 'página|páginas',
+    'rate_this_series' => 'Puntuar esta serie',
+    'up_next_to_watch' => 'Seguir viendo',
+    'your_books_manga_and_comics_in' => 'Tus libros, manga y cómics en curso',
+    'your_games_in_progress' => 'Tus juegos en curso',
+    'your_stats' => 'Tus estadísticas',
+    'your_viewing_gaming_and_reading_activity' => 'Tu actividad viendo, jugando y leyendo, de un vistazo.',
+];

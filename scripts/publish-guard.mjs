@@ -34,10 +34,10 @@ const TEXT_EXEMPT = [
  * and names as fixtures), and data the code matches against.
  */
 const POLISH_ALLOWED = [
-    /^lang\/pl/, // the Polish translation
+    /^lang\/(?!en[/.])/, // the translations but English: Spanish, Czech and others write some of the same letters (ó)
     /^tests\//, // fixtures with Polish titles and names
     /\.test\.ts$/, // the same, next to front-end modules
-    /^app\/Tracking\/Creators\/PersonTitles\.php$/, // Polish credit phrases to recognise ("we własnej osobie")
+    /^app\/Tracking\/Creators\/PersonTitles\.php$/, // credit phrases to recognise in every UI language ("we własnej osobie")
     /^app\/Integrations\/Playnite\/PlayniteCsvSource\.php$/, // the column names Playnite writes in Polish ("Nazwa")
     /^app\/Integrations\/Netflix\/NetflixTitle\.php$/, // the season words Netflix writes in Polish ("Sezon")
     /^resources\/js\/lib\/commands\.ts$/, // folding Polish diacritics for search
