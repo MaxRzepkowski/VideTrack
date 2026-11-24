@@ -1,0 +1,25 @@
+<?php
+
+return [
+    'all_episodes_watched' => 'Alle afleveringen gezien',
+    'chapter' => 'hoofdstuk|hoofdstukken',
+    'continue_watching_the_shows_you_have' => 'Kijk verder met de series waaraan je bent begonnen.',
+    'count_book' => ':count boek|:count boeken',
+    'count_comic' => ':count comic|:count comics',
+    'count_game' => ':count game|:count games',
+    'count_manga' => ':count manga|:count manga',
+    'count_show' => ':count serie|:count series',
+    'currently_playing' => 'Nu aan het spelen',
+    'currently_reading' => 'Nu aan het lezen',
+    'issue' => 'nummer|nummers',
+    'no_upcoming_releases_for_your_shows' => 'Geen komende releases voor je series en backlog.',
+    'nothing_here_yet_mark_an_episode' => 'Hier staat nog niets. Markeer een aflevering als gezien en je series verschijnen hier.',
+    'nothing_left_to_watch' => 'Niets meer te kijken',
+    'page' => 'pagina|pagina’s',
+    'rate_this_series' => 'Deze serie beoordelen',
+    'up_next_to_watch' => 'Verder kijken',
+    'your_books_manga_and_comics_in' => 'Boeken, manga en comics waar je mee bezig bent',
+    'your_games_in_progress' => 'Games waar je mee bezig bent',
+    'your_stats' => 'Je statistieken',
+    'your_viewing_gaming_and_reading_activity' => 'Wat je kijkt, speelt en leest in één oogopslag.',
+];
