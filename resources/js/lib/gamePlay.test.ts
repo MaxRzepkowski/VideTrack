@@ -29,7 +29,7 @@ describe('languageRows', () => {
             'Traditional Chinese',
         ]);
 
-        setPageProps({ locale: 'pl' });
+        setPageProps({ locale: 'pl', languageTag: 'pl-PL' });
         const rows = languageRows(languages);
 
         expect(rows[0]).toEqual({ locale: 'pl-PL', name: 'polski', audio: false, subtitles: true, interface: true });

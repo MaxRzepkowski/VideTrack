@@ -23,6 +23,7 @@ export function resetPage(): void {
     // take the old page's states in under the new address.
     testPage.props = {
         locale: 'en',
+        languageTag: 'en-US',
         capitalizedNouns: false,
         translations: '/lang/en.0123456789abcdef.json',
         imageBase: 'https://image.tmdb.org/t/p',

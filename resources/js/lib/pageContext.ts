@@ -32,9 +32,12 @@ export function viewerUsername(): string {
     return signedInUser().username;
 }
 
-/** The UI locale, for any Intl formatter (dates, region names, …). */
+/**
+ * The UI language as a language tag, for any Intl formatter (dates, region
+ * names, …): `pt-BR`, where the translations name it `pt_BR`.
+ */
 export function pageLocale(): string {
-    return shared().locale;
+    return shared().languageTag;
 }
 
 /** Whether the page's language writes every noun with a capital, inside a sentence too (German). */

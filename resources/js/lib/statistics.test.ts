@@ -142,7 +142,7 @@ describe('numbers and words', () => {
     });
 
     it('keeps the capital of a noun in a language that writes nouns with one', () => {
-        setPageProps({ locale: 'de', capitalizedNouns: true });
+        setPageProps({ locale: 'de', languageTag: 'de-DE', capitalizedNouns: true });
 
         expect(typeNoun('movie')).toBe('Movies');
     });

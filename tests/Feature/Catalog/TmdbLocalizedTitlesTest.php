@@ -69,3 +69,17 @@ test('a film translated into neither UI language falls back to the english name,
 
     expect(tmdbProvider()->details('movie', '129', 'pl')->localizedTitles['pl']->title)->toBe('Spirited Away');
 });
+
+test('a language translated for several regions reads the variant of its UI region', function () {
+    config(['tracker.supported_locales' => ['en', 'pt_BR']]);
+    $film = tmdbPolishFilm();
+    $film['translations'] = ['translations' => [
+        ['iso_639_1' => 'en', 'iso_3166_1' => 'US', 'data' => ['title' => 'Teddy Bear']],
+        ['iso_639_1' => 'pt', 'iso_3166_1' => 'PT', 'data' => ['title' => 'O Ursinho']],
+        ['iso_639_1' => 'pt', 'iso_3166_1' => 'BR', 'data' => ['title' => 'O Ursinho de Pelúcia']],
+    ]];
+
+    Http::fake(['*/movie/31407*' => Http::response($film), ...providerDictionaryFakes()]);
+
+    expect(tmdbProvider()->details('movie', '31407', 'en')->localizedTitles['pt_BR']->title)->toBe('O Ursinho de Pelúcia');
+});

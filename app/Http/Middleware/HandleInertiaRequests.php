@@ -71,6 +71,9 @@ class HandleInertiaRequests extends Middleware
             'passwordLogin' => $this->passwordLogin->isEnabled(),
             'identityProviders' => fn (): array => array_map(IdentityProviderOption::of(...), $this->identityProviders->all()),
             'locale' => App::getLocale(),
+            // The same language as Intl names it (pt-BR for pt_BR): every
+            // date and number the front formats takes this one.
+            'languageTag' => Locales::language(App::getLocale()),
             'capitalizedNouns' => Locales::capitalizesNouns(App::getLocale()),
             // Where that language's texts are: the page shell preloads them,
             // and a language changed in the settings is fetched from here.

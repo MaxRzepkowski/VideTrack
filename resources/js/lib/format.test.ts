@@ -51,14 +51,14 @@ describe('codes and the locale', () => {
 
     it('names a country in the UI language and falls back to the code', () => {
         expect(countryName('PL')).toBe('Poland');
-        setPageProps({ locale: 'pl' });
+        setPageProps({ locale: 'pl', languageTag: 'pl-PL' });
         expect(countryName('PL')).toBe('Polska');
         expect(countryName('not-a-code')).toBe('not-a-code');
     });
 
     it('names a language in the UI language and falls back to the tag', () => {
         expect(languageName('ja')).toBe('Japanese');
-        setPageProps({ locale: 'pl' });
+        setPageProps({ locale: 'pl', languageTag: 'pl-PL' });
         expect(languageName('ja')).toBe('japoński');
         expect(languageName('not a tag')).toBe('not a tag');
     });
@@ -93,7 +93,7 @@ describe('dates and times', () => {
         expect(formatReleaseDate('2028-01-01', 'year')).toBe('2028');
         expect(formatReleaseDate(null, 'year')).toBeNull();
 
-        setPageProps({ locale: 'pl' });
+        setPageProps({ locale: 'pl', languageTag: 'pl-PL' });
         expect(formatReleaseDate('2028-03-01', 'month')).toBe('marzec 2028');
     });
 
@@ -199,7 +199,7 @@ describe('durations and numbers', () => {
         expect(formatMoney(0)).toBeNull();
         expect(formatMoney(undefined)).toBeNull();
 
-        setPageProps({ locale: 'pl' });
+        setPageProps({ locale: 'pl', languageTag: 'pl-PL' });
         expect(formatNumber(12.5, 1)).toBe('12,5');
         expect(formatNumber(1234567)).toBe('1 234 567');
     });
