@@ -31,7 +31,10 @@ final readonly class PersonTitles implements CreatorTitleSource
      * English is the pronoun pattern in isSelfAppearance(), which every locale
      * also gets (untranslated credits stay English). A new UI language needs
      * its entry here; a test holds the list to the supported locales. Stored
-     * lowercased; matched as substrings against the normalized role.
+     * lowercased; matched as substrings against the normalized role. A language
+     * written without spaces leaves this empty and names whole roles in
+     * SELF_ROLES instead: a phrase inside one could sit inside another word
+     * (本人 in 日本人, "Japanese").
      *
      * @var array<string, list<string>>
      */
@@ -118,10 +121,18 @@ final readonly class PersonTitles implements CreatorTitleSource
             'себя саму',
             'самих себя',
         ],
-        'zh_CN' => [
-            '本人',
-            '自己',
-        ],
+        'zh_CN' => [],
+    ];
+
+    /**
+     * Whole roles that mean "as themselves" in a language written without
+     * spaces, matched against the normalized role without a trailing
+     * parenthesis ("本人（声）" is 本人 voicing).
+     *
+     * @var array<string, list<string>>
+     */
+    public const SELF_ROLES = [
+        'zh_CN' => ['本人', '自己', '他自己', '她自己'],
     ];
 
     public function __construct(
@@ -217,6 +228,10 @@ final readonly class PersonTitles implements CreatorTitleSource
             }
         }
 
+        if (in_array($this->withoutTrailingNote($normalized), self::SELF_ROLES[$locale] ?? [], true)) {
+            return true;
+        }
+
         foreach ($names as $name) {
             $name = $this->normalize($name);
 
@@ -233,6 +248,12 @@ final readonly class PersonTitles implements CreatorTitleSource
         }
 
         return false;
+    }
+
+    /** The role without a trailing parenthesis: "本人（声）" is 本人 voicing. */
+    private function withoutTrailingNote(string $role): string
+    {
+        return (string) preg_replace('/\s*[(（][^()（）]*[)）]$/u', '', $role);
     }
 
     private function normalize(string $value): string
