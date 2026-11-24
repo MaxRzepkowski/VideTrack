@@ -205,6 +205,17 @@ describe('durations and numbers', () => {
         }
     });
 
+    it('sets the terms side by side the way the language writes them', async () => {
+        await loadLanguageAsync('ja');
+
+        try {
+            expect(formatRuntime(136)).toBe('2時間16分');
+            expect(formatWatchTime(3 * 1440 + 7 * 60 + 12)).toBe('3日7時間12分');
+        } finally {
+            await loadLanguageAsync('en');
+        }
+    });
+
     it('formats numbers and money for the UI language', () => {
         expect(formatNumber(1234567)).toBe('1,234,567');
         expect(formatNumber(12.5, 1)).toBe('12.5');

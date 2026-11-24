@@ -122,6 +122,7 @@ final readonly class PersonTitles implements CreatorTitleSource
             'самих себя',
         ],
         'zh_CN' => [],
+        'ja' => [],
     ];
 
     /**
@@ -133,6 +134,7 @@ final readonly class PersonTitles implements CreatorTitleSource
      */
     public const SELF_ROLES = [
         'zh_CN' => ['本人', '自己', '他自己', '她自己'],
+        'ja' => ['本人', '本人役', '自分自身', '自身'],
     ];
 
     public function __construct(
