@@ -19,6 +19,7 @@ $locales = [
     'cs' => ['language' => 'cs-CZ', 'region' => 'CZ', 'capitalized_nouns' => false],
     'sv' => ['language' => 'sv-SE', 'region' => 'SE', 'capitalized_nouns' => false],
     'ru' => ['language' => 'ru-RU', 'region' => 'RU', 'capitalized_nouns' => false],
+    'zh_CN' => ['language' => 'zh-CN', 'region' => 'CN', 'capitalized_nouns' => false],
 ];
 
 return [

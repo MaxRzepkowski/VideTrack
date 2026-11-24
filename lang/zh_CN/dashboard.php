@@ -1,0 +1,25 @@
+<?php
+
+return [
+    'all_episodes_watched' => '已看完所有单集',
+    'chapter' => '话',
+    'continue_watching_the_shows_you_have' => '继续看你已经开始的剧集。',
+    'count_book' => ':count 本书',
+    'count_comic' => ':count 部欧美漫画',
+    'count_game' => ':count 款游戏',
+    'count_manga' => ':count 部漫画',
+    'count_show' => ':count 部剧集',
+    'currently_playing' => '在玩',
+    'currently_reading' => '在读',
+    'issue' => '期',
+    'no_upcoming_releases_for_your_shows' => '你的剧集和待看清单近期没有新的发布。',
+    'nothing_here_yet_mark_an_episode' => '这里还是空的。把一集标记为看过，你的剧集就会出现在这里。',
+    'nothing_left_to_watch' => '没有要看的了',
+    'page' => '页',
+    'rate_this_series' => '给这部剧评分',
+    'up_next_to_watch' => '继续观看',
+    'your_books_manga_and_comics_in' => '你正在读的图书、漫画和欧美漫画',
+    'your_games_in_progress' => '你正在玩的游戏',
+    'your_stats' => '你的统计',
+    'your_viewing_gaming_and_reading_activity' => '一眼看清你的观看、游戏和阅读记录。',
+];
