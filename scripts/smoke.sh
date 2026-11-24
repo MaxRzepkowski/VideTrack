@@ -93,6 +93,13 @@ check "$image"
 curl -fsS -o /dev/null "$base/sw.js"
 curl -fsS -o /dev/null "$base/manifest.webmanifest"
 
+# Caddy's admin API would stop the web server for any request from inside
+# the container; the image switches it off.
+if docker exec "$name" curl -s -o /dev/null localhost:2019/config/; then
+    echo "smoke: Caddy's admin API answers on localhost:2019" >&2
+    exit 1
+fi
+
 # The first start makes the web push keys next to the database.
 if ! docker exec "$name" test -s /data/vapid.json; then
     echo "smoke: the first start made no web push keys" >&2
