@@ -1,8 +1,9 @@
 <script setup lang="ts">
+import ConfirmAccountField from '@/components/ConfirmAccountField.vue';
 import MetaLine from '@/components/MetaLine.vue';
 import { getInitials } from '@/lib/format';
 import { Head, useForm, usePage } from '@inertiajs/vue3';
-import { computed, onBeforeUnmount, ref } from 'vue';
+import { computed, onBeforeUnmount, ref, watch } from 'vue';
 
 import HeadingSmall from '@/components/HeadingSmall.vue';
 import InputError from '@/components/InputError.vue';
@@ -44,6 +45,21 @@ const form = useForm({
     locale: user.value.locale ?? page.props.locale,
     avatar: null as File | null,
     remove_avatar: false as boolean,
+    // Asked only while the address changes: password resets go to it.
+    current_password: '',
+    confirm_username: '',
+});
+
+const changesEmail = computed(() => form.email.trim().toLowerCase() !== user.value.email);
+
+function forgetConfirmation(): void {
+    form.current_password = '';
+    form.confirm_username = '';
+}
+
+// Back to the saved address, nothing is left to confirm.
+watch(changesEmail, (changes) => {
+    if (!changes) forgetConfirmation();
 });
 
 const avatarInput = ref<HTMLInputElement | null>(null);
@@ -105,6 +121,7 @@ function submit(): void {
             clearAvatarPick();
             form.avatar = null;
             form.remove_avatar = false;
+            forgetConfirmation();
             toast.success(trans('settings.saved_2'));
         },
     });
@@ -199,6 +216,15 @@ function submit(): void {
                                 autocomplete="email"
                                 :class="[SETTINGS_FIELD_CLASS, 'block w-full']"
                             />
+                            <div v-if="changesEmail" class="mt-4 grid gap-2">
+                                <p class="text-ink-muted text-sm">{{ trans('settings.confirm_the_new_address') }}</p>
+                                <ConfirmAccountField
+                                    v-model:password="form.current_password"
+                                    v-model:username="form.confirm_username"
+                                    id-prefix="email-change"
+                                    :errors="{ password: form.errors.current_password, username: form.errors.confirm_username }"
+                                />
+                            </div>
                         </SettingsRow>
 
                         <SettingsRow :title="trans('settings.language')" for="locale" :error="form.errors.locale">

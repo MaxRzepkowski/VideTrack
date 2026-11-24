@@ -23,6 +23,7 @@ test('profile information can be updated', function () {
             'name' => 'Test User',
             'username' => 'test_user',
             'email' => 'test@example.com',
+            'current_password' => 'password',
             'bio' => 'A short bio',
             'is_private' => true,
         ]);
@@ -38,6 +39,38 @@ test('profile information can be updated', function () {
     $this->assertSame('test@example.com', $user->email);
     $this->assertSame('A short bio', $user->bio);
     $this->assertTrue($user->is_private);
+});
+
+test('a new address takes the password, an unchanged one nothing', function () {
+    $user = User::factory()->create(['email' => 'alex@example.com']);
+    $this->actingAs($user)->from(route('settings.profile.edit'));
+    $profile = fn (array $fields) => $this->patch(route('settings.profile.update'), [
+        'name' => $user->name, 'username' => $user->username, 'email' => 'alex@example.com', ...$fields,
+    ]);
+
+    $profile(['bio' => 'Only the bio'])->assertSessionHasNoErrors();
+
+    $profile(['email' => 'someone@example.com'])->assertSessionHasErrors('current_password');
+    $profile(['email' => 'someone@example.com', 'current_password' => 'not it'])->assertSessionHasErrors('current_password');
+    expect($user->refresh()->email)->toBe('alex@example.com');
+
+    $profile(['email' => 'someone@example.com', 'current_password' => 'password'])->assertSessionHasNoErrors();
+    expect($user->refresh()->email)->toBe('someone@example.com')
+        ->and($user->bio)->toBe('Only the bio');
+});
+
+test('an account without a password confirms a new address with its username', function () {
+    $user = User::factory()->withoutPassword()->create(['email' => 'alex@example.com', 'username' => 'alex']);
+    $this->actingAs($user)->from(route('settings.profile.edit'));
+    $profile = fn (array $fields) => $this->patch(route('settings.profile.update'), [
+        'name' => $user->name, 'username' => 'alex', 'email' => 'someone@example.com', ...$fields,
+    ]);
+
+    $profile(['confirm_username' => 'somebody'])->assertSessionHasErrors(['confirm_username' => __('settings.username_does_not_match')]);
+    expect($user->refresh()->email)->toBe('alex@example.com');
+
+    $profile(['confirm_username' => 'alex'])->assertSessionHasNoErrors();
+    expect($user->refresh()->email)->toBe('someone@example.com');
 });
 
 test('username cannot be taken by someone else', function () {

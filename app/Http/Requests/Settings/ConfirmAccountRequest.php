@@ -2,33 +2,25 @@
 
 namespace App\Http\Requests\Settings;
 
-use App\Accounts\PasswordLogin;
+use App\Http\Requests\Settings\Concerns\ConfirmsAccount;
 use App\Models\User;
+use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
-use LogicException;
 
 /**
  * Someone confirming what cannot be undone (deleting the account, clearing
- * its data): with their password where it is their way in, otherwise by
- * typing their username.
+ * its data).
  */
 class ConfirmAccountRequest extends FormRequest
 {
+    use ConfirmsAccount;
+
     /**
      * @return array<string, mixed>
      */
-    public function rules(): array
+    public function rules(#[CurrentUser] User $viewer): array
     {
-        $user = $this->user();
-
-        if (! $user instanceof User) {
-            throw new LogicException('Only a signed-in account confirms.');
-        }
-
-        return app(PasswordLogin::class)->isWayInFor($user)
-            ? ['password' => ['required', 'current_password']]
-            : ['username' => ['required', 'string', Rule::in([$user->username])]];
+        return $this->confirmationRules($viewer, 'password', 'username');
     }
 
     /**
@@ -36,6 +28,6 @@ class ConfirmAccountRequest extends FormRequest
      */
     public function messages(): array
     {
-        return ['username.in' => trans('settings.username_does_not_match')];
+        return $this->confirmationMessages('username');
     }
 }

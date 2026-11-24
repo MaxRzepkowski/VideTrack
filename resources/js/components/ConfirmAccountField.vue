@@ -7,8 +7,9 @@ import { trans } from 'laravel-vue-i18n';
 import { ref } from 'vue';
 
 /**
- * What confirms an action that cannot be undone: the password where it is
- * the viewer's way in, otherwise their username typed out.
+ * What confirms a change that hands the account over or cannot be undone:
+ * the password where it is the viewer's way in, otherwise their username
+ * typed out.
  */
 const props = defineProps<{
     idPrefix: string;

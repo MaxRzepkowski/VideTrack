@@ -45,6 +45,7 @@ return [
     'set_password' => 'Ustaw hasło',
     'set_a_password_to_log_in' => 'Dodaj hasło, aby logować się bez połączonego konta',
     'username_does_not_match' => 'To nie jest Twoja nazwa użytkownika.',
+    'confirm_the_new_address' => 'Potwierdź nowy adres.',
     'type_your_username_to_confirm' => 'Wpisz swoją nazwę użytkownika (:username), aby potwierdzić',
     'episode_still' => 'Kadr odcinka',
     'episode_thumbnails' => 'Miniatury odcinków',
