@@ -51,8 +51,12 @@ ARG APP_VERSION=dev
 # them. Sessions and cache live in files, off the SQLite write lock the
 # queue and the library share; the queue stays in the database (durable
 # jobs). Logs go to stdout for `docker logs`. Thirty days of inactivity
-# before a session ends, not Laravel's two hours.
+# before a session ends, not Laravel's two hours. Caddy's admin API stays
+# off: nothing here reconfigures the server at runtime, and on localhost:2019
+# it would stop or rewrite the web server for any request that reaches it
+# from inside the container, a webhook or a push address included.
 ENV SERVER_NAME=:80 \
+    CADDY_GLOBAL_OPTIONS="admin off" \
     APP_NAME=VideTrack \
     APP_ENV=production \
     APP_DEBUG=false \
