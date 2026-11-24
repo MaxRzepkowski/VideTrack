@@ -32,9 +32,9 @@ final readonly class PersonTitles implements CreatorTitleSource
      * also gets (untranslated credits stay English). A new UI language needs
      * its entry here; a test holds the list to the supported locales. Stored
      * lowercased; matched as substrings against the normalized role. A language
-     * written without spaces leaves this empty and names whole roles in
+     * whose words run together leaves this empty and names whole roles in
      * SELF_ROLES instead: a phrase inside one could sit inside another word
-     * (本人 in 日本人, "Japanese").
+     * (本人 in 日本人, "Japanese"; 자신 in 자신감, "confidence").
      *
      * @var array<string, list<string>>
      */
@@ -123,11 +123,12 @@ final readonly class PersonTitles implements CreatorTitleSource
         ],
         'zh_CN' => [],
         'ja' => [],
+        'ko' => [],
     ];
 
     /**
-     * Whole roles that mean "as themselves" in a language written without
-     * spaces, matched against the normalized role without a trailing
+     * Whole roles that mean "as themselves" in a language whose words run
+     * together, matched against the normalized role without a trailing
      * parenthesis ("本人（声）" is 本人 voicing).
      *
      * @var array<string, list<string>>
@@ -135,6 +136,7 @@ final readonly class PersonTitles implements CreatorTitleSource
     public const SELF_ROLES = [
         'zh_CN' => ['本人', '自己', '他自己', '她自己'],
         'ja' => ['本人', '本人役', '自分自身', '自身'],
+        'ko' => ['본인', '본인 역', '자기 자신', '자신'],
     ];
 
     public function __construct(
