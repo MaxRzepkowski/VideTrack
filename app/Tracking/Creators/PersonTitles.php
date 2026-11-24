@@ -51,6 +51,13 @@ final readonly class PersonTitles implements CreatorTitleSource
             'er selbst',
             'sie selbst',
         ],
+        'fr' => [
+            'lui-même',
+            'elle-même',
+            'soi-même',
+            'eux-mêmes',
+            'elles-mêmes',
+        ],
     ];
 
     public function __construct(

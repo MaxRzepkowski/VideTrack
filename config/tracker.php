@@ -10,6 +10,7 @@ $locales = [
     'en' => ['language' => 'en-US', 'region' => 'US', 'capitalized_nouns' => false],
     'pl' => ['language' => 'pl-PL', 'region' => 'PL', 'capitalized_nouns' => false],
     'de' => ['language' => 'de-DE', 'region' => 'DE', 'capitalized_nouns' => true],
+    'fr' => ['language' => 'fr-FR', 'region' => 'FR', 'capitalized_nouns' => false],
 ];
 
 return [
