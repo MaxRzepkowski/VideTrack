@@ -188,7 +188,9 @@ for (const path of files(SOURCE)) {
 // dash. Laravel's own groups are the framework's wording, not ours.
 const FRAMEWORK_GROUPS = new Set(['auth', 'pagination', 'passwords', 'validation']);
 
-for (const locale of ['en', 'pl']) {
+const LOCALES = readdirSync(join(ROOT, 'lang')).filter((name) => statSync(join(ROOT, 'lang', name)).isDirectory());
+
+for (const locale of LOCALES) {
     const dir = join(ROOT, 'lang', locale);
 
     for (const name of readdirSync(dir).filter((file) => file.endsWith('.php') && !FRAMEWORK_GROUPS.has(file.replace(/\.php$/, '')))) {

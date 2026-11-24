@@ -144,7 +144,7 @@ Everything is optional except `TMDB_API_KEY`. A media type exists only when its 
 | `GITHUB_CLIENT_ID` / `GITHUB_CLIENT_SECRET` | | logging in with GitHub |
 | `GITLAB_CLIENT_ID` / `GITLAB_CLIENT_SECRET` / `GITLAB_URL` | `GITLAB_URL`: `https://gitlab.com` | logging in with GitLab |
 | `PASSWORD_LOGIN_ENABLED` | `true` | `false` leaves the providers as the only way in (ignored while none is configured) |
-| `DEFAULT_LOCALE` | `en` | language of new accounts (`en` / `pl`); each user picks their own |
+| `DEFAULT_LOCALE` | `en` | language of new accounts, one of the codes under `lang/` (`en`, `de`, `pt_BR`…); each user picks their own |
 | `APP_TIMEZONE` | `UTC` | storage time zone; display uses each user's preference |
 | `MAIL_MAILER` | `log` | how the instance sends mail: password-reset links, and the e-mail notification channel, offered only when mail really goes out. `log` only writes it to the container log. `smtp` with `MAIL_HOST`, `MAIL_PORT` (`587`), `MAIL_USERNAME`, `MAIL_PASSWORD`, `MAIL_SCHEME` |
 | `MAIL_FROM_ADDRESS` | `videtrack@localhost` | sender of the mail the instance sends |
