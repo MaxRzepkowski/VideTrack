@@ -7,8 +7,9 @@ $source = env('SOURCE_URL', 'https://github.com/MaxRzepkowski/VideTrack');
 $userAgent = "VideTrack/{$version} (+{$source})";
 
 $locales = [
-    'en' => ['language' => 'en-US', 'region' => 'US'],
-    'pl' => ['language' => 'pl-PL', 'region' => 'PL'],
+    'en' => ['language' => 'en-US', 'region' => 'US', 'capitalized_nouns' => false],
+    'pl' => ['language' => 'pl-PL', 'region' => 'PL', 'capitalized_nouns' => false],
+    'de' => ['language' => 'de-DE', 'region' => 'DE', 'capitalized_nouns' => true],
 ];
 
 return [
@@ -179,7 +180,8 @@ return [
 
     // What each UI language means outside the UI: the language tag providers
     // are asked in, and the country whose streaming offers, release dates and
-    // age ratings a viewer sees until they pick their own.
+    // age ratings a viewer sees until they pick their own; and whether the
+    // language writes every noun with a capital, inside a sentence too.
     'locales' => $locales,
 
     /*

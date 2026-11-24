@@ -37,6 +37,11 @@ export function pageLocale(): string {
     return shared().locale;
 }
 
+/** Whether the page's language writes every noun with a capital, inside a sentence too (German). */
+export function pageCapitalizesNouns(): boolean {
+    return shared().capitalizedNouns;
+}
+
 /** The viewer's timezone preference; undefined = the browser's own (Intl default). */
 export function viewerTimeZone(): string | undefined {
     return shared().auth.user?.preferences.timezone ?? undefined;

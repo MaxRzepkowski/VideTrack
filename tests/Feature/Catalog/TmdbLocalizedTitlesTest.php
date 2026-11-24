@@ -4,6 +4,8 @@ use App\Catalog\Data\LocalizedTitle;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
 
+beforeEach(fn () => speakEnglishAndPolish());
+
 test('one details request names the title and picks its poster in every UI language', function () {
     Http::fake(['*/movie/31407*' => Http::response(tmdbPolishFilm()), ...providerDictionaryFakes()]);
 

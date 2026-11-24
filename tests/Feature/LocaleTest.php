@@ -25,6 +25,17 @@ test('an unsupported locale falls back to the application default', function () 
         ->assertInertia(fn ($page) => $page->where('locale', 'en'));
 });
 
+test('a page says whether its language writes nouns with a capital', function (string $locale, bool $capitalized) {
+    $user = User::factory()->create(['locale' => $locale]);
+
+    $this->actingAs($user)
+        ->get(route('dashboard'))
+        ->assertInertia(fn ($page) => $page->where('capitalizedNouns', $capitalized));
+})->with([
+    'English' => ['en', false],
+    'German' => ['de', true],
+]);
+
 test('users can change their locale in profile settings', function () {
     $user = User::factory()->create();
 

@@ -12,6 +12,7 @@ use App\Models\Play;
 use App\Models\Rating;
 use App\Models\User;
 use Carbon\CarbonImmutable;
+use Illuminate\Support\Collection;
 
 function seedExportData(User $user): MediaItem
 {
@@ -241,9 +242,11 @@ test('the export page and the profile take their lists from the server', functio
             ['code' => 'myanimelist-anime', 'label' => 'MyAnimeList: anime', 'shelf' => 'service'],
         ]));
 
+    // Every UI language, each under its own name.
     $this->actingAs($user)
         ->get(route('settings.profile.edit'))
-        ->assertInertia(fn ($page) => $page->where('languages', [['value' => 'en', 'label' => 'English'], ['value' => 'pl', 'label' => 'Polski']]));
+        ->assertInertia(fn ($page) => $page->where('languages', fn (Collection $languages): bool => $languages->pluck('value')->all() === config('tracker.supported_locales')
+            && $languages->pluck('label', 'value')->only(['en', 'pl'])->all() === ['en' => 'English', 'pl' => 'Polski']));
 });
 
 test('the watch date is the day on the user\'s own calendar', function () {

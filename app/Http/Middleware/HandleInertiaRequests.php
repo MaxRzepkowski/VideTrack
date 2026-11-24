@@ -18,6 +18,7 @@ use App\Models\MediaList;
 use App\Models\User;
 use App\Notifications\Data\NotificationFeed;
 use App\Support\FrontTranslations;
+use App\Support\Locales;
 use App\Support\QueryRow;
 use App\Tracking\Data\EventEntry;
 use App\Tracking\Events\VisibleEvents;
@@ -70,6 +71,7 @@ class HandleInertiaRequests extends Middleware
             'passwordLogin' => $this->passwordLogin->isEnabled(),
             'identityProviders' => fn (): array => array_map(IdentityProviderOption::of(...), $this->identityProviders->all()),
             'locale' => App::getLocale(),
+            'capitalizedNouns' => Locales::capitalizesNouns(App::getLocale()),
             // Where that language's texts are: the page shell preloads them,
             // and a language changed in the settings is fetched from here.
             // Always sent, a partial reload included: the shell names it on
