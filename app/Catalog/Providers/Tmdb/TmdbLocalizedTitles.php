@@ -92,16 +92,31 @@ final readonly class TmdbLocalizedTitles
      */
     private function namesByLanguage(array $data, string $nameKey): array
     {
+        $regions = [];
+
+        foreach (Locales::supported() as $locale) {
+            $regions[Locales::code($locale)] = Locales::region($locale);
+        }
+
         $names = [];
+        $inOwnRegion = [];
 
         foreach (Payload::list(data_get($data, 'translations.translations')) as $row) {
             $language = Payload::string($row, 'iso_639_1');
             $name = Payload::string(Payload::map($row['data'] ?? null), $nameKey);
 
-            // A language arrives once per region (pt-BR, pt-PT); the first
-            // regional variant with a name answers for the language.
-            if ($language !== null && $name !== null && ! isset($names[$language])) {
+            if ($language === null || $name === null || isset($inOwnRegion[$language])) {
+                continue;
+            }
+
+            // A language arrives once per region (pt-BR, pt-PT; zh-CN, zh-TW):
+            // the variant of the UI language's own region answers for it, else
+            // the first one with a name.
+            if (Payload::string($row, 'iso_3166_1') === ($regions[$language] ?? null)) {
                 $names[$language] = $name;
+                $inOwnRegion[$language] = true;
+            } else {
+                $names[$language] ??= $name;
             }
         }
 

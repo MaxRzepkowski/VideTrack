@@ -4,10 +4,17 @@ import { describe, expect, it } from 'vitest';
 
 describe('pageContext', () => {
     it('reads the language and the image CDN the page shares', () => {
-        setPageProps({ locale: 'pl', imageBase: 'https://cdn.test/t/p' });
+        setPageProps({ locale: 'pl', languageTag: 'pl-PL', imageBase: 'https://cdn.test/t/p' });
 
-        expect(pageLocale()).toBe('pl');
+        expect(pageLocale()).toBe('pl-PL');
         expect(imageBase()).toBe('https://cdn.test/t/p');
+    });
+
+    it('names a regional language the way Intl takes it', () => {
+        setPageProps({ locale: 'pt_BR', languageTag: 'pt-BR' });
+
+        expect(pageLocale()).toBe('pt-BR');
+        expect(() => new Intl.NumberFormat(pageLocale())).not.toThrow();
     });
 
     it("reads the viewer's clock preferences, the browser's and the locale's when unset", () => {

@@ -42,6 +42,8 @@ export type SharedData = {
     /** The identity providers this instance signs in with, in the order the login page offers them. */
     identityProviders: IdentityProviderOption[];
     locale: string;
+    /** The same language as a tag Intl takes (`pt-BR` where `locale` is `pt_BR`). */
+    languageTag: string;
     /** Whether the page's language writes every noun with a capital, inside a sentence too. */
     capitalizedNouns: boolean;
     /** Where the texts of that language are, fingerprinted: a browser keeps them until they change. */

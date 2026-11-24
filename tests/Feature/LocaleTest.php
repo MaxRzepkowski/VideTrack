@@ -36,6 +36,14 @@ test('a page says whether its language writes nouns with a capital', function (s
     'German' => ['de', true],
 ]);
 
+test('a page names its language the way Intl takes it', function () {
+    $user = User::factory()->create(['locale' => 'pt_BR']);
+
+    $this->actingAs($user)
+        ->get(route('dashboard'))
+        ->assertInertia(fn ($page) => $page->where('locale', 'pt_BR')->where('languageTag', 'pt-BR'));
+});
+
 test('users can change their locale in profile settings', function () {
     $user = User::factory()->create();
 
