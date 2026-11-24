@@ -1,10 +1,12 @@
 <?php
 
 use App\Integrations\Connections\HostResolver;
+use App\Integrations\Connections\ServerNetworks;
 use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
 use Tests\Fakes\FakeHostResolver;
+use Tests\Fakes\FakeServerNetworks;
 use Tests\TestCase;
 
 // Every Feature test: a fresh database, no real service, one frozen instant,
@@ -20,6 +22,8 @@ pest()->extend(TestCase::class)
         resetFakes();
         // Nor DNS: a connect form's address resolves from a fixed table.
         app()->instance(HostResolver::class, new FakeHostResolver);
+        // Nor the machine's interfaces: the server stands in a fixed network.
+        app()->instance(ServerNetworks::class, new FakeServerNetworks);
         // Nor the front-end build: a page renders without a running Vite or
         // a built manifest, as on a fresh clone or in CI.
         $this->withoutVite();

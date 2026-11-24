@@ -71,9 +71,7 @@ final readonly class OwnServerClient
     /** A request to `$base` (the API's path under the address) at the approved IP. */
     public function to(PinnedAddress $address, string $base): PendingRequest
     {
-        return Http::baseUrl($address->url.$base)
-            ->withoutRedirecting()
-            ->withOptions(['curl' => [CURLOPT_RESOLVE => [$address->curlResolve()]]])
+        return $address->hold(Http::baseUrl($address->url.$base))
             ->timeout(self::TIMEOUT_SECONDS)
             ->acceptJson()
             ->withUserAgent(config()->string('tracker.http.user_agent'));

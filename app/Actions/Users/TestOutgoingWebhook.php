@@ -23,7 +23,7 @@ final readonly class TestOutgoingWebhook
 
     public function execute(OutgoingWebhook $webhook): DeliveryAnswer
     {
-        $answer = $this->client->send($webhook->url, $webhook->secret, new WebhookMessage(
+        $answer = $this->client->send($webhook, $webhook->user, new WebhookMessage(
             (string) Str::uuid7(),
             WebhookEventType::Test,
             now()->toIso8601String(),

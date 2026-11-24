@@ -153,7 +153,6 @@ return [
     'optional_field' => '(facultatif)',
     'this_is_not_a_web_address' => 'Saisis une adresse web commençant par http:// ou https://.',
     'this_address_could_not_be_found' => 'Cette adresse est introuvable.',
-    'this_address_is_in_a_private_network' => 'Cette adresse se trouve dans un réseau privé. Demande à l’administrateur de l’ajouter à INTEGRATION_PRIVATE_HOSTS ou de la configurer depuis un compte administrateur.',
     'estimate_sign' => '≈',
     'zoom_in' => 'Zoom avant',
     'zoom_in_hint' => 'Zoom avant (Ctrl + molette fonctionne aussi)',

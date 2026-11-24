@@ -153,7 +153,7 @@ return [
     'optional_field' => '(opcjonalne)',
     'this_is_not_a_web_address' => 'Wpisz adres strony zaczynający się od http:// albo https://.',
     'this_address_could_not_be_found' => 'Nie udało się znaleźć tego adresu.',
-    'this_address_is_in_a_private_network' => 'Ten adres należy do sieci prywatnej. Poproś administratora, żeby dopisał go do INTEGRATION_PRIVATE_HOSTS albo ustawił go z konta administratora.',
+    'this_address_leads_to_the_server' => 'Ten adres prowadzi do serwera, na którym działa VideTrack, a z niego może korzystać tylko konto administratora. Podaj adres, pod którym usługa działa w Twojej sieci domowej.',
     'estimate_sign' => '≈',
     'zoom_in' => 'Przybliż',
     'zoom_in_hint' => 'Przybliż (także Ctrl + kółko myszy)',

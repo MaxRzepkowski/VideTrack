@@ -153,7 +153,6 @@ return [
     'optional_field' => '(opcional)',
     'this_is_not_a_web_address' => 'Introduce una dirección web que empiece por http:// o https://.',
     'this_address_could_not_be_found' => 'No se encontró esta dirección.',
-    'this_address_is_in_a_private_network' => 'Esta dirección está en una red privada. Pide al administrador que la añada a INTEGRATION_PRIVATE_HOSTS o que la configure desde una cuenta de administrador.',
     'estimate_sign' => '≈',
     'zoom_in' => 'Acercar',
     'zoom_in_hint' => 'Acercar (también con Ctrl + rueda de desplazamiento)',

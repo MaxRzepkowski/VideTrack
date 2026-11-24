@@ -19,9 +19,6 @@ use Inertia\Testing\AssertableInertia;
 
 beforeEach(function () {
     Sleep::fake();
-    // The server these tests talk to stands in the local network, as one
-    // usually does; the operator lets accounts reach it.
-    config(['tracker.integrations.private_hosts' => 'abs.lan']);
 });
 
 function audiobookshelfConnection(User $user, array $attributes = []): ServiceConnection

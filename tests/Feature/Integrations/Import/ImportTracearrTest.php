@@ -25,9 +25,6 @@ use Inertia\Testing\AssertableInertia;
 
 beforeEach(function () {
     Sleep::fake();
-    // The Tracearr these tests talk to stands in the local network, as one
-    // usually does; the operator lets accounts reach it.
-    config(['tracker.integrations.private_hosts' => 'tracearr.lan']);
 });
 
 const TRACEARR_ME = '7d9c1b8e-0000-4000-8000-000000000001';
@@ -246,31 +243,40 @@ test('a busy Tracearr is waited out', function () {
     Sleep::assertSleptTimes(1);
 });
 
-test('an ordinary account cannot point the server at an address in its private network', function (string $address) {
-    config(['tracker.integrations.private_hosts' => '']);
+test('an ordinary account cannot point the server at itself', function (string $address) {
     Http::fake();
 
     $this->actingAs(User::factory()->create())
         ->postJson(route('settings.connections.verify', ['service' => 'tracearr']), ['values' => ['url' => $address, 'key' => 'trr_pub_secret']])
         ->assertUnprocessable()
-        ->assertJsonValidationErrors(['values.url' => __('common.this_address_is_in_a_private_network')]);
+        ->assertJsonValidationErrors(['values.url' => __('common.this_address_leads_to_the_server')]);
 
     Http::assertNothingSent();
 })->with([
-    'the server itself' => 'http://localhost:3000',
-    'a local network name' => 'http://tracearr.lan:3000',
+    'its loopback' => 'http://localhost:3000',
+    'a container beside it' => 'http://tracearr:3000',
     'a cloud metadata endpoint' => 'http://169.254.169.254',
     'IPv6 loopback' => 'http://[::1]:3000',
-    'a name with one private address among public ones' => 'http://rebound.example.com',
+    'a name with one address of the server among public ones' => 'http://rebound.example.com',
 ]);
 
-test('an administrator may connect a Tracearr in the local network', function () {
-    config(['tracker.integrations.private_hosts' => '']);
+test('every account may connect a Tracearr in the home network', function () {
     Http::fake(['tracearr.lan:3000/*' => Http::response(['data' => [['id' => TRACEARR_ME, 'username' => 'alex']], 'meta' => []])]);
 
-    $this->actingAs(User::factory()->admin()->create())
+    $this->actingAs(User::factory()->create())
         ->postJson(route('settings.connections.verify', ['service' => 'tracearr']), ['values' => ['url' => 'http://tracearr.lan:3000', 'key' => 'trr_pub_secret']])
         ->assertOk();
+});
+
+test('a Tracearr beside the server takes an administrator, or its host listed by the operator', function () {
+    Http::fake(['tracearr:3000/*' => Http::response(['data' => [['id' => TRACEARR_ME, 'username' => 'alex']], 'meta' => []])]);
+    $verify = fn (User $user) => $this->actingAs($user)
+        ->postJson(route('settings.connections.verify', ['service' => 'tracearr']), ['values' => ['url' => 'http://tracearr:3000', 'key' => 'trr_pub_secret']]);
+
+    $verify(User::factory()->admin()->create())->assertOk();
+
+    config(['tracker.integrations.private_hosts' => 'tracearr']);
+    $verify(User::factory()->create())->assertOk();
 });
 
 test('a public address is open to every account, and a redirect it answers with is not followed', function () {
@@ -288,7 +294,10 @@ test('a public address is open to every account, and a redirect it answers with 
 });
 
 test('a run checks the address again, so a host the operator stopped allowing is no longer read', function () {
-    $connection = tracearrConnection(User::factory()->create());
+    config(['tracker.integrations.private_hosts' => 'tracearr']);
+    $connection = tracearrConnection(User::factory()->create(), [
+        'credentials' => ['url' => 'http://tracearr:3000', 'key' => 'trr_pub_secret'],
+    ]);
     config(['tracker.integrations.private_hosts' => '']);
     Http::fake();
 
@@ -303,7 +312,6 @@ test('a run whose address resolves to nothing this time is tried again, not give
     $connection = tracearrConnection(User::factory()->create(), [
         'credentials' => ['url' => 'http://gone.lan:3000', 'key' => 'trr_pub_secret'],
     ]);
-    config(['tracker.integrations.private_hosts' => 'gone.lan']);
     Http::fake();
 
     expect(fn () => runConnectionImport($connection, 'tracearr'))->toThrow(OwnServerUnavailable::class);

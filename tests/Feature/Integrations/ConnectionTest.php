@@ -562,7 +562,7 @@ test('every service with an address field keeps an ordinary account out of the s
             if ($field->type === CredentialFieldType::Url) {
                 $this->actingAs(User::factory()->create())
                     ->postJson(route('settings.connections.verify', ['service' => $code]), ['values' => $values])
-                    ->assertJsonValidationErrors(["values.{$field->key}" => __('common.this_address_is_in_a_private_network')]);
+                    ->assertJsonValidationErrors(["values.{$field->key}" => __('common.this_address_leads_to_the_server')]);
                 $checked++;
             }
         }

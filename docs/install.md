@@ -151,7 +151,7 @@ Everything is optional except `TMDB_API_KEY`. A media type exists only when its 
 | `TRUSTED_PROXIES` | `PRIVATE_SUBNETS` | whose `X-Forwarded-*` headers to believe (client address for throttling, HTTPS detection); list a proxy on a public address here. `*` is right only when nothing but the proxy can reach the app |
 | `SESSION_SECURE_COOKIE` | follows `APP_URL` | `true` sends the session cookie over HTTPS only; unset, it is `true` exactly when `APP_URL` starts with `https://` |
 | `SESSION_LIFETIME` | `43200` (30 days) | minutes of inactivity before a session ends; "remember me" keeps it about five years |
-| `INTEGRATION_PRIVATE_HOSTS` | | private-network hosts an ordinary account may connect an integration or point a notification channel to (an administrator may use any), comma-separated: `tracearr.lan,192.168.1.20` |
+| `INTEGRATION_PRIVATE_HOSTS` | | hosts on the server itself an ordinary account may connect an integration, point a notification channel or send a webhook to, comma-separated: `kavita,tracearr` for containers beside VideTrack. Every account may use the internet and the home network, except on the host's network (`network_mode: host`), where the home network is the server's own. A network VideTrack shares with other services (a reverse proxy's) is the server's too: there an ordinary account gives a service's outside or home-network address, and a container name needs this list; an administrator may use any address |
 | `LOG_CHANNEL` / `LOG_LEVEL` | `stderr` / `warning` | `stderr` writes to `docker logs`; `daily` or `single` write a file on the storage volume |
 | `SOURCE_URL` | this repository | where About links for the source code; point it at your fork when you run a modified version (AGPL-3.0, section 13) |
 | `API_DOCS_URL` | `docs/api.md` in this repository | the API reference linked from Settings → API; point it at your fork's copy |
@@ -176,10 +176,10 @@ at it: nothing to set up. The list of services comes from that container, so a s
 appears with its next image.
 
 A user fills in the fields the service asks for (a bot token, a topic, a server…), and VideTrack puts
-the Apprise URL together. A field that names a server follows the same rule as the integrations: an
-ordinary account may not point it into a private network unless `INTEGRATION_PRIVATE_HOSTS` lists the
-host; an administrator may use any. The check runs when the channel is saved; Apprise looks the name up
-again when it sends.
+the Apprise URL together. A field that names a server follows the same rule as the integrations: any
+address on the internet or in the home network, but one that leads to the server VideTrack runs on only
+for an administrator, or when `INTEGRATION_PRIVATE_HOSTS` lists the host. The check runs when the channel
+is saved; Apprise looks the name up again when it sends.
 
 Without the container, delete the `apprise` service and the `APPRISE_API_URL` line from
 `compose.yaml`: its services disappear from the settings, and Discord and e-mail stay.

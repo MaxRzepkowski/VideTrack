@@ -43,6 +43,16 @@ Images are tagged `X.Y.Z`, `X.Y` and `latest`, one set per release.
   Apprise services too.
 - **The `apprise` container is pinned to a minor version** (`caronc/apprise:2.1`): `docker compose pull`
   brings its patches. A newer minor, with the services Apprise added, is the tag you set in `compose.yaml`.
+- **`INTEGRATION_PRIVATE_HOSTS` is needed only for the server itself.** Every account may now give an
+  address in the home network (a Kavita, a Home Assistant), so hosts listed there for that reason can go.
+  An address that leads to the server VideTrack runs on (`localhost`, another container of the compose
+  file, a cloud's metadata endpoint) stays for an administrator, or a host listed there; webhooks and
+  browser notifications follow the same rule, checked again before every message. A webhook of an
+  ordinary account that points at such an address (`http://homeassistant:8123` in the same compose
+  file), or at the home network of an instance on the host's network (`network_mode: host`), says on
+  Settings → Webhooks that it is not delivered: list its host there to keep it. The same goes for a
+  container name in a network VideTrack shares with other services (a reverse proxy's): an ordinary
+  account gives the service's outside or home-network address instead, or the host is listed.
 
 ## Going back
 

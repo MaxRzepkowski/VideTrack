@@ -13,6 +13,9 @@ enum DeliveryAnswer: string
     /** The receiver said the address is closed for good: nothing more should go there. */
     case Closed = 'closed';
 
+    /** The address leads to the server itself, which its owner may not call: no service was asked. */
+    case NotAllowed = 'not_allowed';
+
     /** The service answered and refused the message. */
     case Refused = 'refused';
 
@@ -46,6 +49,7 @@ enum DeliveryAnswer: string
         return __(match ($answer) {
             self::Gone => 'settings.delivery_failure_gone',
             self::Closed => 'settings.delivery_failure_closed',
+            self::NotAllowed => 'common.this_address_leads_to_the_server',
             self::Refused => 'settings.delivery_failure_refused',
             self::Throttled => 'settings.delivery_failure_throttled',
             self::Unavailable => 'settings.delivery_failure_unavailable',

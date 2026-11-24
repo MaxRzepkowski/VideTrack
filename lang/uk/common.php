@@ -153,7 +153,6 @@ return [
     'optional_field' => '(необов’язково)',
     'this_is_not_a_web_address' => 'Введи вебадресу, що починається з http:// або https://.',
     'this_address_could_not_be_found' => 'Не вдалося знайти цю адресу.',
-    'this_address_is_in_a_private_network' => 'Ця адреса належить до приватної мережі. Попроси адміністратора додати її до INTEGRATION_PRIVATE_HOSTS або налаштувати це з акаунта адміністратора.',
     'estimate_sign' => '≈',
     'zoom_in' => 'Збільшити',
     'zoom_in_hint' => 'Збільшити (також Ctrl + коліщатко миші)',

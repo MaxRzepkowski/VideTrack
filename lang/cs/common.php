@@ -153,7 +153,6 @@ return [
     'optional_field' => '(nepovinné)',
     'this_is_not_a_web_address' => 'Zadej webovou adresu začínající http:// nebo https://.',
     'this_address_could_not_be_found' => 'Tuto adresu se nepodařilo najít.',
-    'this_address_is_in_a_private_network' => 'Tato adresa je v soukromé síti. Požádej správce, aby ji přidal do INTEGRATION_PRIVATE_HOSTS, nebo ji nastavil ze správcovského účtu.',
     'estimate_sign' => '≈',
     'zoom_in' => 'Přiblížit',
     'zoom_in_hint' => 'Přiblížit (funguje i Ctrl + kolečko myši)',

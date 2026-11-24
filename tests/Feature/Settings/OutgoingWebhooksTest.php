@@ -19,13 +19,15 @@ use Inertia\Testing\AssertableInertia as Assert;
 
 const HOME_ASSISTANT = 'http://192.168.1.20:8123/api/webhook/library';
 
+const N8N = 'https://n8n.example.com/webhook/library';
+
 /**
  * @param  array<string, mixed>  $overrides
  * @return array<string, mixed>
  */
 function webhookForm(array $overrides = []): array
 {
-    return ['label' => '', 'url' => HOME_ASSISTANT, 'secret' => WebhookSignature::newSecret(), 'events' => ['ratings', 'lists'], ...$overrides];
+    return ['label' => '', 'url' => N8N, 'secret' => WebhookSignature::newSecret(), 'events' => ['ratings', 'lists'], ...$overrides];
 }
 
 test('the page lists the webhooks by name and host, never their address or secret, and offers a fresh secret', function () {
@@ -46,7 +48,7 @@ test('the page lists the webhooks by name and host, never their address or secre
         ->where('page.limit', OutgoingWebhook::PER_USER));
 });
 
-test('a webhook is added encrypted, on the local network too, named after its host unless named', function () {
+test('a webhook is added encrypted, named after its host unless named', function () {
     Http::fake();
     $user = User::factory()->create();
 
@@ -55,15 +57,48 @@ test('a webhook is added encrypted, on the local network too, named after its ho
     $this->actingAs($user)->post(route('settings.webhooks.store'), $form)->assertSessionHasNoErrors();
 
     $webhook = $user->outgoingWebhooks()->sole();
-    expect($webhook->label)->toBe('192.168.1.20:8123')
-        ->and($webhook->url)->toBe(HOME_ASSISTANT)
+    expect($webhook->label)->toBe('n8n.example.com')
+        ->and($webhook->url)->toBe(N8N)
         ->and($webhook->secret)->toBe($form['secret'])
         ->and($webhook->events->all())->toBe([WebhookEventGroup::Ratings, WebhookEventGroup::Lists])
         ->and($webhook->enabled)->toBeTrue()
-        ->and((string) DB::table('outgoing_webhooks')->value('url'))->not->toContain('192.168')
+        ->and((string) DB::table('outgoing_webhooks')->value('url'))->not->toContain('n8n')
         ->and((string) DB::table('outgoing_webhooks')->value('secret'))->not->toContain('whsec_');
     // Saving sends nothing.
     Http::assertNothingSent();
+});
+
+test('every account may send to its home network, only an administrator or a listed host to the server itself', function () {
+    $user = User::factory()->create();
+    $this->actingAs($user);
+
+    $this->post(route('settings.webhooks.store'), webhookForm(['url' => HOME_ASSISTANT]))->assertSessionHasNoErrors();
+
+    foreach (['http://localhost:2019/stop', 'http://apprise:8000/notify', 'http://169.254.169.254/latest'] as $url) {
+        $this->post(route('settings.webhooks.store'), webhookForm(['url' => $url]))
+            ->assertSessionHasErrors(['url' => __('common.this_address_leads_to_the_server')]);
+    }
+
+    config(['tracker.integrations.private_hosts' => 'apprise']);
+    $this->post(route('settings.webhooks.store'), webhookForm(['url' => 'http://apprise:8000/notify']))->assertSessionHasNoErrors();
+
+    $admin = User::factory()->admin()->create();
+    $this->actingAs($admin)->post(route('settings.webhooks.store'), webhookForm(['url' => 'http://localhost:8123/hook']))->assertSessionHasNoErrors();
+
+    expect($user->outgoingWebhooks()->pluck('url')->all())->toEqualCanonicalizing([HOME_ASSISTANT, 'http://apprise:8000/notify'])
+        ->and($admin->outgoingWebhooks()->sole()->url)->toBe('http://localhost:8123/hook');
+});
+
+test('a new address of a webhook is checked like a first one', function () {
+    $webhook = OutgoingWebhook::factory()->create();
+    $this->actingAs($webhook->user);
+
+    $this->patch(route('settings.webhooks.update', $webhook), ['url' => 'http://localhost:2019/stop'])
+        ->assertSessionHasErrors(['url' => __('common.this_address_leads_to_the_server')]);
+    $this->patch(route('settings.webhooks.update', $webhook), ['url' => 'http://nowhere.example.com/hook'])
+        ->assertSessionHasErrors(['url' => __('common.this_address_could_not_be_found')]);
+
+    expect($webhook->refresh()->url)->toBe(OutgoingWebhookFactory::URL);
 });
 
 test('only an http address, a secret of the standard and known events make a webhook', function (array $form, string $field) {
@@ -103,11 +138,11 @@ test('a change keeps the saved address and secret when left out, a new address f
         ->and($webhook->last_failure)->toBe(DeliveryAnswer::Gone);
 
     $secret = WebhookSignature::newSecret();
-    $this->patch(route('settings.webhooks.update', $webhook), ['url' => HOME_ASSISTANT, 'secret' => $secret, 'label' => ''])->assertSessionHasNoErrors();
+    $this->patch(route('settings.webhooks.update', $webhook), ['url' => N8N, 'secret' => $secret, 'label' => ''])->assertSessionHasNoErrors();
     $webhook->refresh();
-    expect($webhook->url)->toBe(HOME_ASSISTANT)
+    expect($webhook->url)->toBe(N8N)
         ->and($webhook->secret)->toBe($secret)
-        ->and($webhook->label)->toBe('192.168.1.20:8123')
+        ->and($webhook->label)->toBe('n8n.example.com')
         ->and($webhook->last_failure)->toBeNull();
 });
 
@@ -136,6 +171,19 @@ test('the test button sends a signed test now and says when it did not arrive', 
 
     $this->post(route('settings.webhooks.test', $webhook))->assertSessionHasErrors('test');
     expect($webhook->refresh()->last_failure)->toBe(DeliveryAnswer::Unavailable);
+});
+
+test('a webhook at an address its owner may not reach says why, with nothing sent', function () {
+    Http::fake();
+    // Saved some other way, or a host taken off the operator's list.
+    $webhook = OutgoingWebhook::factory()->create(['url' => 'http://localhost:2019/stop']);
+    $this->actingAs($webhook->user);
+
+    $this->post(route('settings.webhooks.test', $webhook))->assertSessionHasErrors('test');
+
+    Http::assertNothingSent();
+    $this->get(route('settings.webhooks.index'))->assertInertia(fn (Assert $page) => $page
+        ->where('page.webhooks.0.lastFailure', __('common.this_address_leads_to_the_server')));
 });
 
 test('a webhook is removed', function () {

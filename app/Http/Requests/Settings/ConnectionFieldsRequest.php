@@ -5,18 +5,18 @@ namespace App\Http\Requests\Settings;
 use App\Http\Requests\Settings\Concerns\ReadsCredentialFields;
 use App\Integrations\Connections\ConnectionRegistry;
 use App\Integrations\Connections\Contracts\HasConnectionFields;
-use App\Integrations\Connections\UnusableAddress;
 use App\Integrations\Connections\UserAddresses;
 use App\Models\User;
 use App\Support\Forms\CredentialFieldType;
+use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Validator;
 
 /**
  * What the user typed on a service's card before connecting: the service's
  * own fields, all required and validated in one go so every missing one is
- * named at once. Every address field is checked by `UserAddresses` here, so
- * a refused address is named under its field before the service is asked.
+ * named at once. Every address field is checked for its owner
+ * (`ReachableAddress`), so a refused address is named under its field
+ * before the service is asked.
  * This is the early answer, not the protection: the service's client pins
  * the address it calls and follows no redirect.
  */
@@ -38,37 +38,20 @@ abstract class ConnectionFieldsRequest extends FormRequest
     abstract protected function capability(): string;
 
     /**
-     * @return array<string, list<string>>
+     * @return array<string, list<mixed>>
      */
-    public function rules(): array
+    public function rules(#[CurrentUser] User $viewer): array
     {
-        return $this->fieldRules($this->connectable()->connectionFields(), 'values', self::VALUE_MAX);
-    }
+        $fields = $this->connectable()->connectionFields();
+        $rules = $this->fieldRules($fields, 'values', self::VALUE_MAX);
 
-    /**
-     * @return list<callable(Validator): void>
-     */
-    public function after(): array
-    {
-        return [function (Validator $validator): void {
-            $owner = $this->user();
-
-            if (! $owner instanceof User || $validator->errors()->isNotEmpty()) {
-                return;
+        foreach ($fields as $field) {
+            if ($field->type === CredentialFieldType::Url) {
+                $rules["values.{$field->key}"] = ['bail', ...$rules["values.{$field->key}"], app(UserAddresses::class)->rule($viewer)];
             }
+        }
 
-            foreach ($this->connectable()->connectionFields() as $field) {
-                if ($field->type !== CredentialFieldType::Url) {
-                    continue;
-                }
-
-                try {
-                    app(UserAddresses::class)->pin($this->string("values.{$field->key}")->trim()->value(), $owner);
-                } catch (UnusableAddress $unusable) {
-                    $validator->errors()->add("values.{$field->key}", $unusable->wording());
-                }
-            }
-        }];
+        return $rules;
     }
 
     /**

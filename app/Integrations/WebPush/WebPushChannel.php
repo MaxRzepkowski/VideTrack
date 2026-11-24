@@ -69,6 +69,7 @@ final readonly class WebPushChannel implements ChannelDriver
         }
 
         $answers = [];
+        $owner = $channel->loadMissing('user')->user;
 
         // Read per channel: the core knows no devices to load up front, and each browser costs a request anyway.
         foreach (PushSubscription::query()->ofChannel($channel->id)->get() as $subscription) {
@@ -77,9 +78,10 @@ final readonly class WebPushChannel implements ChannelDriver
                 continue;
             }
 
-            $answers[] = $answer = $this->client->send($subscription, $message, $vapid);
+            $answers[] = $answer = $this->client->send($subscription, $message, $vapid, $owner);
 
-            if ($answer === DeliveryAnswer::Gone) {
+            // No browser listens there, or none the instance may call.
+            if ($answer === DeliveryAnswer::Gone || $answer === DeliveryAnswer::NotAllowed) {
                 $this->unsubscribe->execute($subscription);
             }
         }

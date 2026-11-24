@@ -2,17 +2,20 @@
 
 namespace App\Integrations\WebPush;
 
+use App\Integrations\Connections\UserAddressDelivery;
 use App\Integrations\WebPush\Data\WebPushMessage;
 use App\Models\PushSubscription;
+use App\Models\User;
 use App\Support\Delivery\DeliveryAnswer;
-use App\Support\Delivery\DeliveryHttpClient;
 use Illuminate\Http\Client\PendingRequest;
 use Minishlink\WebPush\Subscription;
 
 /**
  * Hands a message to the push service of one browser (Google's, Mozilla's,
  * Apple's: the browser chose it), which passes it on whenever the device is
- * online.
+ * online. The browser names that service's address, so it is held to the
+ * rules of any address a user gives ({@see UserAddressDelivery}); a push
+ * service answers where it is asked and never redirects.
  */
 final readonly class WebPushClient
 {
@@ -27,9 +30,9 @@ final readonly class WebPushClient
     /** Set again from the body when it is sent. */
     private const BODY_HEADERS = ['Content-Type', 'Content-Length'];
 
-    public function __construct(private DeliveryHttpClient $http) {}
+    public function __construct(private UserAddressDelivery $delivery) {}
 
-    public function send(PushSubscription $subscription, WebPushMessage $message, VapidCredentials $vapid): DeliveryAnswer
+    public function send(PushSubscription $subscription, WebPushMessage $message, VapidCredentials $vapid, User $owner): DeliveryAnswer
     {
         $request = (new PushRequests($vapid, self::TTL_SECONDS))->for(
             Subscription::create([
@@ -49,7 +52,7 @@ final readonly class WebPushClient
             }
         }
 
-        return $this->http->deliver(self::TIMEOUT_SECONDS, self::GONE, fn (PendingRequest $http) => $http
+        return $this->delivery->deliver($subscription->endpoint, $owner, self::TIMEOUT_SECONDS, self::GONE, fn (PendingRequest $http) => $http
             ->withHeaders($headers)
             ->withBody((string) $request->getBody(), $request->getHeaderLine('Content-Type'))
             ->post((string) $request->getUri()));
