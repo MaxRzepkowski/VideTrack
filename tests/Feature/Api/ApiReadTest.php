@@ -11,6 +11,7 @@ use App\Library\WatchedAt;
 use App\Models\CatalogEvent;
 use App\Models\Follow;
 use App\Models\MediaItem;
+use App\Models\MediaList;
 use App\Models\Play;
 use App\Models\User;
 use App\Notifications\Events\DateChanged;
@@ -192,6 +193,21 @@ test('somebody else private list is not readable', function () {
     apiUser();
 
     $this->getJson("/api/v1/lists/{$list->id}")->assertNotFound();
+});
+
+test('a private profile keeps its public lists from other accounts, the owner and an administrator see them', function () {
+    $owner = User::factory()->private()->create();
+    $list = MediaList::factory()->for($owner)->create();
+
+    Sanctum::actingAs(User::factory()->create(), ['read', 'write']);
+    $this->getJson("/api/v1/lists/{$list->id}")->assertNotFound();
+    $this->postJson("/api/v1/lists/{$list->id}/duplicate")->assertNotFound();
+
+    Sanctum::actingAs(User::factory()->admin()->create(), ['read']);
+    $this->getJson("/api/v1/lists/{$list->id}")->assertOk();
+
+    Sanctum::actingAs($owner, ['read']);
+    $this->getJson("/api/v1/lists/{$list->id}")->assertOk();
 });
 
 test('the calendar serves a window and refuses a silly one', function () {

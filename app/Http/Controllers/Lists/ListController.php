@@ -36,8 +36,6 @@ class ListController extends Controller
     /** A user's list under its owner; the route binds only the owner's own. */
     public function show(#[CurrentUser] User $viewer, User $user, MediaList $list, BuildListPage $page): Response
     {
-        // A private profile keeps its lists with it, public or not.
-        Gate::authorize('view', $user);
         Gate::authorize('view', $list);
 
         return Inertia::render('lists/ListDetails', $page->execute($viewer, $list));
