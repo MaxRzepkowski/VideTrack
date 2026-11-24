@@ -15,7 +15,7 @@ class EnsureAdminCommand extends Command
 {
     protected $signature = 'app:ensure-admin';
 
-    protected $description = 'Create the bootstrap admin account from ADMIN_EMAIL / ADMIN_PASSWORD if it does not exist and guarantee it has the admin role (idempotent, safe to run on every container start); warns when PASSWORD_LOGIN_ENABLED=false is ignored for lack of an identity provider';
+    protected $description = 'Create the bootstrap admin account from ADMIN_EMAIL / ADMIN_PASSWORD if it does not exist (idempotent, safe to run on every container start); warns when the address belongs to an account without the admin role, and when PASSWORD_LOGIN_ENABLED=false is ignored for lack of an identity provider';
 
     public function handle(CreateAccount $createAccount, PasswordLogin $passwordLogin): int
     {
@@ -68,9 +68,11 @@ class EnsureAdminCommand extends Command
             return self::SUCCESS;
         }
 
+        // Never promoted from here: nobody confirms the address an account
+        // signed up with, so whoever registered it would become the
+        // administrator at the next start.
         if (! $user->isAdmin()) {
-            $user->forceFill(['role' => UserRole::Admin])->save();
-            $this->info("Existing account {$email} promoted to admin.");
+            $this->warn("ADMIN_EMAIL {$email} belongs to an account without the admin role; it is left as it is. Make it an administrator with: vide:user:promote {$email}");
         } else {
             $this->info("Admin account {$email} already present.");
         }

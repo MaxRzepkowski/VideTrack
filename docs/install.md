@@ -85,8 +85,9 @@ Over plain HTTP the site works as usual in the browser.
 The first account registered becomes the administrator and sign-up closes after it. To keep
 sign-up open for your household, set `REGISTRATION_ENABLED=true`; `false` keeps it closed even on
 an empty instance. Instead of registering, `ADMIN_EMAIL` and `ADMIN_PASSWORD` create the
-administrator on every start (it is never created twice). Accounts are managed with commands; see
-[Administration](administration.md).
+administrator on every start. It is never created twice, and an account someone already registered
+with that address is not made an administrator: `vide:user:promote` does that. Accounts are managed
+with commands; see [Administration](administration.md).
 
 ## Signing in with an identity provider
 

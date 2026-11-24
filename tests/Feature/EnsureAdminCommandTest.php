@@ -33,16 +33,27 @@ test('it fails when creating without ADMIN_PASSWORD', function () {
     expect(User::count())->toBe(0);
 });
 
-test('it promotes an existing account and does not overwrite its password', function () {
+test('an account someone registered with the address is not promoted, only named, and keeps its password', function () {
     $user = User::factory()->create(['email' => 'admin@example.com', 'password' => Hash::make('user-chosen')]);
     config(['tracker.admin_email' => 'admin@example.com', 'tracker.admin_password' => 'env-password']);
 
-    $this->artisan('app:ensure-admin')->assertSuccessful();
-    $this->artisan('app:ensure-admin')->assertSuccessful();
+    $this->artisan('app:ensure-admin')
+        ->expectsOutputToContain('vide:user:promote')
+        ->assertSuccessful();
 
     $user->refresh();
-    expect($user->role)->toBe(UserRole::Admin)
-        ->and(Hash::check('user-chosen', $user->password))->toBeTrue();
+    expect($user->role)->toBe(UserRole::User)
+        ->and(Hash::check('user-chosen', $user->password))->toBeTrue()
+        ->and(User::query()->count())->toBe(1);
+});
+
+test('the administrator it made is left alone on every later start', function () {
+    config(['tracker.admin_email' => 'admin@example.com', 'tracker.admin_password' => 'secret-password']);
+
+    $this->artisan('app:ensure-admin')->assertSuccessful();
+    $this->artisan('app:ensure-admin')->expectsOutputToContain('already present')->assertSuccessful();
+
+    expect(User::query()->sole()->role)->toBe(UserRole::Admin);
 });
 
 test('it refuses an ADMIN_PASSWORD the sign-up form would refuse', function () {
