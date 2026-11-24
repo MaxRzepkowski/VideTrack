@@ -168,6 +168,13 @@ function rssItems(string $xml): array
     return iterator_to_array($channel->channel->item, false);
 }
 
+test("a blocked account's feeds are not there", function () {
+    $user = User::factory()->blocked()->create();
+
+    $this->get(route('calendar.feed', ['token' => $user->calendarToken()]))->assertNotFound();
+    $this->get(route('calendar.rss', ['token' => $user->calendarToken()]))->assertNotFound();
+});
+
 test('the RSS channel carries the premieres as dated items under the iCal UIDs, newest first', function () {
     enableGamesModule();
     $user = User::factory()->create();

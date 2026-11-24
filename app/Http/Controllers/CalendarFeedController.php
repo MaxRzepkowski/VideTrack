@@ -41,9 +41,14 @@ class CalendarFeedController extends Controller
         ]);
     }
 
+    /** A blocked account's feeds end with its sessions and tokens. */
     private function owner(string $token): User
     {
-        return User::query()->withCalendarToken($token)->firstOrFail();
+        $user = User::query()->withCalendarToken($token)->firstOrFail();
+
+        abort_if($user->isBlocked(), 404);
+
+        return $user;
     }
 
     /**
