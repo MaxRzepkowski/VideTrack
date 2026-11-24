@@ -11,6 +11,8 @@ use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Http;
 use Inertia\Testing\AssertableInertia as Assert;
 
+beforeEach(fn () => speakEnglishAndPolish());
+
 /** The film persisted the way a click in an English UI does it. */
 function persistedPolishFilm(): MediaItem
 {

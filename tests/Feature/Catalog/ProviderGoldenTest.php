@@ -4,6 +4,8 @@ use App\Catalog\MatureContent;
 use App\Catalog\ProviderRegistry;
 use Illuminate\Support\Facades\Http;
 
+beforeEach(fn () => speakEnglishAndPolish());
+
 /*
  * What each provider makes of its recorded answers, every field of the result
  * compared with the shape recorded in tests/Fixtures/golden. A change to how

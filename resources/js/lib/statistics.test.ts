@@ -8,7 +8,6 @@ import {
     daysBetween,
     formatPercent,
     formatRating,
-    lowerList,
     partRange,
     periodDates,
     periodTitle,
@@ -136,11 +135,16 @@ describe('numbers and words', () => {
         expect(scopeName('movie')).toBe('movies');
     });
 
-    it("writes shares, ratings and lists the locale's way", () => {
+    it("writes shares and ratings the locale's way", () => {
         expect(formatPercent(202, 232)).toBe('87%');
         expect(formatPercent(1, 0)).toBe('0%');
         expect(formatRating(6.5)).toBe('6.50');
-        expect(lowerList(['Episodes', 'Movies', 'Games'])).toBe('episodes, movies, and games');
+    });
+
+    it('keeps the capital of a noun in a language that writes nouns with one', () => {
+        setPageProps({ locale: 'de', capitalizedNouns: true });
+
+        expect(typeNoun('movie')).toBe('Movies');
     });
 
     it('says the weekday of a moment, with the year only when asked', () => {

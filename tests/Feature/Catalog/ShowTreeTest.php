@@ -8,6 +8,8 @@ use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 
+beforeEach(fn () => speakEnglishAndPolish());
+
 /*
  * What a stored show tree holds, field by field, whichever way the provider
  * is asked for it: the fake answers a season both on its own endpoint and

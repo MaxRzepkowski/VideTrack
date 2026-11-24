@@ -55,6 +55,7 @@ require_once __DIR__.'/Support/fixtures.php';
 require_once __DIR__.'/Support/golden.php';
 require_once __DIR__.'/Support/modules.php';
 require_once __DIR__.'/Support/library.php';
+require_once __DIR__.'/Support/locales.php';
 require_once __DIR__.'/Support/notifications.php';
 require_once __DIR__.'/Support/pages.php';
 require_once __DIR__.'/Support/webhooks.php';

@@ -1,7 +1,7 @@
 import { addDays, parseDay } from '@/lib/calendar';
 import { episodeCode, formatNumber } from '@/lib/format';
 import { mediaTypeMeta } from '@/lib/mediaTypes';
-import { pageLocale, viewerTimeZone } from '@/lib/pageContext';
+import { pageCapitalizesNouns, pageLocale, viewerTimeZone } from '@/lib/pageContext';
 import type { PartNumber, PeriodKind, PeriodSpan, PeriodTitles, TypeTally } from '@/types/generated';
 import { trans, transChoice } from 'laravel-vue-i18n';
 
@@ -17,9 +17,14 @@ export function countTitles(type: string | null, count: number): string {
     return type === null ? transChoice('common.count_title', count, { count: formatNumber(count) }) : mediaTypeMeta(type).count(count);
 }
 
+/** A type's name as it stands inside a sentence of the page's language: "movies", but German "Filme". */
+function inSentence(name: string): string {
+    return pageCapitalizesNouns() ? name : name.toLocaleLowerCase(pageLocale());
+}
+
 /** What the view's titles are called inside a sentence: "titles" across every type, "movies" for one. */
 export function typeNoun(type: string | null): string {
-    return type === null ? trans('statistics.titles_word') : mediaTypeMeta(type).plural().toLocaleLowerCase();
+    return type === null ? trans('statistics.titles_word') : inSentence(mediaTypeMeta(type).plural());
 }
 
 /** A title's type and year: "Movie, 1983", or the type alone when the year is not known. */
@@ -31,7 +36,7 @@ export function typeAndYear(type: string, year: number | null): string {
 
 /** The scope a subtitle names: "all types together", or the one type ("movies"). */
 export function scopeName(type: string | null): string {
-    return type === null ? trans('statistics.all_types_together') : mediaTypeMeta(type).plural().toLocaleLowerCase();
+    return type === null ? trans('statistics.all_types_together') : inSentence(mediaTypeMeta(type).plural());
 }
 
 /** What the page is asked for: a year, the whole history, or two days; and a type. */
@@ -256,13 +261,6 @@ export function formatPercent(part: number, whole: number): string {
 /** A rating with its decimals as the locale writes them: "6,56". */
 export function formatRating(value: number): string {
     return new Intl.NumberFormat(pageLocale(), { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value);
-}
-
-/** Names as one list in the page's language, all in lower case: "episodes, movies and games". */
-export function lowerList(names: string[]): string {
-    const locale = pageLocale();
-
-    return new Intl.ListFormat(locale, { type: 'conjunction' }).format(names.map((name) => name.toLocaleLowerCase(locale)));
 }
 
 /**

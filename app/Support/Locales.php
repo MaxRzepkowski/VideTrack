@@ -60,10 +60,19 @@ final class Locales
         return self::entry($locale)['region'];
     }
 
-    /** @return array{language: string, region: string} */
+    /**
+     * Whether the language writes every noun with a capital, inside a sentence
+     * too: a type's name keeps it there ("Filme"), elsewhere it goes lower case.
+     */
+    public static function capitalizesNouns(string $locale): bool
+    {
+        return self::entry($locale)['capitalized_nouns'];
+    }
+
+    /** @return array{language: string, region: string, capitalized_nouns: bool} */
     private static function entry(string $locale): array
     {
-        /** @var array<string, array{language: string, region: string}> $locales */
+        /** @var array<string, array{language: string, region: string, capitalized_nouns: bool}> $locales */
         $locales = config('tracker.locales');
 
         return $locales[$locale] ?? $locales[config()->string('tracker.default_locale')] ?? $locales['en'];
