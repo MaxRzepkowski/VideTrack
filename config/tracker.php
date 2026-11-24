@@ -16,6 +16,7 @@ $locales = [
     'it' => ['language' => 'it-IT', 'region' => 'IT', 'capitalized_nouns' => false],
     'nl' => ['language' => 'nl-NL', 'region' => 'NL', 'capitalized_nouns' => false],
     'uk' => ['language' => 'uk-UA', 'region' => 'UA', 'capitalized_nouns' => false],
+    'cs' => ['language' => 'cs-CZ', 'region' => 'CZ', 'capitalized_nouns' => false],
 ];
 
 return [
