@@ -2,24 +2,24 @@
 
 namespace App\Http\Requests\Settings;
 
-use App\Integrations\Connections\UnusableAddress;
 use App\Integrations\Connections\UserAddresses;
 use App\Integrations\WebPush\Data\BrowserSubscription;
 use App\Integrations\WebPush\WebPushChannel;
 use App\Models\User;
 use App\Notifications\Channels\ChannelRegistry;
 use Illuminate\Auth\Access\Response;
+use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
-use Illuminate\Validation\Validator;
 use LogicException;
 use Minishlink\WebPush\ContentEncoding;
 
 /**
  * The push subscription a browser made, as `PushSubscription.toJSON()` gives
  * it. The instance posts to its address, so the address is checked as any
- * other the user hands over: https, and outside the server's own network.
+ * other the user hands over: https, and one the owner may reach
+ * (`UserAddresses`).
  */
 class PushDeviceRequest extends FormRequest
 {
@@ -41,34 +41,14 @@ class PushDeviceRequest extends FormRequest
     /**
      * @return array<string, mixed>
      */
-    public function rules(): array
+    public function rules(#[CurrentUser] User $viewer): array
     {
         return [
-            'endpoint' => ['required', 'string', 'url:https', 'max:'.self::ENDPOINT_MAX],
+            'endpoint' => ['bail', 'required', 'string', 'url:https', 'max:'.self::ENDPOINT_MAX, app(UserAddresses::class)->rule($viewer)],
             'public_key' => ['required', 'string', 'max:'.self::KEY_MAX],
             'auth_token' => ['required', 'string', 'max:'.self::KEY_MAX],
             'content_encoding' => ['required', Rule::enum(ContentEncoding::class)],
         ];
-    }
-
-    /**
-     * @return list<callable(Validator): void>
-     */
-    public function after(): array
-    {
-        return [function (Validator $validator): void {
-            $owner = $this->user();
-
-            if (! $owner instanceof User || $validator->errors()->isNotEmpty()) {
-                return;
-            }
-
-            try {
-                app(UserAddresses::class)->pin($this->string('endpoint')->value(), $owner);
-            } catch (UnusableAddress $unusable) {
-                $validator->errors()->add('endpoint', $unusable->wording());
-            }
-        }];
     }
 
     public function subscription(): BrowserSubscription

@@ -153,7 +153,6 @@ return [
     'optional_field' => '(선택)',
     'this_is_not_a_web_address' => 'http:// 또는 https://로 시작하는 웹 주소를 입력하세요.',
     'this_address_could_not_be_found' => '이 주소를 찾을 수 없어요.',
-    'this_address_is_in_a_private_network' => '사설 네트워크에 있는 주소예요. 관리자에게 이 주소를 INTEGRATION_PRIVATE_HOSTS에 추가하거나 관리자 계정에서 설정해 달라고 요청하세요.',
     'estimate_sign' => '≈',
     'zoom_in' => '확대',
     'zoom_in_hint' => '확대 (Ctrl + 마우스 휠도 돼요)',

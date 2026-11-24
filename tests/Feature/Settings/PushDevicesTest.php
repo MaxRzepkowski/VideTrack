@@ -74,7 +74,7 @@ test('a browser another account subscribed moves to the one at it now', function
         ->and($before->notificationChannels()->exists())->toBeFalse();
 });
 
-test('the instance posts to no address of its own network, and to none without https', function (string $endpoint) {
+test('the instance posts to no address of the server itself, and to none without https', function (string $endpoint) {
     withWebPushKeys();
 
     $this->actingAs(User::factory()->create())
@@ -82,7 +82,7 @@ test('the instance posts to no address of its own network, and to none without h
         ->assertSessionHasErrors('endpoint');
 
     expect(PushSubscription::query()->exists())->toBeFalse();
-})->with(['https://tracearr.lan/push', 'http://push.example.com/send/one']);
+})->with(['https://localhost/push', 'https://apprise/push', 'http://push.example.com/send/one']);
 
 test('an instance without keys has no push: no devices to add, none on the page', function () {
     $user = User::factory()->create();

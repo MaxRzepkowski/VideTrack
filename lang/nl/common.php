@@ -153,7 +153,6 @@ return [
     'optional_field' => '(optioneel)',
     'this_is_not_a_web_address' => 'Vul een webadres in dat begint met http:// of https://.',
     'this_address_could_not_be_found' => 'Dit adres is niet gevonden.',
-    'this_address_is_in_a_private_network' => 'Dit adres ligt in een privénetwerk. Vraag de beheerder om het toe te voegen aan INTEGRATION_PRIVATE_HOSTS, of om het in te stellen vanuit een beheerdersaccount.',
     'estimate_sign' => '≈',
     'zoom_in' => 'Inzoomen',
     'zoom_in_hint' => 'Inzoomen (Ctrl + scrollwiel werkt ook)',

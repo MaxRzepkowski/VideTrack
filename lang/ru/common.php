@@ -153,7 +153,6 @@ return [
     'optional_field' => '(необязательно)',
     'this_is_not_a_web_address' => 'Введи веб-адрес, начинающийся с http:// или https://.',
     'this_address_could_not_be_found' => 'Не удалось найти этот адрес.',
-    'this_address_is_in_a_private_network' => 'Этот адрес находится в частной сети. Попроси администратора добавить его в INTEGRATION_PRIVATE_HOSTS или настроить его из аккаунта администратора.',
     'estimate_sign' => '≈',
     'zoom_in' => 'Приблизить',
     'zoom_in_hint' => 'Приблизить (также Ctrl + колёсико мыши)',

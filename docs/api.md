@@ -136,7 +136,9 @@ address followed by `/api/v1`.
 The other way round: VideTrack tells an address of yours (n8n, Home Assistant, a script) what
 happens in your library, seconds after it happens. Add one in **Settings → Webhooks**, pick the events
 it hears about, and press **Generate** for its signing secret, which your receiver needs to check
-messages (it is shown only until you save). An address on your own network works too.
+messages (it is shown only until you save). An address in your home network works too; one that leads
+to the server VideTrack runs on (`localhost`, another container beside it) takes an administrator
+account, or its host listed by the operator in `INTEGRATION_PRIVATE_HOSTS`.
 
 Each message is a `POST` of JSON, signed as [Standard Webhooks](https://www.standardwebhooks.com)
 defines it:

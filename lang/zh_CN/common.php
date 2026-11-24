@@ -153,7 +153,6 @@ return [
     'optional_field' => '（可选）',
     'this_is_not_a_web_address' => '请输入以 http:// 或 https:// 开头的网址。',
     'this_address_could_not_be_found' => '找不到这个地址。',
-    'this_address_is_in_a_private_network' => '这个地址位于私有网络中。请让管理员把它加入 INTEGRATION_PRIVATE_HOSTS，或用管理员账号来设置。',
     'estimate_sign' => '≈',
     'zoom_in' => '放大',
     'zoom_in_hint' => '放大（也可以用 Ctrl + 鼠标滚轮）',

@@ -153,7 +153,7 @@ return [
     'optional_field' => '(optional)',
     'this_is_not_a_web_address' => 'Enter a web address starting with http:// or https://.',
     'this_address_could_not_be_found' => 'This address could not be found.',
-    'this_address_is_in_a_private_network' => 'This address is in a private network. Ask the administrator to add it to INTEGRATION_PRIVATE_HOSTS, or to set it up from an administrator account.',
+    'this_address_leads_to_the_server' => 'This address leads to the server VideTrack runs on, which only an administrator account may use. Give the address the service has in your home network.',
     'estimate_sign' => '≈',
     'zoom_in' => 'Zoom in',
     'zoom_in_hint' => 'Zoom in (Ctrl + mouse wheel works too)',

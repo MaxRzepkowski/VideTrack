@@ -14,6 +14,7 @@ use App\Notifications\Channels\Data\DigestSection;
 use App\Support\Delivery\DeliveryAnswer;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
+use Tests\Fakes\FakeHostResolver;
 
 /*
  * Web push: a message encrypted to each browser of the channel and signed
@@ -93,6 +94,34 @@ test('a push service that is down leaves the message to be tried again', functio
     $device = pushDevice(User::factory()->create(), $vapid);
 
     expect(app(TestChannel::class)->execute($device->channel))->toBe(DeliveryAnswer::Unavailable);
+});
+
+test('a push goes to the IP the check approved and follows no redirect', function () {
+    $vapid = withWebPushKeys();
+    $options = [];
+    Http::fake(function (Request $request, array $sent) use (&$options) {
+        $options = $sent;
+
+        return Http::response(null, 307, ['Location' => 'http://localhost:2019/stop']);
+    });
+    $device = pushDevice(User::factory()->create(), $vapid);
+
+    expect(app(TestChannel::class)->execute($device->channel))->toBe(DeliveryAnswer::Refused)
+        ->and($options['allow_redirects'])->toBeFalse()
+        ->and($options['curl'][CURLOPT_RESOLVE])->toBe(['push.example.com:443:93.184.215.14']);
+    Http::assertSentCount(1);
+});
+
+test('a browser at an address the owner may no longer reach is not called and is forgotten', function () {
+    $vapid = withWebPushKeys();
+    Http::fake();
+    $device = pushDevice(User::factory()->create(), $vapid, 'https://push.example.com/send/one');
+    // The name now leads to the server itself.
+    FakeHostResolver::$hosts['push.example.com'] = ['127.0.0.1'];
+
+    expect(app(TestChannel::class)->execute($device->channel))->toBe(DeliveryAnswer::NotAllowed)
+        ->and(PushSubscription::query()->exists())->toBeFalse();
+    Http::assertNothingSent();
 });
 
 test('a digest is one push of its lines, cut short past the limit, that opens the notifications page', function () {

@@ -153,7 +153,6 @@ return [
     'optional_field' => '(valfritt)',
     'this_is_not_a_web_address' => 'Ange en webbadress som börjar med http:// eller https://.',
     'this_address_could_not_be_found' => 'Adressen kunde inte hittas.',
-    'this_address_is_in_a_private_network' => 'Adressen ligger i ett privat nätverk. Be administratören att lägga till den i INTEGRATION_PRIVATE_HOSTS, eller att ställa in den från ett administratörskonto.',
     'estimate_sign' => '≈',
     'zoom_in' => 'Zooma in',
     'zoom_in_hint' => 'Zooma in (Ctrl + mushjulet fungerar också)',

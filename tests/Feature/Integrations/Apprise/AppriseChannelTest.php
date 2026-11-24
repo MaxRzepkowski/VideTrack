@@ -102,20 +102,22 @@ test('a value the service does not take, or too few to send with, is refused und
     expect(NotificationChannel::query()->count())->toBe(0);
 });
 
-test('a server of your own is reached unencrypted only when asked, and a private one only by an administrator', function () {
+test('a server of your own is reached unencrypted only when asked, and the server itself only by an administrator', function () {
     enableApprise();
     $user = User::factory()->create();
     $admin = User::factory()->admin()->create();
 
     $this->actingAs($user);
-    addAppriseChannel('jsons', ['host' => '192.168.1.10'])->assertSessionHasErrors(['config.host' => __('common.this_address_is_in_a_private_network')]);
+    addAppriseChannel('jsons', ['host' => '127.0.0.1'])->assertSessionHasErrors(['config.host' => __('common.this_address_leads_to_the_server')]);
+    addAppriseChannel('jsons', ['host' => 'apprise'])->assertSessionHasErrors(['config.host' => __('common.this_address_leads_to_the_server')]);
     addAppriseChannel('jsons', ['host' => 'https://example.com/path'])->assertSessionHasErrors(['config.host' => __('settings.this_is_not_a_server_name')]);
-
-    $this->actingAs($admin);
     addAppriseChannel('jsons', ['host' => '192.168.1.10', 'port' => '8080', AppriseChannel::PLAIN_CONNECTION => '1'])->assertSessionHasNoErrors();
 
-    expect($admin->notificationChannels()->sole()->config[AppriseChannel::URLS])->toBe('json://192.168.1.10:8080')
-        ->and($user->notificationChannels()->count())->toBe(0);
+    $this->actingAs($admin);
+    addAppriseChannel('jsons', ['host' => '127.0.0.1', 'port' => '8080', AppriseChannel::PLAIN_CONNECTION => '1'])->assertSessionHasNoErrors();
+
+    expect($user->notificationChannels()->sole()->config[AppriseChannel::URLS])->toBe('json://192.168.1.10:8080')
+        ->and($admin->notificationChannels()->sole()->config[AppriseChannel::URLS])->toBe('json://127.0.0.1:8080');
 });
 
 test('a notification is one stateless notify call: the saved URL, the headline, the facts and the link', function () {

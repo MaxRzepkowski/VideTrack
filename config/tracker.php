@@ -84,9 +84,10 @@ return [
     | Integration addresses
     |--------------------------------------------------------------------------
     |
-    | Hosts in a private network an ordinary account may connect to (a
-    | Tracearr in the local network), comma-separated, e.g.
-    | "tracearr.lan,192.168.1.20". An administrator may give any address.
+    | Every account may give an address on the internet or in the home
+    | network; one that leads to the server itself (another container of the
+    | compose file, its loopback) only an administrator, or an ordinary account
+    | when its host is listed here, comma-separated, e.g. "kavita,tracearr".
     |
     */
 

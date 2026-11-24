@@ -35,7 +35,7 @@ class DeliverOutgoingWebhook implements ShouldQueue
             return;
         }
 
-        $answer = $client->send($this->webhook->url, $this->webhook->secret, $this->message);
+        $answer = $client->send($this->webhook, $this->webhook->user, $this->message);
 
         $retryAfter = DeliveryRetry::after($answer, $this->attempts());
 

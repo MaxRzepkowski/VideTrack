@@ -3,6 +3,8 @@
 namespace App\Http\Requests\Settings;
 
 use App\Integrations\Connections\Contracts\AuthorizesByForm;
+use App\Models\User;
+use Illuminate\Container\Attributes\CurrentUser;
 use LogicException;
 
 /**
@@ -12,11 +14,11 @@ use LogicException;
 class ConnectionFormRequest extends ConnectionFieldsRequest
 {
     /**
-     * @return array<string, list<string>>
+     * @return array<string, list<mixed>>
      */
-    public function rules(): array
+    public function rules(#[CurrentUser] User $viewer): array
     {
-        return ['choice' => ['nullable', 'string', 'max:255'], ...parent::rules()];
+        return ['choice' => ['nullable', 'string', 'max:255'], ...parent::rules($viewer)];
     }
 
     /** The service, connected by the form itself. */

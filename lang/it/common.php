@@ -153,7 +153,6 @@ return [
     'optional_field' => '(facoltativo)',
     'this_is_not_a_web_address' => 'Inserisci un indirizzo web che inizia con http:// o https://.',
     'this_address_could_not_be_found' => 'Impossibile trovare questo indirizzo.',
-    'this_address_is_in_a_private_network' => 'Questo indirizzo è in una rete privata. Chiedi all’amministratore di aggiungerlo a INTEGRATION_PRIVATE_HOSTS, oppure di configurarlo da un account amministratore.',
     'estimate_sign' => '≈',
     'zoom_in' => 'Ingrandisci',
     'zoom_in_hint' => 'Ingrandisci (funziona anche Ctrl + rotellina del mouse)',

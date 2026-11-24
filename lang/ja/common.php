@@ -153,7 +153,6 @@ return [
     'optional_field' => '（任意）',
     'this_is_not_a_web_address' => 'http://またはhttps://で始まるWebアドレスを入力してください。',
     'this_address_could_not_be_found' => 'このアドレスは見つかりませんでした。',
-    'this_address_is_in_a_private_network' => 'このアドレスはプライベートネットワーク内にあります。管理者にINTEGRATION_PRIVATE_HOSTSへの追加を依頼するか、管理者アカウントから設定してもらってください。',
     'estimate_sign' => '≈',
     'zoom_in' => '拡大',
     'zoom_in_hint' => '拡大（Ctrl＋マウスホイールでも可能）',

@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Settings;
 
+use App\Integrations\Connections\UserAddresses;
 use App\Integrations\OutgoingWebhooks\Data\OutgoingWebhookSettings;
 use App\Integrations\OutgoingWebhooks\WebhookEventGroup;
 use App\Integrations\OutgoingWebhooks\WebhookSignature;
@@ -9,6 +10,7 @@ use App\Models\OutgoingWebhook;
 use App\Models\User;
 use Closure;
 use Illuminate\Auth\Access\Response;
+use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
@@ -17,8 +19,8 @@ use Illuminate\Validation\Validator;
 /**
  * A webhook added, or one the user changed. Changing one sends only what
  * changed: the switch alone, or the form, where a secret left empty keeps the
- * saved one. Any http(s) address goes, on the user's own network too: that is
- * where a Home Assistant or an n8n usually runs.
+ * saved one. An http(s) address the owner may reach, by the rule every
+ * address a user gives follows (`UserAddresses`).
  */
 class OutgoingWebhookRequest extends FormRequest
 {
@@ -33,13 +35,13 @@ class OutgoingWebhookRequest extends FormRequest
     /**
      * @return array<string, mixed>
      */
-    public function rules(): array
+    public function rules(#[CurrentUser] User $viewer): array
     {
         $adding = $this->webhook() === null;
 
         return [
             'label' => ['nullable', 'string', 'max:'.OutgoingWebhook::LABEL_MAX],
-            'url' => [$adding ? 'required' : 'sometimes', 'string', 'max:'.OutgoingWebhook::URL_MAX, 'url:http,https'],
+            'url' => ['bail', $adding ? 'required' : 'sometimes', 'string', 'max:'.OutgoingWebhook::URL_MAX, 'url:http,https', app(UserAddresses::class)->rule($viewer)],
             'secret' => [$adding ? 'required' : 'nullable', 'string', $this->validSecret(...)],
             'events' => [$adding ? 'present' : 'sometimes', 'array'],
             'events.*' => ['distinct', Rule::enum(WebhookEventGroup::class)],
