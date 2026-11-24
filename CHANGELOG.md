@@ -2,6 +2,41 @@
 
 Written by release-please from the pull request titles on `main`. The first release is summarized by hand.
 
+## [0.4.0](https://github.com/MaxRzepkowski/VideTrack/compare/v0.3.0...v0.4.0) (2026-11-24)
+
+
+### Features
+
+* add Brazilian Portuguese as an interface language ([#100](https://github.com/MaxRzepkowski/VideTrack/issues/100)) ([7d12528](https://github.com/MaxRzepkowski/VideTrack/commit/7d125282490aad5cb8ad6b4583ea349a195663bb))
+* add Czech as an interface language ([#104](https://github.com/MaxRzepkowski/VideTrack/issues/104)) ([96e0481](https://github.com/MaxRzepkowski/VideTrack/commit/96e04816fe7bac3d2d397d4bfa2450b22112d29d))
+* add Dutch as an interface language ([#102](https://github.com/MaxRzepkowski/VideTrack/issues/102)) ([0990582](https://github.com/MaxRzepkowski/VideTrack/commit/0990582ee29925b9d29f0bf8d3cf101ca1d87572))
+* add French as an interface language ([#98](https://github.com/MaxRzepkowski/VideTrack/issues/98)) ([2048b36](https://github.com/MaxRzepkowski/VideTrack/commit/2048b369bf357e5397cc045530e2fdc083f69aa6))
+* add German as an interface language ([#97](https://github.com/MaxRzepkowski/VideTrack/issues/97)) ([8f2bbe6](https://github.com/MaxRzepkowski/VideTrack/commit/8f2bbe6fa82d957128520265e863ae4ea1f773eb))
+* add Italian as an interface language ([#101](https://github.com/MaxRzepkowski/VideTrack/issues/101)) ([21161e4](https://github.com/MaxRzepkowski/VideTrack/commit/21161e4dc44a089b9c9831f8d4301d458d81a106))
+* add Japanese as an interface language ([#108](https://github.com/MaxRzepkowski/VideTrack/issues/108)) ([42f6706](https://github.com/MaxRzepkowski/VideTrack/commit/42f6706c6acbbc35751678e3d6969fe8a1ae5c25))
+* add Korean as an interface language ([#109](https://github.com/MaxRzepkowski/VideTrack/issues/109)) ([1bd2e8a](https://github.com/MaxRzepkowski/VideTrack/commit/1bd2e8a8da4eff70b84906c79a68cb33f4152fe5))
+* add Russian as an interface language ([#106](https://github.com/MaxRzepkowski/VideTrack/issues/106)) ([d0c5836](https://github.com/MaxRzepkowski/VideTrack/commit/d0c5836a15d4cfb7b8366d2cc9db60bdf3031d82))
+* add Simplified Chinese as an interface language ([#107](https://github.com/MaxRzepkowski/VideTrack/issues/107)) ([17ae29c](https://github.com/MaxRzepkowski/VideTrack/commit/17ae29c85b2e448e5e834fac6d4a1792b040d8d9))
+* add Spanish as an interface language ([#99](https://github.com/MaxRzepkowski/VideTrack/issues/99)) ([acf68f5](https://github.com/MaxRzepkowski/VideTrack/commit/acf68f5d725f0a108187516b165e6ef31b44da50))
+* add Swedish as an interface language ([#105](https://github.com/MaxRzepkowski/VideTrack/issues/105)) ([7c98cf9](https://github.com/MaxRzepkowski/VideTrack/commit/7c98cf9df25dde7a8908af2876e57803e4c11d67))
+* add Ukrainian as an interface language ([#103](https://github.com/MaxRzepkowski/VideTrack/issues/103)) ([bfd2476](https://github.com/MaxRzepkowski/VideTrack/commit/bfd2476936f163f97593a3f66bf8253eb5523278))
+
+
+### Bug Fixes
+
+* ask for the password before the account's e-mail changes ([#114](https://github.com/MaxRzepkowski/VideTrack/issues/114)) ([44036bb](https://github.com/MaxRzepkowski/VideTrack/commit/44036bb58755d7ea43c0f704f746c98b08b80a65))
+* keep a private profile's lists and a blocked account's feeds closed ([#112](https://github.com/MaxRzepkowski/VideTrack/issues/112)) ([e873fe6](https://github.com/MaxRzepkowski/VideTrack/commit/e873fe6097ddacc014da44439b628de73869d281))
+* labels that meant two things get their own words ([#95](https://github.com/MaxRzepkowski/VideTrack/issues/95)) ([7ae0d68](https://github.com/MaxRzepkowski/VideTrack/commit/7ae0d68714070989f2175ad0e4aa851cace920a6))
+* never make an existing account an administrator on start ([#113](https://github.com/MaxRzepkowski/VideTrack/issues/113)) ([fc352aa](https://github.com/MaxRzepkowski/VideTrack/commit/fc352aaac545f1e6328b9adbd92ccab5b6bdf065))
+* open the home network to every account, the server only to admins ([#111](https://github.com/MaxRzepkowski/VideTrack/issues/111)) ([da67ff4](https://github.com/MaxRzepkowski/VideTrack/commit/da67ff4a66d1e3e5f2ca846baee16160ceac4376))
+* switch off Caddy's admin API in the image ([#110](https://github.com/MaxRzepkowski/VideTrack/issues/110)) ([a0a8e41](https://github.com/MaxRzepkowski/VideTrack/commit/a0a8e4174b90fd8ecd9c6af23a05e09f47d5ab93))
+
+
+### Dependencies
+
+* bump dedoc/scramble from 0.13.54 to 0.13.55 in the production group ([#91](https://github.com/MaxRzepkowski/VideTrack/issues/91)) ([579d357](https://github.com/MaxRzepkowski/VideTrack/commit/579d35759c01d9e2dd541cbfb25ffdf790f3e01b))
+* bump the production group with 2 updates ([#94](https://github.com/MaxRzepkowski/VideTrack/issues/94)) ([21d9cda](https://github.com/MaxRzepkowski/VideTrack/commit/21d9cda3369c7236dac98e09b49876c1b17a2107))
+
 ## [0.3.0](https://github.com/MaxRzepkowski/VideTrack/compare/v0.2.0...v0.3.0) (2026-11-22)
 
 
