@@ -1,0 +1,10 @@
+<?php
+
+declare(strict_types=1);
+
+return [
+    'blocked' => 'Questo account è stato bloccato.',
+    'failed' => 'Queste credenziali non corrispondono ai nostri dati.',
+    'password' => 'La password inserita non è corretta.',
+    'throttle' => 'Troppi tentativi di accesso. Riprova tra :seconds secondi.',
+];
