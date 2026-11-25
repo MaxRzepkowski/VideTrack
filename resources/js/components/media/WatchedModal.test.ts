@@ -301,3 +301,17 @@ describe('a status already on', () => {
         expect(writes()[0]).toMatchObject({ body: { status: 'dropped', amount: null, dropped_at: 'now' } });
     });
 });
+
+describe('mounted already open', () => {
+    it("reads the title's plays at once, as the layout mounts it on its first open", async () => {
+        wrapper.unmount();
+        const movie = mediaSummary({ type: 'movie' });
+        absorbUserStates({ [`${movie.type}:${movie.ref}`]: userState({ watched: true, plays: 1 }) });
+        useMediaModals().openWatched(movie);
+
+        wrapper = mount(WatchedModal);
+        await flushPromises();
+
+        expect(calls.filter((call) => call.url.includes('plays.index'))).toHaveLength(1);
+    });
+});

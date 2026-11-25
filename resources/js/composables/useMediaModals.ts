@@ -9,8 +9,9 @@ export interface CreatorListsTarget {
     name: string;
 }
 
-// The media modals (watched / rate / lists) are mounted once in the app
-// layout; any action surface opens them for a given summary. The watched
+// The media modals (watched, rate, lists, a creator's lists) are mounted by
+// the app layout, each the first time it is asked for; any action surface
+// opens them for a given summary. The watched
 // modal is the single status surface: completing, dropping, putting on
 // hold, the attempt list AND the progress counter of a title in progress.
 const modals = reactive<{

@@ -128,34 +128,39 @@ function resetAmount(): void {
     amountDirty.value = false;
 }
 
-watch(media, (opened) => {
-    if (!opened || !state.value) {
-        return;
-    }
+// At once as well: the modal mounts the first time it is asked for, already open.
+watch(
+    media,
+    (opened) => {
+        if (!opened || !state.value) {
+            return;
+        }
 
-    intent.value = openingIntent(opened, state.value, modals.watchedTab);
-    mainIntent.value = intent.value;
-    mode.value = 'now';
-    customDate.value = localDateTimeInput();
-    correcting.value = false;
-    mergeDropped.value = true;
-    historyOpen.value = false;
-    cyclesOpen.value = false;
-    clearHistory();
+        intent.value = openingIntent(opened, state.value, modals.watchedTab);
+        mainIntent.value = intent.value;
+        mode.value = 'now';
+        customDate.value = localDateTimeInput();
+        correcting.value = false;
+        mergeDropped.value = true;
+        historyOpen.value = false;
+        cyclesOpen.value = false;
+        clearHistory();
 
-    resetAmount();
+        resetAmount();
 
-    if (isPlayable(opened)) {
-        void loadPlays();
-    }
+        if (isPlayable(opened)) {
+            void loadPlays();
+        }
 
-    // Only a show that has already been started over has a history worth
-    // fetching: without a reset there is exactly one cycle, and the status
-    // line says everything about it.
-    if (opened.type === 'show' && state.value.cycle > 1) {
-        void loadCycles();
-    }
-});
+        // Only a show that has already been started over has a history worth
+        // fetching: without a reset there is exactly one cycle, and the status
+        // line says everything about it.
+        if (opened.type === 'show' && state.value.cycle > 1) {
+            void loadCycles();
+        }
+    },
+    { immediate: true },
+);
 
 watch(mergeDropped, prefillAmount);
 
