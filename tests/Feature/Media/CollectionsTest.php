@@ -324,6 +324,36 @@ test('a collection gone from the provider is removed', function () {
         ->and(MediaList::query()->whereKey($list->id)->exists())->toBeFalse();
 });
 
+test('a collection from a provider this instance has disabled is skipped and kept, the rest refresh', function () {
+    $orphan = MediaList::factory()->create([
+        'user_id' => null,
+        'system_key' => MediaList::collectionKey('unconfigured', '77'),
+        'title' => 'Orphaned Saga',
+        'is_public' => true,
+    ]);
+    MediaList::factory()->create([
+        'user_id' => null,
+        'system_key' => MediaList::collectionKey('tmdb', '2344'),
+        'title' => 'Stale title',
+        'is_public' => true,
+    ]);
+
+    Http::fake([...collectionHttpFakes(), ...providerDictionaryFakes()]);
+
+    RefreshCollections::queueTask();
+
+    $run = TaskRun::query()->where('name', 'refresh-collections')->sole();
+
+    expect($run->status)->toBe(TaskRunStatus::Success)
+        ->and($run->summary)->toContain('Refreshed 1 of 2 collections')
+        ->and($run->errors)->toBeNull()
+        ->and($run->details)->toHaveCount(1)
+        ->and($run->details[0])->toContain('Orphaned Saga', 'disabled')
+        // Its provider may come back once the key is set again.
+        ->and(MediaList::query()->whereKey($orphan->id)->exists())->toBeTrue()
+        ->and(MediaList::query()->where('system_key', MediaList::collectionKey('tmdb', '2344'))->sole()->title)->toBe('The Matrix Collection');
+});
+
 test("a series' page names the series around it, a plain collection none", function () {
     $relations = new CollectionRelations(
         parent: new CollectionLink('183', 'Tomb Raider'),

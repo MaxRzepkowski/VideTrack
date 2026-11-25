@@ -51,6 +51,7 @@ class RefreshCollections implements ShouldQueue
         $refreshed = 0;
         $notified = 0;
         $removed = [];
+        $skipped = [];
         $errors = [];
 
         foreach ($lists->values() as $index => $list) {
@@ -60,13 +61,20 @@ class RefreshCollections implements ShouldQueue
                 continue;
             }
 
+            $provider = $providers->find($source['provider']);
+
+            if ($provider === null) {
+                // Kept: the collection comes back once its provider is enabled again.
+                $skipped[] = "{$list->title}: skipped (its provider is disabled on this instance).";
+
+                continue;
+            }
+
+            if (! $provider instanceof SupportsCollections) {
+                continue;
+            }
+
             try {
-                $provider = $providers->get($source['provider']);
-
-                if (! $provider instanceof SupportsCollections) {
-                    continue;
-                }
-
                 $notified += $refresh->execute($source['provider'], $provider->collection($source['ref'], $locale), $locale);
                 $refreshed++;
             } catch (ItemNotFoundException) {
@@ -91,6 +99,10 @@ class RefreshCollections implements ShouldQueue
             $summary .= ' Removed '.count($removed).' no longer at the provider.';
         }
 
-        $this->taskRun->markSuccess($summary, $errors, $removed);
+        if ($skipped !== []) {
+            $summary .= ' Skipped '.count($skipped).' from a disabled provider.';
+        }
+
+        $this->taskRun->markSuccess($summary, $errors, [...$removed, ...$skipped]);
     }
 }
