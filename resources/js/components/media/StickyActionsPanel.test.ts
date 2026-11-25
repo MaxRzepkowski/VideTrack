@@ -43,9 +43,10 @@ describe('the bell', () => {
         ['nothing tracks the title', {}, 'Follow releases', 'follow'],
         ['the user rang it', { follow: 'follow', followSource: 'followed' }, 'Following', null],
         ['a creator rang it', { follow: 'follow', followVia: 'Keanu Reeves', followSource: 'creator' }, 'Following (Keanu Reeves)', 'mute'],
-        ['the backlog outranks a rung bell', { follow: 'follow', followSource: 'backlog' }, 'Following (backlog)', 'mute'],
+        ['the backlog tracks it with no bell', { followSource: 'backlog' }, 'Following (backlog)', 'mute'],
         ['history tracks it with no bell', { followSource: 'activity' }, 'Following (watching)', 'mute'],
-        ['a drop outranks the bell', { follow: 'follow', followSource: 'dropped' }, 'Following (dropped)', 'mute'],
+        ['a drop tracks it with no bell', { followSource: 'dropped' }, 'Following (dropped)', 'mute'],
+        ['the backlog outranks a creator', { follow: 'follow', followVia: 'Keanu Reeves', followSource: 'backlog' }, 'Following (backlog)', 'mute'],
         ['it is muted', { follow: 'mute', followSource: null }, 'Muted', null],
     ] as const)('when %s it says so, and a click moves it on', async (_, state, label, next) => {
         const bell = bellFor(state);

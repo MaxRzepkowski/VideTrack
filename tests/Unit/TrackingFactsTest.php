@@ -16,14 +16,16 @@ test('a title falls in the first row that applies', function (array $facts, ?Tra
 })->with([
     'untouched' => [[], null],
     'muted, whatever else' => [['muted' => true, 'onHold' => true, 'backlog' => true, 'activity' => true, 'manualFollow' => true], null],
-    'on hold over a drop' => [['onHold' => true, 'dropped' => true, 'activity' => true], TrackingSource::OnHold],
-    'dropped over the backlog' => [['dropped' => true, 'backlog' => true, 'activity' => true], TrackingSource::Dropped],
-    'on hold over the backlog' => [['onHold' => true, 'backlog' => true], TrackingSource::OnHold],
-    'a status over a bell' => [['dropped' => true, 'manualFollow' => true, 'creatorFollow' => true], TrackingSource::Dropped],
+    'your own bell over everything else' => [['manualFollow' => true, 'backlog' => true, 'dropped' => true, 'onHold' => true, 'activity' => true, 'creatorFollow' => true], TrackingSource::ManualFollow],
+    'your own bell over the backlog' => [['backlog' => true, 'manualFollow' => true], TrackingSource::ManualFollow],
+    'your own bell over a status' => [['dropped' => true, 'manualFollow' => true], TrackingSource::ManualFollow],
+    'the backlog over a drop' => [['dropped' => true, 'backlog' => true, 'activity' => true], TrackingSource::Backlog],
+    'the backlog over a pause' => [['onHold' => true, 'backlog' => true], TrackingSource::Backlog],
+    'a drop over a pause' => [['onHold' => true, 'dropped' => true, 'activity' => true], TrackingSource::Dropped],
+    'a status over history' => [['onHold' => true, 'activity' => true], TrackingSource::OnHold],
     'the backlog over history' => [['backlog' => true, 'activity' => true], TrackingSource::Backlog],
-    'the backlog over a bell' => [['backlog' => true, 'manualFollow' => true], TrackingSource::Backlog],
-    'history over a bell' => [['activity' => true, 'manualFollow' => true, 'creatorFollow' => true], TrackingSource::Activity],
-    'your own bell over a creator' => [['manualFollow' => true, 'creatorFollow' => true], TrackingSource::ManualFollow],
+    'history over a creator' => [['activity' => true, 'creatorFollow' => true], TrackingSource::Activity],
+    'a status over a creator' => [['dropped' => true, 'creatorFollow' => true], TrackingSource::Dropped],
     'a creator alone' => [['creatorFollow' => true], TrackingSource::CreatorFollow],
 ]);
 

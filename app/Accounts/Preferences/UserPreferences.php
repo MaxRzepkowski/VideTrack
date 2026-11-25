@@ -60,9 +60,10 @@ final readonly class UserPreferences
         'up_next_sort' => UpNextSort::Activity,
 
         // The tracking matrix: rows × surfaces, plus each surface's own
-        // options. Notifications are quieter than the calendar: paused and
-        // abandoned titles stay visible in passive views but do not ping; a
-        // leaner countdown list leaves dropped titles out.
+        // options. Notifications are quieter than the calendar: the paused
+        // and dropped rows stay on in passive views but do not ping, and a
+        // leaner countdown list leaves the dropped row out. A bell the user
+        // rang or a Backlog spot still speaks for such a title, by its own row.
         'calendar_active' => true,
         'calendar_dropped' => true,
         'calendar_on_hold' => true,
