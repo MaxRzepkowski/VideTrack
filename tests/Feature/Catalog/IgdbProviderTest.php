@@ -218,24 +218,19 @@ test('game details expose linkable studios carrying provider refs', function () 
         ->and($game->extra['publisherLinks'][0]->ref)->toBe('70');
 });
 
-test('the company page maps igdb fields and top games per role as credits', function () {
+test('the company page maps igdb fields and top games per role as credits, all in one request', function () {
     enableGamesModule();
-    $gameQueries = [];
+    $bodies = [];
 
+    // The record and the first chunk of the ludography — the released back
+    // catalogue (sort total_rating) and the upcoming front (first_release_date
+    // >= today) — come in one multiquery; role (from involved_companies) and
+    // category (from game_type) are bucketed in PHP.
     Http::fake([
-        '*/companies' => Http::response(jsonFixture('igdb/company')),
-        // The ludography is fetched in just two queries — the released back
-        // catalogue (sort total_rating) and the upcoming front (first_release_date
-        // > now) — then role (from involved_companies) and category (from
-        // game_type) are bucketed in PHP.
-        '*/games' => function ($request) use (&$gameQueries) {
-            $gameQueries[] = $request->body();
+        '*/multiquery' => function ($request) use (&$bodies) {
+            $bodies[] = $request->body();
 
-            if (str_contains($request->body(), 'first_release_date >')) {
-                return Http::response([]); // no upcoming games in this fixture
-            }
-
-            return Http::response([
+            return Http::response(igdbCompanyPage(jsonFixture('igdb/company'), rated: [
                 [
                     'id' => 7346, 'name' => 'The Legend of Zelda: Breath of the Wild',
                     'first_release_date' => 1488499200, 'total_rating' => 95.0, 'game_type' => 0, 'cover' => ['image_id' => 'co3p2d'],
@@ -261,7 +256,7 @@ test('the company page maps igdb fields and top games per role as credits', func
                     'first_release_date' => 1527811200, 'total_rating' => 60.0, 'game_type' => 0, 'cover' => ['image_id' => 'coport'],
                     'involved_companies' => [['company' => ['id' => 70], 'developer' => false, 'publisher' => false, 'porting' => true, 'supporting' => true]],
                 ],
-            ]);
+            ]));
         },
     ]);
 
@@ -291,11 +286,41 @@ test('the company page maps igdb fields and top games per role as credits', func
         ->and($coverlessGame->media->posterPath)->toBeNull()
         // Porting and supporting are roles of their own, with their own shelves.
         ->and(collect($company->credits)->where('media.ref', '7000')->pluck('role')->all())->toBe([CompanyRole::Porting, CompanyRole::Supporting])
-        ->and($gameQueries)->toHaveCount(2);
+        ->and($bodies)->toHaveCount(1)
+        ->and(substr_count($bodies[0], 'query games'))->toBe(2)
+        ->and($bodies[0])->not->toContain('cover != null');
+});
 
-    foreach ($gameQueries as $query) {
-        expect($query)->not->toContain('cover != null');
-    }
+/** A game of the company's ludography, its developer. */
+function companyGame(int $id): array
+{
+    return ['id' => $id, 'name' => "Game {$id}", 'first_release_date' => 1488499200, 'game_type' => 0, 'involved_companies' => [['company' => ['id' => 70], 'developer' => true]]];
+}
+
+test('a later chunk of the ludography is the back catalogue alone, one request past the chunks before', function () {
+    enableGamesModule();
+    Http::fake(['*/games' => Http::response(array_map(companyGame(...), range(1, 500)))]);
+
+    $chunk = igdbProvider()->companyCredits('70', 'en', MatureContent::Suggestive, 2);
+
+    expect($chunk->credits)->toHaveCount(500)
+        ->and($chunk->hasMore)->toBeTrue()
+        ->and(Http::recorded(fn ($request) => str_contains($request->url(), 'api.igdb.com')))->toHaveCount(1);
+    Http::assertSent(fn ($request) => str_ends_with($request->url(), '/games')
+        && str_contains($request->body(), 'offset 500;')
+        && ! str_contains($request->body(), 'first_release_date >='));
+});
+
+test('the first chunk of the ludography asks the upcoming front and the back catalogue together', function () {
+    enableGamesModule();
+    Http::fake(['*/multiquery' => Http::response(igdbCompanyPage([], upcoming: [companyGame(1)], rated: [companyGame(1), companyGame(2)]))]);
+
+    $chunk = igdbProvider()->companyCredits('70', 'en', MatureContent::Suggestive, 1);
+
+    // A game in both answers is one credit; fewer rated than a chunk holds is the last chunk.
+    expect(array_map(fn ($credit) => $credit->media->ref, $chunk->credits))->toBe(['1', '2'])
+        ->and($chunk->hasMore)->toBeFalse()
+        ->and(Http::recorded(fn ($request) => str_contains($request->url(), 'api.igdb.com')))->toHaveCount(1);
 });
 
 test('game details persist every regional release variant with unfiltered statuses', function () {

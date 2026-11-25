@@ -366,8 +366,7 @@ test('person details carry user states for the credit cards', function () {
 test('company details page renders', function () {
     enableGamesModule();
     Http::fake([
-        '*/companies' => Http::response(jsonFixture('igdb/company')),
-        '*/games' => Http::response([]),
+        '*/multiquery' => Http::response(igdbCompanyPage(jsonFixture('igdb/company'))),
     ]);
 
     $this->actingAs(User::factory()->create())

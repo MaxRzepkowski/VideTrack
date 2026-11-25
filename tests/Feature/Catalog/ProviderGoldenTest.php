@@ -81,8 +81,10 @@ function igdbGoldenLudography(): array
 test('IGDB reads its recorded answers the same way', function (string $name, Closure $call) {
     enableGamesModule();
     Http::fake([
-        '*/multiquery' => Http::response(igdbGamePage(jsonFixture('igdb/game'), [['id' => 951, 'game_id' => 7346, 'normally' => 332160, 'hastily' => 200000, 'completely' => 500000]])),
-        '*/companies' => Http::response(jsonFixture('igdb/company')),
+        // A company page asks for its record and first games together, a game page for the game and its parts.
+        '*/multiquery' => fn ($request) => Http::response(str_contains($request->body(), 'query companies')
+            ? igdbCompanyPage(jsonFixture('igdb/company'), igdbGoldenLudography(), igdbGoldenLudography())
+            : igdbGamePage(jsonFixture('igdb/game'), [['id' => 951, 'game_id' => 7346, 'normally' => 332160, 'hastily' => 200000, 'completely' => 500000]])),
         '*/popularity_primitives' => Http::response(jsonFixture('igdb/popularity')),
         '*/games/count' => Http::response(['count' => 42]),
         '*/genres' => Http::response([['id' => 31, 'name' => 'Adventure'], ['id' => 'x'], ['name' => 'Nameless']]),
@@ -91,8 +93,6 @@ test('IGDB reads its recorded answers the same way', function (string $name, Clo
             $body = $request->body();
 
             return match (true) {
-                // A company's ludography asks by the company.
-                str_contains($body, 'involved_companies.company') => Http::response(igdbGoldenLudography()),
                 str_contains($body, 'search '), str_contains($body, 'where id = (115289') => Http::response(jsonFixture('igdb/search')),
                 default => Http::response(jsonFixture('igdb/game')),
             };

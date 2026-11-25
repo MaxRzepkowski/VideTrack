@@ -134,16 +134,12 @@ test("a game company's follower gets the games of the role they chose", function
             return Http::response(['access_token' => 'testing-token', 'expires_in' => 5000000]);
         }
 
-        if (str_ends_with($url, '/companies')) {
-            return Http::response(jsonFixture('igdb/company'));
-        }
-
-        if (str_ends_with($url, '/games') && str_contains($body, 'involved_companies.company = 70')) {
+        if (str_ends_with($url, '/multiquery') && str_contains($body, 'involved_companies.company = 70')) {
             // The upcoming front lists both games; the rated back catalogue nothing.
-            return Http::response(str_contains($body, 'first_release_date >') ? array_map(fn (array $game): array => [
+            return Http::response(igdbCompanyPage(jsonFixture('igdb/company'), upcoming: array_map(fn (array $game): array => [
                 'id' => $game[0], 'name' => "Game {$game[0]}", 'first_release_date' => $soon, 'game_type' => 0,
                 'involved_companies' => [['company' => 70, 'developer' => $game['developer'], 'publisher' => $game['publisher']]],
-            ], $games) : []);
+            ], $games)));
         }
 
         if (str_ends_with($url, '/multiquery') && preg_match('/where id = (\d+);/', $body, $match) === 1) {

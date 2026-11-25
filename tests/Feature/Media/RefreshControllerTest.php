@@ -152,8 +152,7 @@ test('a person refresh re-fetches the person from the provider', function () {
 test('a company refresh re-fetches the company from the provider', function () {
     enableGamesModule();
     Http::fake([
-        '*/companies' => Http::response(jsonFixture('igdb/company')),
-        '*/games' => Http::response([]),
+        '*/multiquery' => Http::response(igdbCompanyPage(jsonFixture('igdb/company'))),
     ]);
 
     $this->actingAs(User::factory()->create())
@@ -161,7 +160,7 @@ test('a company refresh re-fetches the company from the provider', function () {
         ->post('/company/igdb/70/refresh')
         ->assertRedirect('/company/igdb/70');
 
-    Http::assertSent(fn ($request) => str_contains($request->url(), '/companies'));
+    Http::assertSent(fn ($request) => str_ends_with($request->url(), '/multiquery') && str_contains($request->body(), 'query companies'));
 });
 
 test('a collection refresh re-syncs its system list', function () {
@@ -207,8 +206,7 @@ test('a person refresh writes the stored row, not just the response cache', func
 test('a company refresh writes the stored row, not just the response cache', function () {
     enableGamesModule();
     Http::fake([
-        '*/companies' => Http::response(jsonFixture('igdb/company')),
-        '*/games' => Http::response([]),
+        '*/multiquery' => Http::response(igdbCompanyPage(jsonFixture('igdb/company'))),
     ]);
 
     $company = Company::factory()->create([
