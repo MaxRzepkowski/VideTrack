@@ -80,3 +80,15 @@ describe('CommandPalette', () => {
         expect(visit).toHaveBeenCalledWith('/collections/tmdb/119');
     });
 });
+
+describe('mounted already open', () => {
+    it('asks for the recent titles at once, as the layout mounts it on its first open', async () => {
+        wrapper.unmount();
+        palette.result.open.value = true;
+
+        wrapper = mount(CommandPalette);
+        await flushPromises();
+
+        expect(asked).toHaveLength(1);
+    });
+});

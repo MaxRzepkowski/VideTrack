@@ -101,19 +101,24 @@ watch(term, (value) => {
     void search();
 });
 
-watch(open, (isOpen) => {
-    if (!isOpen) {
-        // Cleared on close, not on open: resetting the term schedules the watch
-        // above, which would abort the very fetch that opening starts.
-        term.value = '';
-        results.value = [];
-        lists.value = [];
+// At once as well: the palette mounts the first time it is opened.
+watch(
+    open,
+    (isOpen) => {
+        if (!isOpen) {
+            // Cleared on close, not on open: resetting the term schedules the watch
+            // above, which would abort the very fetch that opening starts.
+            term.value = '';
+            results.value = [];
+            lists.value = [];
 
-        return;
-    }
+            return;
+        }
 
-    fetchPalette('');
-});
+        fetchPalette('');
+    },
+    { immediate: true },
+);
 
 const commands = computed(() => matchCommands(allCommands(), term.value));
 

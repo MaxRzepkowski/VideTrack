@@ -30,10 +30,15 @@ const shown = computed(() => hovered.value ?? chosen.value ?? state.value?.ratin
 const previewed = computed(() => hovered.value ?? chosen.value);
 const changed = computed(() => chosen.value !== null && chosen.value !== state.value?.rating);
 
-watch(media, () => {
-    hovered.value = null;
-    chosen.value = null;
-});
+// At once as well: the modal mounts the first time it is asked for, already open.
+watch(
+    media,
+    () => {
+        hovered.value = null;
+        chosen.value = null;
+    },
+    { immediate: true },
+);
 
 const byFinger = (event: PointerEvent): boolean => event.pointerType === 'touch' || event.pointerType === 'pen';
 

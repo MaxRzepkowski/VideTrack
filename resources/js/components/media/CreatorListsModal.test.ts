@@ -140,3 +140,15 @@ describe('CreatorListsModal', () => {
         expect(writes()).toEqual([]);
     });
 });
+
+describe('mounted already open', () => {
+    it("asks for the creator's lists at once, as the layout mounts it on its first open", async () => {
+        wrapper.unmount();
+        useMediaModals().openCreatorLists({ kind: 'person', provider: 'tmdb', ref: '6384' }, 'Keanu Reeves');
+
+        wrapper = mount(CreatorListsModal);
+        await flushPromises();
+
+        expect(calls.filter((call) => call.url.includes('lists.show'))).toHaveLength(1);
+    });
+});

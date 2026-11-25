@@ -33,31 +33,36 @@ const loading = ref(false);
 
 const listIds = computed(() => (creator.value ? creatorState(creator.value).listIds : []));
 
-watch(target, async (value, _, onCleanup) => {
-    let current = true;
+// At once as well: the modal mounts the first time it is asked for, already open.
+watch(
+    target,
+    async (value, _, onCleanup) => {
+        let current = true;
 
-    onCleanup(() => (current = false));
-    loaded.value = false;
-    loading.value = false;
+        onCleanup(() => (current = false));
+        loaded.value = false;
+        loading.value = false;
 
-    if (!value) {
-        return;
-    }
-
-    loading.value = true;
-
-    try {
-        const landed = await loadLists(value.creator);
-
-        if (current) {
-            loaded.value = landed;
+        if (!value) {
+            return;
         }
-    } finally {
-        if (current) {
-            loading.value = false;
+
+        loading.value = true;
+
+        try {
+            const landed = await loadLists(value.creator);
+
+            if (current) {
+                loaded.value = landed;
+            }
+        } finally {
+            if (current) {
+                loading.value = false;
+            }
         }
-    }
-});
+    },
+    { immediate: true },
+);
 
 // Create a new list with this creator already on it; the answer brings the
 // creator's lists with the fresh one checked.
