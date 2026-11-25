@@ -1,6 +1,6 @@
 import NotificationPanel from '@/components/notifications/NotificationPanel.vue';
 import { notificationEntry } from '@/test/factories';
-import type { NotificationEntry, NotificationFeed } from '@/types/notifications';
+import type { NotificationEntry } from '@/types/notifications';
 import { mount } from '@vue/test-utils';
 import { describe, expect, it } from 'vitest';
 
@@ -9,8 +9,8 @@ const Link = { props: ['href'], template: '<a :href="href"><slot /></a>' };
 const entry = (overrides: Partial<NotificationEntry> = {}) =>
     notificationEntry({ event: 'premiere', subject: 'Dune', label: 'Out today', facts: ['Movie release'], ...overrides });
 
-function panel(feed: NotificationFeed) {
-    return mount(NotificationPanel, { props: { feed, followingHref: '/following' }, global: { stubs: { Link } } });
+function panel(feed: { unread: number; recent: NotificationEntry[] | null }) {
+    return mount(NotificationPanel, { props: { ...feed, followingHref: '/following' }, global: { stubs: { Link } } });
 }
 
 describe('NotificationPanel', () => {
@@ -39,6 +39,17 @@ describe('NotificationPanel', () => {
 
         expect(wrapper.text()).toContain('No notifications');
         expect(wrapper.text()).toContain('Release dates, status changes and premieres of titles you follow show up here.');
+        expect(wrapper.find('a[href="/notifications.index"]').exists()).toBe(false);
+        expect(wrapper.find('a[href="/following"]').exists()).toBe(true);
+    });
+
+    it("holds the list's place with placeholder rows until it arrives, with nothing to lead on to yet but what you follow", () => {
+        const wrapper = panel({ unread: 2, recent: null });
+
+        expect(wrapper.find('[role="status"][aria-busy="true"]').attributes('aria-label')).toBe('Loading…');
+        expect(wrapper.findAll('.skeleton').length).toBeGreaterThan(0);
+        expect(wrapper.text()).not.toContain('No notifications');
+        expect(wrapper.text()).toContain('Mark all as read');
         expect(wrapper.find('a[href="/notifications.index"]').exists()).toBe(false);
         expect(wrapper.find('a[href="/following"]').exists()).toBe(true);
     });

@@ -5,7 +5,7 @@ namespace App\Notifications\Data;
 use Spatie\TypeScriptTransformer\Attributes\TypeScript;
 
 /**
- * What the header bell reads: the shared prop and the feed it polls alike.
+ * What the header bell reads when it opens, and polls while the tab is open.
  */
 #[TypeScript]
 final readonly class NotificationFeed

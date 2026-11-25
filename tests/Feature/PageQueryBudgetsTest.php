@@ -113,16 +113,16 @@ test('a page reads a library within its query budget, whatever its size', functi
 
     expect(count($larger))->toBeLessThanOrEqual($measured + PAGE_QUERY_ROOM, implode("\n", array_map(fn (QueryExecuted $query): string => $query->sql, $larger)));
 })->with([
-    'the home page' => [20, fn (User $user): string => route('dashboard')],
-    'the calendar' => [16, fn (User $user): string => route('calendar')],
-    'the countdowns' => [16, fn (User $user): string => route('countdowns')],
-    'the history' => [25, fn (User $user): string => route('users.history', ['user' => $user->username])],
-    'the Backlog' => [19, fn (User $user): string => listPage($user->watchlist())],
-    'the notifications' => [6, fn (User $user): string => route('notifications.index')],
-    'the suggestions' => [25, fn (User $user): string => route('suggestions.index')],
-    'a shelf of subjects' => [8, fn (User $user): string => route('suggestions.show', ['shelf' => 'missing-from-collections'])],
-    'a show being watched' => [24, fn (User $user): string => route('show.details', ['ref' => '1399']), watchMoreOfTheShow(...)],
-    'a person' => [12, fn (User $user): string => route('person.details', ['provider' => 'tmdb', 'ref' => '6384'])],
-    'the search' => [12, fn (User $user): string => route('search', ['q' => 'matrix'])],
-    'Discover' => [11, fn (User $user): string => route('discover', ['type' => 'show'])],
+    'the home page' => [19, fn (User $user): string => route('dashboard')],
+    'the calendar' => [15, fn (User $user): string => route('calendar')],
+    'the countdowns' => [15, fn (User $user): string => route('countdowns')],
+    'the history' => [24, fn (User $user): string => route('users.history', ['user' => $user->username])],
+    'the Backlog' => [18, fn (User $user): string => listPage($user->watchlist())],
+    'the notifications' => [5, fn (User $user): string => route('notifications.index')],
+    'the suggestions' => [24, fn (User $user): string => route('suggestions.index')],
+    'a shelf of subjects' => [7, fn (User $user): string => route('suggestions.show', ['shelf' => 'missing-from-collections'])],
+    'a show being watched' => [23, fn (User $user): string => route('show.details', ['ref' => '1399']), watchMoreOfTheShow(...)],
+    'a person' => [11, fn (User $user): string => route('person.details', ['provider' => 'tmdb', 'ref' => '6384'])],
+    'the search' => [11, fn (User $user): string => route('search', ['q' => 'matrix'])],
+    'Discover' => [10, fn (User $user): string => route('discover', ['type' => 'show'])],
 ]);

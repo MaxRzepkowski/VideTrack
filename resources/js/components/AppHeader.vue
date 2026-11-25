@@ -22,15 +22,16 @@ import { computed, ref, watch } from 'vue';
 // The header is part of the app layout, which only a signed-in user sees.
 const viewer = computed(() => signedInUser());
 
-// Header bell: unread counter + latest notifications (null for guests). Kept
-// current while the tab stays open — the shared prop alone would age until the
-// next navigation.
+// Header bell: the unread counter (null for guests), and the latest
+// notifications once it has been opened. Kept current while the tab stays
+// open — the shared prop alone would age until the next navigation.
 const bellOpen = ref(false);
 const sheetOpen = ref(false);
 const notificationsOpen = computed(() => bellOpen.value || sheetOpen.value);
-const { feed: notifications, refresh: refreshNotifications } = useNotificationFeed(notificationsOpen);
+const { unread, recent, refresh: refreshNotifications } = useNotificationFeed(notificationsOpen);
 
-// Opening is the one moment the list is read closely; ask for it fresh.
+// Opening is the one moment the list is read closely; ask for it fresh (the
+// first time, it is not here at all).
 watch(notificationsOpen, (open) => {
     if (open) {
         refreshNotifications();
@@ -38,9 +39,7 @@ watch(notificationsOpen, (open) => {
 });
 
 const bellLabel = computed(() =>
-    notifications.value && notifications.value.unread > 0
-        ? trans('common.notifications_unread', { count: String(notifications.value.unread) })
-        : trans('common.notifications'),
+    unread.value !== null && unread.value > 0 ? trans('common.notifications_unread', { count: String(unread.value) }) : trans('common.notifications'),
 );
 const followingHref = navHref(FOLLOWING);
 
@@ -126,13 +125,13 @@ async function openNotification(item: NotificationEntry, event: MouseEvent): Pro
                     <Search class="text-ink size-4.5" />
                 </Link>
 
-                <template v-if="notifications">
+                <template v-if="unread !== null">
                     <!-- One bell, two holders: a panel dropping from it on a desktop,
                          a sheet rising from the bottom on a phone. -->
                     <DropdownMenu v-model:open="bellOpen">
                         <DropdownMenuTrigger v-tooltip="trans('common.notifications')" :aria-label="bellLabel" :class="[BELL, 'hidden md:flex']">
                             <Bell class="text-ink size-4.5" />
-                            <span v-if="notifications.unread > 0" :class="UNREAD_MARK" aria-hidden="true" />
+                            <span v-if="unread > 0" :class="UNREAD_MARK" aria-hidden="true" />
                         </DropdownMenuTrigger>
                         <!-- Right edge in line with the avatar; the arrow points back up at the bell. -->
                         <DropdownMenuContent
@@ -147,7 +146,8 @@ async function openNotification(item: NotificationEntry, event: MouseEvent): Pro
                                 aria-hidden="true"
                             />
                             <NotificationPanel
-                                :feed="notifications"
+                                :unread="unread"
+                                :recent="recent"
                                 :following-href="followingHref"
                                 @mark-all-read="markAllRead"
                                 @open="openNotification"
@@ -158,11 +158,12 @@ async function openNotification(item: NotificationEntry, event: MouseEvent): Pro
 
                     <button type="button" :aria-label="bellLabel" :class="[BELL, 'md:hidden']" @click="sheetOpen = true">
                         <Bell class="text-ink size-4.5" />
-                        <span v-if="notifications.unread > 0" :class="UNREAD_MARK" aria-hidden="true" />
+                        <span v-if="unread > 0" :class="UNREAD_MARK" aria-hidden="true" />
                     </button>
                     <BottomSheet v-model:open="sheetOpen" :title="trans('common.notifications')">
                         <NotificationPanel
-                            :feed="notifications"
+                            :unread="unread"
+                            :recent="recent"
                             :following-href="followingHref"
                             @mark-all-read="markAllRead"
                             @open="openNotification"

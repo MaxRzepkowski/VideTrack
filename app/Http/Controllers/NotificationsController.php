@@ -24,8 +24,6 @@ class NotificationsController extends Controller
     {
         $page = $viewer->notifications()->paginate(self::PER_PAGE);
 
-        // Not `notifications`: that name is the bell's shared prop, which a
-        // page prop of the same name would hide from the header.
         return Inertia::render('Notifications', [
             'entries' => NotificationResource::rendered($page->items(), $copy, App::getLocale())->resolve(),
             'pagination' => PageInfo::of($page),

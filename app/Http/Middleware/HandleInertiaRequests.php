@@ -6,7 +6,6 @@ use App\Accounts\Identity\Data\IdentityProviderOption;
 use App\Accounts\Identity\IdentityProviderRegistry;
 use App\Accounts\PasswordLogin;
 use App\Accounts\Registration;
-use App\Actions\BuildNotificationFeed;
 use App\Catalog\Discovery;
 use App\Catalog\ImageUrls;
 use App\Catalog\MediaTypeDefinition;
@@ -16,7 +15,6 @@ use App\Library\Data\UserList;
 use App\Library\Data\UserMediaState;
 use App\Models\MediaList;
 use App\Models\User;
-use App\Notifications\Data\NotificationFeed;
 use App\Support\FrontTranslations;
 use App\Support\Locales;
 use App\Support\QueryRow;
@@ -32,7 +30,6 @@ class HandleInertiaRequests extends Middleware
     public function __construct(
         private readonly MediaTypeRegistry $types,
         private readonly Discovery $discovery,
-        private readonly BuildNotificationFeed $notificationFeed,
         private readonly VisibleEvents $events,
         private readonly Registration $registration,
         private readonly PasswordLogin $passwordLogin,
@@ -101,19 +98,11 @@ class HandleInertiaRequests extends Middleware
                 'ownPage' => TitlePages::hasOwnPage($type->code),
                 'genreBrowsable' => $this->discovery->browsesGenresOf($type->code),
             ], $this->types->all())),
-            // The header bell: unread counter + the latest few for the
-            // dropdown. Only the state at render time — an open tab keeps it
-            // current by polling notifications.feed, which answers with the
-            // very same payload.
-            'notifications' => function () use ($request): ?NotificationFeed {
-                $user = $request->user();
-
-                if ($user === null) {
-                    return null;
-                }
-
-                return $this->notificationFeed->execute($user, App::getLocale());
-            },
+            // The header bell's unread counter, null for a guest, who has no
+            // bell. The list itself is asked of notifications.feed when the
+            // bell first opens: most pages are left without anyone looking
+            // into it, and an open tab polls the same feed for the counter.
+            'unreadNotifications' => fn (): ?int => $request->user()?->unreadNotifications()->count(),
             // The "live" button: the events running or starting soon, as one
             // small read; the page switches the button on and off by their
             // times, never asking again.

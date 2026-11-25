@@ -16,7 +16,6 @@ import type {
     WeekStart,
 } from '@/types/generated';
 import type { UserList } from '@/types/media';
-import type { NotificationFeed } from '@/types/notifications';
 
 export type { EpisodeImage, ReleaseDateMode };
 
@@ -57,8 +56,8 @@ export type SharedData = {
     userLists: UserList[];
     /** The state of a title the user never touched; null for guests. */
     untouchedState: UserMediaState | null;
-    /** Unread counter + latest items for the header bell; null for guests. */
-    notifications: NotificationFeed | null;
+    /** The header bell's unread counter; null for guests. The bell asks for its list when it opens. */
+    unreadNotifications: number | null;
     /** The events on the viewer's calendar running now or starting within hours: the "live" button's own clock reads them. */
     liveEvents: EventEntry[];
     ziggy: {

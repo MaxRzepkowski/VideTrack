@@ -271,6 +271,26 @@
 }
 
 /*
+ * A placeholder for something still on its way (a card, a row of the bell):
+ * the raised tone with a lighter shine sweeping across it, so the wait reads
+ * as loading rather than as empty.
+ */
+@utility skeleton {
+    background: linear-gradient(90deg, var(--color-surface-raised) 0%, var(--color-skeleton-shine) 50%, var(--color-surface-raised) 100%);
+    background-size: 200% 100%;
+    animation: skeleton-shine 1.4s infinite linear;
+}
+
+@keyframes skeleton-shine {
+    0% {
+        background-position: 150% 0;
+    }
+    100% {
+        background-position: -150% 0;
+    }
+}
+
+/*
  * A scroll area that carries its own affordance — arrow buttons that appear
  * only while there is something past an edge — and so has no use for a bar
  * underneath saying the same thing a second time. The area still scrolls by

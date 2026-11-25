@@ -14,21 +14,3 @@
         </div>
     </div>
 </template>
-
-<style scoped>
-.skeleton {
-    /* Base = raised card tone, highlight clearly lighter so the sweep reads. */
-    background: linear-gradient(90deg, var(--color-surface-raised) 0%, var(--color-skeleton-shine) 50%, var(--color-surface-raised) 100%);
-    background-size: 200% 100%;
-    animation: shimmer 1.4s infinite linear;
-}
-
-@keyframes shimmer {
-    0% {
-        background-position: 150% 0;
-    }
-    100% {
-        background-position: -150% 0;
-    }
-}
-</style>
