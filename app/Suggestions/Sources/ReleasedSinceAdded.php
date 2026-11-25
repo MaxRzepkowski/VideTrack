@@ -2,6 +2,7 @@
 
 namespace App\Suggestions\Sources;
 
+use App\Accounts\UserCalendar;
 use App\Catalog\MediaItemSummaries;
 use App\Enums\FollowMode;
 use App\Models\Follow;
@@ -117,6 +118,8 @@ final readonly class ReleasedSinceAdded implements SuggestionSource
             ->toBase()
             ->get(['media_item_id', 'created_at']);
 
+        // The day on the viewer's calendar, to set against a release day.
+        $calendar = UserCalendar::of($viewer);
         $added = [];
 
         foreach ([AddedVia::Followed->value => $bells, AddedVia::Listed->value => $listed] as $origin => $rows) {
@@ -128,7 +131,7 @@ final readonly class ReleasedSinceAdded implements SuggestionSource
                 }
 
                 $id = QueryRow::int($row, 'media_item_id');
-                $day = Carbon::parse($createdAt)->toDateString();
+                $day = $calendar->dayOfStored($createdAt);
                 $added[$id][$origin] = min($added[$id][$origin] ?? $day, $day);
             }
         }

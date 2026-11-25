@@ -83,3 +83,21 @@ test('the latest premiere comes first and the card says when it was added and re
 test('it needs no provider sets', function () {
     expect(app(ReleasedSinceAdded::class)->wantedSets(User::factory()->create()))->toBe([]);
 });
+
+test("a premiere counts as out from the viewer's own midnight, not the server's", function () {
+    // 23:30 UTC is already the next day in Warsaw.
+    $this->travelTo('2026-10-10 23:30:00');
+    $user = User::factory()->create(['preferences' => ['timezone' => 'Europe/Warsaw']]);
+    belled($user, MediaItem::factory()->movie()->create(['title' => 'Out in Warsaw', 'release_date' => '2026-10-11']), '2026-10-05 10:00:00');
+
+    expect(releasedSinceAdded($user))->toBe(['Out in Warsaw']);
+});
+
+test("the day a title was added is the viewer's day, so a bell rung on its premiere night is not an early one", function () {
+    $this->travelTo('2026-10-12 12:00:00');
+    $user = User::factory()->create(['preferences' => ['timezone' => 'Europe/Warsaw']]);
+    // 22:30 UTC on the 10th is half past midnight on the 11th in Warsaw: the premiere day itself.
+    belled($user, MediaItem::factory()->movie()->create(['title' => 'Belled on the day', 'release_date' => '2026-10-11']), '2026-10-10 22:30:00');
+
+    expect(releasedSinceAdded($user))->toBe([]);
+});

@@ -2,6 +2,7 @@
 
 namespace App\Suggestions;
 
+use App\Accounts\UserCalendar;
 use App\Catalog\Data\MediaSummary;
 use App\Models\LibraryEntry;
 use App\Models\User;
@@ -55,6 +56,7 @@ final readonly class SuggestionFilter
             }
         }
 
-        return new TitleStandings($finished, $touched, today());
+        // Out by the viewer's own day, as their calendar and countdowns count it.
+        return new TitleStandings($finished, $touched, UserCalendar::of($viewer)->today());
     }
 }
