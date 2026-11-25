@@ -150,8 +150,8 @@ final readonly class ItemMetadata
         return $query->whereNull(self::column($field));
     }
 
-    /** Where a typed field is stored, for a query. */
-    private static function column(string $field): string
+    /** Where a typed field is stored, for a query: the column a select or a condition names. */
+    public static function column(string $field): string
     {
         return in_array($field, self::TYPED_KEYS, true) ? "media_items.metadata->{$field}" : throw new InvalidArgumentException("Item metadata has no typed field [{$field}].");
     }

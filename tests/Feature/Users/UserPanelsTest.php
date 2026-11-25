@@ -587,6 +587,49 @@ test('the history\'s date filter takes the viewer\'s days, as the page groups th
         ->assertInertia(fn (Assert $page) => $page->has('entries', 0));
 });
 
+test('the history\'s days follow the viewer\'s clock across both changes of time', function (string $instanceZone) {
+    // Plays are stamped as the instance's clock reads them; the day a play
+    // falls on is the viewer's, an hour apart on either side of each change.
+    config(['app.timezone' => $instanceZone]);
+    date_default_timezone_set($instanceZone);
+
+    $user = User::factory()->create(['preferences' => ['timezone' => 'Europe/Warsaw']]);
+    $movie = MediaItem::factory()->movie()->create(['runtime' => 60]);
+
+    foreach ([
+        '2026-03-28 22:59', '2026-03-28 23:00', // the last minute of winter time, then midnight
+        '2026-03-29 21:59', '2026-03-29 22:00', // the first day of summer time, at its two ends
+        '2026-10-24 21:59', '2026-10-24 22:00', // the last minute of summer time, then midnight
+        '2026-10-25 22:59', '2026-10-25 23:00', // the day back on winter time, at its two ends
+    ] as $moment) {
+        app(MarkWatched::class)->execute($user, $movie, WatchedAt::at(CarbonImmutable::parse($moment, 'UTC')->setTimezone($instanceZone)));
+    }
+
+    $this->actingAs($user)
+        ->get(route('users.history', ['user' => $user->username]))
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('entries', fn ($entries) => collect($entries)->pluck('day')->all() === [
+                '2026-10-26', '2026-10-25', '2026-10-25', '2026-10-24',
+                '2026-03-30', '2026-03-29', '2026-03-29', '2026-03-28',
+            ])
+            ->where('dayTotals', [
+                '2026-10-26' => ['watch' => 60],
+                '2026-10-25' => ['watch' => 120],
+                '2026-10-24' => ['watch' => 60],
+                '2026-03-30' => ['watch' => 60],
+                '2026-03-29' => ['watch' => 120],
+                '2026-03-28' => ['watch' => 60],
+            ]));
+
+    // Rolled up, a show sits under the viewer's day of its latest play.
+    $show = makeShowTree([1 => ['2020-01-01']]);
+    app(MarkWatched::class)->execute($user, $show, WatchedAt::at(CarbonImmutable::parse('2026-10-25 23:00', 'UTC')->setTimezone($instanceZone)));
+
+    $this->actingAs($user)
+        ->get(route('users.history', ['user' => $user->username, 'type' => 'show']))
+        ->assertInertia(fn (Assert $page) => $page->has('entries', 1)->where('entries.0.day', '2026-10-26'));
+})->with(['an instance on UTC' => 'UTC', 'an instance on the viewer\'s zone' => 'Europe/Warsaw']);
+
 test('the ratings panel carries no day totals', function () {
     $user = User::factory()->create();
     $movie = MediaItem::factory()->movie()->create(['runtime' => 90]);

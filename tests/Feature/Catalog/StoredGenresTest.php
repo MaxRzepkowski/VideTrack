@@ -3,6 +3,8 @@
 use App\Catalog\ItemMetadata;
 use App\Catalog\StoredGenres;
 use App\Models\MediaItem;
+use Illuminate\Database\Events\QueryExecuted;
+use Illuminate\Support\Facades\DB;
 
 /** A title whose metadata holds these genres, stored the way ItemMetadata stores them. */
 function titleOfGenres(string ...$genres): MediaItem
@@ -16,7 +18,7 @@ test('the genres of a set of titles are read once each, only from the titles ask
     $none = titleOfGenres();
     titleOfGenres('Western');
 
-    $genres = StoredGenres::of(MediaItem::query()->whereIn('id', [$drama->id, $again->id, $none->id]));
+    $genres = StoredGenres::ofTitles([$drama->id, $again->id, $none->id]);
 
     expect($genres)->toEqualCanonicalizing(['Drama', 'Crime']);
 });
@@ -27,5 +29,21 @@ test('only names count as genres, and a title with no metadata adds none', funct
     $bare = MediaItem::factory()->movie()->create();
     MediaItem::query()->whereKey($bare->id)->update(['metadata' => null]);
 
-    expect(StoredGenres::of(MediaItem::query()->whereIn('id', [$mixed->id, $bare->id])))->toBe(['Drama']);
+    expect(StoredGenres::ofTitles([$mixed->id, $bare->id]))->toBe(['Drama']);
+});
+
+test('a set of titles has its genres read from the index, not from each title\'s metadata', function () {
+    $titles = [titleOfGenres('Drama')->id, titleOfGenres('Crime')->id];
+    $queries = [];
+    DB::listen(function (QueryExecuted $query) use (&$queries) {
+        $queries[] = $query;
+    });
+
+    StoredGenres::ofTitles($titles);
+    [$read] = $queries;
+    expect($queries)->toHaveCount(1);
+
+    $plan = collect(DB::select("explain query plan {$read->sql}", $read->bindings))->pluck('detail')->implode(' | ');
+
+    expect($plan)->toContain('USING COVERING INDEX media_items_id_genres_index');
 });

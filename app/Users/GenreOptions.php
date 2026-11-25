@@ -7,7 +7,6 @@ use App\Catalog\StoredGenres;
 use App\Enums\PlayOutcome;
 use App\Models\Favorite;
 use App\Models\LibraryEntry;
-use App\Models\MediaItem;
 use App\Models\Play;
 use App\Models\Rating;
 use App\Models\User;
@@ -40,8 +39,7 @@ final readonly class GenreOptions
             ->merge(Favorite::query()->where('user_id', $user->id)->pluck('media_item_id'))
             ->unique();
 
-        $genres = StoredGenres::of(MediaItem::query()
-            ->whereIn('id', $played->merge($this->hierarchy->rootIds(Numbers::ints($marked)))->unique()));
+        $genres = StoredGenres::ofTitles(Numbers::ints($played->merge($this->hierarchy->rootIds(Numbers::ints($marked)))->unique()));
 
         sort($genres, SORT_NATURAL | SORT_FLAG_CASE);
 

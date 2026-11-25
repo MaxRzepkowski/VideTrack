@@ -2,9 +2,7 @@
 
 namespace App\Catalog;
 
-use App\Models\MediaItem;
 use App\Support\Payload;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -15,16 +13,29 @@ use Illuminate\Support\Facades\DB;
 final class StoredGenres
 {
     /**
-     * The distinct genres the rows of a query carry.
+     * The index holding each title's genre list beside its id, as the query
+     * builder writes the genres column: read so, the genres come from the
+     * index without parsing any row's metadata.
+     */
+    private const INDEX = 'media_items_id_genres_index';
+
+    /**
+     * The distinct genres of these titles.
      *
-     * @param  Builder<MediaItem>  $query
+     * @param  list<int>  $ids
      * @return list<string>
      */
-    public static function of(Builder $query): array
+    public static function ofTitles(array $ids): array
     {
+        // Named, not left to the planner: nothing gathers statistics on this
+        // database, and without them SQLite reads each row by its key instead.
+        $titles = DB::table(DB::raw('media_items indexed by '.self::INDEX))
+            ->whereIn('id', $ids)
+            ->select(ItemMetadata::column('genres').' as genres');
+
         return Payload::strings(DB::query()
-            ->fromSub($query->toBase()->select('media_items.metadata'), 'rows')
-            ->crossJoin(DB::raw(self::entries('rows.metadata').' as genre'))
+            ->fromSub($titles, 'rows')
+            ->crossJoin(DB::raw('json_each(rows.genres) as genre'))
             ->distinct()
             ->pluck('genre.value')
             ->all());
