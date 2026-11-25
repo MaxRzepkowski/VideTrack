@@ -33,4 +33,6 @@ return [
     'one_shots' => '読み切り',
     'most_popular' => '人気順',
     'most_favorited' => 'お気に入り数順',
+    'range_from' => '下限',
+    'range_to' => '上限',
 ];

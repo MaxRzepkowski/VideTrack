@@ -33,4 +33,6 @@ return [
     'one_shots' => '短篇',
     'most_popular' => '最受欢迎',
     'most_favorited' => '收藏最多',
+    'range_from' => '最低',
+    'range_to' => '最高',
 ];

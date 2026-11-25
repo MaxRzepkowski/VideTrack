@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import AmountTerms from '@/components/AmountTerms.vue';
 import Hairline from '@/components/Hairline.vue';
 import { durationTerms } from '@/lib/format';
 import { mediaTypeMeta } from '@/lib/mediaTypes';
@@ -93,10 +94,7 @@ const detail = computed(() => statCounts(props.kind, stats.value));
                  wraps to three lines inside it. -->
             <p class="text-ink flex flex-wrap items-baseline gap-x-2 text-base leading-tight font-bold sm:text-lg">
                 <span v-if="(stats.estimatedMinutes ?? 0) > 0" class="text-ink-muted font-medium">{{ trans('common.estimate_sign') }}</span>
-                <span v-for="entry in headline" :key="entry.unit" class="inline-flex items-baseline gap-x-1">
-                    <span>{{ entry.value }}</span>
-                    <span class="font-medium">{{ entry.unit }}</span>
-                </span>
+                <AmountTerms :terms="headline" word-class="font-medium" />
             </p>
             <!-- The shared rule between the counts. The row spaces itself, so
                  the rule drops its own margins. -->

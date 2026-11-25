@@ -33,4 +33,6 @@ return [
     'one_shots' => '단편',
     'most_popular' => '인기 순',
     'most_favorited' => '즐겨찾기 많은 순',
+    'range_from' => '최소',
+    'range_to' => '최대',
 ];

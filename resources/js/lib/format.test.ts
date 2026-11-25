@@ -1,9 +1,11 @@
 import {
     ALTERNATIVE_TITLES_SHOWN,
     alternativeTitlesLine,
+    amountTerm,
     countryName,
     dateTimeInputInstant,
     durationTerms,
+    durationTermsSpaced,
     episodeCode,
     formatCalendarDate,
     formatCountOrNull,
@@ -190,7 +192,9 @@ describe('durations and numbers', () => {
         expect(formatWatchTime(3 * 1440 + 7 * 60 + 12)).toBe('3 days 7 hours 12 minutes');
         expect(formatWatchTime(1440 + 1)).toBe('1 day 1 minute');
         expect(formatWatchTime(0)).toBe('0 minutes');
-        expect(durationTerms(60)).toEqual([{ value: '1', unit: 'hour' }]);
+        expect(durationTerms(60)).toEqual([{ value: '1', before: '', after: ' hour' }]);
+        expect(durationTermsSpaced()).toBe(true);
+        expect(() => amountTerm('3', 'days', ':value')).toThrow();
     });
 
     it('takes the units from the language', async () => {
@@ -211,6 +215,8 @@ describe('durations and numbers', () => {
         try {
             expect(formatRuntime(136)).toBe('2時間16分');
             expect(formatWatchTime(3 * 1440 + 7 * 60 + 12)).toBe('3日7時間12分');
+            expect(durationTerms(60)).toEqual([{ value: '1', before: '', after: '時間' }]);
+            expect(durationTermsSpaced()).toBe(false);
         } finally {
             await loadLanguageAsync('en');
         }

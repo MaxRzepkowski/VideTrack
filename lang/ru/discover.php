@@ -33,4 +33,6 @@ return [
     'one_shots' => 'Ваншоты',
     'most_popular' => 'Самое популярное',
     'most_favorited' => 'Чаще всего в избранном',
+    'range_from' => 'От',
+    'range_to' => 'До',
 ];

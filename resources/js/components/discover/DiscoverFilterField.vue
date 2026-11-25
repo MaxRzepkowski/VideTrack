@@ -88,14 +88,14 @@ function onRange(end: 'from' | 'to', event: Event): void {
 
         <div v-else class="flex items-center gap-2">
             <label class="flex-1">
-                <span class="sr-only">{{ trans('common.from') }}</span>
+                <span class="sr-only">{{ trans('discover.range_from') }}</span>
                 <select
                     v-if="rangeOptions.length"
                     :value="range.from ?? ''"
                     :class="[SELECT_CLASS, 'w-full']"
                     @change="(event) => onRange('from', event)"
                 >
-                    <option value="">{{ trans('common.from') }}</option>
+                    <option value="">{{ trans('discover.range_from') }}</option>
                     <option v-for="option in rangeOptions" :key="`from-${option}`" :value="option">{{ option }}</option>
                 </select>
                 <input
@@ -105,7 +105,7 @@ function onRange(end: 'from' | 'to', event: Event): void {
                     :value="range.from ?? ''"
                     :min="filter.rangeMin ?? undefined"
                     :max="filter.rangeMax ?? undefined"
-                    :placeholder="trans('common.from')"
+                    :placeholder="trans('discover.range_from')"
                     :class="[SELECT_CLASS, 'w-full']"
                     @change="(event) => onRange('from', event)"
                 />
@@ -114,14 +114,14 @@ function onRange(end: 'from' | 'to', event: Event): void {
             <span class="bg-line h-px w-2 shrink-0" aria-hidden="true" />
 
             <label class="flex-1">
-                <span class="sr-only">{{ trans('common.to') }}</span>
+                <span class="sr-only">{{ trans('discover.range_to') }}</span>
                 <select
                     v-if="rangeOptions.length"
                     :value="range.to ?? ''"
                     :class="[SELECT_CLASS, 'w-full']"
                     @change="(event) => onRange('to', event)"
                 >
-                    <option value="">{{ trans('common.to') }}</option>
+                    <option value="">{{ trans('discover.range_to') }}</option>
                     <option v-for="option in rangeOptions" :key="`to-${option}`" :value="option">{{ option }}</option>
                 </select>
                 <input
@@ -131,7 +131,7 @@ function onRange(end: 'from' | 'to', event: Event): void {
                     :value="range.to ?? ''"
                     :min="filter.rangeMin ?? undefined"
                     :max="filter.rangeMax ?? undefined"
-                    :placeholder="trans('common.to')"
+                    :placeholder="trans('discover.range_to')"
                     :class="[SELECT_CLASS, 'w-full']"
                     @change="(event) => onRange('to', event)"
                 />

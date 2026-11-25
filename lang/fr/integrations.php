@@ -25,7 +25,7 @@ return [
     'create_token' => 'Créer un jeton',
     'dashboard_plugins_webhook_add_generic_destination' => 'Dashboard → Plugins → Webhook → Add Generic Destination. Colle l’adresse ci-dessus comme URL du webhook.',
     'disconnect_this_endpoint_its_address_and' => 'Déconnecter ce point d’entrée ? Son adresse et son journal des envois seront supprimés.',
-    'dry_run' => 'Essai à blanc',
+    'dry_run_headline' => 'Essai à blanc : :headline',
     'emby_sends_webhooks_only_with_emby' => 'Emby n’envoie de webhooks qu’avec Emby Premiere. Sans cet abonnement, rien n’arrivera ici.',
     'event_is_complete_progress_stop_start' => 'event vaut l’une de ces valeurs : :events. progress est un pourcentage ; un stop au-delà de :threshold % compte comme vu sur cette instance. Sans occurred_at, c’est le moment de l’envoi qui compte. user est comparé au champ « Compte sur le serveur ». Les champs inconnus sont ignorés, et un contenu illisible reçoit une réponse 422 avec la raison.',
     'every_account' => 'Tous les comptes',

@@ -2,7 +2,6 @@
 
 return [
     'all_episodes_watched' => 'Todos os episódios assistidos',
-    'chapter' => 'capítulo|capítulos',
     'continue_watching_the_shows_you_have' => 'Continue assistindo às séries que você começou.',
     'count_book' => ':count livro|:count livros',
     'count_comic' => ':count HQ|:count HQs',
@@ -11,11 +10,9 @@ return [
     'count_show' => ':count série|:count séries',
     'currently_playing' => 'Jogando agora',
     'currently_reading' => 'Lendo agora',
-    'issue' => 'edição|edições',
     'no_upcoming_releases_for_your_shows' => 'Nenhum lançamento futuro para suas séries e seu Backlog.',
     'nothing_here_yet_mark_an_episode' => 'Nada aqui ainda. Marque um episódio como assistido e suas séries aparecerão aqui.',
     'nothing_left_to_watch' => 'Nada mais para assistir',
-    'page' => 'página|páginas',
     'rate_this_series' => 'Avaliar esta série',
     'up_next_to_watch' => 'Para assistir a seguir',
     'your_books_manga_and_comics_in' => 'Seus livros, mangás e HQs em andamento',

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import AmountTerms from '@/components/AmountTerms.vue';
 import PosterThumb from '@/components/statistics/PosterThumb.vue';
 import ChartCard from '@/components/statistics/ChartCard.vue';
 import TypeYear from '@/components/statistics/TypeYear.vue';
@@ -35,20 +36,12 @@ const subtitle = computed(() =>
                 <span class="text-ink-muted text-sm">{{ meta.length.longest() }}</span>
                 <span class="text-ink text-base font-semibold group-hover:underline">{{ length.longest.title }}</span>
                 <TypeYear :type="length.type" :year="length.longest.year" />
-                <span class="text-ink flex flex-wrap gap-x-2 text-lg">
-                    <span v-for="term in durationTerms(length.longestRuntime)" :key="term.unit"
-                        ><b>{{ term.value }}</b> {{ term.unit }}</span
-                    >
-                </span>
+                <AmountTerms :terms="durationTerms(length.longestRuntime)" class="text-ink text-lg" value-class="font-bold" />
             </span>
         </Link>
         <div class="border-line-subtle flex flex-col gap-1.5 border-t pt-4">
             <span class="text-ink-muted text-sm">{{ meta.length.average() }}</span>
-            <span class="text-ink flex flex-wrap gap-x-2 text-lg">
-                <span v-for="term in durationTerms(length.average)" :key="term.unit"
-                    ><b>{{ term.value }}</b> {{ term.unit }}</span
-                >
-            </span>
+            <AmountTerms :terms="durationTerms(length.average)" class="text-ink text-lg" value-class="font-bold" />
         </div>
     </ChartCard>
 </template>

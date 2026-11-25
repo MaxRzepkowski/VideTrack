@@ -258,7 +258,7 @@ function subtitle(entry: ActivityEntry): string | null {
             </label>
 
             <label class="flex flex-col gap-1.5">
-                <span class="text-ink-muted text-base font-bold">{{ trans('common.from') }}</span>
+                <span class="text-ink-muted text-base font-bold">{{ trans('common.date_from') }}</span>
                 <input
                     data-toolbar-control
                     type="date"
@@ -268,7 +268,7 @@ function subtitle(entry: ActivityEntry): string | null {
                 />
             </label>
             <label class="flex flex-col gap-1.5">
-                <span class="text-ink-muted text-base font-bold">{{ trans('common.to') }}</span>
+                <span class="text-ink-muted text-base font-bold">{{ trans('common.date_to') }}</span>
                 <input
                     data-toolbar-control
                     type="date"
