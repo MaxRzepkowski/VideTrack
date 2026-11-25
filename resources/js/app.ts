@@ -11,9 +11,14 @@ import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { getActiveLanguage, I18n, i18nVue } from 'laravel-vue-i18n';
 import type { DefineComponent } from 'vue';
 import { createApp, h } from 'vue';
-import { ZiggyVue } from '../../vendor/tightenco/ziggy';
+import { route, ZiggyVue } from '../../vendor/tightenco/ziggy';
 
 const appName = import.meta.env.VITE_APP_NAME || 'VideTrack';
+
+// The lib modules and composables call `route()` outside any component; the
+// page's @routes carries only the route map, so the bundled function stands in
+// as the global.
+globalThis.route = route;
 
 // The reader's language first, so the first paint already reads in it
 // instead of showing keys until it lands.
