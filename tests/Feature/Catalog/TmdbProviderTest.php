@@ -127,6 +127,47 @@ test('a show carries its origin, languages, type and cinema screenings', functio
         ]);
 });
 
+test("the airing episode opening its season is the season's premiere, whatever its number", function (array $seasons, int $number, ?EpisodeBadge $badge) {
+    Http::fake([
+        '*/tv/1399*' => Http::response([
+            ...jsonFixture('tmdb/tv'),
+            'status' => 'Returning Series',
+            'number_of_seasons' => 3,
+            'seasons' => $seasons,
+            'next_episode_to_air' => ['id' => 9001, 'name' => 'Next', 'air_date' => '2026-10-20', 'season_number' => 3, 'episode_number' => $number, 'episode_type' => 'standard'],
+        ]),
+        ...providerDictionaryFakes(),
+    ]);
+
+    $next = tmdbProvider()->details('show', '1399', 'en')->nextEpisodeToAir;
+
+    expect($next?->episodeBadge)->toBe($badge);
+})->with([
+    'numbered from one' => [tmdbSeasons([0 => 2, 1 => 61, 2 => 16, 3 => 14]), 1, EpisodeBadge::SeasonPremiere],
+    // A saga season numbered on from the last one: the third opens on 78.
+    'numbered on from the season before' => [tmdbSeasons([0 => 2, 1 => 61, 2 => 16, 3 => 14]), 78, EpisodeBadge::SeasonPremiere],
+    'further into a season numbered on' => [tmdbSeasons([0 => 2, 1 => 61, 2 => 16, 3 => 14]), 79, null],
+    // The count of the seasons before falls inside this one's own numbers: not a premiere.
+    'numbered from one, where the seasons before add up to its number' => [tmdbSeasons([1 => 10, 2 => 5, 3 => 22]), 16, null],
+]);
+
+/**
+ * TMDB's season list of a show, from episode counts by season number.
+ *
+ * @param  array<int, int>  $counts
+ * @return list<array<string, mixed>>
+ */
+function tmdbSeasons(array $counts): array
+{
+    return array_map(fn (int $number, int $count): array => [
+        'id' => 1000 + $number,
+        'season_number' => $number,
+        'name' => "Season {$number}",
+        'episode_count' => $count,
+        'air_date' => '2020-01-01',
+    ], array_keys($counts), array_values($counts));
+}
+
 test('the home-release note comes from the row that won the date', function () {
     Http::fake(['*/movie/603*' => Http::response(jsonFixture('tmdb/movie')), ...providerDictionaryFakes()]);
 

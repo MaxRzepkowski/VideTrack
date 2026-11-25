@@ -332,6 +332,37 @@ final readonly class TmdbTitleParts
     }
 
     /**
+     * Whether an episode opens its season, told without the season's list. A
+     * saga season numbered on from the one before (some anime) opens right
+     * after the episodes of the earlier seasons, specials aside, and runs past
+     * its own count, which a season numbered from one never does.
+     *
+     * @param  array<array-key, mixed>  $show  the tv details payload
+     */
+    public function opensSeason(array $show, int $season, int $number): bool
+    {
+        if ($number === 1) {
+            return true;
+        }
+
+        $before = 0;
+        $own = null;
+
+        foreach (Payload::list($show['seasons'] ?? null) as $entry) {
+            $at = Payload::int($entry, 'season_number');
+            $count = Payload::int($entry, 'episode_count') ?? 0;
+
+            if ($at === $season) {
+                $own = $count;
+            } elseif ($at !== null && $at > 0 && $at < $season) {
+                $before += $count;
+            }
+        }
+
+        return $own !== null && $number > $own && $number === $before + 1;
+    }
+
+    /**
      * One episode of a season payload. The season page and the show's leaves
      * both map through here, so a stored episode holds the same fields
      * whichever of the two fetched it.
