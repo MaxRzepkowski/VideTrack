@@ -4,6 +4,7 @@ use App\Catalog\Data\PlatformRelease;
 use App\Catalog\Data\RelatedRelease;
 use App\Catalog\DatePrecision;
 use App\Catalog\GameKind;
+use App\Catalog\Providers\Igdb\IgdbCompanies;
 use App\Catalog\Providers\Igdb\IgdbGames;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
@@ -43,6 +44,24 @@ function igdbGamePage(array $game, array $timeToBeat = [], array $editions = [],
         ['name' => IgdbGames::TIME_TO_BEAT, 'result' => $timeToBeat],
         ['name' => IgdbGames::EDITIONS, 'result' => $editions],
         ['name' => IgdbGames::BUNDLE_CONTENTS, 'result' => $bundleContents],
+    ];
+}
+
+/**
+ * IGDB's answer to a company page's one multiquery: the company record and
+ * the first chunk of its games, the ones still to come and the rated ones.
+ *
+ * @param  list<array<string, mixed>>  $company
+ * @param  list<array<string, mixed>>  $upcoming
+ * @param  list<array<string, mixed>>  $rated
+ * @return list<array{name: string, result: list<array<string, mixed>>}>
+ */
+function igdbCompanyPage(array $company, array $upcoming = [], array $rated = []): array
+{
+    return [
+        ['name' => IgdbCompanies::COMPANY, 'result' => $company],
+        ['name' => IgdbCompanies::UPCOMING, 'result' => $upcoming],
+        ['name' => IgdbCompanies::RATED, 'result' => $rated],
     ];
 }
 

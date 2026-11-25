@@ -29,6 +29,13 @@ final readonly class IgdbCompanies
      */
     private const COMPANY_GAMES_PER_REQUEST = 500;
 
+    /** The results of a company's multiqueries: its record and the first chunk of its games. */
+    public const COMPANY = 'company';
+
+    public const UPCOMING = 'upcoming';
+
+    public const RATED = 'rated';
+
     /**
      * ISO 3166-1 numeric → alpha-2, the subset that covers the vast majority
      * of game studios; the page names the country in the viewer's language.
@@ -87,22 +94,24 @@ final readonly class IgdbCompanies
             throw new ItemNotFoundException("IGDB does not serve a company for [{$ref}].");
         }
 
-        // The company's developed/published arrays run to thousands of unsorted
-        // ids (Nintendo: 674 / 2826), far too many to inline. The core record
-        // comes in one request; the games come sorted, in chunks, from the games
-        // endpoint (companyCredits) so the page opens on the notable ones.
-        $data = $this->client->query(
-            'companies',
-            'fields name, description, country, start_date, url, logo.image_id, '
-            .'websites.url, websites.type, parent.id, parent.name; '
-            ."where id = {$ref};",
-            $this->payload->ttl('details'),
-            requireResults: true,
-        )[0] ?? throw new ItemNotFoundException("IGDB returned no company for [{$ref}].");
+        $id = (int) $ref;
 
+        // The company's developed/published arrays run to thousands of unsorted
+        // ids (Nintendo: 674 / 2826), far too many to inline. The games come
+        // sorted, from the games endpoint, so the page opens on the notable
+        // ones; the record and the first chunk of games are one request, since
+        // each answer of IGDB takes seconds and in a row they would add up.
+        $answer = $this->client->multiquery([
+            self::COMPANY => ['companies', 'fields name, description, country, start_date, url, logo.image_id, '
+                .'websites.url, websites.type, parent.id, parent.name; '
+                ."where id = {$id};"],
+            ...$this->firstChunkQueries($id),
+        ], $this->payload->ttl('listing'), required: self::COMPANY);
+
+        $data = $answer[self::COMPANY][0] ?? throw new ItemNotFoundException("IGDB returned no company for [{$ref}].");
         $parent = Payload::map($data['parent'] ?? null);
         $founded = Payload::int($data, 'start_date');
-        $first = $this->companyCredits($ref, $locale, 1);
+        $first = $this->creditPage($answer[self::UPCOMING], $answer[self::RATED], $id);
 
         return new CompanyDetails(
             ref: $this->payload->ref($data),
@@ -123,9 +132,9 @@ final readonly class IgdbCompanies
 
     /**
      * The company's ludography (both roles, all category shelves), a chunk at a
-     * time: one request for the top-rated back catalogue, plus — on the first
-     * chunk — one for the upcoming front, since an unreleased game has no
-     * rating and a rating sort would bury it where the page never reaches it.
+     * time: the top-rated back catalogue, and on the first chunk the upcoming
+     * front in the same request, since an unreleased game has no rating and a
+     * rating sort would bury it where the page never reaches it.
      *
      * IGDB can't sort a company's developed/published arrays inline, but it can
      * filter the games endpoint by them — so rather than a query per role ×
@@ -144,26 +153,72 @@ final readonly class IgdbCompanies
             return new CreditPage([], false);
         }
 
-        $fields = IgdbPayload::SUMMARY_FIELDS
-            .', involved_companies.company, involved_companies.developer, involved_companies.publisher, involved_companies.porting, involved_companies.supporting';
-        $base = "involved_companies.company = {$ref} & version_parent = null "
-            .'& '.GameType::clause(GameType::cases());
+        $id = (int) $ref;
 
-        $upcoming = $page === 1 ? $this->client->query(
-            'games',
-            "fields {$fields}; where {$base} & first_release_date >= ".$this->payload->startOfTodayUtc().'; '
-            .'sort first_release_date asc; limit '.self::COMPANY_GAMES_PER_REQUEST.';',
-            $this->payload->ttl('listing'),
-        ) : [];
+        // Past the first chunk the back catalogue alone, which changes slowly:
+        // kept as long as a game's page.
+        if ($page > 1) {
+            [$endpoint, $body] = $this->ratedQuery($id, $page);
 
-        $rated = $this->client->query(
-            'games',
-            "fields {$fields}; where {$base}; sort total_rating desc; "
+            return $this->creditPage([], $this->client->query($endpoint, $body, $this->payload->ttl('details')), $id);
+        }
+
+        $answer = $this->client->multiquery($this->firstChunkQueries($id), $this->payload->ttl('listing'));
+
+        return $this->creditPage($answer[self::UPCOMING], $answer[self::RATED], $id);
+    }
+
+    /**
+     * The first chunk's two queries, the upcoming front beside the rated back
+     * catalogue. Kept as long as a listing, for the front: a game announced
+     * today belongs on the page within hours, and its record and back
+     * catalogue come along in the same answer. The front's own date rolls the
+     * cache key over every day whatever the lifetime.
+     *
+     * @return array{upcoming: array{string, string}, rated: array{string, string}} result name => endpoint, body
+     */
+    private function firstChunkQueries(int $id): array
+    {
+        return [
+            self::UPCOMING => ['games', 'fields '.self::gameFields().'; where '.self::companyGamesWhere($id).' & first_release_date >= '.$this->payload->startOfTodayUtc().'; '
+                .'sort first_release_date asc; limit '.self::COMPANY_GAMES_PER_REQUEST.';'],
+            self::RATED => $this->ratedQuery($id, 1),
+        ];
+    }
+
+    /**
+     * The query for one chunk of the company's back catalogue, best rated first.
+     *
+     * @return array{string, string} endpoint, body
+     */
+    private function ratedQuery(int $id, int $page): array
+    {
+        return ['games', 'fields '.self::gameFields().'; where '.self::companyGamesWhere($id).'; sort total_rating desc; '
             .'limit '.self::COMPANY_GAMES_PER_REQUEST.'; '
-            .'offset '.((max(1, $page) - 1) * self::COMPANY_GAMES_PER_REQUEST).';',
-            $this->payload->ttl('details'),
-        );
+            .'offset '.(($page - 1) * self::COMPANY_GAMES_PER_REQUEST).';'];
+    }
 
+    private static function gameFields(): string
+    {
+        return IgdbPayload::SUMMARY_FIELDS
+            .', involved_companies.company, involved_companies.developer, involved_companies.publisher, involved_companies.porting, involved_companies.supporting';
+    }
+
+    private static function companyGamesWhere(int $id): string
+    {
+        return "involved_companies.company = {$id} & version_parent = null & ".GameType::clause(GameType::cases());
+    }
+
+    /**
+     * A chunk of credits: the upcoming games first, then the rated ones, each
+     * game once, with a credit per role the company held on it. Another chunk
+     * follows while the rated ones fill theirs.
+     *
+     * @param  list<array<array-key, mixed>>  $upcoming
+     * @param  list<array<array-key, mixed>>  $rated
+     */
+    private function creditPage(array $upcoming, array $rated, int $ref): CreditPage
+    {
         $credits = [];
         $seen = [];
 
@@ -178,7 +233,7 @@ final readonly class IgdbCompanies
             $summary = $this->payload->summary($game);
             $category = (Payload::intEnum($game, 'game_type', GameType::class) ?? GameType::Main)->shelf();
 
-            foreach ($this->companyRoles($game, (int) $ref) as $role) {
+            foreach ($this->companyRoles($game, $ref) as $role) {
                 $credits[] = new CompanyCredit(media: $summary, role: $role, category: $category);
             }
         }
