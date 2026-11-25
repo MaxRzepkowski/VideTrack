@@ -40,7 +40,8 @@ describe('nextFollowMode', () => {
         ['the user rang it', { follow: 'follow', followSource: 'followed', followVia: null }, null],
         ['a creator rang it', { follow: 'follow', followSource: 'creator', followVia: 'Keanu Reeves' }, 'mute'],
         ['the matrix tracks it', { follow: null, followSource: 'activity', followVia: null }, 'mute'],
-        ['a status outranks a rung bell', { follow: 'follow', followSource: 'dropped', followVia: null }, 'mute'],
+        ['a status tracks it with no bell', { follow: null, followSource: 'dropped', followVia: null }, 'mute'],
+        ['the backlog outranks a creator', { follow: 'follow', followSource: 'backlog', followVia: 'Keanu Reeves' }, 'mute'],
         ['it is muted', { follow: 'mute', followSource: null, followVia: null }, null],
     ] as const)('when %s, one click moves it on', (_, state, next) => {
         expect(nextFollowMode(state)).toBe(next);

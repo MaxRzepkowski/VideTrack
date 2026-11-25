@@ -43,19 +43,21 @@ final readonly class TrackingFacts
     }
 
     /**
-     * The row the title falls in, in the order the bell reads it: a status
-     * outranks the backlog, the backlog outranks history, and a bell only
-     * speaks for a title nothing else covers. Null when muted or untouched.
+     * The row the title falls in, in the order the bell reads it: a bell the
+     * user rang outranks everything else they did, so switching off any
+     * other row never silences a title they asked for by name; then the
+     * backlog, dropped, on hold and history, and a creator's bell only speaks
+     * for a title nothing else covers. Null when muted or untouched.
      */
     public function source(): ?TrackingSource
     {
         return match (true) {
             $this->muted => null,
-            $this->onHold => TrackingSource::OnHold,
-            $this->dropped => TrackingSource::Dropped,
-            $this->backlog => TrackingSource::Backlog,
-            $this->activity => TrackingSource::Activity,
             $this->manualFollow => TrackingSource::ManualFollow,
+            $this->backlog => TrackingSource::Backlog,
+            $this->dropped => TrackingSource::Dropped,
+            $this->onHold => TrackingSource::OnHold,
+            $this->activity => TrackingSource::Activity,
             $this->creatorFollow => TrackingSource::CreatorFollow,
             default => null,
         };

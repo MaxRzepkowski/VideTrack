@@ -29,8 +29,8 @@ use Laravel\Sanctum\Sanctum;
 
 /*
  * One rule behind the calendar, the countdowns and both kinds of
- * notification: a title falls in one row of the tracking matrix — on hold,
- * dropped, backlog, history, your bell, a creator's bell, in that order — and
+ * notification: a title falls in one row of the tracking matrix — your bell,
+ * backlog, dropped, on hold, history, a creator's bell, in that order — and
  * that row's toggle decides for it.
  */
 
@@ -79,21 +79,34 @@ function carriedTitles(User $user, Surface $surface = Surface::Calendar): array
         ->all();
 }
 
-test('a status outranks the bell: a dropped title rung by hand answers to the dropped toggle', function () {
+test('your bell outranks a status: a dropped title rung by hand answers to the bell toggle', function () {
     $user = User::factory()->create();
     $show = airingShow('Severance');
     watchPilot($user, $show);
     app(SetFollow::class)->execute($user, $show, FollowMode::Follow);
     app(DropAttempt::class)->execute($user, $show, WatchedAt::releaseDateOrNow());
 
+    setToggles($user, ['calendar_dropped' => false]);
     expect(carriedTitles($user))->toBe(['Severance']);
 
-    setToggles($user, ['calendar_dropped' => false]);
-
+    setToggles($user, ['calendar_followed' => false]);
     expect(carriedTitles($user))->toBe([]);
 });
 
-test('dropped outranks the backlog, for a series and a game alike', function () {
+test('your bell outranks the backlog: a title rung by hand stays when the backlog is switched off', function () {
+    $user = User::factory()->create();
+    $show = airingShow('Severance');
+    app(SetFollow::class)->execute($user, $show, FollowMode::Follow);
+    putOnBacklog($user, $show);
+
+    setToggles($user, ['calendar_watchlist' => false, 'notifications_watchlist' => false]);
+
+    expect(carriedTitles($user))->toBe(['Severance'])
+        ->and(carriedTitles($user, Surface::Notifications))->toBe(['Severance'])
+        ->and(app(LibraryStates::class)->resolveItem($user, $show->refresh())->followSource?->value)->toBe('followed');
+});
+
+test('the backlog outranks dropped, for a series and a game alike', function () {
     enableGamesModule();
     $user = User::factory()->create();
     $show = airingShow('Severance');
@@ -104,10 +117,10 @@ test('dropped outranks the backlog, for a series and a game alike', function () 
     putOnBacklog($user, $game);
     app(DropAttempt::class)->execute($user, $game, WatchedAt::releaseDateOrNow());
 
+    setToggles($user, ['calendar_dropped' => false]);
     expect(carriedTitles($user))->toBe(['Severance', 'Silksong']);
 
-    setToggles($user, ['calendar_dropped' => false]);
-
+    setToggles($user, ['calendar_watchlist' => false]);
     expect(carriedTitles($user))->toBe([]);
 });
 
@@ -140,16 +153,20 @@ test('a session logged on a dropped game opens a new attempt: the game is histor
         ->and(app(TrackedAudience::class)->usersFor($game)->pluck('id')->all())->toBe([$user->id]);
 });
 
-test('on hold outranks the backlog', function () {
+test('the backlog outranks on hold, and on hold outranks history', function () {
     $user = User::factory()->create();
     $show = airingShow('Andor');
     watchPilot($user, $show);
-    putOnBacklog($user, $show);
     app(SetMediaStatus::class)->execute($user, $show, MediaUserStatus::OnHold);
 
-    setToggles($user, ['calendar_on_hold' => false]);
+    setToggles($user, ['calendar_active' => false]);
+    expect(carriedTitles($user))->toBe(['Andor']);
 
+    setToggles($user, ['calendar_on_hold' => false]);
     expect(carriedTitles($user))->toBe([]);
+
+    putOnBacklog($user, $show);
+    expect(carriedTitles($user))->toBe(['Andor']);
 });
 
 test('a watched title on the backlog answers to the backlog toggle, not to history', function () {
@@ -248,6 +265,7 @@ test('a change to a title reaches exactly the users whose daily pings carry it',
     $seasonOnBacklog = User::factory()->create();
     putOnBacklog($seasonOnBacklog, $show->children()->firstOrFail());
 
+    // Their own bell speaks for the title over its history, and they switched bells off.
     $watcherWithBellOff = User::factory()->create(['preferences' => ['notifications_followed' => false]]);
     watchPilot($watcherWithBellOff, $show);
     app(SetFollow::class)->execute($watcherWithBellOff, $show, FollowMode::Follow);
@@ -260,7 +278,6 @@ test('a change to a title reaches exactly the users whose daily pings carry it',
 
     $droppedQuietly = User::factory()->create();
     watchPilot($droppedQuietly, $show);
-    putOnBacklog($droppedQuietly, $show);
     app(DropAttempt::class)->execute($droppedQuietly, $show, WatchedAt::releaseDateOrNow());
 
     $audience = app(TrackedAudience::class)->usersFor($show)->pluck('id')->sort()->values()->all();
@@ -271,7 +288,7 @@ test('a change to a title reaches exactly the users whose daily pings carry it',
         ->values()
         ->all();
 
-    expect($audience)->toBe([$seasonOnBacklog->id, $watcherWithBellOff->id, $ratedOnly->id, $lovedOnly->id])
+    expect($audience)->toBe([$seasonOnBacklog->id, $ratedOnly->id, $lovedOnly->id])
         ->and($pinged)->toBe($audience);
 });
 
@@ -283,11 +300,16 @@ test('the bell names the row the calendar reads the title through', function () 
 
     expect($source())->toBe('followed');
 
+    // Your own bell names the title whatever else it carries.
     watchPilot($user, $show);
-    expect($source())->toBe('activity');
-
     putOnBacklog($user, $show);
+    expect($source())->toBe('followed');
+
+    app(SetFollow::class)->execute($user, $show, null);
     expect($source())->toBe('backlog');
+
+    app(SyncListMembership::class)->execute($user, $show, []);
+    expect($source())->toBe('activity');
 
     app(DropAttempt::class)->execute($user, $show, WatchedAt::releaseDateOrNow());
     expect($source())->toBe('dropped');
@@ -323,7 +345,6 @@ test('a kind of title with sources of its own follows them on each surface, the 
 test('sources of its own are the whole say for a kind of title: one the defaults leave out comes back', function () {
     $user = User::factory()->create();
     $film = MediaItem::factory()->movie()->create(['title' => 'Nosferatu', 'release_date' => today()->addDays(10)->toDateString()]);
-    putOnBacklog($user, $film);
     app(DropAttempt::class)->execute($user, $film, WatchedAt::releaseDateOrNow());
 
     setToggles($user, ['notifications_dropped' => false]);

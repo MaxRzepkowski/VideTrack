@@ -32,9 +32,8 @@ const followable = computed(() => !['season', 'episode'].includes(props.media.ty
 const trackedAs = computed(() => trackedBecause(state.value.followSource));
 
 // The bell names why it rings; a click walks it on (`nextFollowMode`), worked
-// out from the server's state when the request goes out. A status, the backlog
-// or history outranks a bell, so the bell names them first — as the calendar
-// reads them.
+// out from the server's state when the request goes out. The row it names is
+// the one the calendar reads the title through, as the server chose it.
 const followRow = computed(() => {
     const mode = state.value.follow;
 
