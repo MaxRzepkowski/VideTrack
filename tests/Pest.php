@@ -66,5 +66,6 @@ require_once __DIR__.'/Support/webhooks.php';
 require_once __DIR__.'/Support/webpush.php';
 require_once __DIR__.'/Support/integrations.php';
 require_once __DIR__.'/Support/providers.php';
+require_once __DIR__.'/Support/queries.php';
 require_once __DIR__.'/Support/tasks.php';
 require_once __DIR__.'/Support/suggestions.php';

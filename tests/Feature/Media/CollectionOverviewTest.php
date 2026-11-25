@@ -10,7 +10,6 @@ use App\Models\MediaItem;
 use App\Models\MediaList;
 use App\Models\Person;
 use App\Models\User;
-use Illuminate\Support\Facades\DB;
 use Inertia\Testing\AssertableInertia as Assert;
 
 /**
@@ -157,7 +156,7 @@ test('the cast gathers a person once, with every character, the most returning f
 });
 
 test('the overview reads in the same number of queries however long the saga is', function () {
-    $queries = function (int $parts): int {
+    $queries = function (int $parts): array {
         [$list, $items] = sagaOf(array_fill(0, $parts, []), (string) $parts);
 
         foreach ($items as $part) {
@@ -165,14 +164,11 @@ test('the overview reads in the same number of queries however long the saga is'
         }
 
         $list = $list->fresh();
-        DB::enableQueryLog();
-        DB::flushQueryLog();
-        app(BuildCollectionOverview::class)->execute($list);
 
-        return count(DB::getQueryLog());
+        return queriesRunBy(fn () => app(BuildCollectionOverview::class)->execute($list));
     };
 
-    expect($queries(6))->toBe($queries(2));
+    expectSameQueries($queries(2), $queries(6));
 });
 
 test('the collection page carries the overview', function () {

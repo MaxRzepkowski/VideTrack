@@ -10,8 +10,8 @@ use App\Models\Rating;
 use App\Models\User;
 use App\Tracking\Surfaces\CalendarDays;
 use Carbon\CarbonImmutable;
+use Illuminate\Database\Events\QueryExecuted;
 use Illuminate\Notifications\DatabaseNotification;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Inertia\Testing\AssertableInertia as Assert;
 
@@ -186,14 +186,14 @@ test('the archive page shows the viewer\'s archive entries with their states, an
 
 test('the archive asks the same few queries however many titles are archived', function () {
     $user = User::factory()->create();
-    /** @return array{queries: int, titles: int} */
+    /** @return array{queries: list<QueryExecuted>, titles: int} */
     $archive = function () use ($user): array {
-        DB::flushQueryLog();
-        DB::enableQueryLog();
-        $titles = app(BuildArchivedTitles::class)->execute($user);
-        DB::disableQueryLog();
+        $titles = [];
+        $queries = queriesRunBy(function () use ($user, &$titles): void {
+            $titles = app(BuildArchivedTitles::class)->execute($user);
+        });
 
-        return ['queries' => count(DB::getQueryLog()), 'titles' => count($titles)];
+        return ['queries' => $queries, 'titles' => count($titles)];
     };
 
     // One show held through an episode play, one through the show itself.
@@ -211,6 +211,6 @@ test('the archive asks the same few queries however many titles are archived', f
     $three = $archive();
 
     expect($one['titles'])->toBe(1)
-        ->and($three['titles'])->toBe(2)
-        ->and($three['queries'])->toBe($one['queries']);
+        ->and($three['titles'])->toBe(2);
+    expectSameQueries($one['queries'], $three['queries']);
 });

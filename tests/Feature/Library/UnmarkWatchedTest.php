@@ -10,7 +10,6 @@ use App\Models\Play;
 use App\Models\User;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Events\QueryExecuted;
-use Illuminate\Support\Facades\DB;
 
 function unmarkWatched(): UnmarkWatched
 {
@@ -92,15 +91,9 @@ test('one unmark projects the title once, however many events it announces', fun
     app(MarkWatched::class)->execute($user, $movie, WatchedAt::at(CarbonImmutable::parse('2026-01-01')));
     MediaUserState::factory()->create(['user_id' => $user->id, 'media_item_id' => $movie->id, 'status' => MediaUserStatus::OnHold]);
 
-    $projections = 0;
-    DB::listen(function (QueryExecuted $query) use (&$projections): void {
-        if (str_starts_with($query->sql, 'select * from "library_entries"') && str_contains($query->sql, '"root_id" in')) {
-            $projections++;
-        }
-    });
-
-    unmarkWatched()->execute($user, $movie);
+    $queries = queriesRunBy(fn () => unmarkWatched()->execute($user, $movie));
+    $projections = array_filter($queries, fn (QueryExecuted $query): bool => str_starts_with($query->sql, 'select * from "library_entries"') && str_contains($query->sql, '"root_id" in'));
 
     // A status cleared and a play removed: two events, one projection.
-    expect($projections)->toBe(1);
+    expect($projections)->toHaveCount(1);
 });
