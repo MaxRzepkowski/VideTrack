@@ -1,12 +1,13 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
+use Tighten\Ziggy\Ziggy;
 
 /*
  * The front names routes as strings (Ziggy's `route('…')`), and nothing in
  * vue-tsc checks them: a renamed or removed route only fails in the browser.
- * Every name the front spells must be one the app serves — a literal exactly,
- * a template (`ui.${resource}.follow.update`) by at least one route.
+ * Every name the front spells must be in the route map the page carries — a
+ * literal exactly, a template (`ui.${resource}.follow.update`) by at least one
+ * route — so a route kept out of the map fails here too.
  */
 
 /** @return array<string, string> repo-relative path => contents of the front's own code */
@@ -28,7 +29,7 @@ function frontSources(): array
 }
 
 test('every route the front names exists', function () {
-    $served = array_keys(Route::getRoutes()->getRoutesByName());
+    $carried = array_keys((new Ziggy)->toArray()['routes']);
     $missing = [];
 
     foreach (frontSources() as $path => $source) {
@@ -37,7 +38,7 @@ test('every route the front names exists', function () {
 
         foreach ($matches as [, $quote, $name]) {
             $pattern = '/^'.preg_replace('/\\\\\$\\\\\{[^}]*\\\\\}/', '[a-z-]+', preg_quote($name, '/')).'$/';
-            $known = $quote === '`' ? preg_grep($pattern, $served) !== [] : in_array($name, $served, true);
+            $known = $quote === '`' ? preg_grep($pattern, $carried) !== [] : in_array($name, $carried, true);
 
             if (! $known) {
                 $missing[] = "{$path}: {$name}";

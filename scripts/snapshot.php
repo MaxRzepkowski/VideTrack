@@ -45,6 +45,7 @@ use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Sleep;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use Tighten\Ziggy\BladeRouteGenerator;
 
 const ROOT = __DIR__.'/..';
 const SNAPSHOTS = ROOT.'/storage/snapshots';
@@ -687,6 +688,10 @@ function send(HttpKernel $kernel, User $user, Request $request): Response
     // An API request leaves Sanctum as the default guard; a page signs in through the session one.
     Auth::shouldUse('web');
     Auth::guard('web')->setUser($user);
+    // Ziggy declares its route map in a process's first page only and merges
+    // into it on later ones; each visit here stands for a browser's first
+    // load, which carries the declaration.
+    BladeRouteGenerator::$generated = false;
     $response = $kernel->handle($request);
     $kernel->terminate($request, $response);
 
