@@ -40,6 +40,17 @@ final readonly class ReleaseWindow
         return isset($this->followedVia[$root->id]) ? ['followedVia' => $this->followedVia[$root->id]] : [];
     }
 
+    /**
+     * The window over a stored date column: a date is stored midnight-stamped
+     * (Y-m-d 00:00:00), so a bare Y-m-d upper bound would drop the last day.
+     *
+     * @return array{string, string}
+     */
+    public function storedBounds(): array
+    {
+        return [$this->from, "{$this->to} 23:59:59"];
+    }
+
     /** Whether a calendar date (Y-m-d) falls inside the window. */
     public function contains(string $date): bool
     {

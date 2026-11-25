@@ -2,7 +2,6 @@
 
 namespace App\Tracking\Releases;
 
-use App\Models\MediaItem;
 use App\Tracking\Settings\DeclaresTypeOptions;
 use Illuminate\Support\Collection;
 
@@ -15,10 +14,14 @@ use Illuminate\Support\Collection;
 interface ReleaseSource extends DeclaresTypeOptions
 {
     /**
-     * The releases of the given tracked titles that fall in the window.
+     * The releases of the given tracked titles that fall in the window: ids
+     * of titles of a kind this source serves, of a module switched on. A
+     * source reads only the titles that can have one there, where their
+     * columns tell: a library holds far more titles than any window has
+     * releases.
      *
-     * @param  Collection<int, MediaItem>  $roots
+     * @param  list<int>  $rootIds
      * @return Collection<int, ReleaseEntry>
      */
-    public function releases(Collection $roots, ReleaseWindow $window): Collection;
+    public function releases(array $rootIds, ReleaseWindow $window): Collection;
 }

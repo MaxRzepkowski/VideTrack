@@ -27,10 +27,17 @@ final readonly class ProgressReleases implements ReleaseSource
         private PlatformPremieres $premieres,
     ) {}
 
-    public function releases(Collection $roots, ReleaseWindow $window): Collection
+    public function releases(array $rootIds, ReleaseWindow $window): Collection
     {
-        return $roots
-            ->flatMap(fn (MediaItem $title): Collection => $this->entries($title, $window))
+        $perPlatform = $window->viewer->preferences->perPlatform($window->surface);
+
+        // The platform dates live in the metadata, so every title is read.
+        return MediaItem::query()
+            ->whereIn('id', $rootIds)
+            ->orderBy('id')
+            ->get()
+            ->toBase()
+            ->flatMap(fn (MediaItem $title): Collection => $this->entries($title, $perPlatform, $window))
             ->values();
     }
 
@@ -58,9 +65,9 @@ final readonly class ProgressReleases implements ReleaseSource
     /**
      * @return Collection<int, ReleaseEntry>
      */
-    private function entries(MediaItem $title, ReleaseWindow $window): Collection
+    private function entries(MediaItem $title, bool $perPlatform, ReleaseWindow $window): Collection
     {
-        $releases = $window->viewer->preferences->perPlatform($window->surface) ? ItemMetadata::fromStored($title->metadata)->platformReleases : [];
+        $releases = $perPlatform ? ItemMetadata::fromStored($title->metadata)->platformReleases : [];
 
         if ($releases !== []) {
             return collect($this->premieres->inWindow($releases, $window))

@@ -39,36 +39,36 @@ final readonly class EpisodeReleases implements ReleaseSource
         )];
     }
 
-    public function releases(Collection $roots, ReleaseWindow $window): Collection
+    public function releases(array $rootIds, ReleaseWindow $window): Collection
     {
-        $shows = $roots->keyBy('id');
+        $episodes = MediaItem::query()
+            ->whereIn('parent_id', MediaItem::query()->select('id')->whereIn('parent_id', $rootIds))
+            ->whereNotIn('parent_id', Play::query()
+                ->select('media_item_id')
+                ->where('user_id', $window->viewer->id)
+                ->where('outcome', PlayOutcome::Dropped->value))
+            ->whereBetween('release_date', $window->storedBounds())
+            ->orderBy('number')
+            ->orderBy('id')
+            ->get();
+
+        if ($episodes->isEmpty()) {
+            return new Collection;
+        }
 
         $seasons = MediaItem::query()
-            ->whereIn('parent_id', $shows->keys())
+            ->whereIn('id', $episodes->pluck('parent_id')->unique()->values())
             ->get(['id', 'parent_id', 'number'])
             ->keyBy('id');
-
-        $skippedSeasons = Play::query()
-            ->where('user_id', $window->viewer->id)
-            ->where('outcome', PlayOutcome::Dropped->value)
-            ->whereIn('media_item_id', $seasons->keys())
-            ->distinct()
-            ->pluck('media_item_id');
-
-        // Eloquent's except() filters by model keys but re-indexes the
-        // collection — restore the id keying the lookups below rely on.
-        $seasons = $seasons->except($skippedSeasons->all())->keyBy('id');
-
-        return MediaItem::query()
-            ->whereIn('parent_id', $seasons->keys())
-            // release_date is stored midnight-stamped (Y-m-d 00:00:00), so a
-            // bare Y-m-d upper bound would drop the window's last day.
-            ->whereBetween('release_date', [$window->from, "{$window->to} 23:59:59"])
-            ->orderBy('number')
+        $shows = MediaItem::query()
+            ->whereIn('id', $seasons->pluck('parent_id')->unique()->values())
             ->get()
+            ->keyBy('id');
+
+        return $episodes
             ->toBase()
             ->map(function (MediaItem $episode) use ($shows, $seasons, $window): ReleaseEntry {
-                /** @var MediaItem $season the episodes were asked for by these seasons */
+                /** @var MediaItem $season the seasons were read by these episodes' parents */
                 $season = $seasons->get($episode->parent_id);
                 /** @var MediaItem $show a season's parent is one of the shows asked about */
                 $show = $shows->get($season->parent_id);
