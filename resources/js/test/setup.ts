@@ -24,6 +24,9 @@ createApp({}).use(i18nVue, {
 });
 
 globalThis.route = route as typeof globalThis.route;
+// A test is never idle: what the app fetches ahead while the browser idles (a
+// deferred modal) would otherwise land after the test that imported it ended.
+window.requestIdleCallback = () => 0;
 config.global.mocks.route = route;
 // Registered for every component, as the app registers it: a component a test
 // mounts may carry a hint without the test having to know.
