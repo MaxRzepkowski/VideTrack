@@ -8,6 +8,8 @@
  *   php scripts/snapshot.php take <label>  render every page from a fresh copy of the base
  *   php scripts/snapshot.php diff <a> <b>  what changed between two takes
  *   php scripts/snapshot.php restore       the snapshot account's backup imported into an empty account: time, queries, rows
+ *   php scripts/snapshot.php profile <label> [--frozen-clock] [--live] [--only=<page>,<page>]
+ *                                          every page cold and warm: time, queries, response size, the costliest queries and their plans
  *
  * A take migrates a throwaway copy of the base with the code as it is now,
  * freezes the clock at the moment the base was made, and cuts the network
@@ -30,11 +32,13 @@ use Illuminate\Contracts\Console\Kernel as ConsoleKernel;
 use Illuminate\Contracts\Http\Kernel as HttpKernel;
 use Illuminate\Database\Events\QueryExecuted;
 use Illuminate\Foundation\Application;
+use Illuminate\Http\Client\Events\ResponseReceived;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Queue;
@@ -50,6 +54,21 @@ const USER_ID = 1;
 /** Keys that change on every request and say nothing about the page. */
 const VOLATILE = ['errors', 'flash', 'ziggy', 'csrf_token', 'version', 'encryptHistory', 'clearHistory'];
 
+/** Warm visits per page in a profile; the median is the warm time. */
+const WARM_VISITS = 3;
+
+/** Queries a profile keeps per page, costliest first. */
+const COSTLIEST_QUERIES = 5;
+
+/** Props a profile keeps per page, largest first. */
+const LARGEST_PROPS = 5;
+
+/** How much of a statement a profile keeps: enough to recognise it. */
+const SQL_PREVIEW = 600;
+
+/** zlib's default level: an estimate of the compressed size, whichever level the web server picks. */
+const GZIP_LEVEL = 6;
+
 require ROOT.'/vendor/autoload.php';
 
 $command = $argv[1] ?? '';
@@ -59,7 +78,13 @@ match ($command) {
     'take' => take($argv[2] ?? exit("Usage: php scripts/snapshot.php take <label>\n")),
     'diff' => diff($argv[2] ?? '', $argv[3] ?? exit("Usage: php scripts/snapshot.php diff <a> <b>\n")),
     'restore' => restore(),
-    default => exit("Usage: php scripts/snapshot.php base | take <label> | diff <a> <b> | restore\n"),
+    'profile' => profile(
+        $argv[2] ?? exit("Usage: php scripts/snapshot.php profile <label> [--frozen-clock] [--live] [--only=<page>,<page>]\n"),
+        frozenClock: in_array('--frozen-clock', $argv, true),
+        live: in_array('--live', $argv, true),
+        only: onlyPages($argv),
+    ),
+    default => exit("Usage: php scripts/snapshot.php base | take <label> | diff <a> <b> | restore | profile <label>\n"),
 };
 
 function makeBase(): void
@@ -97,23 +122,10 @@ function take(string $label): void
     is_dir($out) && exit("The take {$label} exists.\n");
     mkdir($out, 0777, true);
 
-    // A throwaway copy of the base, so a take never changes the base or the live data.
-    $work = sys_get_temp_dir().'/snapshot-'.uniqid();
-    mkdir("{$work}/cache", 0777, true);
-    copy(BASE.'/database.sqlite', "{$work}/database.sqlite");
-    passthru('cp -r '.escapeshellarg(BASE.'/cache').'/. '.escapeshellarg("{$work}/cache"));
-
+    $work = workCopy();
     $app = boot($work);
-
-    $meta = json_decode((string) file_get_contents(BASE.'/meta.json'), true);
-    CarbonImmutable::setTestNow($meta['frozenAt']);
-    Carbon::setTestNow($meta['frozenAt']);
-
-    Http::preventStrayRequests();
-    Http::fake(['*' => Http::failedConnection()]);
-    Sleep::fake();
-    Queue::fake();
-    Mail::fake();
+    freezeClock();
+    offline();
 
     $timings = [];
 
@@ -139,22 +151,10 @@ function restore(): void
 {
     is_file(BASE.'/meta.json') || exit("No base yet: php scripts/snapshot.php base\n");
 
-    $work = sys_get_temp_dir().'/snapshot-'.uniqid();
-    mkdir("{$work}/cache", 0777, true);
-    copy(BASE.'/database.sqlite', "{$work}/database.sqlite");
-    passthru('cp -r '.escapeshellarg(BASE.'/cache').'/. '.escapeshellarg("{$work}/cache"));
-
+    $work = workCopy();
     boot($work);
-
-    $meta = json_decode((string) file_get_contents(BASE.'/meta.json'), true);
-    CarbonImmutable::setTestNow($meta['frozenAt']);
-    Carbon::setTestNow($meta['frozenAt']);
-
-    Http::preventStrayRequests();
-    Http::fake(['*' => Http::failedConnection()]);
-    Sleep::fake();
-    Queue::fake();
-    Mail::fake();
+    freezeClock();
+    offline();
 
     $owner = User::query()->findOrFail(USER_ID);
     $file = "{$work}/backup.json";
@@ -187,6 +187,238 @@ function restore(): void
     printf("%-12s %6d -> %6d\n", 'cycles', WatchCycle::query()->where('user_id', $owner->id)->count(), WatchCycle::query()->where('user_id', $target->id)->count());
 
     passthru('rm -rf '.escapeshellarg($work));
+}
+
+/**
+ * Every page cold (its first visit in the process: classes, translations and
+ * the app's own caches still to load) and warm (the median of WARM_VISITS
+ * visits after it), with its size and the queries that cost the most.
+ *
+ * The clock runs live by default: a frozen Carbon makes every date the app
+ * creates noticeably slower, and a page with many dates would look several
+ * times costlier than it is. --frozen-clock measures what a take sees.
+ *
+ * --live starts from an empty provider cache with the network on: what a
+ * page costs the first time anyone opens it, providers asked with the
+ * instance's keys. Narrow it with --only, so a run asks the services for a
+ * few pages, not for every title the account has.
+ *
+ * @param  list<string>|null  $only  page names; null for every page
+ */
+function profile(string $label, bool $frozenClock, bool $live, ?array $only): void
+{
+    is_file(BASE.'/meta.json') || exit("No base yet: php scripts/snapshot.php base\n");
+
+    $out = SNAPSHOTS."/_profiles/{$label}.json";
+    is_file($out) && exit("The profile {$label} exists.\n");
+    $only === [] && exit("--only names no page.\n");
+    is_dir(dirname($out)) || mkdir(dirname($out), 0777, true);
+
+    $work = workCopy(providerCache: ! $live);
+    $app = boot($work);
+    $frozenClock ? freezeClock() : unfreezeClock();
+    // Live, the providers are asked for real; nothing is queued or sent all the same.
+    $live ? sendNothing() : offline();
+
+    // The page names are known only on the booted copy (titles come from the
+    // library), so a wrong one removes the copy before it stops.
+    $known = array_keys(pages(User::query()->findOrFail(USER_ID)));
+    $unknown = array_diff($only ?? [], $known);
+
+    if ($unknown !== []) {
+        passthru('rm -rf '.escapeshellarg($work));
+        exit('No page named '.implode(', ', $unknown).'; the pages are: '.implode(', ', $known)."\n");
+    }
+
+    $pragmas = [];
+
+    foreach (['journal_mode', 'synchronous', 'busy_timeout', 'foreign_keys', 'cache_size', 'temp_store', 'mmap_size'] as $pragma) {
+        $row = (array) (DB::select("PRAGMA {$pragma}")[0] ?? []);
+        $pragmas[$pragma] = reset($row);
+    }
+
+    echo 'PRAGMA '.implode(', ', array_map(fn (string $key, mixed $value): string => "{$key}={$value}", array_keys($pragmas), $pragmas))."\n\n";
+
+    // What a page asked the providers for, by host: a cold page's cost is its requests.
+    $requests = [];
+    Event::listen(ResponseReceived::class, function (ResponseReceived $event) use (&$requests): void {
+        $host = (string) parse_url((string) $event->request->url(), PHP_URL_HOST);
+        $requests[$host] ??= ['count' => 0, 'ms' => 0];
+        $requests[$host]['count']++;
+        $requests[$host]['ms'] += (int) round(((float) ($event->response->handlerStats()['total_time'] ?? 0)) * 1000);
+    });
+
+    $pages = [];
+
+    for ($visit = 0; $visit <= WARM_VISITS; $visit++) {
+        visitPages($app, only: $only, onPage: function (string $name, array $page, array $timing, array $log) use ($visit, &$pages, &$requests): void {
+            $asked = $requests;
+            $requests = [];
+
+            if ($visit > 0) {
+                $pages[$name]['warmVisits'][] = $timing['ms'];
+
+                return;
+            }
+
+            $props = is_array($page['props'] ?? null) ? $page['props'] : [];
+            $propBytes = array_map(fn (mixed $value): int => strlen((string) json_encode($value)), $props);
+            arsort($propBytes);
+
+            $pages[$name] = [
+                'status' => $page['status'],
+                'coldMs' => $timing['ms'],
+                'queries' => $timing['queries'],
+                'databaseMs' => round(array_sum(array_column($log, 'time')), 1),
+                'bytes' => $timing['bytes'],
+                'gzipBytes' => $timing['gzipBytes'],
+                'props' => array_slice($propBytes, 0, LARGEST_PROPS, true),
+                'costliest' => costliestQueries($log),
+                'requests' => $asked,
+                'warmVisits' => [],
+            ];
+        });
+    }
+
+    printf("%-28s %4s %7s %7s %5s %8s %8s %8s\n", 'page', 'code', 'cold', 'warm', 'sql', 'sql ms', 'KB', 'KB gzip');
+
+    foreach ($pages as $name => &$page) {
+        $warm = $page['warmVisits'];
+        sort($warm);
+        $page['warmMs'] = $warm[intdiv(count($warm), 2)];
+        printf("%-28s %4d %5d ms %5d ms %5d %8.1f %8.1f %8.1f\n", $name, $page['status'], $page['coldMs'], $page['warmMs'], $page['queries'], $page['databaseMs'], $page['bytes'] / 1024, $page['gzipBytes'] / 1024);
+
+        foreach ($page['requests'] as $host => $asked) {
+            printf("%-28s %d requests to %s, %d ms\n", '', $asked['count'], $host, $asked['ms']);
+        }
+    }
+
+    unset($page);
+
+    $profile = [
+        'commit' => trim((string) shell_exec('git -C '.escapeshellarg(ROOT).' rev-parse --short HEAD')),
+        'base' => frozenAt(),
+        'clock' => $frozenClock ? 'frozen' : 'live',
+        'network' => $live ? 'live, empty provider cache' : 'off',
+        'php' => PHP_VERSION,
+        'opcache' => (bool) ini_get('opcache.enable_cli'),
+        'library' => librarySize(),
+        'pragmas' => $pragmas,
+        'pages' => $pages,
+    ];
+
+    file_put_contents($out, json_encode($profile, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)."\n");
+    passthru('rm -rf '.escapeshellarg($work));
+
+    echo "\nProfile written to {$out}\n";
+}
+
+/**
+ * The same statement run many times counts as one, with its count: an N+1
+ * is a cheap query that adds up.
+ *
+ * @param  list<array{query: string, bindings: array<int, mixed>, time: float|null}>  $log
+ * @return list<array{sql: string, count: int, ms: float, plan: list<string>}>
+ */
+function costliestQueries(array $log): array
+{
+    $grouped = [];
+
+    foreach ($log as $entry) {
+        $sql = $entry['query'];
+        $grouped[$sql] ??= ['sql' => $sql, 'count' => 0, 'ms' => 0.0, 'bindings' => $entry['bindings']];
+        $grouped[$sql]['count']++;
+        $grouped[$sql]['ms'] += (float) $entry['time'];
+    }
+
+    usort($grouped, fn (array $a, array $b): int => $b['ms'] <=> $a['ms']);
+
+    return array_map(function (array $query): array {
+        $plan = [];
+
+        if (preg_match('/^\s*(select|with)\b/i', $query['sql']) === 1) {
+            foreach (DB::select('EXPLAIN QUERY PLAN '.$query['sql'], $query['bindings']) as $row) {
+                $plan[] = (string) ((array) $row)['detail'];
+            }
+        }
+
+        return ['sql' => mb_substr($query['sql'], 0, SQL_PREVIEW), 'count' => $query['count'], 'ms' => round($query['ms'], 1), 'plan' => $plan];
+    }, array_slice($grouped, 0, COSTLIEST_QUERIES));
+}
+
+/** @return array<string, int> what the snapshot account's library holds, for the report */
+function librarySize(): array
+{
+    return [
+        'plays' => DB::table('plays')->where('user_id', USER_ID)->count(),
+        'libraryEntries' => DB::table('library_entries')->where('user_id', USER_ID)->count(),
+        'lists' => DB::table('lists')->where('user_id', USER_ID)->count(),
+        'follows' => DB::table('follows')->where('user_id', USER_ID)->count(),
+        'notifications' => DB::table('notifications')->where('user_id', USER_ID)->count(),
+        'mediaItems' => DB::table('media_items')->count(),
+    ];
+}
+
+/** A throwaway copy of the base, so a run never changes the base or the live data. */
+function workCopy(bool $providerCache = true): string
+{
+    $work = sys_get_temp_dir().'/snapshot-'.uniqid();
+    mkdir("{$work}/cache", 0777, true);
+    copy(BASE.'/database.sqlite', "{$work}/database.sqlite");
+
+    if ($providerCache) {
+        passthru('cp -r '.escapeshellarg(BASE.'/cache').'/. '.escapeshellarg("{$work}/cache"));
+    }
+
+    return $work;
+}
+
+/**
+ * @param  list<string>  $argv
+ * @return list<string>|null
+ */
+function onlyPages(array $argv): ?array
+{
+    foreach ($argv as $argument) {
+        if (str_starts_with($argument, '--only=')) {
+            return array_values(array_filter(explode(',', substr($argument, strlen('--only=')))));
+        }
+    }
+
+    return null;
+}
+
+/** The clock at the moment the base was made, so what has aired is what it was then. */
+function freezeClock(): void
+{
+    CarbonImmutable::setTestNow(frozenAt());
+    Carbon::setTestNow(frozenAt());
+}
+
+function frozenAt(): string
+{
+    return json_decode((string) file_get_contents(BASE.'/meta.json'), true)['frozenAt'];
+}
+
+function unfreezeClock(): void
+{
+    CarbonImmutable::setTestNow();
+    Carbon::setTestNow();
+}
+
+/** Providers see a dead connection and degrade the way they do in real life; nothing is queued or sent. */
+function offline(): void
+{
+    Http::preventStrayRequests();
+    Http::fake(['*' => Http::failedConnection()]);
+    Sleep::fake();
+    sendNothing();
+}
+
+function sendNothing(): void
+{
+    Queue::fake();
+    Mail::fake();
 }
 
 /** The app on the database and provider cache in $dir, migrated with the code as it is now. */
@@ -226,11 +458,7 @@ function boot(string $dir): Application
     // Frozen before the migrations: one that works something out from the
     // date (what has aired) has to see the day the pages are rendered on.
     // Making the base itself runs live.
-    if (is_file(BASE.'/meta.json')) {
-        $meta = json_decode((string) file_get_contents(BASE.'/meta.json'), true);
-        CarbonImmutable::setTestNow($meta['frozenAt']);
-        Carbon::setTestNow($meta['frozenAt']);
-    }
+    is_file(BASE.'/meta.json') && freezeClock();
 
     $app->make(ConsoleKernel::class)->call('migrate', ['--force' => true]);
     // As the container's boot does after migrating.
@@ -243,22 +471,35 @@ function boot(string $dir): Application
  * Every page, in the same order each time (a page can leave a trace the next
  * one shows, like "recently viewed"), handed to $onPage with its timing.
  *
- * @param  callable(string, array<string, mixed>, array{ms: int, queries: int}): void  $onPage
+ * The size is every response the page took, its deferred props included:
+ * as sent, and an estimate of it compressed.
+ *
+ * @param  callable(string, array<string, mixed>, array{ms: int, queries: int, bytes: int, gzipBytes: int}, list<array{query: string, bindings: array<int, mixed>, time: float|null}>): void  $onPage
+ * @param  list<string>|null  $only  page names; null for every page
  */
-function visitPages(Application $app, callable $onPage): void
+function visitPages(Application $app, callable $onPage, ?array $only = null): void
 {
     $user = User::query()->findOrFail(USER_ID);
     $token = $user->createToken('snapshot');
     $kernel = $app->make(HttpKernel::class);
+    $pages = pages($user);
 
-    foreach (pages($user) as $name => $url) {
+    foreach ($only === null ? $pages : array_intersect_key($pages, array_flip($only)) as $name => $url) {
         DB::flushQueryLog();
         DB::enableQueryLog();
         $started = hrtime(true);
 
         $page = str_starts_with($url, '/api/') ? apiPage($kernel, $url, $token->plainTextToken) : inertiaPage($kernel, $user, $url);
 
-        $onPage($name, $page, ['ms' => (int) round((hrtime(true) - $started) / 1e6), 'queries' => count(DB::getQueryLog())]);
+        $ms = (int) round((hrtime(true) - $started) / 1e6);
+        $log = DB::getQueryLog();
+        DB::disableQueryLog();
+        // Measured after the clock stopped: compressing is the script's work, not the page's.
+        $bytes = array_sum(array_map('strlen', $page['bodies']));
+        $gzipBytes = array_sum(array_map(fn (string $body): int => strlen((string) gzencode($body, GZIP_LEVEL)), $page['bodies']));
+        unset($page['bodies']);
+
+        $onPage($name, $page, ['ms' => $ms, 'queries' => count($log), 'bytes' => $bytes, 'gzipBytes' => $gzipBytes], $log);
     }
 
     $token->accessToken->delete();
@@ -387,7 +628,7 @@ function libraryItem(User $user, string $type): ?MediaItem
  * An Inertia page with its deferred props filled in, the way the browser
  * would load it; a JSON endpoint or a download as it comes.
  *
- * @return array{status: int, component?: string, props?: mixed, body?: mixed}
+ * @return array{status: int, bodies: list<string>, component?: string, props?: mixed, body?: mixed}
  */
 function inertiaPage(HttpKernel $kernel, User $user, string $url): array
 {
@@ -400,6 +641,7 @@ function inertiaPage(HttpKernel $kernel, User $user, string $url): array
 
     $body = content($response);
     $status = $response->getStatusCode();
+    $bodies = [$body];
 
     // The page object rides a JSON script element; an older Inertia wrote it
     // into an attribute, which an earlier snapshot was taken from.
@@ -408,7 +650,7 @@ function inertiaPage(HttpKernel $kernel, User $user, string $url): array
     } elseif (preg_match('/data-page="([^"]*)"/', $body, $match) === 1) {
         $page = json_decode(html_entity_decode($match[1], ENT_QUOTES | ENT_HTML5), true);
     } else {
-        return ['status' => $status, 'body' => json_decode($body, true) ?? mb_substr($body, 0, 2000)];
+        return ['status' => $status, 'bodies' => $bodies, 'body' => json_decode($body, true) ?? mb_substr($body, 0, 2000)];
     }
 
     foreach ($page['deferredProps'] ?? [] as $keys) {
@@ -418,23 +660,26 @@ function inertiaPage(HttpKernel $kernel, User $user, string $url): array
             'HTTP_X_INERTIA_PARTIAL_COMPONENT' => $page['component'],
             'HTTP_X_INERTIA_PARTIAL_DATA' => implode(',', $keys),
         ]);
-        $loaded = json_decode(content(send($kernel, $user, $partial)), true);
+        $deferred = content(send($kernel, $user, $partial));
+        $bodies[] = $deferred;
+        $loaded = json_decode($deferred, true);
         $page['props'] = array_replace($page['props'], $loaded['props'] ?? []);
     }
 
     unset($page['deferredProps']);
 
-    return ['status' => $status, 'component' => $page['component'], 'props' => $page['props']];
+    return ['status' => $status, 'bodies' => $bodies, 'component' => $page['component'], 'props' => $page['props']];
 }
 
-/** @return array{status: int, body: mixed} */
+/** @return array{status: int, bodies: list<string>, body: mixed} */
 function apiPage(HttpKernel $kernel, string $url, string $token): array
 {
     $request = Request::create($url, 'GET', [], [], [], ['HTTP_AUTHORIZATION' => "Bearer {$token}", 'HTTP_ACCEPT' => 'application/json']);
     $response = $kernel->handle($request);
     $kernel->terminate($request, $response);
+    $body = content($response);
 
-    return ['status' => $response->getStatusCode(), 'body' => json_decode(content($response), true)];
+    return ['status' => $response->getStatusCode(), 'bodies' => [$body], 'body' => json_decode($body, true)];
 }
 
 function send(HttpKernel $kernel, User $user, Request $request): Response
@@ -539,17 +784,18 @@ function preview(mixed $value): string
     return mb_strlen($json) > 80 ? mb_substr($json, 0, 77).'…' : $json;
 }
 
-/** Time and query count per page, before → after; informative, never a failure on its own. */
+/** Time, query count and response size per page, before → after; informative, never a failure on its own. */
 function timings(string $left, string $right): void
 {
     $read = fn (string $dir): array => is_file("{$dir}/_timings.json") ? (array) json_decode((string) file_get_contents("{$dir}/_timings.json"), true) : [];
     $old = $read($left);
     $new = $read($right);
 
-    echo "\n".str_pad('page', 28).str_pad('ms', 16).'queries'."\n";
+    echo "\n".str_pad('page', 28).str_pad('ms', 16).str_pad('queries', 16).'KB'."\n";
+    $kilobytes = fn (?int $bytes): string => $bytes === null ? '–' : (string) round($bytes / 1024);
 
     foreach ($new as $page => $now) {
-        $was = $old[$page] ?? ['ms' => null, 'queries' => null];
-        printf("%-28s%-16s%s\n", $page, ($was['ms'] ?? '–').' → '.$now['ms'], ($was['queries'] ?? '–').' → '.$now['queries']);
+        $was = $old[$page] ?? [];
+        printf("%-28s%-16s%-16s%s\n", $page, ($was['ms'] ?? '–').' → '.$now['ms'], ($was['queries'] ?? '–').' → '.$now['queries'], $kilobytes($was['bytes'] ?? null).' → '.$kilobytes($now['bytes'] ?? null));
     }
 }
