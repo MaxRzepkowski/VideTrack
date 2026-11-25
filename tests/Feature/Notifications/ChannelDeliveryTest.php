@@ -11,8 +11,8 @@ use App\Notifications\Channels\ChannelRegistry;
 use App\Notifications\Channels\DailyDigests;
 use App\Support\Delivery\DeliveryAnswer;
 use App\Support\Delivery\DeliveryRetry;
+use Illuminate\Database\Events\QueryExecuted;
 use Illuminate\Http\Client\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\URL;
@@ -358,9 +358,7 @@ test('two digest channels of one user read the notifications once', function () 
     app(SendMediaNotification::class)->execute($user, premiereEvent());
     $this->travelTo('2026-07-23 09:00:00');
 
-    DB::enableQueryLog();
-    runChannelDigests();
-    $reads = collect(DB::getQueryLog())->filter(fn (array $query): bool => str_starts_with($query['query'], 'select') && str_contains($query['query'], '"notifications"'));
+    $reads = collect(queriesRunBy(runChannelDigests(...)))->filter(fn (QueryExecuted $query): bool => str_starts_with($query->sql, 'select') && str_contains($query->sql, '"notifications"'));
 
     expect($reads)->toHaveCount(1);
     Http::assertSentCount(2);

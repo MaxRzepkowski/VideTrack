@@ -8,7 +8,6 @@ use App\Models\Company;
 use App\Models\Follow;
 use App\Models\Person;
 use App\Models\User;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Inertia\Inertia;
 use Inertia\Testing\AssertableInertia as Assert;
@@ -190,15 +189,15 @@ test('the bell and lists of many creators cost the same few queries as of one', 
     }, range($from, $from + $count - 1)));
 
     $few = $creators(1);
-    DB::enableQueryLog();
-    $query->of($user, $few);
-    $forFew = count(DB::getQueryLog());
+    $forFew = queriesRunBy(fn () => $query->of($user, $few));
 
     $many = $creators(8, 100);
-    DB::flushQueryLog();
-    $states = $query->of($user, $many);
+    $states = [];
+    $forMany = queriesRunBy(function () use ($query, $user, $many, &$states): void {
+        $states = $query->of($user, $many);
+    });
 
-    expect(count(DB::getQueryLog()))->toBe($forFew)
-        ->and($states)->toHaveCount(16)
+    expectSameQueries($forFew, $forMany);
+    expect($states)->toHaveCount(16)
         ->and(collect($states)->where('followed', true))->toHaveCount(8);
 });

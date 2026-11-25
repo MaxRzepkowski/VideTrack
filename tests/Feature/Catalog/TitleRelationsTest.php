@@ -16,7 +16,6 @@ use App\Models\RelatedTitle;
 use App\Models\User;
 use App\Tasks\TaskName;
 use Illuminate\Http\Client\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Sleep;
 use Inertia\Testing\AssertableInertia;
@@ -369,7 +368,7 @@ test('a title of the franchise that is also a spin-off says so, and one that onl
 });
 
 test('finding the tied works costs the same number of queries for one work as for many', function () {
-    $queriesFor = function (int $works): int {
+    $queriesFor = function (int $works): array {
         $title = titleKnownToWikidata('Q'.(5000 + $works));
         $rows = [];
 
@@ -380,12 +379,8 @@ test('finding the tied works costs the same number of queries for one work as fo
         }
 
         fakeRelations($rows);
-        DB::flushQueryLog();
-        DB::enableQueryLog();
-        app(RefreshTitleRelations::class)->execute(MediaItem::query()->whereKey($title->id)->get(), 'en');
-        DB::disableQueryLog();
 
-        return count(DB::getQueryLog());
+        return queriesRunBy(fn () => app(RefreshTitleRelations::class)->execute(MediaItem::query()->whereKey($title->id)->get(), 'en'));
     };
 
     // Whatever the first run of a process asks once is out of the way first.
@@ -393,7 +388,7 @@ test('finding the tied works costs the same number of queries for one work as fo
 
     // The works are looked up together, so a title with many ties asks the
     // database no more often than a title with one.
-    expect($queriesFor(8))->toBe($queriesFor(1));
+    expectSameQueries($queriesFor(1), $queriesFor(8));
 });
 
 test('the titles someone holds are asked about before the rest of the catalogue; a collection\'s own list holds none', function () {

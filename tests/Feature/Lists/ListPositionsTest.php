@@ -7,7 +7,6 @@ use App\Models\MediaList;
 use App\Models\Person;
 use App\Models\User;
 use Carbon\CarbonImmutable;
-use Illuminate\Support\Facades\DB;
 use Inertia\Testing\AssertableInertia as Assert;
 
 test('a position is appended after the last one, with the time it was added', function () {
@@ -42,10 +41,9 @@ test('a new order is written in one statement, and only for the rows that move',
     $lists = collect(range(1, 4))->map(fn (int $position) => MediaList::factory()->for($user)->create(['position' => $position]))->keyBy('id');
     [$first, $second, $third, $fourth] = $lists->values()->all();
 
-    DB::enableQueryLog();
-    app(ListPositions::class)->save($lists, [$first->id => 1, $second->id => 3, $third->id => 2, $fourth->id => 4]);
+    $queries = queriesRunBy(fn () => app(ListPositions::class)->save($lists, [$first->id => 1, $second->id => 3, $third->id => 2, $fourth->id => 4]));
 
-    expect(DB::getQueryLog())->toHaveCount(1)
+    expect($queries)->toHaveCount(1)
         ->and(MediaList::query()->whereNull('system_key')->orderBy('position')->pluck('id')->all())->toBe([$first->id, $third->id, $second->id, $fourth->id]);
 });
 

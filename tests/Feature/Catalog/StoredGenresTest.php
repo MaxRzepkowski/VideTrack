@@ -3,7 +3,6 @@
 use App\Catalog\ItemMetadata;
 use App\Catalog\StoredGenres;
 use App\Models\MediaItem;
-use Illuminate\Database\Events\QueryExecuted;
 use Illuminate\Support\Facades\DB;
 
 /** A title whose metadata holds these genres, stored the way ItemMetadata stores them. */
@@ -34,12 +33,7 @@ test('only names count as genres, and a title with no metadata adds none', funct
 
 test('a set of titles has its genres read from the index, not from each title\'s metadata', function () {
     $titles = [titleOfGenres('Drama')->id, titleOfGenres('Crime')->id];
-    $queries = [];
-    DB::listen(function (QueryExecuted $query) use (&$queries) {
-        $queries[] = $query;
-    });
-
-    StoredGenres::ofTitles($titles);
+    $queries = queriesRunBy(fn () => StoredGenres::ofTitles($titles));
     [$read] = $queries;
     expect($queries)->toHaveCount(1);
 

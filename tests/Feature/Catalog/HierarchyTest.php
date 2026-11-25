@@ -4,7 +4,6 @@ use App\Catalog\Data\CascadeLeaf;
 use App\Catalog\Hierarchy;
 use App\Catalog\HierarchyCycle;
 use App\Models\MediaItem;
-use Illuminate\Support\Facades\DB;
 
 /**
  * @return array{show: MediaItem, specials: MediaItem, season: MediaItem, special: MediaItem, first: MediaItem, unaired: MediaItem}
@@ -39,10 +38,13 @@ test('a climb through loaded parents reaches the root without a query', function
     $tree = showTree();
     $episode = MediaItem::query()->with('parent.parent')->findOrFail($tree['first']->id);
 
-    DB::enableQueryLog();
+    $root = null;
+    $queries = queriesRunBy(function () use ($episode, &$root): void {
+        $root = app(Hierarchy::class)->loadedRootOf($episode);
+    });
 
-    expect(app(Hierarchy::class)->loadedRootOf($episode)->id)->toBe($tree['show']->id)
-        ->and(DB::getQueryLog())->toBe([])
+    expect($root?->id)->toBe($tree['show']->id)
+        ->and($queries)->toBe([])
         ->and(app(Hierarchy::class)->loadedRootOf($tree['show'])->id)->toBe($tree['show']->id);
 });
 
@@ -93,15 +95,17 @@ test('cascade leaves come in hierarchy order without the specials, for a show an
     $s1e2 = MediaItem::factory()->episode($first, 2, null)->create();
     $s1e1 = MediaItem::factory()->episode($first, 1)->create();
 
-    DB::enableQueryLog();
-    $leaves = app(Hierarchy::class)->cascadeLeaves(collect([$show, $first]));
+    $leaves = [];
+    $queries = queriesRunBy(function () use ($show, $first, &$leaves): void {
+        $leaves = app(Hierarchy::class)->cascadeLeaves(collect([$show, $first]));
+    });
 
     expect(array_map(fn (CascadeLeaf $leaf): int => $leaf->id, $leaves[$show->id]))->toBe([$s1e1->id, $s1e2->id, $s2e1->id])
         ->and(array_map(fn (CascadeLeaf $leaf): array => $leaf->path, $leaves[$show->id]))->toBe([[1, 1], [1, 2], [2, 1]])
         ->and(array_map(fn (CascadeLeaf $leaf): bool => $leaf->aired, $leaves[$show->id]))->toBe([true, false, true])
         ->and(array_map(fn (CascadeLeaf $leaf): array => $leaf->path, $leaves[$first->id]))->toBe([[1], [2]])
         // The season's episodes are read once, though both containers reach them.
-        ->and(DB::getQueryLog())->toHaveCount(2);
+        ->and($queries)->toHaveCount(2);
 });
 
 test('a cascade descent through a parent cycle fails loudly', function () {

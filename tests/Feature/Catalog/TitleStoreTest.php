@@ -5,7 +5,6 @@ use App\Catalog\ItemNotFoundException;
 use App\Catalog\TitleStore;
 use App\Models\MediaItem;
 use Illuminate\Database\Events\QueryExecuted;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 
 function titleStore(): TitleStore
@@ -170,14 +169,8 @@ test('a refresh reads each level of the tree once, not each of its rows', functi
     $show = titleStore()->persist('show', '1399', 'en');
     $children = MediaItem::query()->whereIn('type', ['season', 'episode'])->count();
 
-    $lookups = 0;
-    DB::listen(function (QueryExecuted $query) use (&$lookups): void {
-        if (str_starts_with($query->sql, 'select * from "media_items"') && str_contains($query->sql, '"provider_ref" = ?')) {
-            $lookups++;
-        }
-    });
-
-    titleStore()->refresh($show, 'en');
+    $queries = queriesRunBy(fn () => titleStore()->refresh($show, 'en'));
+    $lookups = count(array_filter($queries, fn (QueryExecuted $query): bool => str_starts_with($query->sql, 'select * from "media_items"') && str_contains($query->sql, '"provider_ref" = ?')));
 
     // Only the root is looked up on its own; three seasons and six episodes are not.
     expect($children)->toBe(9)

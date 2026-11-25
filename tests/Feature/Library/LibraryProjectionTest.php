@@ -17,12 +17,17 @@ use App\Models\User;
 use App\Tasks\TaskName;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Events\QueryExecuted;
-use Illuminate\Support\Facades\DB;
 
 /** @return array<int, LibraryEntry> the user's entries by position id */
 function entriesOf(User $user): array
 {
     return LibraryEntry::query()->where('user_id', $user->id)->get()->keyBy('media_item_id')->all();
+}
+
+/** @param  list<QueryExecuted>  $queries */
+function projectionWrites(array $queries): int
+{
+    return count(array_filter($queries, fn (QueryExecuted $query): bool => preg_match('/^(insert|update|delete)\b.*library_entries/i', $query->sql) === 1));
 }
 
 test('a play projects every position of its title, the untouched episodes too', function () {
@@ -164,17 +169,12 @@ test('an import projects its titles in one write, however many it brings', funct
     $first = MediaItem::factory()->movie()->create(['provider_ref' => '603']);
     $second = MediaItem::factory()->movie()->create(['provider_ref' => '604']);
 
-    $writes = 0;
-    DB::listen(function (QueryExecuted $query) use (&$writes): void {
-        $writes += preg_match('/^(insert|update|delete)\b.*library_entries/i', $query->sql);
-    });
-
-    runFakeImport($user, [
+    $queries = queriesRunBy(fn () => runFakeImport($user, [
         new MediaRow(MediaSubject::direct('movie', 'tmdb', '603', 'The Matrix'), plays: [new ImportPlay(new CarbonImmutable('2025-01-10 20:00:00'))]),
         new MediaRow(MediaSubject::direct('movie', 'tmdb', '604', 'The Matrix Reloaded'), plays: [new ImportPlay(new CarbonImmutable('2025-01-11 20:00:00'))]),
-    ]);
+    ]));
 
-    expect($writes)->toBe(1)
+    expect(projectionWrites($queries))->toBe(1)
         ->and(entriesOf($user)[$first->id]->watched)->toBeTrue()
         ->and(entriesOf($user)[$second->id]->watched)->toBeTrue();
 });
@@ -260,12 +260,7 @@ test('projecting a title nothing changed on writes nothing', function () {
 
     app(MarkWatched::class)->execute($user, episodeOf($show, 1, 1), WatchedAt::at(CarbonImmutable::parse('2026-01-01')));
 
-    $writes = 0;
-    DB::listen(function (QueryExecuted $query) use (&$writes): void {
-        $writes += preg_match('/^(insert|update|delete)\b.*library_entries/i', $query->sql);
-    });
+    $queries = queriesRunBy(fn () => app(LibraryProjector::class)->projectRoots($user, [$show->id]));
 
-    app(LibraryProjector::class)->projectRoots($user, [$show->id]);
-
-    expect($writes)->toBe(0);
+    expect(projectionWrites($queries))->toBe(0);
 });

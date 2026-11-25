@@ -7,7 +7,7 @@ use App\Integrations\Tautulli\TautulliScrobbleSource;
 use App\Models\User;
 use App\Models\WebhookDelivery;
 use App\Models\WebhookEndpoint;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Events\QueryExecuted;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\URL;
 use Inertia\Testing\AssertableInertia as Assert;
@@ -254,11 +254,10 @@ test("each endpoint shows its own latest deliveries, every endpoint's read in on
     }
 
     $newest = $endpoints[0]->deliveries()->max('id');
-    DB::enableQueryLog();
 
-    $this->actingAs($user)->get('/settings/integrations')->assertInertia(fn (Assert $page) => $page
+    $queries = queriesRunBy(fn () => $this->actingAs($user)->get(route('settings.integrations.index'))->assertInertia(fn (Assert $page) => $page
         ->where('sources.0.endpoints.0.deliveries.0.id', $newest)
-        ->where('sources.0.endpoints.0.deliveries', fn ($deliveries) => count($deliveries) < 25));
+        ->where('sources.0.endpoints.0.deliveries', fn ($deliveries) => count($deliveries) < 25)));
 
-    expect(collect(DB::getQueryLog())->filter(fn (array $query) => str_contains($query['query'], 'webhook_deliveries')))->toHaveCount(1);
+    expect(collect($queries)->filter(fn (QueryExecuted $query) => str_contains($query->sql, 'webhook_deliveries')))->toHaveCount(1);
 });
