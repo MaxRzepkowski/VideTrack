@@ -18,11 +18,13 @@ final readonly class TrackedTitles
     public function of(User $user, Surface $surface): array
     {
         $tracked = [];
+        // Read once: every read of a model's cast object writes it back to the attributes first.
+        $preferences = $user->preferences;
 
         foreach ($this->facts->forUser($user) as $rootId => $facts) {
             $source = $facts->source();
 
-            if ($source !== null && $surface->carries($user->preferences, $facts)) {
+            if ($source !== null && $surface->carries($preferences, $facts)) {
                 $tracked[$rootId] = $source;
             }
         }

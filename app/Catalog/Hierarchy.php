@@ -103,13 +103,15 @@ final readonly class Hierarchy
         while ($cursor !== []) {
             $this->guard($depth++, (int) array_key_first($cursor));
 
+            // A plain array: the loop runs once per item, thousands for a long history.
             $parents = MediaItem::query()
                 ->toBase()
                 ->whereIn('id', array_unique($cursor))
-                ->pluck('parent_id', 'id');
+                ->pluck('parent_id', 'id')
+                ->all();
 
             foreach ($cursor as $origin => $node) {
-                if (! $parents->has($node)) {
+                if (! array_key_exists($node, $parents)) {
                     unset($cursor[$origin]);
 
                     continue;

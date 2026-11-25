@@ -10,6 +10,7 @@ use App\Enums\FollowMode;
 use App\Models\Follow;
 use App\Models\MediaItem;
 use App\Models\User;
+use App\Support\QueryRow;
 use App\Tracking\Surface;
 use App\Tracking\TrackedTitles;
 use App\Tracking\TrackingSource;
@@ -38,9 +39,6 @@ final readonly class ReleaseFeed
     public function entries(User $user, Surface $surface, string $from, string $to): Collection
     {
         $tracked = $this->tracked->of($user, $surface);
-        // A type whose module the instance switched off has no releases to tell.
-        $roots = MediaItem::query()->whereIn('id', array_keys($tracked))->get()
-            ->filter(fn (MediaItem $root): bool => $this->types->has($root->type));
         // A card names the creators behind a title only when they are why it
         // is here: one the backlog or history carries reads as the bell does.
         $byCreators = array_keys(array_filter($tracked, fn (TrackingSource $source): bool => $source === TrackingSource::CreatorFollow));
@@ -55,20 +53,37 @@ final readonly class ReleaseFeed
             followedVia: $this->followedVia($user, $byCreators),
         );
 
+        $sources = [$this->episodes, $this->films, $this->progress, $this->related];
+        $titles = [];
+        $sourcesOfType = [];
+
+        // Only the kind of each title here; each source reads the titles it
+        // serves itself, as far as the window needs them.
+        $rows = MediaItem::query()->toBase()->whereIn('id', array_keys($tracked))->orderBy('id')->get(['id', 'type']);
+
+        foreach ($rows as $row) {
+            $type = QueryRow::text($row, 'type');
+
+            // A type whose module the instance switched off has no releases to tell.
+            if (! $this->types->has($type)) {
+                continue;
+            }
+
+            $sourcesOfType[$type] ??= $this->sourcesOf($this->types->get($type));
+
+            foreach ($sources as $index => $source) {
+                if (in_array($source, $sourcesOfType[$type], true)) {
+                    $titles[$index][] = QueryRow::int($row, 'id');
+                }
+            }
+        }
+
         /** @var Collection<int, ReleaseEntry> $entries */
         $entries = collect();
 
-        $sources = [];
-
-        foreach ($roots as $root) {
-            $sources[$root->type] ??= $this->sourcesOf($this->types->get($root->type));
-        }
-
-        foreach ([$this->episodes, $this->films, $this->progress, $this->related] as $source) {
-            $titles = $roots->filter(fn (MediaItem $root): bool => in_array($source, $sources[$root->type], true));
-
-            if ($titles->isNotEmpty()) {
-                $entries = $entries->concat($source->releases($titles->toBase()->values(), $window));
+        foreach ($sources as $index => $source) {
+            if (isset($titles[$index])) {
+                $entries = $entries->concat($source->releases($titles[$index], $window));
             }
         }
 

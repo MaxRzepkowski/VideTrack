@@ -29,8 +29,12 @@ final readonly class RelatedReleases implements ReleaseSource
         private OwnStances $stances,
     ) {}
 
-    public function releases(Collection $roots, ReleaseWindow $window): Collection
+    public function releases(array $rootIds, ReleaseWindow $window): Collection
     {
+        // The releases are listed in the metadata, so every game is read.
+        $roots = MediaItem::query()->whereIn('id', $rootIds)->orderBy('id')->get();
+        $preferences = $window->viewer->preferences;
+        $perPlatform = $preferences->perPlatform($window->surface);
         $listed = [];
         $refs = [];
 
@@ -68,14 +72,14 @@ final readonly class RelatedReleases implements ReleaseSource
                 $kind = RelatedReleaseKind::of($release->kind);
                 $key = "{$game->provider}|{$game->type}|{$release->ref}";
 
-                if ($kind === null || isset($own[$key]) || ! $window->viewer->preferences->showsRelated($window->surface, $kind)) {
+                if ($kind === null || isset($own[$key]) || ! $preferences->showsRelated($window->surface, $kind)) {
                     continue;
                 }
 
                 // A remake two tracked games list is one release.
                 $own[$key] = true;
 
-                foreach ($this->entries($game, $release, $window) as $entry) {
+                foreach ($this->entries($game, $release, $perPlatform, $window) as $entry) {
                     $entries[] = $entry;
                 }
             }
@@ -131,11 +135,11 @@ final readonly class RelatedReleases implements ReleaseSource
      *
      * @return list<ReleaseEntry>
      */
-    private function entries(MediaItem $game, RelatedRelease $release, ReleaseWindow $window): array
+    private function entries(MediaItem $game, RelatedRelease $release, bool $perPlatform, ReleaseWindow $window): array
     {
         $extra = $window->followedViaOf($game);
 
-        if ($window->viewer->preferences->perPlatform($window->surface) && $release->platformReleases !== []) {
+        if ($perPlatform && $release->platformReleases !== []) {
             return array_map(fn (PlatformPremiere $premiere): ReleaseEntry => new ReleaseEntry(
                 media: MediaItemSummaries::related(
                     $game,

@@ -14,6 +14,7 @@ use App\Models\MediaItem;
 use App\Tracking\Settings\TypeOption;
 use App\Tracking\Settings\TypeOptionRequirement;
 use App\Tracking\Surface;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 
 /**
@@ -37,9 +38,24 @@ final readonly class FilmReleases implements ReleaseSource
 {
     public function __construct(private MediaItemSummaries $cards) {}
 
-    public function releases(Collection $roots, ReleaseWindow $window): Collection
+    public function releases(array $rootIds, ReleaseWindow $window): Collection
     {
-        return $roots->flatMap(fn (MediaItem $film): array => $this->entries($film, $window))->values();
+        $mode = $window->viewer->preferences->releaseMode($window->surface);
+
+        if (! $mode->showsPremiere() && ! $mode->showsDigital()) {
+            return new Collection;
+        }
+
+        return MediaItem::query()
+            ->whereIn('id', $rootIds)
+            ->where(fn (Builder $dated) => $dated
+                ->when($mode->showsPremiere(), fn (Builder $query) => $query->orWhereBetween('release_date', $window->storedBounds()))
+                ->when($mode->showsDigital(), fn (Builder $query) => $query->orWhereBetween('home_release_date', $window->storedBounds())))
+            ->orderBy('id')
+            ->get()
+            ->toBase()
+            ->flatMap(fn (MediaItem $film): array => $this->entries($film, $mode, $window))
+            ->values();
     }
 
     /**
@@ -85,9 +101,8 @@ final readonly class FilmReleases implements ReleaseSource
     /**
      * @return list<ReleaseEntry>
      */
-    private function entries(MediaItem $film, ReleaseWindow $window): array
+    private function entries(MediaItem $film, ReleaseDateMode $mode, ReleaseWindow $window): array
     {
-        $mode = $window->viewer->preferences->releaseMode($window->surface);
         $premiere = $mode->showsPremiere() && $film->release_date !== null && $window->contains($film->release_date->toDateString());
         $home = $mode->showsDigital() && $film->home_release_date !== null && $window->contains($film->home_release_date->toDateString());
 
