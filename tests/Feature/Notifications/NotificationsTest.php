@@ -526,12 +526,13 @@ test('the notifications page, single read and read-all work', function () {
             ->has('entries', 1)
             ->where('entries.0.readAt', null)
             // The page's own list leaves the bell's shared prop alone.
-            ->where('notifications.unread', 1));
+            ->where('unreadNotifications', 1));
 
-    // The shared header prop carries the unread counter.
+    // The shared header prop carries the unread counter, and only that: the
+    // bell asks for its list when it opens.
     $this->actingAs($user)
         ->get(route('dashboard'))
-        ->assertInertia(fn ($page) => $page->where('notifications.unread', 1));
+        ->assertInertia(fn ($page) => $page->where('unreadNotifications', 1)->missing('notifications'));
 
     $this->actingAs($user)
         ->patch(route('ui.notifications.read', ['notification' => $notification->id]))
@@ -601,8 +602,8 @@ test('the bell feed answers as JSON, scoped to the acting user', function () {
 
     $this->getJson(route('notifications.feed'))->assertUnauthorized();
 
-    // What the header polls between navigations: the same shape as the shared
-    // prop, so a fresh answer can replace it in place.
+    // Where the bell gets its list, when it opens and on every poll of an open
+    // tab, together with the counter it keeps current.
     $this->actingAs($user)
         ->getJson(route('notifications.feed'))
         ->assertOk()

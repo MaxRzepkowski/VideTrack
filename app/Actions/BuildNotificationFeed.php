@@ -8,10 +8,8 @@ use App\Notifications\NotificationCopy;
 use Illuminate\Notifications\DatabaseNotification;
 
 /**
- * The header bell's payload: the unread counter plus the newest few entries.
- *
- * Read from two places that must not drift apart — the shared Inertia prop
- * (every page render) and the endpoint an open tab polls, since a
+ * The header bell's payload: the unread counter plus the newest few entries,
+ * asked for by the bell when it opens and polled by an open tab, since a
  * notification written by the queue reaches the browser only when somebody
  * asks for it. The full feed lives on /notifications.
  */

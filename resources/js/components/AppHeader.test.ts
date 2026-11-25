@@ -19,7 +19,7 @@ const Link = { props: ['href'], template: '<a :href="href"><slot /></a>' };
 const Inline = { template: '<div><slot /></div>' };
 
 function header(unread: number) {
-    setPageProps({ notifications: { unread, recent: [] } });
+    setPageProps({ unreadNotifications: unread });
 
     return mount(AppHeader, {
         global: {
