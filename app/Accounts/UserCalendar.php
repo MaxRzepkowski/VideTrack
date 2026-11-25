@@ -4,7 +4,9 @@ namespace App\Accounts;
 
 use App\Models\User;
 use Carbon\CarbonImmutable;
+use DateTimeImmutable;
 use DateTimeInterface;
+use DateTimeZone;
 use InvalidArgumentException;
 
 /**
@@ -14,7 +16,12 @@ use InvalidArgumentException;
  */
 final readonly class UserCalendar
 {
-    public function __construct(private string $timezone) {}
+    private DateTimeZone $zone;
+
+    public function __construct(string $timezone)
+    {
+        $this->zone = new DateTimeZone($timezone);
+    }
 
     public static function of(User $user): self
     {
@@ -24,7 +31,7 @@ final readonly class UserCalendar
     /** A moment as the user's clock showed it: their hour, their weekday. */
     public function moment(DateTimeInterface $moment): CarbonImmutable
     {
-        return CarbonImmutable::instance($moment)->setTimezone($this->timezone);
+        return CarbonImmutable::instance($moment)->setTimezone($this->zone);
     }
 
     /**
@@ -38,12 +45,23 @@ final readonly class UserCalendar
     }
 
     /**
+     * The user's calendar day (Y-m-d) of a timestamp as the database holds it,
+     * read on the instance's clock. A panel asks this of every row it groups,
+     * so it stays on PHP's own dates: a Carbon object per row costs several
+     * times more.
+     */
+    public function dayOfStored(string $stamp): string
+    {
+        return (new DateTimeImmutable($stamp))->setTimezone($this->zone)->format('Y-m-d');
+    }
+
+    /**
      * The day it is for the user now, at its start: past midnight in Warsaw it
      * is already tomorrow there, though the server's clock still says today.
      */
     public function today(): CarbonImmutable
     {
-        return CarbonImmutable::now($this->timezone)->startOfDay();
+        return CarbonImmutable::now($this->zone)->startOfDay();
     }
 
     /** The moment a calendar day (Y-m-d) begins for the user. */
@@ -69,6 +87,6 @@ final readonly class UserCalendar
 
     private function onDay(string $day): CarbonImmutable
     {
-        return CarbonImmutable::createFromFormat('!Y-m-d', $day, $this->timezone) ?: throw new InvalidArgumentException("Not a day: [{$day}].");
+        return CarbonImmutable::createFromFormat('!Y-m-d', $day, $this->zone) ?: throw new InvalidArgumentException("Not a day: [{$day}].");
     }
 }

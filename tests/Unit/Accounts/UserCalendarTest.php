@@ -11,6 +11,24 @@ test("a moment falls on the day of the user's own calendar", function (string $t
     'west of it, still the same' => ['America/New_York', '2026-03-01'],
 ]);
 
+test("a stored timestamp falls on the user's day, read on the instance's clock", function (string $instance, string $stamp, string $day) {
+    $default = date_default_timezone_get();
+    date_default_timezone_set($instance);
+
+    try {
+        expect((new UserCalendar('Europe/Warsaw'))->dayOfStored($stamp))->toBe($day)
+            ->and((new UserCalendar('Europe/Warsaw'))->day(CarbonImmutable::parse($stamp)))->toBe($day);
+    } finally {
+        date_default_timezone_set($default);
+    }
+})->with([
+    'a UTC instance, past midnight in winter' => ['UTC', '2026-03-28 23:00:00', '2026-03-29'],
+    'a UTC instance, the last minute of a summer day' => ['UTC', '2026-03-29 21:59:00', '2026-03-29'],
+    'a UTC instance, past midnight in summer' => ['UTC', '2026-10-24 22:00:00', '2026-10-25'],
+    'an instance west of the user' => ['America/New_York', '2026-10-25 19:00:00', '2026-10-26'],
+    'an instance on the user\'s zone' => ['Europe/Warsaw', '2026-10-25 00:30:00', '2026-10-25'],
+]);
+
 test('no moment is no day', function () {
     expect((new UserCalendar('UTC'))->day(null))->toBeNull();
 });

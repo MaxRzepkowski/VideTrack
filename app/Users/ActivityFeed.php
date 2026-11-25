@@ -261,7 +261,7 @@ final readonly class ActivityFeed
         $days = [];
 
         foreach ($rows as $row) {
-            $days[$row['groupId']] = $calendar->day(CarbonImmutable::parse($row['at']));
+            $days[$row['groupId']] = $calendar->dayOfStored($row['at']);
         }
 
         return $days;
@@ -355,7 +355,7 @@ final readonly class ActivityFeed
         foreach ($rows as $row) {
             $id = QueryRow::int($row, 'id');
             $at = QueryRow::textOrNull($row, 'at_value');
-            $day = $at === null ? '' : $calendar->day(CarbonImmutable::parse($at));
+            $day = $at === null ? '' : $calendar->dayOfStored($at);
 
             $days[$day][] = $id;
             $dayOf[$id] = $day;
