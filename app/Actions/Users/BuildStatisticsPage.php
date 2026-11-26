@@ -155,7 +155,7 @@ final readonly class BuildStatisticsPage
             $amount = array_sum(array_map(fn (HistoryEntry $entry): int => $entry->amount, $entries));
 
             $tiles[$code] = new WatchStats(
-                minutes: $amount,
+                amount: $amount,
                 watched: count(array_unique(array_map(fn (HistoryEntry $entry): int => $entry->itemId, $counted))),
                 plays: count($counted),
                 titles: $titles[$code] ?? 0,

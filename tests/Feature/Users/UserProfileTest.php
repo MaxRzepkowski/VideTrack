@@ -86,7 +86,7 @@ test('the profile counts the stats of the user it is about', function () {
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->where('stats.movie.watched', 1)
-            ->where('stats.movie.minutes', 120)
+            ->where('stats.movie.amount', 120)
             ->where('stats.show.watched', 0));
 });
 

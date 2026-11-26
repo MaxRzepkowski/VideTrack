@@ -25,7 +25,7 @@ const props = withDefaults(
     { stats: undefined, username: null },
 );
 
-const stats = computed(() => props.stats ?? { minutes: 0, watched: 0, plays: 0, titles: 0, estimatedMinutes: null });
+const stats = computed(() => props.stats ?? { amount: 0, watched: 0, plays: 0, titles: 0, estimatedMinutes: null });
 
 // Glyph and colour come from the shared type vocabulary, so a tile names its
 // type exactly the way every badge, calendar entry and countdown card does.
@@ -42,13 +42,13 @@ const label = computed(() => meta.value.plural());
 /**
  * Total watch time as "3 days 7 hours 12 minutes" (games: real logged hours
  * only) — the shared spelling, which the progress tooltips quote too. Reading
- * types count positions, not time: the `minutes` field carries the
+ * types count positions, not time: the `amount` field carries the
  * progress-unit total, and the tile leads with the time it took, estimated at
  * the user's pace and marked as an estimate, naming what was read beneath it.
  */
 const estimated = computed(() => stats.value.estimatedMinutes !== null);
 
-const headline = computed(() => (estimated.value ? durationTerms(stats.value.estimatedMinutes ?? 0) : amountTerms(props.kind, stats.value.minutes)));
+const headline = computed(() => (estimated.value ? durationTerms(stats.value.estimatedMinutes ?? 0) : amountTerms(props.kind, stats.value.amount)));
 
 /**
  * How many things are behind the headline. A container names both levels —

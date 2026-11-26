@@ -226,9 +226,9 @@ describe('statCounts', () => {
     it("names what a type's totals are made of, a read type with what was read", () => {
         useMediaTypes();
 
-        expect(statCounts('movie', { minutes: 250, watched: 2, plays: 2, titles: 2, estimatedMinutes: null })).toEqual(['2 movies']);
-        expect(statCounts('show', { minutes: 420, watched: 10, plays: 10, titles: 1, estimatedMinutes: null })).toEqual(['1 show', '10 episodes']);
-        expect(statCounts('book', { minutes: 1355, watched: 8, plays: 8, titles: 8, estimatedMinutes: 1626 })).toEqual(['8 books', '1,355 pages']);
+        expect(statCounts('movie', { amount: 250, watched: 2, plays: 2, titles: 2, estimatedMinutes: null })).toEqual(['2 movies']);
+        expect(statCounts('show', { amount: 420, watched: 10, plays: 10, titles: 1, estimatedMinutes: null })).toEqual(['1 show', '10 episodes']);
+        expect(statCounts('book', { amount: 1355, watched: 8, plays: 8, titles: 8, estimatedMinutes: 1626 })).toEqual(['8 books', '1,355 pages']);
     });
 });
 

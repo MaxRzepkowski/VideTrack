@@ -23,7 +23,7 @@ const tally = (byType: [string, number][]): TypeTally => ({
     byType: byType.map(([type, count]) => ({ type, count })),
 });
 
-const zero = { minutes: 0, watched: 0, plays: 0, titles: 0, estimatedMinutes: null };
+const zero = { amount: 0, watched: 0, plays: 0, titles: 0, estimatedMinutes: null };
 
 function statisticsPage(overrides: Partial<StatisticsPage> = {}): StatisticsPage {
     return {
@@ -50,10 +50,10 @@ function statisticsPage(overrides: Partial<StatisticsPage> = {}): StatisticsPage
             communityDelta: null,
         },
         tiles: {
-            movie: { minutes: 250, watched: 2, plays: 2, titles: 2, estimatedMinutes: null },
-            show: { minutes: 420, watched: 10, plays: 10, titles: 1, estimatedMinutes: null },
+            movie: { amount: 250, watched: 2, plays: 2, titles: 2, estimatedMinutes: null },
+            show: { amount: 420, watched: 10, plays: 10, titles: 1, estimatedMinutes: null },
             game: zero,
-            book: { minutes: 1355, watched: 8, plays: 8, titles: 8, estimatedMinutes: 1355 },
+            book: { amount: 1355, watched: 8, plays: 8, titles: 8, estimatedMinutes: 1355 },
         },
         titles: {
             titles: tally([

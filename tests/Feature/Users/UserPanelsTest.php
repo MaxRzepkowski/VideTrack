@@ -544,7 +544,7 @@ test('an episode without a runtime of its own costs what its show declares, on t
         ->get(route('users.history', ['user' => $user->username]))
         ->assertInertia(fn (Assert $page) => $page->where('dayTotals.2026-05-01', ['watch' => 42]));
 
-    expect(app(BuildWatchStats::class)->execute($user)['show']->minutes)->toBe(42);
+    expect(app(BuildWatchStats::class)->execute($user)['show']->amount)->toBe(42);
 });
 
 test('a dropped viewing counts the minutes it logged, and nothing without them', function () {
@@ -567,7 +567,7 @@ test('a dropped viewing counts the minutes it logged, and nothing without them',
         ->get(route('users.history', ['user' => $user->username]))
         ->assertInertia(fn (Assert $page) => $page->where('dayTotals.2026-04-02', ['watch' => 35]));
 
-    expect(app(BuildWatchStats::class)->execute($user)['movie']->minutes)->toBe(35);
+    expect(app(BuildWatchStats::class)->execute($user)['movie']->amount)->toBe(35);
 });
 
 test('the history\'s date filter takes the viewer\'s days, as the page groups them', function () {

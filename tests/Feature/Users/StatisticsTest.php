@@ -39,7 +39,7 @@ test('a year counts what was finished on the user\'s own calendar', function () 
             ->where('page.period.days', 365)
             ->where('page.titles.completed.total', 2)
             ->where('page.summary.activeDays', 2)
-            ->where('page.tiles.movie.minutes', 190)
+            ->where('page.tiles.movie.amount', 190)
             ->where('page.years', [2025])
             ->where('page.first.media.title', $movie->title)
             ->where('page.first.at', '2025-01-01T00:30:00+01:00'));
@@ -79,7 +79,7 @@ test('a dropped attempt makes a game one of the period\'s titles but is not some
             ->where('page.titles.titles.total', 2)
             ->where('page.titles.completed.total', 1)
             ->where('page.titles.dropped.total', 1)
-            ->where('page.tiles.game.minutes', 720));
+            ->where('page.tiles.game.amount', 720));
 });
 
 test('a show watched across years is finished in the year of its last episode', function () {
@@ -171,7 +171,7 @@ test('reading counts as time at the reader\'s own pace, said to be an estimate',
         ->assertInertia(fn (Assert $page) => $page
             ->where('page.summary.time.total', 280)
             ->where('page.summary.readingMinutes', 180)
-            ->where('page.tiles.book.minutes', 90)
+            ->where('page.tiles.book.amount', 90)
             ->where('page.tiles.book.estimatedMinutes', 180)
             ->where('page.tiles.movie.estimatedMinutes', null));
 
