@@ -23,7 +23,8 @@ use App\Http\Controllers\Api\V1\SuggestionController;
 use App\Http\Controllers\Api\V1\TitleListController;
 use App\Http\Controllers\Api\V1\UpNextController;
 use App\Http\Controllers\Api\V1\WatchCycleController;
-use App\Http\Middleware\ThrottleTitleLookups;
+use App\Http\Middleware\ThrottlePerTitle;
+use App\Http\Requests\Api\V1\LookupTitlesRequest;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -59,7 +60,7 @@ Route::middleware('abilities:'.TokenAbility::Read->value)->group(function () {
     // many searches a minute, charged per title.
     Route::get('search', SearchController::class)->middleware('throttle:providers')->name('search');
     // A read with a body: the titles do not fit a query string.
-    Route::post('lookup', LookupController::class)->middleware(ThrottleTitleLookups::class)->name('lookup');
+    Route::post('lookup', LookupController::class)->middleware(ThrottlePerTitle::using('titles', LookupTitlesRequest::MAX_TITLES, 'title-lookups'))->name('lookup');
     Route::get('discover/{type}', DiscoverController::class)->middleware('throttle:providers')->whereAlpha('type')->name('discover');
     Route::get('library', LibraryController::class)->name('library');
     Route::get('calendar', CalendarController::class)->name('calendar');
