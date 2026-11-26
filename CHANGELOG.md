@@ -2,6 +2,51 @@
 
 Written by release-please from the pull request titles on `main`. The first release is summarized by hand.
 
+## [0.5.0](https://github.com/MaxRzepkowski/VideTrack/compare/v0.4.0...v0.5.0) (2026-11-26)
+
+
+### ⚠ BREAKING CHANGES
+
+* name a statistics tile's total `amount`, not `minutes`, in the API ([#130](https://github.com/MaxRzepkowski/VideTrack/issues/130))
+
+### Features
+
+* add up to 25 titles to a list in one API call ([b88f8ed](https://github.com/MaxRzepkowski/VideTrack/commit/b88f8ed50165614d4e3e73a50b1a539469f8f288))
+* let the assistant add many titles to a list at once ([2fab00a](https://github.com/MaxRzepkowski/VideTrack/commit/2fab00a9f3b779ffd1b622e13a486fc979c7f49e))
+* let the assistant reorder and duplicate lists ([484a4b7](https://github.com/MaxRzepkowski/VideTrack/commit/484a4b779a0566c26f2422286ece542182a401a4))
+* show how many notifications are unread on the bell ([#131](https://github.com/MaxRzepkowski/VideTrack/issues/131)) ([e3b5bee](https://github.com/MaxRzepkowski/VideTrack/commit/e3b5beeb8cf75e1c21403d6bde70937301f7cfdd))
+
+
+### Bug Fixes
+
+* count release and added days on Suggestions in the viewer's time zone ([#119](https://github.com/MaxRzepkowski/VideTrack/issues/119)) ([a7b53b7](https://github.com/MaxRzepkowski/VideTrack/commit/a7b53b733c08d6f3938bf19cc1094873cc91e541))
+* keep outside times and statistics on APP_TIMEZONE instead of UTC ([#122](https://github.com/MaxRzepkowski/VideTrack/issues/122)) ([4b7a90d](https://github.com/MaxRzepkowski/VideTrack/commit/4b7a90d52be5fc18751144f010c08fd20ab9eb02))
+* keep refreshing collections when one comes from a disabled provider ([#117](https://github.com/MaxRzepkowski/VideTrack/issues/117)) ([b966646](https://github.com/MaxRzepkowski/VideTrack/commit/b966646709d425e4b1e832d2daefc1ca245cde1c))
+* let your own bell, then the backlog, decide where a title shows over its status ([#118](https://github.com/MaxRzepkowski/VideTrack/issues/118)) ([3957f41](https://github.com/MaxRzepkowski/VideTrack/commit/3957f41fb4b52ce58cda47fe3b4a2a6fd520d8dc))
+* mark a season's first episode as its premiere when numbering is absolute ([#124](https://github.com/MaxRzepkowski/VideTrack/issues/124)) ([4d3ddd9](https://github.com/MaxRzepkowski/VideTrack/commit/4d3ddd9117b0fb3eca652cb1e442b00badce0208))
+* name a statistics tile's total `amount`, not `minutes`, in the API ([#130](https://github.com/MaxRzepkowski/VideTrack/issues/130)) ([74eee6e](https://github.com/MaxRzepkowski/VideTrack/commit/74eee6e2c8d38cd025f2e75475853cce2e3dd1f7))
+* name an RSS feed's language in a form feed readers understand ([#129](https://github.com/MaxRzepkowski/VideTrack/issues/129)) ([d08ca73](https://github.com/MaxRzepkowski/VideTrack/commit/d08ca739dac9109983a03e8dd2243680d25739c6))
+* stop the assistant's answers repeating a title's state ([#128](https://github.com/MaxRzepkowski/VideTrack/issues/128)) ([f06b337](https://github.com/MaxRzepkowski/VideTrack/commit/f06b3373f7fc3abf5858e0956681244bddc535b9))
+* write durations and range filters the way each language does ([#120](https://github.com/MaxRzepkowski/VideTrack/issues/120)) ([bb1ca5b](https://github.com/MaxRzepkowski/VideTrack/commit/bb1ca5bdf9ab8d2d822ba599ae10aa72e3391a2e))
+
+
+### Performance
+
+* load the modals and the command palette only when first opened ([a057dd5](https://github.com/MaxRzepkowski/VideTrack/commit/a057dd5f7b71a88cd7984752ca284a0b86d5052a))
+* open a game company's page in one request to IGDB instead of three ([105e1ea](https://github.com/MaxRzepkowski/VideTrack/commit/105e1ea24a9ee6f120a43bb4f0f6e5c58dfe099d))
+* open the calendar, countdowns and home page about twice as fast ([d64fc49](https://github.com/MaxRzepkowski/VideTrack/commit/d64fc493f588ee5f42c3dbc0cafc19332c2b609e))
+* open the history, ratings and favorites panels faster ([3637d43](https://github.com/MaxRzepkowski/VideTrack/commit/3637d4398236f79914963ef13d620358c64d6049))
+* send the bell's list only once the bell is opened ([d501eef](https://github.com/MaxRzepkowski/VideTrack/commit/d501eef945f134b83fde1a22a7baf848b1e31ba1))
+* trim about 30 KB from every page's first load ([b7d72ea](https://github.com/MaxRzepkowski/VideTrack/commit/b7d72eaefccd6603853c7a5038024569a16b8092))
+
+
+### Dependencies
+
+* bump the production group with 3 updates ([#125](https://github.com/MaxRzepkowski/VideTrack/issues/125)) ([374d70e](https://github.com/MaxRzepkowski/VideTrack/commit/374d70edebfa91b4b48332d32242459bb61478b1))
+* bump the production group with 3 updates ([#127](https://github.com/MaxRzepkowski/VideTrack/issues/127)) ([3f8e55d](https://github.com/MaxRzepkowski/VideTrack/commit/3f8e55da5e8654eda4c114771617153db8050f0b))
+* bump vue from 3.5.45 to 3.5.46 in the vue-and-inertia group ([#126](https://github.com/MaxRzepkowski/VideTrack/issues/126)) ([c430f73](https://github.com/MaxRzepkowski/VideTrack/commit/c430f736f78aae6ca10e157fa770065ad483cf65))
+* update Symfony to 8.1.12 for mailer, routing and http-kernel advisories ([#121](https://github.com/MaxRzepkowski/VideTrack/issues/121)) ([0b0caec](https://github.com/MaxRzepkowski/VideTrack/commit/0b0caecf4dfa5a4f84da9562b3184501beebeb9e))
+
 ## [0.4.0](https://github.com/MaxRzepkowski/VideTrack/compare/v0.3.0...v0.4.0) (2026-11-24)
 
 
