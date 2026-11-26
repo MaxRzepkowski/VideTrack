@@ -76,7 +76,8 @@ watch next or what comes out this week, check which of twenty films you have see
 episode, rate a film, drop a show, or build a list for you.
 
 Each tool calls the API above, so it follows the same rules and records what it writes with the source
-`api`. Its answers are compact: no pictures, and a field that is false or empty is left out. A token
+`api`. Its answers are compact: no pictures, a field that is false or empty is left out, and a write on one
+title carries that title's state once, on the title, with `states` holding only the others it moved. A token
 without `write` sees only the reading tools.
 
 | Reading | |

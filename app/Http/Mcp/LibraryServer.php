@@ -125,7 +125,7 @@ final class LibraryServer extends Server
 
             Answers are compact: a field that is missing is false, empty or unknown. A title carries the user's `state`
             (watched, plays, rating, favorite, status, listIds…). A write on one title answers with the title as it now
-            stands and `states`, every state the write moved (an episode moves its season and its show too);
+            stands and `states`, every other state the write moved (an episode moves its season and its show);
             `add_to_list` takes many titles at once and answers each one's `outcome` beside their `states`.
 
             The Backlog, where the user keeps what they mean to watch, is the list whose `systemKey` is "{$watchlist}".

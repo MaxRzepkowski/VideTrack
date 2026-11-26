@@ -285,9 +285,22 @@ test('marking a title watched writes a play from the api and answers with its ne
     mcpTool('mark_watched', ['type' => 'movie', 'ref' => $movie->provider_ref])
         ->assertJsonPath('result.structuredContent.meta.created', 1)
         ->assertJsonPath('result.structuredContent.data.state.watched', true)
-        ->assertJsonPath("result.structuredContent.states.movie:{$movie->provider_ref}.plays", 1);
+        // A film moves no state but its own, which the card carries: nothing left to repeat.
+        ->assertJsonMissingPath('result.structuredContent.states');
 
     expect(Play::query()->where('user_id', $user->id)->sole()->source)->toBe(MutationSource::api()->value());
+});
+
+test("an episode marked watched answers its own state once and its season's and show's beside it", function () {
+    assistant();
+    $show = makeShowTree([1 => ['2020-01-01', '2020-01-08']]);
+    $episode = episodeOf($show, 1, 1);
+
+    $answer = mcpTool('mark_watched', ['type' => 'episode', 'ref' => $episode->provider_ref])
+        ->assertJsonPath('result.structuredContent.data.state.watched', true)
+        ->json('result.structuredContent.states');
+
+    expect(array_keys($answer))->toEqualCanonicalizing(['season:'.seasonOf($show, 1)->provider_ref, "show:{$show->provider_ref}"]);
 });
 
 test('a play marked by an assistant is announced as coming from the api', function () {

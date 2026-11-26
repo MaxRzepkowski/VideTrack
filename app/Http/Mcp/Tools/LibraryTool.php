@@ -62,9 +62,9 @@ abstract class LibraryTool extends Tool
     }
 
     /**
-     * The route's answer as the tool's result: compact, less the top-level
-     * keys that mean nothing outside HTTP (a page's links); a refusal as a
-     * sentence.
+     * The route's answer as the tool's result: compact, without the written
+     * title's own state repeated in `states`, less the top-level keys that
+     * mean nothing outside HTTP (a page's links); a refusal as a sentence.
      */
     protected function relay(ApiAnswer $answer): ResponseFactory|Response
     {
@@ -72,9 +72,11 @@ abstract class LibraryTool extends Tool
             return $this->refusal($answer);
         }
 
+        $compact = Compact::withoutRepeatedState(array_map(Compact::of(...), array_diff_key($answer->object(), ['links' => true])));
+
         // An empty `data` stays: it says "none", which a missing one would not.
         $body = array_filter(
-            array_map(Compact::of(...), array_diff_key($answer->object(), ['links' => true])),
+            $compact,
             fn (mixed $value, string $key): bool => $key === 'data' || ($value !== null && $value !== []),
             ARRAY_FILTER_USE_BOTH,
         );
