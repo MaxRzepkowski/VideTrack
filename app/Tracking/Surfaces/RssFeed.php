@@ -4,6 +4,7 @@ namespace App\Tracking\Surfaces;
 
 use App\Accounts\UserCalendar;
 use App\Models\User;
+use App\Support\Locales;
 use App\Support\PublicUrl;
 use App\Tracking\Releases\ReleaseEntry;
 use Carbon\CarbonImmutable;
@@ -68,7 +69,7 @@ final readonly class RssFeed
             'title' => $this->items->name($user),
             'link' => PublicUrl::to(route('calendar', absolute: false)),
             'description' => __('common.upcoming_releases_from_the_titles_you'),
-            'language' => App::getLocale(),
+            'language' => Locales::declaredLanguage(App::getLocale()),
             'ttl' => FeedItems::REFRESH_MINUTES,
             'items' => array_slice($items, 0, self::MAX_ITEMS),
         ])->render();

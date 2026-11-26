@@ -15,6 +15,17 @@ final class Locales
         return self::entry($locale)['language'];
     }
 
+    /**
+     * The locale as a page or a feed declares its language: a BCP 47 tag as
+     * short as the locale is written (pl, pt-BR), the region only where it is
+     * part of the language. Unlike {@see language()} it reads no map: the
+     * locale it is given is one the UI already speaks.
+     */
+    public static function declaredLanguage(string $locale): string
+    {
+        return str_replace('_', '-', $locale);
+    }
+
     /** The ISO 639-1 language alone, e.g. pl — what a provider tags a translation or an image with. */
     public static function code(string $locale): string
     {
