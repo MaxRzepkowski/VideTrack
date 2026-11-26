@@ -488,6 +488,60 @@ test("a list that is not the user's is refused by the library, as a sentence", f
         ->and($theirs->items()->count())->toBe(0);
 });
 
+test("a list's items are put in a new order by the ids get_list gives", function () {
+    $user = assistant();
+    $list = app(CreateList::class)->execute($user, 'Marvel');
+
+    foreach (MediaItem::factory()->movie()->count(3)->create() as $movie) {
+        app(AddToList::class)->execute($user, $list, ListTarget::item($movie->id));
+    }
+
+    [$first, $second, $third] = mcpTool('get_list', ['list_id' => $list->id])->json('result.structuredContent.data.items.*.id');
+
+    // The one left out keeps its place after those given.
+    mcpTool('reorder_list_items', ['list_id' => $list->id, 'item_ids' => [$third, $first]])
+        ->assertJsonPath('result.isError', false);
+
+    expect($list->items()->pluck('id')->all())->toBe([$third, $first, $second]);
+});
+
+test("the user's lists are put in a new order, the Backlog first whatever is given", function () {
+    $user = assistant();
+    $first = app(CreateList::class)->execute($user, 'First');
+    $second = app(CreateList::class)->execute($user, 'Second');
+
+    mcpTool('reorder_lists', ['list_ids' => [$second->id, $first->id, $user->watchlist()->id]])->assertJsonPath('result.isError', false);
+
+    expect(mcpTool('get_lists')->json('result.structuredContent.data.*.id'))->toBe([$user->watchlist()->id, $second->id, $first->id]);
+});
+
+test('a list is copied with what is on it, and the copy is a list of its own', function () {
+    $user = assistant();
+    $list = app(CreateList::class)->execute($user, 'Marvel');
+    $movie = MediaItem::factory()->movie()->create();
+    app(AddToList::class)->execute($user, $list, ListTarget::item($movie->id));
+
+    $copy = mcpTool('duplicate_list', ['list_id' => $list->id])->json('result.structuredContent.data.id');
+
+    expect($copy)->not->toBe($list->id)
+        ->and(MediaList::query()->findOrFail($copy)->items()->pluck('media_item_id')->all())->toBe([$movie->id]);
+});
+
+test("someone else's private list is neither reordered nor copied by the assistant, a public one may be copied", function () {
+    $user = assistant();
+    $owner = User::factory()->create();
+    $private = app(CreateList::class)->execute($owner, 'Private', isPublic: false);
+    $public = app(CreateList::class)->execute($owner, 'Public', isPublic: true);
+
+    expect(mcpRefusal(mcpTool('reorder_list_items', ['list_id' => $private->id, 'item_ids' => [1]])))->toBe(__('mcp.nothing_at_this_address'))
+        ->and(mcpRefusal(mcpTool('duplicate_list', ['list_id' => $private->id])))->toBe(__('mcp.nothing_at_this_address'))
+        ->and(mcpRefusal(mcpTool('reorder_list_items', ['list_id' => $public->id, 'item_ids' => [1]])))->toBe(__('mcp.nothing_at_this_address'));
+
+    $copy = mcpTool('duplicate_list', ['list_id' => $public->id])->json('result.structuredContent.data.id');
+
+    expect(MediaList::query()->findOrFail($copy)->user_id)->toBe($user->id);
+});
+
 test("someone else's history entry is not the assistant's to delete", function () {
     assistant();
     $theirs = Play::factory()->create();
