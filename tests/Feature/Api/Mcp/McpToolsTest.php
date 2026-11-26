@@ -6,6 +6,7 @@ use App\Actions\Library\MarkWatched;
 use App\Actions\Library\RateItem;
 use App\Library\Data\ListTarget;
 use App\Library\Events\PlayRecorded;
+use App\Library\ListAddOutcome;
 use App\Library\MutationSource;
 use App\Library\RatingScale;
 use App\Library\WatchedAt;
@@ -426,8 +427,9 @@ test('a list is made, filled, emptied, renamed and deleted', function () {
 
     $id = mcpTool('create_list', ['title' => 'Light films'])->json('result.structuredContent.data.id');
 
-    mcpTool('add_to_list', ['type' => 'movie', 'ref' => $movie->provider_ref, 'list_id' => $id])
-        ->assertJsonPath('result.structuredContent.data.state.listIds', [$id]);
+    mcpTool('add_to_list', ['items' => [['type' => 'movie', 'ref' => $movie->provider_ref]], 'list_id' => $id])
+        ->assertJsonPath('result.structuredContent.data.0.outcome', ListAddOutcome::Added->value)
+        ->assertJsonPath("result.structuredContent.states.movie:{$movie->provider_ref}.listIds", [$id]);
     mcpTool('get_list', ['list_id' => $id])
         ->assertJsonPath('result.structuredContent.data.items.0.media.ref', $movie->provider_ref);
 
@@ -453,9 +455,37 @@ test('adding to a list keeps the title on its other lists', function () {
     $second = app(CreateList::class)->execute($user, 'Second');
     app(AddToList::class)->execute($user, $first, ListTarget::item($movie->id));
 
-    mcpTool('add_to_list', ['type' => 'movie', 'ref' => $movie->provider_ref, 'list_id' => $second->id]);
+    mcpTool('add_to_list', ['items' => [['type' => 'movie', 'ref' => $movie->provider_ref]], 'list_id' => $second->id]);
 
     expect($movie->listItems()->pluck('list_id')->sort()->values()->all())->toBe([$first->id, $second->id]);
+});
+
+test('many titles go on a list in one call, in the order given, each saying how it went', function () {
+    $user = assistant();
+    $list = app(CreateList::class)->execute($user, 'Marvel');
+    [$there, $first, $second] = MediaItem::factory()->movie()->count(3)->create()->all();
+    app(AddToList::class)->execute($user, $list, ListTarget::item($there->id));
+
+    mcpTool('add_to_list', ['list_id' => $list->id, 'items' => [
+        ['type' => 'movie', 'ref' => $second->provider_ref],
+        ['type' => 'movie', 'ref' => $there->provider_ref],
+        ['type' => 'movie', 'ref' => $first->provider_ref],
+    ]])
+        ->assertJsonPath('result.structuredContent.data.0.outcome', ListAddOutcome::Added->value)
+        ->assertJsonPath('result.structuredContent.data.1.outcome', ListAddOutcome::Present->value)
+        ->assertJsonPath('result.structuredContent.meta.itemsCount', 3);
+
+    expect($list->items()->orderBy('position')->pluck('media_item_id')->all())->toBe([$there->id, $second->id, $first->id]);
+});
+
+test("a list that is not the user's is refused by the library, as a sentence", function () {
+    assistant();
+    $movie = MediaItem::factory()->movie()->create();
+    $theirs = app(CreateList::class)->execute(User::factory()->create(), 'Theirs', isPublic: false);
+
+    expect(mcpRefusal(mcpTool('add_to_list', ['list_id' => $theirs->id, 'items' => [['type' => 'movie', 'ref' => $movie->provider_ref]]])))
+        ->toBe(__('mcp.nothing_at_this_address'))
+        ->and($theirs->items()->count())->toBe(0);
 });
 
 test("someone else's history entry is not the assistant's to delete", function () {

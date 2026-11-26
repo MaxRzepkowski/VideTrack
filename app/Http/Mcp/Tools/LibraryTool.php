@@ -13,6 +13,7 @@ use App\Support\Payload;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\Http\Request as HttpRequest;
 use Illuminate\JsonSchema\JsonSchema as Schema;
+use Illuminate\JsonSchema\Types\Type;
 use Illuminate\JsonSchema\ValidationRules;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
@@ -101,7 +102,7 @@ abstract class LibraryTool extends Tool
      * The `type` + `ref` pair that addresses a position, as API v1 takes it in
      * its path.
      *
-     * @return array<string, mixed>
+     * @return array<string, Type>
      */
     protected function position(JsonSchema $schema): array
     {
