@@ -168,6 +168,14 @@ function rssItems(string $xml): array
     return iterator_to_array($channel->channel->item, false);
 }
 
+test('the RSS channel names its language as a tag a reader understands', function () {
+    $user = User::factory()->create(['locale' => 'pt_BR']);
+
+    $channel = simplexml_load_string((string) $this->get(route('calendar.rss', ['token' => $user->calendarToken()]))->getContent());
+
+    expect((string) $channel?->channel->language)->toBe('pt-BR');
+});
+
 test("a blocked account's feeds are not there", function () {
     $user = User::factory()->blocked()->create();
 

@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\User;
+use Illuminate\Support\Facades\App;
 
 test('guests get the default locale from configuration', function () {
     config(['tracker.default_locale' => 'pl']);
@@ -42,6 +43,21 @@ test('a page names its language the way Intl takes it', function () {
     $this->actingAs($user)
         ->get(route('dashboard'))
         ->assertInertia(fn ($page) => $page->where('locale', 'pt_BR')->where('languageTag', 'pt-BR'));
+});
+
+test('a page declares its language as the locale is written, a region only where the language has one', function (string $locale, string $tag) {
+    $this->actingAs(User::factory()->create(['locale' => $locale]))
+        ->get(route('dashboard'))
+        ->assertSee('<html lang="'.$tag.'"', false);
+})->with([
+    'Polish' => ['pl', 'pl'],
+    'Brazilian Portuguese' => ['pt_BR', 'pt-BR'],
+]);
+
+test('a page outside the app declares its language the same way', function () {
+    App::setLocale('pt_BR');
+
+    $this->get('/up')->assertSee('<html lang="pt-BR"', false);
 });
 
 test('users can change their locale in profile settings', function () {
