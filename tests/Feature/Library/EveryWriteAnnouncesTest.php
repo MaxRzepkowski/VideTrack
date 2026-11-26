@@ -1,5 +1,6 @@
 <?php
 
+use App\Actions\Library\AddTitlesToList;
 use App\Actions\Library\AddToList;
 use App\Actions\Library\BackCreatorTitles;
 use App\Actions\Library\BackfillCreatorFollow;
@@ -108,6 +109,7 @@ function libraryWrites(): array
     };
 
     return [
+        AddTitlesToList::class => [ListItemAdded::class, fn (User $user) => app(AddTitlesToList::class)->execute($user, $user->watchlist(), [['type' => 'movie', 'ref' => MediaItem::factory()->movie()->create()->provider_ref]], 'en')],
         AddToList::class => [ListItemAdded::class, fn (User $user) => app(AddToList::class)->execute($user, $user->watchlist(), ListTarget::item(MediaItem::factory()->movie()->create()->id))],
         BackCreatorTitles::class => [CreatorTitlesBacked::class, fn (User $user) => app(BackCreatorTitles::class)->execute($user, CreatorKind::Person, Person::factory()->create()->id, [MediaItem::factory()->movie()->create()->id])],
         BackfillCreatorFollow::class => [FollowChanged::class, fn (User $user) => app(BackfillCreatorFollow::class)->execute($user, $person(), 'Bryan Cranston', FollowMode::Follow, 'en')],

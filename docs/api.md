@@ -40,7 +40,7 @@ Preferences), as the pages do; `lookup` names titles you already know, so it fin
 that setting, as an import does.
 
 With `write`: plays, ratings, status, progress, favorites, list membership (all of a title's lists
-at once, or one list at a time), rewatch cycles, the
+at once, one list at a time, or up to 25 titles onto one list in one call, in the order given), rewatch cycles, the
 release bell (titles, people, companies, networks, collections), people and companies on lists,
 and list management.
 
@@ -57,7 +57,15 @@ and list management.
 - Errors are always JSON: `{"message": …}`, plus `{"errors": {…}}` for a 422. A token without the
   needed ability gets a 403. A media type this instance does not serve (its keys are not
   configured) gets a 404.
-- The rate limit is 240 requests per minute per token.
+- The rate limit is 240 requests per minute per token. `lookup` and adding titles to a list
+  (`POST lists/{list}/items`) are also charged per title, since each title may be fetched from its
+  catalogue: 120 titles a minute each, counted apart, so looking titles up and then adding them is not
+  charged twice.
+- Adding titles to a list answers each title as asked, in order, with its `outcome`: `added`,
+  `present` (on the list already; it keeps its place), `not_found` (its catalogue does not know the
+  ref) or `unavailable` (its catalogue could not be asked; when it was down or busy, asking again later
+  may do). `meta` counts each outcome and gives the list's `itemsCount`; `states` holds the titles from
+  the call that are on the list.
 
 ## MCP server for AI assistants
 

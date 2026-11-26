@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Actions\Library\AddTitlesToList;
 use App\Actions\Library\CreateList;
 use App\Actions\Library\DeleteList;
 use App\Actions\Library\DuplicateList;
@@ -11,17 +12,21 @@ use App\Actions\Library\ReorderLists;
 use App\Actions\Library\UpdateList;
 use App\Catalog\MediaItemSummaries;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\V1\AddListItemsRequest;
 use App\Http\Requests\Api\V1\ReorderListItemsRequest;
 use App\Http\Requests\Api\V1\ReorderListsRequest;
 use App\Http\Requests\Api\V1\StoreListRequest;
 use App\Http\Requests\Api\V1\UpdateListRequest;
 use App\Http\Resources\Api\V1\ListResource;
+use App\Http\Responses\ListAdditionsWritten;
+use App\Http\Responses\ListAdditionWrites;
 use App\Models\ListItem;
 use App\Models\MediaList;
 use App\Models\User;
 use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Gate;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -81,6 +86,19 @@ class ListController extends Controller
         $delete->execute($viewer, $list);
 
         return response()->noContent();
+    }
+
+    /** Many titles onto the end of the list in one call, in the order given. */
+    public function storeItems(
+        #[CurrentUser] User $viewer,
+        AddListItemsRequest $request,
+        MediaList $list,
+        AddTitlesToList $add,
+        ListAdditionWrites $written,
+    ): ListAdditionsWritten {
+        Gate::authorize('update', $list);
+
+        return $written->of($viewer, $list, $add->execute($viewer, $list, $request->positions(), App::getLocale()));
     }
 
     public function removeItem(MediaList $list, ListItem $item, RemoveListItem $remove): Response
