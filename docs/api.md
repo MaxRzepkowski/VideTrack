@@ -61,7 +61,7 @@ and list management.
   (`POST lists/{list}/items`) are also charged per title, since each title may be fetched from its
   catalogue: 120 titles a minute each, counted apart, so looking titles up and then adding them is not
   charged twice.
-- Adding titles to a list answers each title as asked, in order, with its `outcome`: `added`,
+- Adding titles to a list answers each title once, in the order first given, with its `outcome`: `added`,
   `present` (on the list already; it keeps its place), `not_found` (its catalogue does not know the
   ref) or `unavailable` (its catalogue could not be asked; when it was down or busy, asking again later
   may do). `meta` counts each outcome and gives the list's `itemsCount`; `states` holds the titles from
@@ -98,12 +98,13 @@ without `write` sees only the reading tools.
 | `rate`, `remove_rating`, `set_favorite`, `set_status`, `log_progress` | rating, favorite, dropped or on hold, pages or hours |
 | `follow_releases`, `follow_creator` | the release bell on a title, a person, a company or a collection |
 | `start_rewatch`, `cancel_rewatch` | watch a show again from the start |
-| `create_list`, `update_list`, `delete_list`, `add_to_list`, `remove_from_list` | your lists |
+| `create_list`, `update_list`, `delete_list`, `remove_from_list` | your lists |
+| `add_to_list` | up to 25 titles onto a list in one call, in the order given |
 | `mark_notifications_read` | one notification, or all |
 
 A tool counts against the API's rate limit as the calls it makes (most make one; `update_list` makes
 two). `search`, `get_title` and `get_trending` also count against the 120 catalogue lookups a minute your
-account has; `check_titles` has 120 titles a minute of its own.
+account has; `check_titles` and `add_to_list` each have 120 titles a minute of their own.
 
 Claude Code:
 
