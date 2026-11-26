@@ -13,7 +13,7 @@ test('stats are zeroed for every root type when nothing was played', function ()
     $stats = app(BuildWatchStats::class)->execute($user);
 
     expect($stats)->toHaveKeys(['movie', 'show'])
-        ->and((array) $stats['movie'])->toBe(['minutes' => 0, 'watched' => 0, 'plays' => 0, 'titles' => 0, 'estimatedMinutes' => null]);
+        ->and((array) $stats['movie'])->toBe(['amount' => 0, 'watched' => 0, 'plays' => 0, 'titles' => 0, 'estimatedMinutes' => null]);
 });
 
 test('watch time counts every play and titles count distinct roots', function () {
@@ -35,8 +35,8 @@ test('watch time counts every play and titles count distinct roots', function ()
 
     $stats = app(BuildWatchStats::class)->execute($user);
 
-    expect((array) $stats['movie'])->toBe(['minutes' => 200, 'watched' => 1, 'plays' => 2, 'titles' => 1, 'estimatedMinutes' => null])
-        ->and((array) $stats['show'])->toBe(['minutes' => 105, 'watched' => 3, 'plays' => 3, 'titles' => 2, 'estimatedMinutes' => null]);
+    expect((array) $stats['movie'])->toBe(['amount' => 200, 'watched' => 1, 'plays' => 2, 'titles' => 1, 'estimatedMinutes' => null])
+        ->and((array) $stats['show'])->toBe(['amount' => 105, 'watched' => 3, 'plays' => 3, 'titles' => 2, 'estimatedMinutes' => null]);
 });
 
 test('an episode with no runtime is priced at the length its show declares', function () {
@@ -54,7 +54,7 @@ test('an episode with no runtime is priced at the length its show declares', fun
 
     app(MarkWatched::class)->execute($user, $show, WatchedAt::at(CarbonImmutable::parse('2026-03-01')));
 
-    expect(app(BuildWatchStats::class)->execute($user)['show']->minutes)->toBe(72);
+    expect(app(BuildWatchStats::class)->execute($user)['show']->amount)->toBe(72);
 });
 
 test('a watched special counts into the stats like any other episode', function () {
@@ -70,7 +70,7 @@ test('a watched special counts into the stats like any other episode', function 
     app(MarkWatched::class)->execute($user, $special, WatchedAt::at(CarbonImmutable::parse('2026-01-01')));
 
     expect((array) app(BuildWatchStats::class)->execute($user)['show'])
-        ->toBe(['minutes' => 30, 'watched' => 1, 'plays' => 1, 'titles' => 1, 'estimatedMinutes' => null]);
+        ->toBe(['amount' => 30, 'watched' => 1, 'plays' => 1, 'titles' => 1, 'estimatedMinutes' => null]);
 });
 
 test('stats never mix users', function () {

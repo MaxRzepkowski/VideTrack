@@ -266,7 +266,7 @@ test('game stats prefer real playtime and count in-progress sessions', function 
     // Titles = every attempt, open ones included (beaten, estimated,
     // abandoned + the game still being played); plays = history entries
     // (2 completions + 1 drop — an open session is not an entry yet).
-    expect($stats['game']->minutes)->toBe(2400 + 120 + 300)
+    expect($stats['game']->amount)->toBe(2400 + 120 + 300)
         ->and($stats['game']->watched)->toBe(4)
         ->and($stats['game']->plays)->toBe(3)
         ->and($stats['game']->titles)->toBe(4);

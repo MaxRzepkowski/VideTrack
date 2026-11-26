@@ -311,7 +311,7 @@ test('statistics count a year, a range or the whole history, a part at a time', 
     $this->getJson('/api/v1/statistics')
         ->assertOk()
         ->assertJsonPath('meta.period', ['kind' => 'year', 'from' => '2026-01-01', 'to' => '2026-12-31'])
-        ->assertJsonPath('data.tiles.movie.minutes', 90)
+        ->assertJsonPath('data.tiles.movie.amount', 90)
         ->assertJsonPath('data.years', [2025, 2026]);
 
     $this->getJson('/api/v1/statistics?period=2025&type=movie')

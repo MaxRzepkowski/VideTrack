@@ -450,7 +450,7 @@ export function statCounts(type: string, stats: WatchStats): string[] {
     const unit = readUnitOf(type);
 
     if (stats.estimatedMinutes !== null && unit !== null) {
-        return [meta.count(stats.titles), formatUnitAmount(unit, stats.minutes)];
+        return [meta.count(stats.titles), formatUnitAmount(unit, stats.amount)];
     }
 
     return leaf === type ? [meta.count(stats.watched)] : [meta.count(stats.titles), mediaTypeMeta(leaf).count(stats.watched)];

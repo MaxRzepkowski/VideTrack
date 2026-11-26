@@ -20,9 +20,9 @@ test('a new account receives zeroed stats for every enabled root type', function
         ->get('/dashboard')
         ->assertOk()
         ->assertInertia(fn (AssertableInertia $page) => $page
-            ->where('stats.movie', ['minutes' => 0, 'watched' => 0, 'plays' => 0, 'titles' => 0, 'estimatedMinutes' => null])
-            ->where('stats.show', ['minutes' => 0, 'watched' => 0, 'plays' => 0, 'titles' => 0, 'estimatedMinutes' => null])
-            ->where('stats.game', ['minutes' => 0, 'watched' => 0, 'plays' => 0, 'titles' => 0, 'estimatedMinutes' => null]));
+            ->where('stats.movie', ['amount' => 0, 'watched' => 0, 'plays' => 0, 'titles' => 0, 'estimatedMinutes' => null])
+            ->where('stats.show', ['amount' => 0, 'watched' => 0, 'plays' => 0, 'titles' => 0, 'estimatedMinutes' => null])
+            ->where('stats.game', ['amount' => 0, 'watched' => 0, 'plays' => 0, 'titles' => 0, 'estimatedMinutes' => null]));
 });
 
 // No provider is called: a stray request fails the test (tests/Pest.php).

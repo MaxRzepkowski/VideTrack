@@ -162,10 +162,10 @@ test('book statistics count every attempt and pages separately from watch time',
 
     $stats = app(BuildWatchStats::class)->execute($user);
 
-    expect($stats['book']->minutes)->toBe(320 + 120 + 102)
+    expect($stats['book']->amount)->toBe(320 + 120 + 102)
         ->and($stats['book']->watched)->toBe(3)
         ->and($stats['book']->plays)->toBe(2)
-        ->and($stats['movie']->minutes)->toBe(90)
+        ->and($stats['movie']->amount)->toBe(90)
         ->and($stats['movie']->watched)->toBe(1)
         ->and($stats['movie']->plays)->toBe(1)
         // Pages read as time at the default pace; a film's minutes are no estimate.

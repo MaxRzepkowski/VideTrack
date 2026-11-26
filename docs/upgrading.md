@@ -54,6 +54,13 @@ Images are tagged `X.Y.Z`, `X.Y` and `latest`, one set per release.
   container name in a network VideTrack shares with other services (a reverse proxy's): an ordinary
   account gives the service's outside or home-network address instead, or the host is listed.
 
+## API changes
+
+- **A statistics tile's `minutes` is now `amount`** in `data.tiles` of `GET /api/v1/statistics` and
+  `GET /api/v1/statistics/summary`, and in the MCP tool `get_statistics`. For a type that is read it never held
+  minutes but pages, chapters or issues; the minutes reading took are in `estimatedMinutes` beside it. A script
+  reading `minutes` reads `amount` instead; an AI assistant sees the new description after its client reconnects.
+
 ## Going back
 
 A migration changes the database, so an older image cannot simply run on it. To return to the

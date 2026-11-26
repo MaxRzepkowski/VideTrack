@@ -163,11 +163,11 @@ test('manga and comic statistics count attempts in their own buckets', function 
 
     $stats = app(BuildWatchStats::class)->execute($user);
 
-    expect($stats['manga']->minutes)->toBe(162 + 42)
+    expect($stats['manga']->amount)->toBe(162 + 42)
         ->and($stats['manga']->watched)->toBe(2)
         ->and($stats['manga']->plays)->toBe(1)
         ->and($stats['manga']->titles)->toBe(2)
-        ->and($stats['comic']->minutes)->toBe(30)
+        ->and($stats['comic']->amount)->toBe(30)
         ->and($stats['comic']->watched)->toBe(1)
         ->and($stats['comic']->plays)->toBe(1);
 });

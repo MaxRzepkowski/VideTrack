@@ -1208,7 +1208,7 @@ export type WatchProviderData = {
     readonly logoPath: string | null;
 };
 export type WatchStats = {
-    readonly minutes: number;
+    readonly amount: number;
     readonly watched: number;
     readonly plays: number;
     readonly titles: number;

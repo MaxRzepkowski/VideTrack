@@ -19,7 +19,7 @@ use Laravel\Mcp\Server\Tools\Annotations\IsReadOnly;
  * GET /api/v1/statistics and /api/v1/statistics/{section}.
  */
 #[Name('get_statistics')]
-#[Description('The user\'s statistics for a year (their current one by default), a range of days or the whole history, from their own history: time spent (minutes) and counts per media type, ratings and what became of the titles; or one section in depth. To compare two periods, call once for each.')]
+#[Description('The user\'s statistics for a year (their current one by default), a range of days or the whole history, from their own history: time spent and counts per media type (a tile\'s `amount` is minutes, or for what is read its own unit, pages, chapters or issues, with the minutes it took in `estimatedMinutes`), ratings and what became of the titles; or one section in depth. To compare two periods, call once for each.')]
 #[IsReadOnly]
 final class GetStatistics extends LibraryTool
 {

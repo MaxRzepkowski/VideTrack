@@ -38,7 +38,7 @@ final readonly class BuildWatchStats
         $stats = [];
 
         foreach ($this->types->titleCodes() as $code) {
-            $stats[$code] = ['minutes' => 0, 'watched' => 0, 'plays' => 0, 'titles' => 0];
+            $stats[$code] = ['amount' => 0, 'watched' => 0, 'plays' => 0, 'titles' => 0];
         }
 
         // Counting rules: movies and episodes
@@ -63,7 +63,7 @@ final readonly class BuildWatchStats
             ->selectRaw('media_items.id as item_id, media_items.type as type, media_items.runtime as runtime, library_entries.root_id as root_id')
             ->selectRaw('sum(case when plays.outcome = ? then 1 else 0 end) as play_count', [$completed])
             ->selectRaw('count(*) as attempt_count')
-            ->selectRaw("sum({$cost}) as minutes", $costBindings)
+            ->selectRaw("sum({$cost}) as amount", $costBindings)
             ->get();
 
         // A type whose module the instance switched off has no tile to count into.
@@ -78,8 +78,8 @@ final readonly class BuildWatchStats
                 ? $group
                 : $group->filter(fn (object $row) => (Numbers::int($row->play_count) ?? 0) > 0);
 
-            $stats[$code] ??= ['minutes' => 0, 'watched' => 0, 'plays' => 0, 'titles' => 0];
-            $stats[$code]['minutes'] += Numbers::int($group->sum('minutes')) ?? 0;
+            $stats[$code] ??= ['amount' => 0, 'watched' => 0, 'plays' => 0, 'titles' => 0];
+            $stats[$code]['amount'] += Numbers::int($group->sum('amount')) ?? 0;
             $stats[$code]['watched'] += $countedRows->count();
             $stats[$code]['plays'] += Numbers::int($group->sum($attemptCounting ? 'attempt_count' : 'play_count')) ?? 0;
             $stats[$code]['titles'] += $countedRows->pluck('root_id')->unique()->count();
@@ -91,7 +91,7 @@ final readonly class BuildWatchStats
         $openStates = MediaUserState::query()
             ->where('media_user_states.user_id', $user->id)
             ->join('media_items', 'media_items.id', '=', 'media_user_states.media_item_id')
-            ->selectRaw('media_items.id as item_id, media_items.type as type, coalesce(media_user_states.progress, 0) as minutes')
+            ->selectRaw('media_items.id as item_id, media_items.type as type, coalesce(media_user_states.progress, 0) as amount')
             ->toBase()
             ->get();
 
@@ -101,8 +101,8 @@ final readonly class BuildWatchStats
             $definition = $this->types->get((string) $type);
             $code = $this->rootCode($definition);
 
-            $stats[$code] ??= ['minutes' => 0, 'watched' => 0, 'plays' => 0, 'titles' => 0];
-            $stats[$code]['minutes'] += Numbers::int($group->sum('minutes')) ?? 0;
+            $stats[$code] ??= ['amount' => 0, 'watched' => 0, 'plays' => 0, 'titles' => 0];
+            $stats[$code]['amount'] += Numbers::int($group->sum('amount')) ?? 0;
 
             if ($definition->progressUnit !== null) {
                 $fresh = $group->filter(fn (object $row) => ! $playedItemIds->has($row->item_id))->count();
@@ -116,7 +116,7 @@ final readonly class BuildWatchStats
         $tiles = [];
 
         foreach ($stats as $code => $tile) {
-            $tiles[$code] = new WatchStats(...$tile, estimatedMinutes: $reading->of($this->types->get($code)->progressUnit, $tile['minutes']));
+            $tiles[$code] = new WatchStats(...$tile, estimatedMinutes: $reading->of($this->types->get($code)->progressUnit, $tile['amount']));
         }
 
         return $tiles;
