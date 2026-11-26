@@ -6,6 +6,7 @@ use App\Catalog\Data\MediaDetails;
 use App\Catalog\Data\MediaSummary;
 use App\Catalog\MediaItemSummaries;
 use App\Catalog\MediaTypeRegistry;
+use App\Catalog\StoredPositions;
 use App\Library\Data\EpisodePointer;
 use App\Library\Data\HistoryState;
 use App\Library\Data\UserMediaState;
@@ -27,6 +28,7 @@ final readonly class LibraryStates
         private MediaTypeRegistry $types,
         private LibraryStateCalculator $calculator,
         private PositionMarksQuery $marks,
+        private StoredPositions $stored,
     ) {}
 
     /**
@@ -67,7 +69,8 @@ final readonly class LibraryStates
             return [];
         }
 
-        $items = $this->findItems($keys);
+        // A position of a switched-off type is not found: its card reads untouched until the module returns.
+        $items = $this->stored->among($keys);
         $history = $this->history($user, collect($items)->keyBy(fn (MediaItem $item): int => $item->id));
         $marks = $this->marks->of($user, collect($items)->values());
 
@@ -144,43 +147,5 @@ final readonly class LibraryStates
         }
 
         return $pointers;
-    }
-
-    /**
-     * @param  array<string, array{string, string}>  $keys
-     * @return array<string, MediaItem>
-     */
-    private function findItems(array $keys): array
-    {
-        $groups = [];
-
-        foreach ($keys as [$type, $ref]) {
-            // A type whose module the instance switched off has no provider
-            // to find it by: its title reads untouched until the module returns.
-            if (! $this->types->has($type)) {
-                continue;
-            }
-
-            $definition = $this->types->get($type);
-            $groups["{$definition->provider}|{$type}"][] = $ref;
-        }
-
-        $items = [];
-
-        foreach ($groups as $group => $refs) {
-            [$provider, $type] = explode('|', $group);
-
-            $found = MediaItem::query()
-                ->where('provider', $provider)
-                ->where('type', $type)
-                ->whereIn('provider_ref', $refs)
-                ->get();
-
-            foreach ($found as $item) {
-                $items[MediaSummary::keyOf($item->type, $item->provider_ref)] = $item;
-            }
-        }
-
-        return $items;
     }
 }
