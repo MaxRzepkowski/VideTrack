@@ -247,11 +247,11 @@ function removeItem(id: number): void {
                 <!-- The date range runs on when the position was added,
                      the only date a list has of its own. -->
                 <label class="flex flex-col gap-1.5">
-                    <span class="text-ink-muted text-base font-bold">{{ trans('common.from') }}</span>
+                    <span class="text-ink-muted text-base font-bold">{{ trans('common.date_from') }}</span>
                     <input v-model="fromDate" data-toolbar-control type="date" :class="SELECT_CLASS" />
                 </label>
                 <label class="flex flex-col gap-1.5">
-                    <span class="text-ink-muted text-base font-bold">{{ trans('common.to') }}</span>
+                    <span class="text-ink-muted text-base font-bold">{{ trans('common.date_to') }}</span>
                     <input v-model="toDate" data-toolbar-control type="date" :class="SELECT_CLASS" />
                 </label>
 

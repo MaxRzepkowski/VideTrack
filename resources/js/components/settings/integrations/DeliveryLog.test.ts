@@ -25,6 +25,13 @@ describe('DeliveryLog', () => {
         expect(text).toContain('Already counted as watched.');
     });
 
+    it('sets a dry run in its own sentence, the headline where the language puts it', () => {
+        const row = mountLog([delivery({ status: 'test', kind: 'complete', label: 'The Matrix (1999)' })]).find('li span');
+
+        expect(row.text()).toBe('Dry run: The Matrix (1999)');
+        expect(row.find('.text-ink-muted').text()).toBe('Dry run:');
+    });
+
     it('heads a delivery without a title by its kind, and one without either as unrecognized', () => {
         const log = mountLog([delivery({ id: 1, kind: 'pause' }), delivery({ id: 2, message: 'not_an_event' })]);
         const rows = log.findAll('li').map((row) => row.text());

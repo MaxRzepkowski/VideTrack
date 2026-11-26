@@ -25,7 +25,7 @@ return [
     'create_token' => '创建令牌',
     'dashboard_plugins_webhook_add_generic_destination' => 'Dashboard → Plugins → Webhook → Add Generic Destination。把上方的地址粘贴为 webhook URL。',
     'disconnect_this_endpoint_its_address_and' => '断开这个端点？它的地址和推送日志都会被删除。',
-    'dry_run' => '试运行',
+    'dry_run_headline' => '试运行：:headline',
     'emby_sends_webhooks_only_with_emby' => 'Emby 只有开通 Emby Premiere 才会发送 webhook。没有它，这里什么都收不到。',
     'event_is_complete_progress_stop_start' => 'event 为以下之一：:events。progress 是百分比；在这个实例上，超过 :threshold% 的 stop 算作看过。没有 occurred_at 时，以发送时刻为准。user 会与“服务器上的账号”进行匹配。未知字段会被忽略，无法读取的数据会返回 422 并附上原因。',
     'every_account' => '所有账号',

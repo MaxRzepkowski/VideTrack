@@ -25,7 +25,7 @@ return [
     'create_token' => 'Token aanmaken',
     'dashboard_plugins_webhook_add_generic_destination' => 'Dashboard → Plugins → Webhook → Add Generic Destination. Plak het adres hierboven als webhook-URL.',
     'disconnect_this_endpoint_its_address_and' => 'Dit eindpunt ontkoppelen? Het adres en het berichtenlog worden verwijderd.',
-    'dry_run' => 'Proefrun',
+    'dry_run_headline' => 'Proefrun: :headline',
     'emby_sends_webhooks_only_with_emby' => 'Emby verstuurt alleen webhooks met Emby Premiere. Zonder dat komt hier niets aan.',
     'event_is_complete_progress_stop_start' => 'event is een van: :events. progress is een percentage; een stop boven :threshold% telt op deze instantie als gezien. Zonder occurred_at telt het moment van verzenden. user wordt vergeleken met Account op de server. Onbekende velden worden genegeerd, en op een payload die niet te lezen is komt 422 terug, met de reden.',
     'every_account' => 'Elk account',

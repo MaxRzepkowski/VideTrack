@@ -25,7 +25,7 @@ return [
     'create_token' => 'Token erstellen',
     'dashboard_plugins_webhook_add_generic_destination' => 'Dashboard → Plugins → Webhook → Add Generic Destination. Füge die Adresse von oben als Webhook-URL ein.',
     'disconnect_this_endpoint_its_address_and' => 'Diesen Endpunkt trennen? Seine Adresse und sein Zustellprotokoll werden gelöscht.',
-    'dry_run' => 'Testlauf',
+    'dry_run_headline' => 'Testlauf: :headline',
     'emby_sends_webhooks_only_with_emby' => 'Emby sendet Webhooks nur mit Emby Premiere. Ohne kommt hier nichts an.',
     'event_is_complete_progress_stop_start' => 'event ist eines von: :events. progress ist ein Prozentwert; ein stop über :threshold % zählt auf dieser Instanz als gesehen. Ohne occurred_at zählt der Zeitpunkt des Sendens. user wird mit „Konto auf dem Server“ abgeglichen. Unbekannte Felder werden ignoriert, und auf einen nicht lesbaren Payload wird mit 422 und dem Grund geantwortet.',
     'every_account' => 'Alle Konten',

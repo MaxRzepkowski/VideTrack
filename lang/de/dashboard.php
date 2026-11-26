@@ -2,7 +2,6 @@
 
 return [
     'all_episodes_watched' => 'Alle Folgen gesehen',
-    'chapter' => 'Kapitel|Kapitel',
     'continue_watching_the_shows_you_have' => 'Schau die Serien weiter, die du begonnen hast.',
     'count_book' => ':count Buch|:count Bücher',
     'count_comic' => ':count Comic|:count Comics',
@@ -11,11 +10,9 @@ return [
     'count_show' => ':count Serie|:count Serien',
     'currently_playing' => 'Aktuelle Spiele',
     'currently_reading' => 'Aktuelle Lektüre',
-    'issue' => 'Heft|Hefte',
     'no_upcoming_releases_for_your_shows' => 'Keine anstehenden Premieren für deine Serien und deinen Backlog.',
     'nothing_here_yet_mark_an_episode' => 'Hier ist noch nichts. Markiere eine Folge als gesehen, dann erscheinen deine Serien hier.',
     'nothing_left_to_watch' => 'Nichts mehr anzusehen',
-    'page' => 'Seite|Seiten',
     'rate_this_series' => 'Serie bewerten',
     'up_next_to_watch' => 'Als Nächstes ansehen',
     'your_books_manga_and_comics_in' => 'Deine begonnenen Bücher, Manga und Comics',

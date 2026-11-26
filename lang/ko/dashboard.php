@@ -2,7 +2,6 @@
 
 return [
     'all_episodes_watched' => '모든 에피소드 시청 완료',
-    'chapter' => '챕터',
     'continue_watching_the_shows_you_have' => '보기 시작한 시리즈를 이어서 보세요.',
     'count_book' => '책 :count권',
     'count_comic' => '코믹스 :count편',
@@ -11,11 +10,9 @@ return [
     'count_show' => '시리즈 :count편',
     'currently_playing' => '플레이 중',
     'currently_reading' => '읽는 중',
-    'issue' => '이슈',
     'no_upcoming_releases_for_your_shows' => '내 시리즈와 백로그에 다가오는 출시가 없어요.',
     'nothing_here_yet_mark_an_episode' => '아직 아무것도 없어요. 에피소드를 시청 완료로 표시하면 여기에 시리즈가 나타나요.',
     'nothing_left_to_watch' => '더 볼 것이 없어요',
-    'page' => '페이지',
     'rate_this_series' => '이 시리즈 평가하기',
     'up_next_to_watch' => '이어 보기',
     'your_books_manga_and_comics_in' => '읽고 있는 책, 만화, 코믹스',

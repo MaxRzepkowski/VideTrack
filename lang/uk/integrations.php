@@ -25,7 +25,7 @@ return [
     'create_token' => 'Створити токен',
     'dashboard_plugins_webhook_add_generic_destination' => 'Dashboard → Plugins → Webhook → Add Generic Destination. Встав адресу вище як URL вебхука.',
     'disconnect_this_endpoint_its_address_and' => 'Від’єднати цей приймач? Його адресу та журнал запитів буде видалено.',
-    'dry_run' => 'Пробний запуск',
+    'dry_run_headline' => 'Пробний запуск: :headline',
     'emby_sends_webhooks_only_with_emby' => 'Emby надсилає вебхуки лише з Emby Premiere. Без нього сюди нічого не надійде.',
     'event_is_complete_progress_stop_start' => 'event – одне з: :events. progress – це відсоток; stop понад :threshold% на цьому екземплярі зараховується як переглянуте. Без occurred_at враховується момент надсилання. user порівнюється з полем «Акаунт на сервері». Невідомі поля ігноруються, а на дані, які не вдалося прочитати, надходить відповідь 422 із причиною.',
     'every_account' => 'Усі акаунти',

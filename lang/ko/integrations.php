@@ -25,7 +25,7 @@ return [
     'create_token' => '토큰 만들기',
     'dashboard_plugins_webhook_add_generic_destination' => 'Dashboard → Plugins → Webhook → Add Generic Destination으로 가서 위 주소를 웹훅 URL로 붙여 넣으세요.',
     'disconnect_this_endpoint_its_address_and' => '이 엔드포인트의 연결을 해제할까요? 주소와 전송 기록이 삭제돼요.',
-    'dry_run' => '테스트',
+    'dry_run_headline' => '테스트: :headline',
     'emby_sends_webhooks_only_with_emby' => 'Emby는 Emby Premiere가 있어야 웹훅을 보내요. 없으면 여기로 아무것도 오지 않아요.',
     'event_is_complete_progress_stop_start' => 'event는 다음 중 하나예요: :events. progress는 퍼센트이며, 이 인스턴스에서는 :threshold%를 넘긴 stop을 시청 완료로 쳐요. occurred_at이 없으면 보낸 시각을 써요. user는 ‘서버의 계정’과 비교해요. 모르는 필드는 무시하고, 읽을 수 없는 페이로드에는 이유와 함께 422로 응답해요.',
     'every_account' => '모든 계정',

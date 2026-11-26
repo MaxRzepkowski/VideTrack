@@ -2,7 +2,6 @@
 
 return [
     'all_episodes_watched' => 'Усі епізоди переглянуто',
-    'chapter' => 'розділ|розділи|розділів',
     'continue_watching_the_shows_you_have' => 'Продовжуй дивитися розпочаті серіали.',
     'count_book' => ':count книжка|:count книжки|:count книжок',
     'count_comic' => ':count комікс|:count комікси|:count коміксів',
@@ -11,11 +10,9 @@ return [
     'count_show' => ':count серіал|:count серіали|:count серіалів',
     'currently_playing' => 'Зараз граю',
     'currently_reading' => 'Зараз читаю',
-    'issue' => 'випуск|випуски|випусків',
     'no_upcoming_releases_for_your_shows' => 'Немає найближчих прем’єр для твоїх серіалів і відкладеного.',
     'nothing_here_yet_mark_an_episode' => 'Тут поки порожньо. Познач епізод переглянутим, і твої серіали з’являться тут.',
     'nothing_left_to_watch' => 'Більше нема чого дивитися',
-    'page' => 'сторінка|сторінки|сторінок',
     'rate_this_series' => 'Оцінити серіал',
     'up_next_to_watch' => 'Що дивитися далі',
     'your_books_manga_and_comics_in' => 'Твої книжки, манґа й комікси в процесі',

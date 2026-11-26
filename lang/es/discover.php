@@ -33,4 +33,6 @@ return [
     'one_shots' => 'One-shots',
     'most_popular' => 'Más populares',
     'most_favorited' => 'Más veces en favoritos',
+    'range_from' => 'Desde',
+    'range_to' => 'Hasta',
 ];

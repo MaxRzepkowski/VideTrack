@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import AmountTerms from '@/components/AmountTerms.vue';
 import Hairline from '@/components/Hairline.vue';
 import MetaLine from '@/components/MetaLine.vue';
 import { durationTerms, formatNumber, formatTotalRuntime } from '@/lib/format';
@@ -126,15 +127,15 @@ const ratingHeight = (count: number): string => `${count === 0 ? 0 : Math.max(4,
                     <span v-if="estimated" class="text-ink-muted text-[1.625rem] font-semibold sm:text-[2.5rem]">{{
                         trans('common.estimate_sign')
                     }}</span>
-                    <span
-                        v-for="(term, index) in hero"
-                        :key="term.unit"
-                        class="inline-flex items-baseline gap-x-1 sm:gap-x-2.5"
-                        :class="index > 0 ? 'ml-1 sm:ml-2' : ''"
-                    >
-                        <span class="text-[2.25rem] font-bold tracking-tight sm:text-[4rem]">{{ term.value }}</span>
-                        <span class="text-ink-secondary text-base sm:text-[1.375rem]">{{ term.unit }}</span>
-                    </span>
+                    <AmountTerms
+                        :terms="hero"
+                        class="gap-y-1"
+                        value-class="text-[2.25rem] font-bold tracking-tight sm:text-[4rem]"
+                        word-class="text-ink-secondary text-base sm:text-[1.375rem]"
+                        space-after-words="mr-1 sm:mr-2.5"
+                        space-before-words="ml-1 sm:ml-2.5"
+                        term-gap="gap-x-2.5 sm:gap-x-4.5"
+                    />
                 </p>
                 <MetaLine
                     v-if="captions.some((caption) => caption !== null)"

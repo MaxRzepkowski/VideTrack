@@ -1,4 +1,4 @@
-import { durationTerms, formatNumber, formatShortHours, formatTimestampDate, formatWatchTime, type DurationTerm } from '@/lib/format';
+import { amountTerm, durationTerms, formatNumber, formatShortHours, formatTimestampDate, formatWatchTime, type AmountTerm } from '@/lib/format';
 import { leafType, mediaTypeDefinition, mediaTypeMeta, readUnitOf, typeCountingIn } from '@/lib/mediaTypes';
 import type { TooltipRow } from '@/lib/tooltip';
 import type { UserMediaState } from '@/types/generated';
@@ -324,15 +324,18 @@ export function asReadUnit(unit: ProgressUnit | null): ReadUnit | null {
 export function formatUnitAmount(unit: ReadUnit, amount: number): string {
     // `:amount`, not `:count`: transChoice writes the raw number into :count,
     // which would drop the thousands separator.
-    const replacements = { amount: formatNumber(amount) };
+    return transChoice(countKey(unit), amount, { amount: formatNumber(amount) });
+}
 
+/** The key that names an amount in its unit, the number as `:amount`. */
+function countKey(unit: ReadUnit): string {
     switch (unit) {
         case 'pages':
-            return transChoice('media.count_pages', amount, replacements);
+            return 'media.count_pages';
         case 'chapters':
-            return transChoice('media.count_chapters', amount, replacements);
+            return 'media.count_chapters';
         case 'issues':
-            return transChoice('media.count_issues', amount, replacements);
+            return 'media.count_issues';
     }
 }
 
@@ -428,22 +431,10 @@ export function unitGlyph(unit: ProgressUnit): LucideIcon | null {
  * what is watched or played, the unit's count ("320 pages") for what is read.
  * Reading types count positions, not time, so their total is in that unit.
  */
-export function amountTerms(type: string, amount: number): DurationTerm[] {
+export function amountTerms(type: string, amount: number): AmountTerm[] {
     const unit = readUnitOf(type);
 
-    return unit === null ? durationTerms(amount) : [{ value: formatNumber(amount), unit: unitWord(unit, amount) }];
-}
-
-/** The unit's own word beside a number set large ("320" / "pages"). */
-export function unitWord(unit: Exclude<ProgressUnit, 'minutes'>, count: number): string {
-    switch (unit) {
-        case 'pages':
-            return transChoice('dashboard.page', count);
-        case 'chapters':
-            return transChoice('dashboard.chapter', count);
-        case 'issues':
-            return transChoice('dashboard.issue', count);
-    }
+    return unit === null ? durationTerms(amount) : [amountTerm(formatNumber(amount), transChoice(countKey(unit), amount), ':amount')];
 }
 
 /**

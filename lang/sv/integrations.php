@@ -25,7 +25,7 @@ return [
     'create_token' => 'Skapa token',
     'dashboard_plugins_webhook_add_generic_destination' => 'Dashboard → Plugins → Webhook → Add Generic Destination. Klistra in adressen ovan som webhook-URL.',
     'disconnect_this_endpoint_its_address_and' => 'Koppla från den här slutpunkten? Dess adress och leveranslogg raderas.',
-    'dry_run' => 'Testkörning',
+    'dry_run_headline' => 'Testkörning: :headline',
     'emby_sends_webhooks_only_with_emby' => 'Emby skickar webhooks bara med Emby Premiere. Utan det kommer inget fram hit.',
     'event_is_complete_progress_stop_start' => 'event är något av: :events. progress är en procentsats; ett stopp efter :threshold % räknas som sett på den här instansen. Utan occurred_at räknas tidpunkten då meddelandet skickades. user jämförs med Konto på servern. Okända fält ignoreras, och en payload som inte kan läsas besvaras med 422 och orsaken.',
     'every_account' => 'Alla konton',

@@ -33,4 +33,6 @@ return [
     'one_shots' => 'One-shots',
     'most_popular' => 'Populairst',
     'most_favorited' => 'Vaakst favoriet',
+    'range_from' => 'Van',
+    'range_to' => 'Tot',
 ];

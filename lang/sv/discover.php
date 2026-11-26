@@ -33,4 +33,6 @@ return [
     'one_shots' => 'One-shots',
     'most_popular' => 'Mest populära',
     'most_favorited' => 'Flest favoritmarkeringar',
+    'range_from' => 'Från',
+    'range_to' => 'Till',
 ];

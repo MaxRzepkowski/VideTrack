@@ -21,6 +21,7 @@ import {
 } from '@/lib/progress';
 import { mediaSummary, useMediaTypes, userState } from '@/test/factories';
 import type { ProgressEntry } from '@/types/media';
+import { loadLanguageAsync } from 'laravel-vue-i18n';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 beforeEach(() => useMediaTypes());
@@ -191,10 +192,33 @@ describe('episodeProgressRows', () => {
 describe('amountTerms', () => {
     it('spells out time for what is watched or played, the unit for what is read', () => {
         expect(amountTerms('movie', 135)).toEqual([
-            { value: '2', unit: 'hours' },
-            { value: '15', unit: 'minutes' },
+            { value: '2', before: '', after: ' hours' },
+            { value: '15', before: '', after: ' minutes' },
         ]);
-        expect(amountTerms('book', 1234)).toEqual([{ value: '1,234', unit: 'pages' }]);
+        expect(amountTerms('book', 1234)).toEqual([{ value: '1,234', before: '', after: ' pages' }]);
+    });
+
+    it("writes the unit's count the way the language does, its words before the number too", async () => {
+        await loadLanguageAsync('ko');
+
+        try {
+            expect(amountTerms('manga', 320)).toEqual([{ value: '320', before: '챕터 ', after: '개' }]);
+        } finally {
+            await loadLanguageAsync('en');
+        }
+    });
+
+    it('spells the unit out in Polish, its plural by the number', async () => {
+        await loadLanguageAsync('pl');
+
+        try {
+            expect(amountTerms('book', 1)[0]?.after).toBe(' strona');
+            expect(amountTerms('book', 3)[0]?.after).toBe(' strony');
+            expect(amountTerms('book', 1234)[0]?.after).toBe(' strony');
+            expect(amountTerms('book', 12)[0]?.after).toBe(' stron');
+        } finally {
+            await loadLanguageAsync('en');
+        }
     });
 });
 

@@ -25,7 +25,7 @@ return [
     'create_token' => 'トークンを作成',
     'dashboard_plugins_webhook_add_generic_destination' => 'Dashboard → Plugins → Webhook → Add Generic Destination。上のアドレスをWebhook URLとして貼り付けます。',
     'disconnect_this_endpoint_its_address_and' => 'このエンドポイントの連携を解除しますか？アドレスと受信ログは削除されます。',
-    'dry_run' => 'テスト',
+    'dry_run_headline' => 'テスト：:headline',
     'emby_sends_webhooks_only_with_emby' => 'EmbyがWebhookを送るのはEmby Premiereがある場合だけです。ないと、ここには何も届きません。',
     'event_is_complete_progress_stop_start' => 'eventは次のいずれかです：:events。progressはパーセントで、:threshold%を超えたstopはこのインスタンスで視聴済みとして扱われます。occurred_atがない場合は送信時刻が使われます。userは「サーバー上のアカウント」と照合されます。不明なフィールドは無視され、読み取れないペイロードには理由とともに422が返されます。',
     'every_account' => 'すべてのアカウント',

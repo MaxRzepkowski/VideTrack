@@ -25,7 +25,7 @@ return [
     'create_token' => 'Vytvořit token',
     'dashboard_plugins_webhook_add_generic_destination' => 'Dashboard → Plugins → Webhook → Add Generic Destination. Adresu výše vlož jako URL webhooku.',
     'disconnect_this_endpoint_its_address_and' => 'Odpojit tento endpoint? Jeho adresa i protokol hlášení se smažou.',
-    'dry_run' => 'Zkouška',
+    'dry_run_headline' => 'Zkouška: :headline',
     'emby_sends_webhooks_only_with_emby' => 'Emby posílá webhooky jen s Emby Premiere. Bez něj sem nic nedorazí.',
     'event_is_complete_progress_stop_start' => 'event je jedno z: :events. progress je procento; stop nad :threshold % se na této instanci počítá jako zhlédnuté. Bez occurred_at se počítá okamžik odeslání. user se porovnává s polem Účet na serveru. Neznámá pole se ignorují a na nečitelný obsah odpovídáme 422 s důvodem.',
     'every_account' => 'Všechny účty',

@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import MetaLine from '@/components/MetaLine.vue';
-import { formatDateTime, relativeTime } from '@/lib/format';
+import { formatDateTime, relativeTime, splitAtPlaceholder } from '@/lib/format';
 import type { DeliveryNote } from '@/types/generated';
 import type { DeliveryRow } from '@/types/integrations';
 import { trans } from 'laravel-vue-i18n';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 
 /**
  * What the server has sent and what became of it — the whole diagnostic
@@ -18,6 +18,10 @@ import { ref } from 'vue';
 defineProps<{ deliveries: DeliveryRow[] }>();
 
 const opened = ref<Set<number>>(new Set());
+
+// A dry run's headline sits in the sentence each language builds around it,
+// its own colon and spacing included.
+const dryRun = computed(() => splitAtPlaceholder(trans('integrations.dry_run_headline'), ':headline'));
 
 function toggle(id: number): void {
     if (opened.value.has(id)) {
@@ -87,8 +91,11 @@ function facts(delivery: DeliveryRow): (string | undefined)[] {
         <li v-for="delivery in deliveries" :key="delivery.id" class="py-2">
             <div class="flex flex-wrap items-baseline justify-between gap-x-3">
                 <span class="text-ink min-w-0 flex-1 truncate text-sm">
-                    <span v-if="delivery.status === 'test'" class="text-ink-muted">{{ trans('integrations.dry_run') }}: </span>
-                    {{ headline(delivery) }}
+                    <template v-if="delivery.status === 'test'"
+                        ><span class="text-ink-muted">{{ dryRun.before }}</span
+                        >{{ headline(delivery) }}{{ dryRun.after }}</template
+                    >
+                    <template v-else>{{ headline(delivery) }}</template>
                 </span>
                 <span v-if="delivery.at" v-tooltip="formatDateTime(delivery.at)" class="text-ink-muted shrink-0 text-sm">
                     {{ relativeTime(delivery.at) }}

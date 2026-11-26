@@ -364,8 +364,24 @@ export function formatTotalRuntime(minutes: number | null): string | null {
     return joinTerms(parts);
 }
 
-/** One term of a spelled-out duration: the number, and its own unit word. */
-export type DurationTerm = { value: string; unit: string };
+/**
+ * One term of an amount as its language writes it ("3 days", "320 pages",
+ * "챕터 320개"): the number, and the words before and after it, spaces
+ * included, so a page can set the number apart without moving or spacing it
+ * by a rule of its own.
+ */
+export type AmountTerm = { value: string; before: string; after: string };
+
+/** The term a number makes in a translated template, cut where the placeholder stands. */
+export function amountTerm(value: string, template: string, placeholder: string): AmountTerm {
+    const { before, after } = splitAtPlaceholder(template, placeholder);
+
+    if (after === null) {
+        throw new Error(`The template [${template}] has no ${placeholder} for its number.`);
+    }
+
+    return { value, before, after };
+}
 
 /**
  * A span of watching, spelled out as "3 days 7 hours 12 minutes" — the format
@@ -375,14 +391,14 @@ export type DurationTerm = { value: string; unit: string };
  * subtracting the number out of ":count days" — `transChoice` writes the raw
  * number into `:count` itself, so the two would not always match.
  */
-export function durationTerms(minutes: number): DurationTerm[] {
-    const term = (count: number, unit: string) => ({ value: String(count), unit });
+export function durationTerms(minutes: number): AmountTerm[] {
+    const term = (count: number, unit: string): AmountTerm => amountTerm(String(count), trans('media.duration_term', { unit }), ':value');
 
     const days = Math.floor(minutes / (60 * 24));
     const hours = Math.floor((minutes % (60 * 24)) / 60);
     const rest = minutes % 60;
 
-    const terms = [];
+    const terms: AmountTerm[] = [];
     if (days > 0) terms.push(term(days, transChoice('media.day', days)));
     if (hours > 0) terms.push(term(hours, transChoice('media.hour', hours)));
     if (rest > 0 || terms.length === 0) terms.push(term(rest, transChoice('media.minute', rest)));
@@ -390,9 +406,17 @@ export function durationTerms(minutes: number): DurationTerm[] {
     return terms;
 }
 
+/**
+ * Whether the language puts a space between the terms of a duration
+ * ("3 days 7 hours") or none ("3日7時間"), read from the key that joins them.
+ */
+export function durationTermsSpaced(): boolean {
+    return /\s/.test(trans('media.duration_two').replace(':first', '').replace(':second', ''));
+}
+
 /** {@see durationTerms} as one string, for places that cannot set the terms apart. */
 export function formatWatchTime(minutes: number): string {
-    return joinTerms(durationTerms(minutes).map((term) => trans('media.duration_term', term)));
+    return joinTerms(durationTerms(minutes).map((term) => `${term.before}${term.value}${term.after}`));
 }
 
 /** USD amounts from TMDB (budget / revenue). */
