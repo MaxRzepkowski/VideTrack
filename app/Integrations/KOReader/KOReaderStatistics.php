@@ -5,7 +5,6 @@ namespace App\Integrations\KOReader;
 use App\Integrations\Import\UploadedSqlite;
 use App\Integrations\KOReader\Data\KOReaderBook;
 use App\Support\Payload;
-use Carbon\CarbonImmutable;
 use Generator;
 use PDO;
 use Pdo\Sqlite;
@@ -61,8 +60,8 @@ final readonly class KOReaderStatistics
             yield new KOReaderBook(
                 title: Payload::text($row, 'title'),
                 author: $this->firstAuthor(Payload::text($row, 'authors')),
-                started: $this->moment(Payload::int($row, 'started')),
-                finished: $this->moment(Payload::int($row, 'finished')),
+                started: Payload::epochSeconds($row['started'] ?? null),
+                finished: Payload::epochSeconds($row['finished'] ?? null),
             );
         }
     }
@@ -73,11 +72,5 @@ final readonly class KOReaderStatistics
         $first = trim(explode("\n", $authors)[0]);
 
         return $first === '' ? null : $first;
-    }
-
-    /** KOReader stamps pages with Unix seconds. */
-    private function moment(?int $seconds): ?CarbonImmutable
-    {
-        return $seconds === null || $seconds <= 0 ? null : CarbonImmutable::createFromTimestampUTC($seconds);
     }
 }

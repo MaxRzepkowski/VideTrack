@@ -6,6 +6,7 @@ use App\Catalog\Providers\Tvmaze\TvmazeClient;
 use App\Catalog\TitleStore;
 use App\Models\MediaItem;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 
 test('backfills episode air times only when tvmaze reports a real airtime', function () {
@@ -31,6 +32,24 @@ test('backfills episode air times only when tvmaze reports a real airtime', func
         ->and($e2->refresh()->release_time)->toBeNull()
         ->and($e3->refresh()->release_time?->toIso8601String())->toBe('2026-08-03T01:00:00+00:00')
         ->and(ItemMetadata::fromStored($show->refresh()->metadata)->module('tvmazeId'))->toBe(999);
+});
+
+test('an air time tvmaze gives in UTC is kept on the instance\'s clock', function () {
+    instanceTimezone('Europe/Warsaw');
+    $show = MediaItem::factory()->show()->create(['metadata' => ['tvdbId' => 12345]]);
+    $season = MediaItem::factory()->season($show, 1)->create();
+    $episode = MediaItem::factory()->episode($season, 1, '2026-07-20')->create();
+
+    Http::fake([
+        'api.tvmaze.com/lookup/shows*' => Http::response(['id' => 999, 'name' => 'Test']),
+        'api.tvmaze.com/shows/999/episodes' => Http::response([
+            ['season' => 1, 'number' => 1, 'airtime' => '21:00', 'airstamp' => '2026-07-20T01:00:00+00:00'],
+        ]),
+    ]);
+
+    app(SyncAirSchedule::class)->execute($show);
+
+    expect(DB::table('media_items')->where('id', $episode->id)->value('release_time'))->toBe('2026-07-20 03:00:00');
 });
 
 test('resolves the tvmaze show by name search matched on premiere year', function () {

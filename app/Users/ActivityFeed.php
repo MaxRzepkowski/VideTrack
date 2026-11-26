@@ -12,8 +12,8 @@ use App\Models\User;
 use App\Support\Numbers;
 use App\Support\PageInfo;
 use App\Support\QueryRow;
+use App\Support\StoredTime;
 use App\Users\Data\ActivityFilters;
-use Carbon\CarbonImmutable;
 use Illuminate\Contracts\Database\Query\Expression;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -215,7 +215,7 @@ final readonly class ActivityFeed
 
             $groups[] = [
                 'item' => $item,
-                'at' => CarbonImmutable::parse($row['at'])->toIso8601String(),
+                'at' => StoredTime::read($row['at'])->toIso8601String(),
                 'day' => $filters->group === ActivityGrouping::Day ? ($days[$row['groupId']] ?? null) : null,
             ];
         }

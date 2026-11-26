@@ -10,7 +10,6 @@ use App\Models\Play;
 use App\Models\User;
 use App\Support\QueryRow;
 use App\Users\Statistics\Data\HistoryEntry;
-use Carbon\CarbonImmutable;
 
 /**
  * A user's whole history in one pass, oldest first, each entry under the
@@ -80,7 +79,7 @@ final readonly class UserHistory
                 QueryRow::intOrNull($row, 'runtime'),
                 QueryRow::intOrNull($row, 'title_runtime'),
             );
-            $at = $calendar->moment(CarbonImmutable::parse(QueryRow::text($row, 'watched_at'), 'UTC'));
+            $at = $calendar->moment(QueryRow::moment($row, 'watched_at'));
 
             $entries[] = new HistoryEntry(
                 itemId: QueryRow::int($row, 'item_id'),

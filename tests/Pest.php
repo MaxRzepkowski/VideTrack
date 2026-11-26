@@ -69,3 +69,4 @@ require_once __DIR__.'/Support/providers.php';
 require_once __DIR__.'/Support/queries.php';
 require_once __DIR__.'/Support/tasks.php';
 require_once __DIR__.'/Support/suggestions.php';
+require_once __DIR__.'/Support/time.php';

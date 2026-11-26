@@ -75,7 +75,8 @@ final readonly class CalibreLibrary
         }
 
         while (is_array($row = $books->fetch(PDO::FETCH_ASSOC))) {
-            $published = Payload::instant(Payload::string($row, 'published'));
+            // The year as Calibre wrote it: a moment moved to the instance's clock could fall in the one before.
+            $published = Payload::yearOf(Payload::string($row, 'published'));
 
             yield new CalibreBook(
                 id: Payload::int($row, 'id') ?? throw new UnexpectedValueException('A Calibre book without its id.'),
@@ -85,7 +86,7 @@ final readonly class CalibreLibrary
                 goodreads: Payload::string($row, 'goodreads'),
                 rating: Payload::int($row, 'rating'),
                 added: Payload::instant(Payload::string($row, 'added')),
-                year: $published === null || $published->year <= self::NO_YEAR ? null : $published->year,
+                year: $published === null || $published <= self::NO_YEAR ? null : $published,
             );
         }
     }

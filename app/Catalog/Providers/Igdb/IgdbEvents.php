@@ -81,8 +81,8 @@ final readonly class IgdbEvents
         $events = [];
 
         foreach (Payload::rows($rows) as $row) {
-            $start = Payload::int($row, 'start_time');
-            $end = Payload::int($row, 'end_time');
+            $start = Payload::epochSeconds($row['start_time'] ?? null);
+            $end = Payload::epochSeconds($row['end_time'] ?? null);
             $name = Payload::string($row, 'name');
 
             if ($start === null || $name === null) {
@@ -92,9 +92,9 @@ final readonly class IgdbEvents
             $events[] = new EventData(
                 ref: $this->payload->ref($row),
                 name: $name,
-                startsAt: CarbonImmutable::createFromTimestampUTC($start),
+                startsAt: $start,
                 // An end before the start is no end the page can say.
-                endsAt: $end === null || $end <= $start ? null : CarbonImmutable::createFromTimestampUTC($end),
+                endsAt: $end === null || $end <= $start ? null : $end,
                 description: Payload::string($row, 'description'),
                 timeZone: Payload::string($row, 'time_zone'),
                 liveStreamUrl: $this->web(Payload::string($row, 'live_stream_url')),

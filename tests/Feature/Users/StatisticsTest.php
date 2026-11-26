@@ -45,6 +45,23 @@ test('a year counts what was finished on the user\'s own calendar', function () 
             ->where('page.first.at', '2025-01-01T00:30:00+01:00'));
 });
 
+test('a play is read on the clock the instance keeps time in, not as UTC', function () {
+    instanceTimezone('Europe/Warsaw');
+    $user = User::factory()->create(['preferences' => ['timezone' => 'UTC']]);
+    $movie = MediaItem::factory()->movie()->create(['runtime' => 100]);
+
+    // Half past midnight in Warsaw is still New Year's Eve in UTC.
+    Play::factory()->for($user)->for($movie, 'mediaItem')->create(['watched_at' => '2025-01-01 00:30:00']);
+    projectLibrary($user);
+
+    $this->actingAs($user)
+        ->get(route('statistics', ['period' => 2025]))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('page.titles.completed.total', 0)
+            ->where('page.years', [2024]));
+});
+
 test('a dropped attempt makes a game one of the period\'s titles but is not something finished', function () {
     enableGamesModule();
     $user = statisticsUser();

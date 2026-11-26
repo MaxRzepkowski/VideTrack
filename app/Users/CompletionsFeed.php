@@ -98,11 +98,10 @@ final readonly class CompletionsFeed
         $entries->load('mediaItem.parent.parent');
 
         return [
-            'entries' => array_values(array_map(function (LibraryEntry $entry): array {
-                $at = QueryRow::textOrNull($entry, 'last_finished_at');
-
-                return ['entry' => $entry, 'at' => $at === null ? null : CarbonImmutable::parse($at)];
-            }, $entries->all())),
+            'entries' => array_values(array_map(
+                fn (LibraryEntry $entry): array => ['entry' => $entry, 'at' => QueryRow::momentOrNull($entry, 'last_finished_at')],
+                $entries->all(),
+            )),
             'pagination' => new PageInfo($paginator->currentPage(), max(1, $paginator->lastPage()), $paginator->total()),
         ];
     }

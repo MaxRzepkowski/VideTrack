@@ -229,6 +229,30 @@ test('a Kitsu library is read page by page and placed by its MyAnimeList mapping
     Http::assertSent(fn (Request $request) => str_contains($request->url(), 'filter%5Buser_id%5D=42'));
 });
 
+test('a day Kitsu sends as its midnight UTC stays that day west of Greenwich', function () {
+    instanceTimezone('America/New_York');
+    seedAnimeIdMap();
+
+    Http::fake([
+        'kitsu.app/api/edge/users*' => Http::response(['data' => [['id' => '42', 'type' => 'users']]]),
+        'kitsu.app/api/edge/library-entries*filter%5Bkind%5D=anime*' => Http::response(['data' => [
+            ['id' => '1', 'type' => 'libraryEntries', 'attributes' => ['status' => 'completed', 'progress' => 1, 'finishedAt' => '2018-03-04T00:00:00.000Z', 'updatedAt' => '2018-03-05T09:00:00.000Z'], 'relationships' => ['anime' => ['data' => ['type' => 'anime', 'id' => '7']]]],
+        ], 'included' => [
+            ['id' => '7', 'type' => 'anime', 'attributes' => ['canonicalTitle' => 'Princess Mononoke', 'episodeCount' => 1], 'relationships' => ['mappings' => ['data' => [['type' => 'mappings', 'id' => '70']]]]],
+            ['id' => '70', 'type' => 'mappings', 'attributes' => ['externalSite' => 'myanimelist/anime', 'externalId' => '164']],
+        ], 'links' => []]),
+        'kitsu.app/api/edge/library-entries*' => Http::response(['data' => [], 'included' => [], 'links' => []]),
+        ...tmdbAnimeFakes(),
+    ]);
+
+    ['film' => $film] = animeCatalogue();
+    $user = User::factory()->create();
+
+    runListImport($user, 'kitsu', 'someone');
+
+    expect($user->plays()->where('media_item_id', $film->id)->firstOrFail()->watched_at->toDateString())->toBe('2018-03-04');
+});
+
 test('a Kitsu name shared by several users asks for the profile number', function () {
     seedAnimeIdMap();
 

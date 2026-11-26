@@ -10,6 +10,7 @@ use App\Integrations\Scrobble\Data\ScrobbleEvent;
 use App\Integrations\Scrobble\Data\SetupStep;
 use App\Integrations\Scrobble\ScrobbleEventKind;
 use App\Integrations\Scrobble\UnrecognizedPayload;
+use App\Support\Payload;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\Request;
 
@@ -143,7 +144,7 @@ class TautulliScrobbleSource implements ProvidesSamplePayload, ScrobbleSource
         $value = $this->text($value);
 
         if ($value !== null && ctype_digit($value)) {
-            return CarbonImmutable::createFromTimestamp((int) $value);
+            return Payload::epochSeconds($value);
         }
 
         return $this->moment($value);

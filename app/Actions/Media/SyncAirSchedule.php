@@ -5,7 +5,7 @@ namespace App\Actions\Media;
 use App\Catalog\AirSchedule;
 use App\Catalog\MediaKind;
 use App\Models\MediaItem;
-use Illuminate\Support\Carbon;
+use App\Support\Payload;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -48,13 +48,11 @@ final readonly class SyncAirSchedule
         DB::transaction(function () use ($episodes, $seasonNumbers, $times) {
             foreach ($episodes as $episode) {
                 $key = $seasonNumbers[$episode->parent_id].':'.$episode->number;
-                $airstamp = $times[$key] ?? null;
+                $instant = Payload::instant($times[$key] ?? null);
 
-                if ($airstamp === null) {
+                if ($instant === null) {
                     continue;
                 }
-
-                $instant = Carbon::parse($airstamp);
 
                 // Skip no-op writes so untouched episodes keep their timestamps.
                 if ($episode->release_time?->equalTo($instant)) {

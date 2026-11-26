@@ -125,6 +125,14 @@ test('the clock is now() and today(), which tests can travel', function () {
     expect(filesMatching('/(?<![\w>:$])(?<!function )(time|date|strtotime|microtime|hrtime)\(|new \\\\?DateTime(Immutable)?\(\)|get(Next|Previous)RunDate\(\)/'))->toBe([]);
 });
 
+test('a moment from an epoch is read by Payload, which tells it on the stored clock', function () {
+    expect(filesMatching('/createFromTimestamp/', [
+        'app/Support/Payload.php',
+        // A release day, never a moment: IGDB dates it by midnight UTC.
+        'app/Catalog/Providers/Igdb/IgdbPayload.php',
+    ]))->toBe([]);
+});
+
 test('the library is written through its actions alone', function () {
     $models = 'Play|Rating|Favorite|Follow|ListItem|MediaUserState|WatchCycle|MediaList';
     $writes = 'create|forceCreate|insert|insertOrIgnore|upsert|firstOrCreate|updateOrCreate|update|delete|forceDelete|increment|decrement|createMany';

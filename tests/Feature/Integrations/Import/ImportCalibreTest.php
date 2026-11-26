@@ -1,6 +1,8 @@
 <?php
 
 use App\Enums\TaskRunStatus;
+use App\Integrations\Calibre\CalibreLibrary;
+use App\Integrations\Calibre\Data\CalibreBook;
 use App\Integrations\Import\Data\ImportInput;
 use App\Integrations\Import\Data\ImportSelection;
 use App\Integrations\Import\Data\ManifestCategory;
@@ -48,6 +50,17 @@ function putCalibreLibrary(): string
 
 test('Calibre is only offered when the books module is on', function () {
     expect(app(ImportSourceRegistry::class)->has('calibre'))->toBeFalse();
+});
+
+test('a Calibre book keeps the year Calibre wrote, whatever zone the instance keeps time in', function () {
+    instanceTimezone('America/Los_Angeles');
+
+    $path = putCalibreLibrary();
+    $library = CalibreLibrary::open(Storage::disk('local')->path($path)) ?? throw new LogicException('Not a Calibre library.');
+    $years = array_map(fn (CalibreBook $book): ?int => $book->year, iterator_to_array($library->books(), false));
+
+    // Midnight UTC on New Year's Day is still the year before in Los Angeles.
+    expect($years)->toBe([1937, null, 2001, 2001]);
 });
 
 test('a Calibre library offers its books and their ratings', function () {

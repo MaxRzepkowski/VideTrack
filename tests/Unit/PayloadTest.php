@@ -55,14 +55,8 @@ test('an instant is read in any format and blank is not now', function () {
 });
 
 test('a moment written without a zone is read in the zone its service keeps, whatever the instance\'s', function () {
-    date_default_timezone_set('Europe/Warsaw');
-
-    try {
-        expect(Payload::instant('2025-09-01 18:00:00', 'UTC')?->toIso8601ZuluString())->toBe('2025-09-01T18:00:00Z')
-            ->and(Payload::instant('2025-09-01T18:00:00+02:00', 'UTC')?->toIso8601ZuluString())->toBe('2025-09-01T16:00:00Z');
-    } finally {
-        date_default_timezone_set('UTC');
-    }
+    onClock('Europe/Warsaw', fn () => expect(Payload::instant('2025-09-01 18:00:00', 'UTC')?->toIso8601ZuluString())->toBe('2025-09-01T18:00:00Z')
+        ->and(Payload::instant('2025-09-01T18:00:00+02:00', 'UTC')?->toIso8601ZuluString())->toBe('2025-09-01T16:00:00Z'));
 });
 
 test('a moment in epoch milliseconds is read as such, and zero is never', function () {
@@ -72,6 +66,28 @@ test('a moment in epoch milliseconds is read as such, and zero is never', functi
         ->and(Payload::epochMilliseconds(['at' => null], 'at'))->toBeNull()
         ->and(Payload::epochMilliseconds(['at' => '2025-09-20'], 'at'))->toBeNull()
         ->and(Payload::epochMilliseconds([], 'at'))->toBeNull();
+});
+
+test('a moment in epoch seconds is read as such, and zero is never', function () {
+    expect(Payload::epochSeconds(1758403200)?->toIso8601ZuluString())->toBe('2025-09-20T21:20:00Z')
+        ->and(Payload::epochSeconds('1758403200')?->toIso8601ZuluString())->toBe('2025-09-20T21:20:00Z')
+        ->and(Payload::epochSeconds(0))->toBeNull()
+        ->and(Payload::epochSeconds(-5))->toBeNull()
+        ->and(Payload::epochSeconds(null))->toBeNull()
+        ->and(Payload::epochSeconds('2025-09-20'))->toBeNull();
+});
+
+test('a moment comes back on the clock the instance keeps time in, a bare day as the day it names', function () {
+    // The database binds a moment by its wall clock: one left in UTC would be
+    // written, and compared, an hour or two off on an instance in Warsaw.
+    onClock('Europe/Warsaw', fn () => expect(Payload::instant('2025-01-10T20:00:00.000Z')?->toDateTimeString())->toBe('2025-01-10 21:00:00')
+        ->and(Payload::instant('2025-09-01 18:00:00', 'UTC')?->toDateTimeString())->toBe('2025-09-01 20:00:00')
+        ->and(Payload::epochMilliseconds(['at' => 1758403200000], 'at')?->toDateTimeString())->toBe('2025-09-20 23:20:00')
+        ->and(Payload::epochSeconds(1758403200)?->toDateTimeString())->toBe('2025-09-20 23:20:00')
+        ->and(Payload::instant('2025-01-10T20:00:00Z')?->timezoneName)->toBe('Europe/Warsaw'));
+
+    // Twelve hours ahead of UTC, noon UTC on a bare day is past midnight.
+    onClock('Pacific/Auckland', fn () => expect(Payload::instant('2024-03-01')?->toDateString())->toBe('2024-03-01'));
 });
 
 test('a positive int is a count or an id above zero, from a number or a numeric string', function () {

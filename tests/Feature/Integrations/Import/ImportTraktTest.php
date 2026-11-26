@@ -3,8 +3,10 @@
 use App\Enums\TaskRunStatus;
 use App\Integrations\Import\Data\ImportSelection;
 use App\Models\MediaItem;
+use App\Models\Play;
 use App\Models\TaskRun;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 
@@ -154,6 +156,34 @@ test('entries no id can place are skipped and the import is idempotent', functio
     expect($user->plays()->count())->toBe(2)
         ->and($user->ratings()->count())->toBe(2)
         ->and($user->lists()->where('title', 'My List')->firstOrFail()->items()->count())->toBe(1);
+});
+
+test('a viewing Trakt dates in UTC lands on the instance\'s clock, and a second run finds it there', function () {
+    instanceTimezone('Europe/Warsaw');
+    $user = User::factory()->create();
+    MediaItem::factory()->movie()->create(['provider_ref' => '603']);
+    $show = makeShowTree([1 => ['2020-01-01', '2020-01-02']]);
+    $selection = ['categories' => ['history']];
+
+    runTraktImport($user, traktFixture($show->provider_ref), $selection);
+    runTraktImport($user->refresh(), traktFixture($show->provider_ref), $selection);
+
+    // 20:00 and 21:00 UTC in January are an hour later in Warsaw.
+    expect(DB::table('plays')->where('user_id', $user->id)->orderBy('watched_at')->pluck('watched_at')->all())
+        ->toBe(['2025-01-10 21:00:00', '2025-01-11 22:00:00']);
+});
+
+test('a viewing an import stamped on the UTC clock is still the one Trakt names, on an instance outside UTC', function () {
+    instanceTimezone('Europe/Warsaw');
+    $user = User::factory()->create();
+    $movie = MediaItem::factory()->movie()->create(['provider_ref' => '603']);
+    $show = makeShowTree([1 => ['2020-01-01', '2020-01-02']]);
+    Play::factory()->for($user)->for($movie, 'mediaItem')->create(['watched_at' => '2025-01-10 20:00:00']);
+    projectLibrary($user);
+
+    runTraktImport($user, traktFixture($show->provider_ref), ['categories' => ['history']]);
+
+    expect($user->plays()->where('media_item_id', $movie->id)->count())->toBe(1);
 });
 
 test('a movie Trakt knows only by its imdb id still lands', function () {

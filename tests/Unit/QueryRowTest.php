@@ -84,3 +84,22 @@ test('the error names the column, never its value', function () {
 
     $this->fail('expected an exception');
 });
+
+test('a moment is read on the clock the database keeps time on', function () {
+    onClock('Europe/Warsaw', function () {
+        $moment = QueryRow::moment(queryRow('2026-10-10 14:00:00'), 'column');
+
+        expect($moment->timezoneName)->toBe('Europe/Warsaw')
+            ->and($moment->toIso8601ZuluString())->toBe('2026-10-10T12:00:00Z')
+            ->and(QueryRow::momentOrNull(queryRow(null), 'column'))->toBeNull();
+    });
+});
+
+test('a moment refuses what is none, where Carbon would read blank as now', function (mixed $value) {
+    QueryRow::moment(queryRow($value), 'column');
+})->with([
+    'null' => [null],
+    'blank' => ['  '],
+    'not a moment' => ['soon'],
+    'number' => [42],
+])->throws(UnexpectedValueException::class, 'column [column]');

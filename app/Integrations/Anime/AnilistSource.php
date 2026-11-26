@@ -151,7 +151,7 @@ final class AnilistSource extends AnimeProfileSource
 
         $score = Payload::float($item, 'score');
         $score = $score === null ? 0 : (int) round($score);
-        $updated = Payload::positiveInt($item, 'updatedAt');
+        $updated = Payload::epochSeconds($item['updatedAt'] ?? null);
 
         return new AnimeListEntry(
             $medium,
@@ -163,7 +163,7 @@ final class AnilistSource extends AnimeProfileSource
             Payload::positiveInt($media, $medium === ListMedium::Anime ? 'episodes' : 'chapters'),
             $this->date($item['startedAt'] ?? null),
             $this->date($item['completedAt'] ?? null),
-            $updated === null ? null : CarbonImmutable::createFromTimestampUTC($updated),
+            $updated,
         );
     }
 

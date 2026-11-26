@@ -86,8 +86,7 @@ test('the progress panel shows shows in the middle of watching', function () {
 test('the progress panel puts the freshest first whatever zone each entry is written in', function () {
     // Shows carry their moment in the app's zone, games in UTC: as strings
     // "14:00+01:00" would beat "13:30Z" (14:30 here).
-    config(['app.timezone' => 'Europe/Warsaw']);
-    date_default_timezone_set('Europe/Warsaw');
+    instanceTimezone('Europe/Warsaw');
     enableGamesModule();
 
     $user = User::factory()->create();
@@ -590,8 +589,7 @@ test('the history\'s date filter takes the viewer\'s days, as the page groups th
 test('the history\'s days follow the viewer\'s clock across both changes of time', function (string $instanceZone) {
     // Plays are stamped as the instance's clock reads them; the day a play
     // falls on is the viewer's, an hour apart on either side of each change.
-    config(['app.timezone' => $instanceZone]);
-    date_default_timezone_set($instanceZone);
+    instanceTimezone($instanceZone);
 
     $user = User::factory()->create(['preferences' => ['timezone' => 'Europe/Warsaw']]);
     $movie = MediaItem::factory()->movie()->create(['runtime' => 60]);

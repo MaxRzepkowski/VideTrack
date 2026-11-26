@@ -7,6 +7,7 @@ use App\Integrations\Import\CsvStream;
 use App\Integrations\Import\Rows\SkipRow;
 use App\Integrations\Import\ZipExport;
 use App\Support\Payload;
+use App\Support\StoredTime;
 use Carbon\CarbonImmutable;
 use Carbon\Exceptions\InvalidFormatException;
 use Generator;
@@ -187,7 +188,7 @@ final class WeTrakrArchive
 
             // The day as written, or the month overflowed into the next one.
             if ($date !== null && $date->day === (int) $parts[2]) {
-                return $date->utc();
+                return StoredTime::of($date);
             }
         }
 

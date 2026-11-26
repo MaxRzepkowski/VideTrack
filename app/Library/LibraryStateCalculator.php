@@ -11,6 +11,7 @@ use App\Library\Data\HistoryFacts;
 use App\Library\Data\HistoryState;
 use App\Models\MediaItem;
 use App\Models\User;
+use App\Support\StoredTime;
 use Carbon\CarbonImmutable;
 
 /**
@@ -371,6 +372,6 @@ final readonly class LibraryStateCalculator
      */
     private function moment(?string $moment): ?CarbonImmutable
     {
-        return $moment === null ? null : CarbonImmutable::parse($moment);
+        return $moment === null ? null : StoredTime::read($moment);
     }
 }

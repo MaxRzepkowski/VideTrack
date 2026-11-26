@@ -18,6 +18,7 @@ use App\Integrations\Import\Rows\MediaRow;
 use App\Library\PlayDating;
 use App\Support\Forms\CredentialField;
 use App\Support\Forms\CredentialFieldType;
+use App\Support\Payload;
 use Carbon\CarbonImmutable;
 use Generator;
 use LogicException;
@@ -157,8 +158,6 @@ class SteamSource implements ExplainsSetup, ReadsCredentials
      */
     private function lastPlayed(array $game): ?CarbonImmutable
     {
-        $at = $game['rtime_last_played'] ?? null;
-
-        return is_int($at) && $at > 0 ? CarbonImmutable::createFromTimestamp($at) : null;
+        return Payload::epochSeconds($game['rtime_last_played'] ?? null);
     }
 }
