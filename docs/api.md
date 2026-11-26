@@ -100,6 +100,7 @@ without `write` sees only the reading tools.
 | `start_rewatch`, `cancel_rewatch` | watch a show again from the start |
 | `create_list`, `update_list`, `delete_list`, `remove_from_list` | your lists |
 | `add_to_list` | up to 25 titles onto a list in one call, in the order given |
+| `reorder_list_items`, `reorder_lists`, `duplicate_list` | the order of what is on a list, the order of your lists, a copy of a list |
 | `mark_notifications_read` | one notification, or all |
 
 A tool counts against the API's rate limit as the calls it makes (most make one; `update_list` makes

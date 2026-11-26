@@ -29,7 +29,7 @@ const MCP_READING_TOOLS = [
 const MCP_WRITING_TOOLS = [
     'mark_watched', 'unmark_watched', 'delete_history_entry', 'rate', 'remove_rating', 'set_status', 'log_progress', 'set_favorite',
     'follow_releases', 'follow_creator', 'start_rewatch', 'cancel_rewatch', 'create_list', 'update_list', 'delete_list',
-    'add_to_list', 'remove_from_list', 'mark_notifications_read',
+    'duplicate_list', 'reorder_lists', 'add_to_list', 'remove_from_list', 'reorder_list_items', 'mark_notifications_read',
 ];
 
 /** @return list<string> */

@@ -9,6 +9,7 @@ use App\Http\Mcp\Tools\CheckTitles;
 use App\Http\Mcp\Tools\CreateList;
 use App\Http\Mcp\Tools\DeleteHistoryEntry;
 use App\Http\Mcp\Tools\DeleteList;
+use App\Http\Mcp\Tools\DuplicateList;
 use App\Http\Mcp\Tools\FollowCreator;
 use App\Http\Mcp\Tools\FollowReleases;
 use App\Http\Mcp\Tools\GetCalendar;
@@ -29,6 +30,8 @@ use App\Http\Mcp\Tools\MarkWatched;
 use App\Http\Mcp\Tools\Rate;
 use App\Http\Mcp\Tools\RemoveFromList;
 use App\Http\Mcp\Tools\RemoveRating;
+use App\Http\Mcp\Tools\ReorderListItems;
+use App\Http\Mcp\Tools\ReorderLists;
 use App\Http\Mcp\Tools\Search;
 use App\Http\Mcp\Tools\SetFavorite;
 use App\Http\Mcp\Tools\SetStatus;
@@ -82,8 +85,11 @@ final class LibraryServer extends Server
         CreateList::class,
         UpdateList::class,
         DeleteList::class,
+        DuplicateList::class,
+        ReorderLists::class,
         AddToList::class,
         RemoveFromList::class,
+        ReorderListItems::class,
         MarkNotificationsRead::class,
     ];
 
