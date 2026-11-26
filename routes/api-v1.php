@@ -24,6 +24,7 @@ use App\Http\Controllers\Api\V1\TitleListController;
 use App\Http\Controllers\Api\V1\UpNextController;
 use App\Http\Controllers\Api\V1\WatchCycleController;
 use App\Http\Middleware\ThrottlePerTitle;
+use App\Http\Requests\Api\V1\AddListItemsRequest;
 use App\Http\Requests\Api\V1\LookupTitlesRequest;
 use Illuminate\Support\Facades\Route;
 
@@ -143,6 +144,8 @@ Route::middleware('abilities:'.TokenAbility::Write->value)->group(function () {
     Route::put('lists/order', [ListController::class, 'reorder'])->name('lists.reorder');
     Route::patch('lists/{list}', [ListController::class, 'update'])->name('lists.update');
     Route::post('lists/{list}/duplicate', [ListController::class, 'duplicate'])->name('lists.duplicate');
+    Route::post('lists/{list}/items', [ListController::class, 'storeItems'])
+        ->middleware(ThrottlePerTitle::using('items', AddListItemsRequest::MAX_ITEMS, 'list-additions'))->name('lists.items.store');
     Route::put('lists/{list}/items/order', [ListController::class, 'reorderItems'])->name('lists.items.reorder');
     Route::delete('lists/{list}', [ListController::class, 'destroy'])->name('lists.destroy');
     Route::delete('lists/{list}/items/{item}', [ListController::class, 'removeItem'])

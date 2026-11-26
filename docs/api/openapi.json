@@ -2300,6 +2300,126 @@
                 }
             }
         },
+        "/lists/{list}/items": {
+            "post": {
+                "operationId": "v1.lists.items.store",
+                "summary": "Many titles onto the end of the list in one call, in the order given",
+                "tags": [
+                    "List"
+                ],
+                "parameters": [
+                    {
+                        "name": "list",
+                        "in": "path",
+                        "required": true,
+                        "description": "The list ID",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AddListItemsRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/ListAdditionResource"
+                                            }
+                                        },
+                                        "meta": {
+                                            "type": "object",
+                                            "properties": {
+                                                "added": {
+                                                    "type": "integer"
+                                                },
+                                                "present": {
+                                                    "type": "integer"
+                                                },
+                                                "notFound": {
+                                                    "type": "integer"
+                                                },
+                                                "unavailable": {
+                                                    "type": "integer"
+                                                },
+                                                "itemsCount": {
+                                                    "type": "integer",
+                                                    "minimum": 0
+                                                }
+                                            },
+                                            "required": [
+                                                "added",
+                                                "present",
+                                                "notFound",
+                                                "unavailable",
+                                                "itemsCount"
+                                            ]
+                                        },
+                                        "states": {
+                                            "type": "object",
+                                            "additionalProperties": {
+                                                "$ref": "#/components/schemas/UserMediaState"
+                                            }
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "meta",
+                                        "states"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Too many requests",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "description": "Error overview."
+                                        }
+                                    },
+                                    "required": [
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                }
+            }
+        },
         "/lists/{list}/items/order": {
             "put": {
                 "operationId": "v1.lists.items.reorder",
@@ -4973,6 +5093,48 @@
             }
         },
         "schemas": {
+            "AddListItemsRequest": {
+                "type": "object",
+                "description": "Titles for the end of a list, each by its type and ref, in the order they go on.",
+                "properties": {
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "type": {
+                                    "type": "string",
+                                    "enum": [
+                                        "show",
+                                        "movie",
+                                        "season",
+                                        "episode",
+                                        "game",
+                                        "book",
+                                        "manga",
+                                        "comic"
+                                    ]
+                                },
+                                "ref": {
+                                    "type": "string",
+                                    "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$",
+                                    "maxLength": 100
+                                }
+                            },
+                            "required": [
+                                "type",
+                                "ref"
+                            ]
+                        },
+                        "minItems": 1,
+                        "maxItems": 25
+                    }
+                },
+                "required": [
+                    "items"
+                ],
+                "title": "AddListItemsRequest"
+            },
             "CalendarDayResource": {
                 "type": "object",
                 "properties": {
@@ -5159,6 +5321,32 @@
                     "progress"
                 ],
                 "title": "LibraryTab"
+            },
+            "ListAdditionResource": {
+                "type": "object",
+                "properties": {
+                    "type": {
+                        "type": "string"
+                    },
+                    "ref": {
+                        "type": "string"
+                    },
+                    "outcome": {
+                        "type": "string",
+                        "enum": [
+                            "added",
+                            "present",
+                            "not_found",
+                            "unavailable"
+                        ]
+                    }
+                },
+                "required": [
+                    "type",
+                    "ref",
+                    "outcome"
+                ],
+                "title": "ListAdditionResource"
             },
             "ListItemResource": {
                 "type": "object",
