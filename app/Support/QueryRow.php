@@ -2,6 +2,8 @@
 
 namespace App\Support;
 
+use Carbon\CarbonImmutable;
+use Carbon\Exceptions\InvalidFormatException;
 use Illuminate\Database\Eloquent\Model;
 use stdClass;
 use UnexpectedValueException;
@@ -54,6 +56,33 @@ final class QueryRow
         }
 
         throw self::unexpected($column);
+    }
+
+    /** A moment the row must carry, read on the clock the database keeps time on. */
+    public static function moment(stdClass|Model $row, string $column): CarbonImmutable
+    {
+        return self::momentOrNull($row, $column) ?? throw self::unexpected($column);
+    }
+
+    /** A moment that may be NULL: a nullable column, `max()` over an empty set. */
+    public static function momentOrNull(stdClass|Model $row, string $column): ?CarbonImmutable
+    {
+        $text = self::textOrNull($row, $column);
+
+        if ($text === null) {
+            return null;
+        }
+
+        // Carbon reads blank as now; a column holds no such moment.
+        if (trim($text) === '') {
+            throw self::unexpected($column);
+        }
+
+        try {
+            return StoredTime::read($text);
+        } catch (InvalidFormatException) {
+            throw self::unexpected($column);
+        }
     }
 
     private static function value(stdClass|Model $row, string $column): mixed

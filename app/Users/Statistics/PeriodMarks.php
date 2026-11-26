@@ -139,7 +139,7 @@ final readonly class PeriodMarks
     }
 
     /**
-     * @param  Collection<int, stdClass>  $rows  with `root_id`, `type` and `at` (UTC)
+     * @param  Collection<int, stdClass>  $rows  with `root_id`, `type` and `at`
      * @return array<int, array{0: string, 1: CarbonImmutable}>
      */
     private function moments(Collection $rows): array
@@ -147,7 +147,7 @@ final readonly class PeriodMarks
         $moments = [];
 
         foreach ($rows as $row) {
-            $moments[QueryRow::int($row, 'root_id')] = [QueryRow::text($row, 'type'), CarbonImmutable::parse(QueryRow::text($row, 'at'), 'UTC')];
+            $moments[QueryRow::int($row, 'root_id')] = [QueryRow::text($row, 'type'), QueryRow::moment($row, 'at')];
         }
 
         return $moments;

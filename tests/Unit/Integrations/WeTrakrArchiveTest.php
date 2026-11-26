@@ -2,7 +2,7 @@
 
 use App\Integrations\WeTrakr\WeTrakrArchive;
 
-test('a WeTrakr moment is read as JavaScript writes it, in UTC', function (string $text, ?string $moment) {
+test('a WeTrakr moment is read as JavaScript writes it, on the stored clock', function (string $text, ?string $moment) {
     expect(WeTrakrArchive::date($text)?->toIso8601String())->toBe($moment);
 })->with([
     'short month' => ['Wed Mar 21 2018 03:42:00 GMT+0000 (Coordinated Universal Time)', '2018-03-21T03:42:00+00:00'],
@@ -14,6 +14,10 @@ test('a WeTrakr moment is read as JavaScript writes it, in UTC', function (strin
     'a weekday that does not match' => ['Mon Mar 21 2018 03:42:00 GMT+0000 (Coordinated Universal Time)', '2018-03-21T03:42:00+00:00'],
     'a day the month does not have' => ['Fri Feb 30 2018 03:42:00 GMT+0000 (Coordinated Universal Time)', null],
 ]);
+
+test('a WeTrakr moment comes back on the clock the instance keeps time in', function () {
+    onClock('Europe/Warsaw', fn () => expect(WeTrakrArchive::date('Wed Mar 21 2018 03:42:00 GMT+0000 (Coordinated Universal Time)')?->toDateTimeString())->toBe('2018-03-21 04:42:00'));
+});
 
 test('an episode row is placed by its show and numbers, a row lacking one of them is not', function (array $row, ?array $place) {
     expect(WeTrakrArchive::place([...['type' => 'episode', 'show_title' => 'Some Show', 'season_number' => '1', 'episode_number' => '2'], ...$row]))->toBe($place);

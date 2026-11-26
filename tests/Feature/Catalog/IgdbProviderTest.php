@@ -860,13 +860,7 @@ test('release dates read IGDB epochs in UTC, whatever the app timezone', functio
     ]);
 
     // 1488499200 is 2017-03-03 00:00 UTC, still March 2nd in Los Angeles.
-    date_default_timezone_set('America/Los_Angeles');
-
-    try {
-        expect(igdbProvider()->details('game', '7346', 'en')->summary->releaseDate)->toBe('2017-03-03');
-    } finally {
-        date_default_timezone_set((string) config('app.timezone'));
-    }
+    onClock('America/Los_Angeles', fn () => expect(igdbProvider()->details('game', '7346', 'en')->summary->releaseDate)->toBe('2017-03-03'));
 });
 
 test('the upcoming section is asked once a day, not on every render', function () {

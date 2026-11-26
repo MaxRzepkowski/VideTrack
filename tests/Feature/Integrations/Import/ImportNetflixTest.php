@@ -9,6 +9,7 @@ use App\Integrations\Import\ImportSourceRegistry;
 use App\Models\MediaItem;
 use App\Models\User;
 use Illuminate\Http\Client\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 
@@ -78,6 +79,18 @@ test('a Netflix profile\'s films come over by name, its episodes by their show a
     // Forty minutes and a resumed twenty of the same evening are one viewing
     // of an hour-long episode; "Part 2" is the season TMDB numbers 2.
     expect($episodes)->toBe(['The North Remembers', 'Winter Is Coming']);
+});
+
+test('a Netflix playback, timed in UTC, lands on the instance\'s clock', function () {
+    instanceTimezone('Europe/Warsaw');
+    fakeNetflixCatalog();
+
+    $user = User::factory()->create();
+    $roma = MediaItem::factory()->movie()->create(['provider_ref' => '426426', 'title' => 'Roma', 'runtime' => 135]);
+
+    runImportFile($user, 'netflix', putTransferFixture('netflix', 'ViewingActivity.csv'), new ImportSelection(['profile:Alex']));
+
+    expect(DB::table('plays')->where('media_item_id', $roma->id)->value('watched_at'))->toBe('2024-03-09 22:15:02');
 });
 
 test('the short history from the Netflix website is refused for what it lacks', function () {

@@ -66,7 +66,7 @@ final class TvTimeArchive
     public static function watchedAt(array $row): ?CarbonImmutable
     {
         if (preg_match('/^watch-date-(\d+)$/', Payload::text($row, 'watch_date_range_key'), $epoch) === 1) {
-            return CarbonImmutable::createFromTimestampUTC((int) $epoch[1]);
+            return Payload::epochSeconds($epoch[1]);
         }
 
         return Payload::instant(Payload::text($row, 'created_at'));

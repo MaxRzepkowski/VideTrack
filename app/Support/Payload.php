@@ -212,6 +212,8 @@ final class Payload
      * which is what Carbon would make of an empty string. A moment written
      * without a zone is read in `$zone`: a service that keeps UTC (SQLite's
      * CURRENT_TIMESTAMP) passes 'UTC', whatever the instance's own zone.
+     * Every moment comes back on the stored clock ({@see StoredTime}); a bare
+     * day stays the day it names ({@see day()}).
      */
     public static function instant(mixed $value, ?string $zone = null): ?CarbonImmutable
     {
@@ -227,7 +229,7 @@ final class Payload
         }
 
         try {
-            return CarbonImmutable::parse($value, $zone);
+            return StoredTime::of(CarbonImmutable::parse($value, $zone));
         } catch (InvalidFormatException) {
             return null;
         }
@@ -243,7 +245,18 @@ final class Payload
     {
         $milliseconds = self::positiveInt($data, $key);
 
-        return $milliseconds === null ? null : CarbonImmutable::createFromTimestampMsUTC($milliseconds);
+        return $milliseconds === null ? null : StoredTime::of(CarbonImmutable::createFromTimestampMsUTC($milliseconds));
+    }
+
+    /**
+     * A moment sent as seconds since the epoch, as a number or as digits.
+     * Zero and below are "never", not 1970.
+     */
+    public static function epochSeconds(mixed $value): ?CarbonImmutable
+    {
+        $seconds = Numbers::int($value);
+
+        return $seconds === null || $seconds <= 0 ? null : StoredTime::of(CarbonImmutable::createFromTimestampUTC($seconds));
     }
 
     /**

@@ -1,5 +1,6 @@
 <?php
 
+use App\Actions\Library\MarkWatched;
 use App\Actions\Scrobble\SettleDelivery;
 use App\Catalog\MediaKind;
 use App\Enums\PlayOutcome;
@@ -9,6 +10,9 @@ use App\Integrations\Scrobble\ScrobbleEventKind;
 use App\Jobs\CleanupExpiredData;
 use App\Jobs\ProcessScrobbleEvent;
 use App\Library\Events\PlayRecorded;
+use App\Library\ScrobbleDedup;
+use App\Library\WatchedAt;
+use App\Models\MediaItem;
 use App\Models\MediaUserState;
 use App\Models\Play;
 use App\Models\Rating;
@@ -98,6 +102,24 @@ test('the same viewing reported by a second endpoint is not logged twice', funct
 
     expect(Play::where('user_id', $user->id)->count())->toBe(1)
         ->and(WebhookDelivery::query()->latest('id')->firstOrFail()->message)->toBe('already_played');
+});
+
+test('a viewing reported in UTC lands on the instance\'s clock and is weighed against plays on it', function () {
+    instanceTimezone('Europe/Warsaw');
+    Http::fake(providerDictionaryFakes());
+
+    [$user, $endpoint, $payload] = completedMovie();
+    $movie = MediaItem::factory()->movie()->create(['provider_ref' => '603']);
+    app(MarkWatched::class)->execute($user, $movie, WatchedAt::at(CarbonImmutable::parse('2026-07-01 21:00:00')));
+
+    // Half an hour past the window on the instance's clock, but inside it
+    // if the report's UTC hour were taken for the instance's own.
+    $reported = CarbonImmutable::parse('2026-07-01 21:00:00')->addHours(ScrobbleDedup::windowHours())->addMinutes(30);
+
+    postScrobble($endpoint, [...$payload, 'occurred_at' => $reported->utc()->toIso8601ZuluString()])->assertStatus(Response::HTTP_ACCEPTED);
+
+    expect(DB::table('plays')->where('user_id', $user->id)->orderBy('id')->pluck('watched_at')->all())
+        ->toBe(['2026-07-01 21:00:00', $reported->toDateTimeString()]);
 });
 
 test('an identical retransmission to the same endpoint is one delivery', function () {

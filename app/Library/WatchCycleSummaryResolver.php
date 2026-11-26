@@ -11,7 +11,7 @@ use App\Models\Play;
 use App\Models\User;
 use App\Models\WatchCycle;
 use App\Support\QueryRow;
-use Carbon\CarbonImmutable;
+use App\Support\StoredTime;
 use Illuminate\Support\Collection;
 use stdClass;
 
@@ -160,6 +160,6 @@ final readonly class WatchCycleSummaryResolver
 
     private function iso(?string $value): ?string
     {
-        return $value === null ? null : CarbonImmutable::parse($value)->toIso8601String();
+        return $value === null ? null : StoredTime::read($value)->toIso8601String();
     }
 }

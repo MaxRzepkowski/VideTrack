@@ -7,7 +7,7 @@ use App\Integrations\Scrobble\Contracts\ScrobbleSource;
 use App\Integrations\Scrobble\Data\ScrobbleEvent;
 use App\Integrations\Scrobble\ScrobbleEventKind;
 use App\Integrations\Scrobble\UnrecognizedPayload;
-use Carbon\CarbonImmutable;
+use App\Support\Payload;
 use Illuminate\Http\Request;
 use RuntimeException;
 
@@ -57,8 +57,6 @@ class FakeScrobbleSource implements ScrobbleSource
             throw new RuntimeException('Unreadable payload.');
         }
 
-        $occurredAt = $request->input('occurred_at');
-
         return new ScrobbleEvent(
             kind: ScrobbleEventKind::from($kind),
             mediaKind: MediaKind::from((string) $request->input('media_kind')),
@@ -70,7 +68,7 @@ class FakeScrobbleSource implements ScrobbleSource
             episodeNumber: $request->filled('episode') ? (int) $request->input('episode') : null,
             progressPercent: $request->filled('percent') ? (float) $request->input('percent') : null,
             rating: $request->filled('rating') ? (int) $request->input('rating') : null,
-            occurredAt: is_string($occurredAt) ? CarbonImmutable::parse($occurredAt) : null,
+            occurredAt: Payload::instant($request->input('occurred_at')),
             serverUsername: $request->input('username'),
         );
     }

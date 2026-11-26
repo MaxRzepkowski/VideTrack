@@ -14,6 +14,7 @@ use App\Tracking\Surfaces\FeedFilter;
 use App\Tracking\Surfaces\IcsFeed;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\Client\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Inertia\Inertia;
 use Inertia\Testing\AssertableInertia as Assert;
@@ -151,6 +152,21 @@ test('the iCal feed carries an event as a timed entry with its stream', function
     expect($ics)->toContain('SUMMARY:Summer Game Fest')
         ->toContain('UID:event-igdb-6045@videtrack')
         ->toContain('URL:https://www.youtube.com/watch?v=sgf');
+});
+
+test('an event its provider times in UTC is kept on the instance\'s clock', function () {
+    instanceTimezone('Europe/Warsaw');
+    enableGamesModule();
+    Http::fake(['*/events' => Http::response([[
+        'id' => 6045, 'name' => 'Summer Game Fest 2026',
+        'start_time' => CarbonImmutable::parse('2026-10-20 19:00', 'UTC')->getTimestamp(),
+        'end_time' => CarbonImmutable::parse('2026-10-20 21:00', 'UTC')->getTimestamp(),
+    ]])]);
+
+    app(RefreshEvents::class)->execute();
+
+    expect((array) DB::table('catalog_events')->where('ref', '6045')->sole(['starts_at', 'ends_at']))
+        ->toBe(['starts_at' => '2026-10-20 21:00:00', 'ends_at' => '2026-10-20 23:00:00']);
 });
 
 test("an event's page shows when it runs, what it showed and whether it is hidden", function () {

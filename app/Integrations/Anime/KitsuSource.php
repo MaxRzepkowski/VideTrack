@@ -186,8 +186,10 @@ final class KitsuSource extends AnimeProfileSource
             $rating === null ? null : (int) ceil($rating / 2),
             Payload::int($attributes, 'progress') ?? 0,
             Payload::positiveInt($mediaAttributes, $medium === ListMedium::Anime ? 'episodeCount' : 'chapterCount'),
-            Payload::instant($attributes['startedAt'] ?? null),
-            Payload::instant($attributes['finishedAt'] ?? null),
+            // A day the user picked, sent as its midnight UTC: read as a moment,
+            // it would fall on the day before west of Greenwich.
+            Payload::calendarDay($attributes['startedAt'] ?? null),
+            Payload::calendarDay($attributes['finishedAt'] ?? null),
             Payload::instant($attributes['updatedAt'] ?? null),
         );
     }

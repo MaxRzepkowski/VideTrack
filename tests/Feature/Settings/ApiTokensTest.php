@@ -88,8 +88,7 @@ test('a token lasts until the picked day ends on the user own clock', function (
 });
 
 test('a token ends at the end of the picked day whatever zone the app keeps time in', function () {
-    config(['app.timezone' => 'America/New_York']);
-    date_default_timezone_set('America/New_York');
+    instanceTimezone('America/New_York');
     $user = User::factory()->create(['preferences' => ['timezone' => 'Europe/Warsaw']]);
 
     $this->actingAs($user)

@@ -19,6 +19,7 @@ use App\Integrations\Import\Rows\MediaRow;
 use App\Integrations\Import\Rows\SkipRow;
 use App\Integrations\Import\ZipExport;
 use App\Library\PlaybackCompletion;
+use App\Support\StoredTime;
 use Carbon\CarbonImmutable;
 use Carbon\Exceptions\InvalidFormatException;
 use Generator;
@@ -158,7 +159,6 @@ final class NetflixViewingSource implements ExplainsSetup, ReadsFile
      */
     private function viewings(CsvStream $csv): Generator
     {
-        $timezone = config()->string('app.timezone');
         $viewings = [];
 
         foreach ($csv->entries() as $row) {
@@ -182,7 +182,7 @@ final class NetflixViewingSource implements ExplainsSetup, ReadsFile
             }
 
             $profile = trim($row['Profile Name']);
-            $key = implode("\0", [$profile, $title, $at->setTimezone($timezone)->toDateString()]);
+            $key = implode("\0", [$profile, $title, $at->toDateString()]);
             $seconds = (Playtime::seconds($row['Duration']) ?? 0) + ($viewings[$key]['seconds'] ?? 0);
             $first = isset($viewings[$key]) && $viewings[$key]['at']->lessThan($at) ? $viewings[$key]['at'] : $at;
 
@@ -215,7 +215,9 @@ final class NetflixViewingSource implements ExplainsSetup, ReadsFile
     private function startedAt(string $value): ?CarbonImmutable
     {
         try {
-            return CarbonImmutable::createFromFormat('Y-m-d H:i:s', trim($value), 'UTC');
+            $moment = CarbonImmutable::createFromFormat('Y-m-d H:i:s', trim($value), 'UTC');
+
+            return $moment === null ? null : StoredTime::of($moment);
         } catch (InvalidFormatException) {
             return null;
         }
