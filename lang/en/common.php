@@ -147,6 +147,7 @@ return [
     'username' => 'Username',
     'video' => 'Video',
     'label_with_count' => ':label (:count)',
+    'badge_count_over' => ':count+',
     'notifications_unread' => 'Notifications, :count unread',
     'session_expired_reload' => 'Your session has expired. Reload the page and try again.',
     'how_to_set_it_up' => 'How to set it up',
