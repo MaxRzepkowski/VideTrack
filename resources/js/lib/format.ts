@@ -437,6 +437,14 @@ export function formatNumber(value: number, maximumFractionDigits = 0): string {
     return new Intl.NumberFormat(pageLocale(), { maximumFractionDigits }).format(value);
 }
 
+/** The most a badge counts to; past it the badge says so with a plus rather than grow wider than what it sits on. */
+export const BADGE_COUNT_MAX = 99;
+
+/** A count on a badge, capped at {@link BADGE_COUNT_MAX}. */
+export function formatBadgeCount(count: number): string {
+    return count > BADGE_COUNT_MAX ? trans('common.badge_count_over', { count: formatNumber(BADGE_COUNT_MAX) }) : formatNumber(count);
+}
+
 /**
  * The running version as a footer shows it: a release number gets its "v"
  * ("1.4.0" → "v1.4.0"); a build label ("dev", "main-…") stays as it is.

@@ -7,7 +7,7 @@ import NotificationPanel from '@/components/notifications/NotificationPanel.vue'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import UserMenuContent from '@/components/UserMenuContent.vue';
 import { useNotificationFeed } from '@/composables/useNotificationFeed';
-import { getInitials } from '@/lib/format';
+import { formatBadgeCount, getInitials } from '@/lib/format';
 import { FOLLOWING, navHref } from '@/lib/navigation';
 import { jsonFetch } from '@/lib/http';
 import { clickTarget, markRead } from '@/lib/notifications';
@@ -45,8 +45,9 @@ const followingHref = navHref(FOLLOWING);
 
 const BELL =
     'bg-surface hover:bg-surface-raised data-[state=open]:bg-surface-overlay relative size-10 cursor-pointer items-center justify-center rounded-[10px] transition-colors duration-150 flex';
-// Something unread is a dot, not a count; the bell's name still says how many.
-const UNREAD_MARK = 'bg-brand-soft absolute top-2 right-2 size-2.25 rounded-full';
+// How many are unread, on the bell's corner; its name says the same to a screen reader.
+const UNREAD_COUNT =
+    'bg-brand text-on-accent absolute -top-1 -right-1 flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-sm leading-none font-semibold tabular-nums';
 
 /**
  * Every route out of the dropdown closes it first. Left open, an Inertia visit
@@ -131,7 +132,7 @@ async function openNotification(item: NotificationEntry, event: MouseEvent): Pro
                     <DropdownMenu v-model:open="bellOpen">
                         <DropdownMenuTrigger v-tooltip="trans('common.notifications')" :aria-label="bellLabel" :class="[BELL, 'hidden md:flex']">
                             <Bell class="text-ink size-4.5" />
-                            <span v-if="unread > 0" :class="UNREAD_MARK" aria-hidden="true" />
+                            <span v-if="unread > 0" :class="UNREAD_COUNT" aria-hidden="true">{{ formatBadgeCount(unread) }}</span>
                         </DropdownMenuTrigger>
                         <!-- Right edge in line with the avatar; the arrow points back up at the bell. -->
                         <DropdownMenuContent
@@ -158,7 +159,7 @@ async function openNotification(item: NotificationEntry, event: MouseEvent): Pro
 
                     <button type="button" :aria-label="bellLabel" :class="[BELL, 'md:hidden']" @click="sheetOpen = true">
                         <Bell class="text-ink size-4.5" />
-                        <span v-if="unread > 0" :class="UNREAD_MARK" aria-hidden="true" />
+                        <span v-if="unread > 0" :class="UNREAD_COUNT" aria-hidden="true">{{ formatBadgeCount(unread) }}</span>
                     </button>
                     <BottomSheet v-model:open="sheetOpen" :title="trans('common.notifications')">
                         <NotificationPanel

@@ -53,11 +53,25 @@ describe('AppHeader', () => {
         wrapper.unmount();
     });
 
+    it('shows no count on the bell when nothing is unread', () => {
+        const wrapper = header(0);
+
+        const bells = wrapper.findAll('[aria-label="Notifications"]');
+
+        expect(bells).toHaveLength(2);
+        expect(bells.map((bell) => bell.text())).toEqual(['', '']);
+
+        wrapper.unmount();
+    });
+
     it('names how many are unread and marks them all read, then asks for the bell again', async () => {
         const wrapper = header(3);
 
-        // The bell shows a dot; how many is in its name.
-        expect(wrapper.find('[aria-label="Notifications, 3 unread"]').exists()).toBe(true);
+        // Both bells, the desktop's and the phone's, show how many and say it in their name.
+        const bells = wrapper.findAll('[aria-label="Notifications, 3 unread"]');
+
+        expect(bells).toHaveLength(2);
+        expect(bells.map((bell) => bell.text())).toEqual(['3', '3']);
 
         await wrapper
             .findAll('button')

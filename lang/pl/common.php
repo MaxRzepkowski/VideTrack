@@ -147,6 +147,7 @@ return [
     'username' => 'Nazwa użytkownika',
     'video' => 'Wideo',
     'label_with_count' => ':label (:count)',
+    'badge_count_over' => ':count+',
     'notifications_unread' => 'Powiadomienia, nieprzeczytane: :count',
     'session_expired_reload' => 'Sesja wygasła. Odśwież stronę i spróbuj ponownie.',
     'how_to_set_it_up' => 'Jak to skonfigurować',

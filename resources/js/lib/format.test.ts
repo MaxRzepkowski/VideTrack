@@ -2,11 +2,13 @@ import {
     ALTERNATIVE_TITLES_SHOWN,
     alternativeTitlesLine,
     amountTerm,
+    BADGE_COUNT_MAX,
     countryName,
     dateTimeInputInstant,
     durationTerms,
     durationTermsSpaced,
     episodeCode,
+    formatBadgeCount,
     formatCalendarDate,
     formatCountOrNull,
     formatDateTime,
@@ -324,5 +326,13 @@ describe('short dates for a button', () => {
     it('spans two days, or names one when both fall on it', () => {
         expect(formatTimestampRange('2026-09-01T20:00:00Z', '2026-10-01T20:00:00Z')).toMatch(/^September 1\s–\sOctober 1, 2026$/u);
         expect(formatTimestampRange('2026-09-01T10:00:00Z', '2026-09-01T20:00:00Z')).toBe('September 1, 2026');
+    });
+});
+
+describe('formatBadgeCount', () => {
+    it('shows a count as it is, and past what a badge holds as the most and a plus', () => {
+        expect(formatBadgeCount(3)).toBe('3');
+        expect(formatBadgeCount(BADGE_COUNT_MAX)).toBe(String(BADGE_COUNT_MAX));
+        expect(formatBadgeCount(BADGE_COUNT_MAX + 1)).toBe(`${BADGE_COUNT_MAX}+`);
     });
 });
