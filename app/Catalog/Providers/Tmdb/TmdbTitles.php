@@ -281,13 +281,11 @@ final readonly class TmdbTitles
         $episodeType = Payload::enum($episode, 'episode_type', EpisodeType::class);
 
         // TMDB's episode_type marks finales but never a premiere, which is
-        // found by position. A lone episode has no season list to stand in,
-        // so the test falls back on episode_number — saga seasons with
-        // absolute numbering are the rare miss.
+        // found by position.
         $badge = EpisodeBadge::of(
             $episodeType,
             $season,
-            opensSeason: $number === 1,
+            opensSeason: $this->parts->opensSeason($show, $season, $number),
             closesEndedShow: $this->lastSeasonOfEndedShow($season, Payload::positiveInt($show, 'number_of_seasons'), $this->payload->status($show)),
         );
 
