@@ -43,13 +43,11 @@ class CleanupExpiredData implements ShouldQueue
             ->where('created_at', '<', now()->subDays(config()->integer('tracker.retention.task_runs_days')))
             ->delete()) ?? 0;
 
-        $cacheRows = 0;
-
-        if (config('cache.default') === 'database') {
-            $cacheRows = DB::table(config()->string('cache.stores.database.table', 'cache'))
-                ->where('expiration', '<', now()->getTimestamp())
-                ->delete();
-        }
+        // Whichever store the cache uses now: an instance that moved it off
+        // the database leaves the expired rows behind, and nothing reads them.
+        $cacheRows = DB::table(config()->string('cache.stores.database.table', 'cache'))
+            ->where('expiration', '<', now()->getTimestamp())
+            ->delete();
 
         $failedJobs = DB::table('failed_jobs')
             ->where('failed_at', '<', now()->subDays(config()->integer('tracker.retention.failed_jobs_days')))
