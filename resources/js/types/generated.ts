@@ -39,8 +39,9 @@ export type ApiTokenItem = {
     readonly expiresAt: string | null;
 };
 export type AttentionItem = {
+    readonly level: CheckLevel;
     readonly title: string;
-    readonly detail: string;
+    readonly details: WordedLine[];
     readonly since: string | null;
 };
 export type BellEntryKind = 'person' | 'company' | 'collection' | 'manual' | 'via' | 'muted';
@@ -532,6 +533,8 @@ export type MaintenanceCheckLine = {
     readonly level: CheckLevel;
     readonly line: WordedLine;
     readonly details: WordedLine[];
+    readonly label: string | null;
+    readonly state: WordedLine | null;
 };
 export type MakerTally = {
     readonly creator: CreatorLink;

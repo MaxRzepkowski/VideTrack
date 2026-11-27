@@ -92,10 +92,10 @@ test('a refused key says what was answered, when it last worked and what to do',
 
     expect($line->level)->toBe(CheckLevel::Problem)
         ->and($line->line->wording())->toBe(__('tasks.provider_refuses_the_key', ['provider' => 'TMDB']))
-        ->and(array_map(fn ($detail) => $detail->key, $line->details))->toBe(['tasks.answered_status_reason_at', 'tasks.last_answered_at', 'tasks.put_a_new_key_in_variables'])
+        ->and(array_map(fn ($detail) => $detail->key, $line->details))->toBe(['tasks.answered_status_reason_at', 'tasks.last_answered_at', 'tasks.titles_from_provider_stop_refreshing', 'tasks.put_a_new_key_in_variables'])
         ->and($line->details[0]->params)->toBe(['status' => 401, 'reason' => 'Invalid API key: You must be granted a valid key.'])
         ->and($line->details[1]->moments['time']->eq($answeredAt))->toBeTrue()
-        ->and($line->details[2]->params)->toBe(['variables' => TmdbKey::VARIABLE]);
+        ->and($line->details[3]->params)->toBe(['variables' => TmdbKey::VARIABLE]);
 });
 
 test('a refused key is noted in the history once, and so is its return', function () {

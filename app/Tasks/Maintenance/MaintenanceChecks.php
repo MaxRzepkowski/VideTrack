@@ -160,7 +160,7 @@ final readonly class MaintenanceChecks
 
     private function performOne(MaintenanceCheckState $state, string $runId, MaintenanceCheck $check, RunCause $cause): void
     {
-        $previous = array_values(array_filter(array_map(CheckLine::fromStored(...), $state->result ?? [])));
+        $previous = CheckLine::listFromStored($state->result);
         $state->fill(['status' => TaskRunStatus::Started, 'run_id' => $runId, 'started_at' => now()])->save();
         $report = new CheckReport($previous, $cause);
         $error = null;

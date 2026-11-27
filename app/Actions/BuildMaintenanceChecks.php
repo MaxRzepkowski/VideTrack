@@ -44,12 +44,8 @@ final readonly class BuildMaintenanceChecks
     {
         $lines = [];
 
-        foreach ($state->result ?? [] as $stored) {
-            $line = CheckLine::fromStored($stored);
-
-            if ($line !== null) {
-                $lines[] = new MaintenanceCheckLine($line->level, WordedLine::of($line->line), array_map(WordedLine::of(...), $line->details));
-            }
+        foreach (CheckLine::listFromStored($state?->result) as $line) {
+            $lines[] = new MaintenanceCheckLine($line->level, WordedLine::of($line->line), array_map(WordedLine::of(...), $line->details), $line->label, $line->state === null ? null : WordedLine::of($line->state));
         }
 
         $error = TaskLine::fromStored($state?->error);

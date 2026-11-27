@@ -3,6 +3,7 @@
 namespace App\Tasks\Attention\Contracts;
 
 use App\Tasks\Attention\Data\AttentionItem;
+use App\Tasks\Attention\Data\PageVisit;
 
 /**
  * One kind of trouble the admin has to fix themselves. The instance's
@@ -13,5 +14,5 @@ interface AttentionSource
     /**
      * @return list<AttentionItem>
      */
-    public function items(): array;
+    public function items(PageVisit $visit): array;
 }

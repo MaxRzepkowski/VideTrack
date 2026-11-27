@@ -14,12 +14,23 @@ function page(props: InstanceType<typeof Overview>['$props']) {
 describe('Overview', () => {
     it('lists what needs the admin, with what to do', () => {
         const text = page({
-            attention: [{ title: 'TMDB refuses the API key', detail: 'Put a new key in the .env file.', since: '2026-10-10T11:00:00+00:00' }],
+            attention: [
+                {
+                    level: 'problem',
+                    title: 'The scheduler is not running',
+                    details: [
+                        { text: 'Last sign of life at :time.', moments: { time: '2026-10-10T11:00:00Z' } },
+                        { text: 'Restart the container.', moments: {} },
+                    ],
+                    since: '2026-10-10T11:00:00+00:00',
+                },
+            ],
             checkedAt: null,
         }).text();
 
-        expect(text).toContain('TMDB refuses the API key');
-        expect(text).toContain('Put a new key in the .env file.');
+        expect(text).toContain('The scheduler is not running');
+        expect(text).toContain('Last sign of life at 11:00 AM.');
+        expect(text).toContain('Restart the container.');
         expect(text).toContain('since');
     });
 

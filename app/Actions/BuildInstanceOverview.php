@@ -5,6 +5,7 @@ namespace App\Actions;
 use App\Models\MaintenanceCheckState;
 use App\Tasks\Attention\AttentionRegistry;
 use App\Tasks\Attention\Data\AttentionItem;
+use App\Tasks\Attention\Data\PageVisit;
 
 /**
  * The Instance page's overview: what needs the admin, and when the checks
@@ -17,12 +18,12 @@ final readonly class BuildInstanceOverview
     /**
      * @return array{attention: list<AttentionItem>, checkedAt: string|null}
      */
-    public function execute(): array
+    public function execute(PageVisit $visit): array
     {
         $latest = MaintenanceCheckState::query()->whereNotNull('checked_at')->latest('checked_at')->first();
 
         return [
-            'attention' => $this->attention->items(),
+            'attention' => $this->attention->items($visit),
             'checkedAt' => $latest?->checked_at?->toIso8601String(),
         ];
     }

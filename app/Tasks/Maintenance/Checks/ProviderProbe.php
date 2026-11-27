@@ -89,18 +89,27 @@ final readonly class ProviderProbe implements MaintenanceCheck
 
     private function line(string $code, SupportsHealthProbe $provider, ProviderStatus $status): CheckLine
     {
-        $named = ['provider' => $provider->serviceName()];
+        $name = $provider->serviceName();
+        $named = ['provider' => $name];
         $answered = $status->answeredAt === null ? [] : [new TaskLine('tasks.last_answered_at', moments: ['time' => $status->answeredAt])];
         $failure = $status->failure === null ? [] : [$this->failure($status->failure)];
 
         return match ($status->state) {
-            ProviderState::Healthy => new CheckLine(CheckLevel::Ok, new TaskLine('tasks.provider_answers', $named), subject: $code),
-            ProviderState::Degraded => new CheckLine(CheckLevel::Warning, new TaskLine('tasks.provider_is_not_answering', $named), [...$failure, ...$answered], $code),
+            ProviderState::Healthy => new CheckLine(CheckLevel::Ok, new TaskLine('tasks.provider_answers', $named), subject: $code, label: $name, state: new TaskLine('tasks.provider_state_answers')),
+            ProviderState::Degraded => new CheckLine(
+                CheckLevel::Warning,
+                new TaskLine('tasks.provider_is_not_answering', $named),
+                [...$failure, ...$answered],
+                $code,
+                label: $name,
+                state: new TaskLine('tasks.provider_state_not_answering'),
+            ),
             ProviderState::KeyRejected => new CheckLine(CheckLevel::Problem, new TaskLine('tasks.provider_refuses_the_key', $named), [
                 ...$failure,
                 ...$answered,
+                new TaskLine('tasks.titles_from_provider_stop_refreshing'),
                 new TaskLine('tasks.put_a_new_key_in_variables', ['variables' => implode(', ', $provider->credentialVariables())]),
-            ], $code),
+            ], $code, $status->since, $name, new TaskLine('tasks.provider_state_refuses_the_key')),
         };
     }
 
