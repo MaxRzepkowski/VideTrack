@@ -45,6 +45,7 @@ use Illuminate\Support\Carbon;
  * @property array<string, mixed>|null $metadata
  * @property Carbon|null $refreshed_at
  * @property Carbon|null $gone_at when the data source stopped having this root, which stays as an archive entry
+ * @property Carbon|null $viewed_at when anyone last opened the title's page
  */
 class MediaItem extends Model
 {
@@ -74,6 +75,7 @@ class MediaItem extends Model
             'localized_titles' => AsLocalizedTitles::class,
             'refreshed_at' => 'datetime',
             'gone_at' => 'datetime',
+            'viewed_at' => 'datetime',
         ];
     }
 

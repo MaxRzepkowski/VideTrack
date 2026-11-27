@@ -36,7 +36,7 @@ test('a check line reads back with its level, details, subject, since, name and 
         [new TaskLine('tasks.put_a_new_key_in_variables', ['variables' => 'TMDB_API_KEY'])],
         'tmdb',
         CarbonImmutable::parse('2026-10-10T10:30:00Z'),
-        'TMDB',
+        new TaskLine('tasks.service_name', ['name' => 'TMDB']),
         new TaskLine('tasks.provider_state_refuses_the_key'),
     );
 

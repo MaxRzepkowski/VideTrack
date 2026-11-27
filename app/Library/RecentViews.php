@@ -4,6 +4,7 @@ namespace App\Library;
 
 use App\Catalog\Data\MediaSummary;
 use App\Catalog\MediaTypeRegistry;
+use App\Models\MediaItem;
 use App\Models\RecentView;
 use App\Models\User;
 use App\Support\Numbers;
@@ -12,7 +13,8 @@ use Illuminate\Support\Facades\DB;
 
 /**
  * A user's browsing history of main titles — the data behind the "Recently
- * viewed" strip and the palette's opening rows. Seasons and episodes never
+ * viewed" strip and the palette's opening rows — and each title's last
+ * opening by anyone, which the orphan sweep reads. Seasons and episodes never
  * reach here (only the main-title pages record), so the history stays at the
  * title level.
  */
@@ -26,13 +28,19 @@ final readonly class RecentViews
 
     public function __construct(private MediaTypeRegistry $types) {}
 
-    /** Upserts the view, bumping its timestamp. */
+    /**
+     * Upserts the view, bumping its timestamp, and marks the title opened: a
+     * user keeps only their newest views, the title its last opening by anyone.
+     */
     public function record(User $user, MediaSummary $title): void
     {
         RecentView::query()->updateOrCreate(
             ['user_id' => $user->id, 'type' => $title->type, 'provider_ref' => $title->ref],
             ['title' => $title->title, 'poster_path' => $title->posterPath, 'viewed_at' => now()],
         );
+
+        // Bypassing the row's own timestamp: an opening does not change the title.
+        MediaItem::query()->toBase()->whereNull('parent_id')->where('type', $title->type)->where('provider', $title->provider)->where('provider_ref', $title->ref)->update(['viewed_at' => now()]);
     }
 
     /**
