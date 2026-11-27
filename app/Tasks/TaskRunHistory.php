@@ -8,6 +8,8 @@ use App\Integrations\Import\ImportSourceRegistry;
 use App\Models\TaskRun;
 use App\Models\User;
 use App\Tasks\Data\TaskRunItem;
+use App\Tasks\Maintenance\MaintenanceChecks;
+use App\Tasks\Maintenance\MaintenanceRegistry;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 
@@ -20,7 +22,10 @@ final readonly class TaskRunHistory
     /** Newest runs shown at once — enough for context without flooding the page. */
     public const RUN_LIMIT = 25;
 
-    public function __construct(private ImportSourceRegistry $imports) {}
+    public function __construct(
+        private ImportSourceRegistry $imports,
+        private MaintenanceRegistry $checks,
+    ) {}
 
     /**
      * @return list<TaskRunItem>
@@ -58,8 +63,9 @@ final readonly class TaskRunHistory
     }
 
     /**
-     * A recurring task by its name, an import by its source — the registry
-     * knows how each reads, so a new source needs no change here.
+     * A recurring task by its name, an import by its source, a maintenance
+     * check by its code — the registries know how each reads, so a new
+     * source or check needs no change here.
      */
     private function label(string $name): string
     {
@@ -73,6 +79,12 @@ final readonly class TaskRunHistory
             /** @var ImportSource $source */
             if ($name === ImportSourceRegistry::taskName($source->code())) {
                 return $source->taskLabel();
+            }
+        }
+
+        foreach ($this->checks->codes() as $code) {
+            if ($name === MaintenanceChecks::historyName($code)) {
+                return $this->checks->get($code)->label();
             }
         }
 

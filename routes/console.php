@@ -1,5 +1,7 @@
 <?php
 
+use App\Tasks\Maintenance\MaintenanceChecks;
+use App\Tasks\Maintenance\MaintenanceWindow;
 use App\Tasks\ScheduledTasks;
 use Illuminate\Support\Facades\Schedule;
 
@@ -10,6 +12,13 @@ use Illuminate\Support\Facades\Schedule;
 // Schedule::job.
 foreach (ScheduledTasks::all() as $task) {
     Schedule::call($task->queue)->cron($task->cron)->name($task->name->value);
+}
+
+// The maintenance checks, window by window: a window queues its checks one
+// after another. They keep their own state instead of a task run each, so a
+// quiet check adds nothing to the task history.
+foreach (MaintenanceWindow::cases() as $window) {
+    Schedule::call(fn (MaintenanceChecks $checks) => $checks->queueWindow($window))->cron($window->cron())->name("maintenance-{$window->value}");
 }
 
 // Recovers runs the scheduler slept through (host not 24/7, container started

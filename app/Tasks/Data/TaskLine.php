@@ -16,6 +16,14 @@ final readonly class TaskLine
         public array $params = [],
     ) {}
 
+    /**
+     * @return array{key: string, params: array<string, string|int>}
+     */
+    public function stored(): array
+    {
+        return ['key' => $this->key, 'params' => $this->params];
+    }
+
     public function wording(?string $locale = null): string
     {
         return __($this->key, $this->params, $locale);

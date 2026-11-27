@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\TaskRun;
+use App\Tasks\Maintenance\MaintenanceChecks;
 use App\Tasks\ScheduledTasks;
 use Illuminate\Console\Command;
 use Illuminate\Support\Carbon;
@@ -26,7 +27,7 @@ class CatchUpTasks extends Command
 
     protected $description = 'Queue recurring tasks whose last run predates their most recent due time (recovers runs missed during downtime).';
 
-    public function handle(): int
+    public function handle(MaintenanceChecks $checks): int
     {
         $now = Carbon::now();
 
@@ -46,6 +47,14 @@ class CatchUpTasks extends Command
             ($task->queue)();
 
             $this->info("Caught up overdue task [{$task->name->value}] (due {$due->toDateTimeString()}).");
+        }
+
+        // The maintenance windows keep no task runs: their checks' own rows
+        // say when each last ran.
+        foreach ($checks->overdueWindows($now) as $window) {
+            $checks->queueWindow($window);
+
+            $this->info("Caught up overdue maintenance window [{$window->value}].");
         }
 
         return self::SUCCESS;
