@@ -4,7 +4,6 @@ return [
     'refresh_saved_titles' => '刷新已保存的作品',
     'background_task_runs_and_the_recurring' => '后台任务的运行记录和定期计划',
     'count_newly_aired_episodes' => '统计新播出的单集',
-    'clean_up_expired_data' => '清理过期数据',
     'clear_finished_runs' => '清除已结束的运行',
     'clear_the_finished_task_history' => '清除已结束任务的历史？',
     'every_3_hours' => '每 3 小时',

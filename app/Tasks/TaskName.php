@@ -18,7 +18,6 @@ enum TaskName: string
     case NotifyReleases = 'notify-releases';
     case ChannelDigest = 'channel-digest';
     case AutoImport = 'auto-import';
-    case Cleanup = 'cleanup';
     case ProjectAiredEpisodes = 'project-aired-episodes';
     case RefreshSuggestionSets = 'refresh-suggestion-sets';
     case RefreshRelations = 'refresh-relations';
@@ -37,7 +36,6 @@ enum TaskName: string
             self::NotifyReleases => __('tasks.send_release_notifications'),
             self::ChannelDigest => __('tasks.send_daily_digests'),
             self::AutoImport => __('tasks.start_automatic_imports'),
-            self::Cleanup => __('tasks.clean_up_expired_data'),
             self::ProjectAiredEpisodes => __('tasks.count_newly_aired_episodes'),
             self::RefreshSuggestionSets => __('tasks.refresh_suggestion_sets'),
             self::RefreshRelations => __('tasks.refresh_relations'),

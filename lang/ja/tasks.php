@@ -4,7 +4,6 @@ return [
     'refresh_saved_titles' => '保存済みの作品を更新',
     'background_task_runs_and_the_recurring' => 'バックグラウンドタスクの実行履歴と定期スケジュール',
     'count_newly_aired_episodes' => '新しく放送されたエピソードを集計',
-    'clean_up_expired_data' => '期限切れのデータを整理',
     'clear_finished_runs' => '終了した実行を消去',
     'clear_the_finished_task_history' => '終了したタスクの履歴を消去しますか？',
     'every_3_hours' => '3時間ごと',

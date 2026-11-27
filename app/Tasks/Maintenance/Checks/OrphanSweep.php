@@ -188,9 +188,9 @@ final readonly class OrphanSweep implements MaintenanceCheck
     private function line(OrphanKind $kind, int $count, int $removed): CheckLine
     {
         $state = match (true) {
-            $count === 0 => new TaskLine('tasks.orphan_state_none'),
+            $count === 0 => new TaskLine('tasks.removed_none'),
             $removed < $count => new TaskLine('tasks.orphan_state_removed_of', ['count' => $removed, 'total' => $count]),
-            default => new TaskLine('tasks.orphan_state_removed', ['count' => $removed]),
+            default => new TaskLine('tasks.removed_count', ['count' => $removed]),
         };
 
         // Nothing here reads away from the row, so the state stands for the line too.

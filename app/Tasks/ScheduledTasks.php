@@ -3,7 +3,6 @@
 namespace App\Tasks;
 
 use App\Catalog\Creators\CreatorTable;
-use App\Jobs\CleanupExpiredData;
 use App\Jobs\NotifyTodaysReleases;
 use App\Jobs\PrefetchTrending;
 use App\Jobs\ProjectAiredEpisodes;
@@ -134,12 +133,6 @@ class ScheduledTasks
                 cron: '45 7 * * *',
                 frequency: 'common.daily',
                 queue: fn () => RefreshEvents::queueTask(),
-            ),
-            new ScheduledTask(
-                name: TaskName::Cleanup,
-                cron: '30 3 * * *',
-                frequency: 'common.daily',
-                queue: fn () => CleanupExpiredData::queueTask(),
             ),
         ];
     }

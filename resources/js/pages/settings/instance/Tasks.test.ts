@@ -43,12 +43,12 @@ type Entry = {
     lastStatus: Run['status'] | null;
 };
 
-const daily: Entry = {
-    name: 'cleanup',
-    label: 'Clean up expired data',
-    frequency: 'common.daily',
-    nextRunAt: '2026-10-11T03:30:00+00:00',
-    lastRunAt: '2026-10-10T03:30:00+00:00',
+const collections: Entry = {
+    name: 'refresh-collections',
+    label: 'Refresh collections',
+    frequency: 'tasks.weekly',
+    nextRunAt: '2026-10-12T05:00:00+00:00',
+    lastRunAt: '2026-10-05T05:00:00+00:00',
     lastStatus: 'failure',
 };
 
@@ -127,17 +127,17 @@ describe('Tasks', () => {
 
     it('lists the schedule with its last ending, and runs a task on demand once at a time', async () => {
         const post = vi.spyOn(router, 'post').mockImplementation(() => undefined);
-        const wrapper = page([], [daily]);
+        const wrapper = page([], [collections]);
         const button = wrapper.findAll('button').find((candidate) => candidate.text() === 'Run now');
 
-        expect(wrapper.text()).toContain('Clean up expired data');
+        expect(wrapper.text()).toContain('Refresh collections');
         expect(wrapper.text()).toContain('Failed');
 
         await button?.trigger('click');
         await button?.trigger('click');
 
         expect(post).toHaveBeenCalledTimes(1);
-        expect(post).toHaveBeenCalledWith('/settings.tasks.run', { name: 'cleanup' }, expect.anything());
+        expect(post).toHaveBeenCalledWith('/settings.tasks.run', { name: 'refresh-collections' }, expect.anything());
         expect(wrapper.text()).toContain('Running');
     });
 
@@ -166,7 +166,7 @@ describe('Tasks', () => {
 
     it('words every status a run or a scheduled task can end in', () => {
         const runs = (['pending', 'started', 'success', 'failure'] as const).map((status, index) => run({ id: index, status }));
-        const schedule = (['pending', 'started', 'success'] as const).map((lastStatus) => ({ ...daily, name: lastStatus, lastStatus }));
+        const schedule = (['pending', 'started', 'success'] as const).map((lastStatus) => ({ ...collections, name: lastStatus, lastStatus }));
         const text = page(runs, schedule).text();
 
         for (const word of ['Pending', 'Started', 'Success', 'Failed']) {

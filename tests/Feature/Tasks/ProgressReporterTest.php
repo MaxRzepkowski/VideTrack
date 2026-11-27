@@ -5,7 +5,7 @@ use App\Tasks\ProgressReporter;
 use App\Tasks\TaskName;
 
 test('progress is written at once, then at most once per interval, built only when written', function () {
-    $run = TaskRun::queueTask(TaskName::Cleanup->value);
+    $run = TaskRun::queueTask(TaskName::RefreshCollections->value);
     $progress = new ProgressReporter($run);
     $built = 0;
 
@@ -25,7 +25,7 @@ test('progress is written at once, then at most once per interval, built only wh
 });
 
 test('progress is written again once the interval has passed', function () {
-    $run = TaskRun::queueTask(TaskName::Cleanup->value);
+    $run = TaskRun::queueTask(TaskName::RefreshCollections->value);
     $progress = new ProgressReporter($run);
 
     $progress->report(fn (): string => 'Item 1 of 3…');

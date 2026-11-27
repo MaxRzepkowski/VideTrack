@@ -3,7 +3,7 @@
 use App\Enums\TaskRunStatus;
 use App\Integrations\Apprise\AppriseChannel;
 use App\Integrations\Apprise\AppriseReach;
-use App\Jobs\CleanupExpiredData;
+use App\Jobs\RefreshCollections;
 use App\Models\MaintenanceCheckState;
 use App\Models\NotificationChannel;
 use App\Models\TaskRun;
@@ -66,7 +66,7 @@ test('the worker leaves a sign of life on every loop, written once a minute', fu
 });
 
 test('the worker leaves a sign of life when it finishes a job', function () {
-    CleanupExpiredData::queueTask();
+    RefreshCollections::queueTask();
 
     expect(app(Heartbeat::class)->lastBeat(BeatingProcess::Worker)?->eq(now()))->toBeTrue();
 });
@@ -79,7 +79,7 @@ test('the scheduler leaves a sign of life every minute', function () {
 
 test('a scheduler gone quiet needs the admin', function () {
     app(Heartbeat::class)->beat(BeatingProcess::Scheduler);
-    TaskRun::queueTask(TaskName::Cleanup->value);
+    TaskRun::queueTask(TaskName::RefreshCollections->value);
     $this->travel(StalledProcesses::SCHEDULER_QUIET_SECONDS - 1)->seconds();
 
     expect(attentionTitles())->not->toContain(__('tasks.the_scheduler_is_not_running'));
@@ -92,7 +92,7 @@ test('a scheduler gone quiet needs the admin', function () {
 test('a scheduler that never ran needs the admin once the instance has been up a while', function () {
     expect(attentionTitles())->not->toContain(__('tasks.the_scheduler_is_not_running'));
 
-    TaskRun::queueTask(TaskName::Cleanup->value);
+    TaskRun::queueTask(TaskName::RefreshCollections->value);
     $this->travel(StalledProcesses::SCHEDULER_QUIET_SECONDS)->seconds();
 
     expect(attentionTitles())->toContain(__('tasks.the_scheduler_is_not_running'));

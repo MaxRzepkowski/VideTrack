@@ -1,7 +1,7 @@
 <?php
 
 use App\Enums\TaskRunStatus;
-use App\Jobs\CleanupExpiredData;
+use App\Jobs\RefreshCollections;
 use App\Models\TaskRun;
 use App\Models\User;
 use App\Tasks\ScheduledTasks;
@@ -104,7 +104,7 @@ test('admins get the recurring schedule with next run, others do not', function 
 
 test('failure runs expose their errors', function () {
     $admin = User::factory()->admin()->create();
-    $run = TaskRun::queueTask('cleanup');
+    $run = TaskRun::queueTask(TaskName::RefreshCollections->value);
     $run->markStarted();
     $run->markFailure('Boom.', ['disk full']);
 
@@ -191,7 +191,7 @@ test('a non-admin clearing leaves system and other users runs untouched', functi
 
     $mine = TaskRun::queueTask('import', $user->id);
     $mine->markSuccess('ok');
-    $system = TaskRun::queueTask('cleanup');
+    $system = TaskRun::queueTask(TaskName::RefreshCollections->value);
     $system->markSuccess('ok');
     $other = TaskRun::queueTask('import', User::factory()->create()->id);
     $other->markSuccess('ok');
@@ -233,21 +233,21 @@ test('catch-up leaves a task that already ran in the current window alone', func
 });
 
 test('a task run ends once, and a failure after it reported its end changes nothing', function () {
-    $run = TaskRun::queueTask(TaskName::Cleanup->value);
+    $run = TaskRun::queueTask(TaskName::RefreshCollections->value);
     $run->markStarted();
     $run->markSuccess('Done.');
 
     expect(fn () => $run->markFailure('Late.'))->toThrow(LogicException::class)
         ->and(fn () => $run->markStarted())->toThrow(LogicException::class);
 
-    (new CleanupExpiredData($run->refresh()))->failed(new RuntimeException('After the end.'));
+    (new RefreshCollections($run->refresh()))->failed(new RuntimeException('After the end.'));
 
     expect($run->refresh()->status)->toBe(TaskRunStatus::Success)
         ->and($run->summary)->toBe('Done.');
 });
 
 test('a retried run starts again without finishing first', function () {
-    $run = TaskRun::queueTask(TaskName::Cleanup->value);
+    $run = TaskRun::queueTask(TaskName::RefreshCollections->value);
     $run->markStarted();
     $run->markStarted();
 

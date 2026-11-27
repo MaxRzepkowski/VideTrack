@@ -4,7 +4,6 @@ return [
     'refresh_saved_titles' => 'Обновление сохранённых произведений',
     'background_task_runs_and_the_recurring' => 'Запуски фоновых задач и регулярное расписание',
     'count_newly_aired_episodes' => 'Подсчёт новых вышедших эпизодов',
-    'clean_up_expired_data' => 'Очистка устаревших данных',
     'clear_finished_runs' => 'Очистить завершённые запуски',
     'clear_the_finished_task_history' => 'Очистить историю завершённых задач?',
     'every_3_hours' => 'Каждые 3 часа',

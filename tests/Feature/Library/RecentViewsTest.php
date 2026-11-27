@@ -2,11 +2,12 @@
 
 use App\Catalog\Data\MediaSummary;
 use App\Catalog\MediaItemSummaries;
-use App\Jobs\CleanupExpiredData;
 use App\Library\RecentViews;
 use App\Models\MediaItem;
 use App\Models\RecentView;
 use App\Models\User;
+use App\Tasks\Maintenance\Checks\ExpiredDataCleanup;
+use App\Tasks\Maintenance\MaintenanceChecks;
 
 function viewed(string $type, string $ref, string $title): MediaSummary
 {
@@ -27,7 +28,7 @@ test('recording a view upserts by (type, ref) and bumps the timestamp', function
         ->and($rows[0]->title)->toBe('The Matrix (renamed)');
 });
 
-test('the daily cleanup trims each history to the newest entries', function () {
+test('the nightly clean-up trims each history to the newest entries', function () {
     $user = User::factory()->create();
     $other = User::factory()->create();
     $action = app(RecentViews::class);
@@ -38,10 +39,10 @@ test('the daily cleanup trims each history to the newest entries', function () {
     }
     $action->record($other, viewed('movie', '1', 'Movie 1'));
 
-    // A page view only records; the trim waits for the cleanup.
+    // A page view only records; the trim waits for the clean-up.
     expect(RecentView::query()->where('user_id', $user->id)->count())->toBe(30);
 
-    CleanupExpiredData::queueTask();
+    app(MaintenanceChecks::class)->perform('run-of-alex', [ExpiredDataCleanup::CODE]);
 
     $refs = RecentView::query()->where('user_id', $user->id)->pluck('provider_ref');
     expect(RecentView::query()->where('user_id', $other->id)->count())->toBe(1);
