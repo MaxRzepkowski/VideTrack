@@ -41,13 +41,16 @@ function matches(paths, pattern) {
     return hits;
 }
 
-/** Files over a line threshold, each counted once (the listing shows their length). */
-function longerThan(paths, lines) {
+/**
+ * Lines past a threshold, per file: a file of 505 lines at a threshold of 400
+ * counts 105, so one already over it cannot grow unnoticed either.
+ */
+function linesOver(paths, lines) {
     return Object.fromEntries(
         paths
-            .map((path) => [path, read(path).split('\n').length])
+            .map((path) => [path, read(path).replace(/\n$/, '').split('\n').length])
             .filter(([, length]) => length > lines)
-            .map(([path, length]) => [`${path}, ${length} lines`, 1]),
+            .map(([path, length]) => [`${path}, ${length} lines`, length - lines]),
     );
 }
 
@@ -121,16 +124,22 @@ const RULES = {
     'non-null assertion or double cast (front)': () => matches(FRONT, 'as unknown as|@ts-ignore|@ts-expect-error'),
     'wire shape written by hand (front)': handWrittenShapes,
     'lint switched off': () => matches([...PHP, ...FRONT], 'eslint-disable|phpstan-ignore|@codingStandardsIgnore'),
-    // Size thresholds (single responsibility): files to think about, not verdicts.
-    'PHP class over 400 lines': () => longerThan(PHP, 400),
-    'controller over 150 lines': () =>
-        longerThan(
+    // Size thresholds (single responsibility): where to think about a split. A file already over
+    // one gets no new lines, so what it holds goes beside it instead.
+    'lines of PHP classes over 400': () => linesOver(PHP, 400),
+    'lines of controllers over 150': () =>
+        linesOver(
             PHP.filter((path) => path.startsWith('app/Http/Controllers/')),
             150,
         ),
-    'Vue component over 400 lines': () =>
-        longerThan(
+    'lines of Vue components over 400': () =>
+        linesOver(
             FRONT.filter((path) => path.endsWith('.vue')),
+            400,
+        ),
+    'lines of TS modules over 400': () =>
+        linesOver(
+            FRONT.filter((path) => path.endsWith('.ts') && !path.endsWith('.d.ts') && path !== 'resources/js/types/generated.ts'),
             400,
         ),
 };

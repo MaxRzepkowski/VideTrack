@@ -10,7 +10,8 @@
     "non-null assertion or double cast (front)": 0,
     "wire shape written by hand (front)": 18,
     "lint switched off": 0,
-    "PHP class over 400 lines": 3,
-    "controller over 150 lines": 1,
-    "Vue component over 400 lines": 1
+    "lines of PHP classes over 400": 200,
+    "lines of controllers over 150": 7,
+    "lines of Vue components over 400": 220,
+    "lines of TS modules over 400": 370
 }
