@@ -159,6 +159,8 @@ class HandleInertiaRequests extends Middleware
             'bio' => $user->bio,
             'avatar' => $user->avatar,
             'is_private' => $user->is_private,
+            // Shows the Instance page in the menu; the page itself asks again.
+            'is_admin' => $user->isAdmin(),
             'locale' => $user->locale,
             'preferences' => $user->preferences->resolved(),
             // Confirms what cannot be undone with the password, or else with the username.

@@ -8,6 +8,7 @@ use App\Models\MaintenanceCheckState;
 use App\Models\TaskRun;
 use App\Tasks\Data\TaskLine;
 use App\Tasks\Maintenance\Contracts\MaintenanceCheck;
+use App\Tasks\Maintenance\Data\CheckLine;
 use App\Tasks\RunFailure;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cache;
@@ -44,11 +45,31 @@ final readonly class MaintenanceChecks
     }
 
     /**
+     * Queues one check now, unless it is queued or at work already — an
+     * admin who does not want to wait for its window. Answers whether it was
+     * queued.
+     */
+    public function runNow(string $code): bool
+    {
+        $state = MaintenanceCheckState::query()->firstOrNew(['code' => $code]);
+
+        if ($state->exists && $state->isInFlight()) {
+            return false;
+        }
+
+        $run = new RunMaintenanceChecks([$code], RunCause::Admin);
+        $state->fill(['status' => TaskRunStatus::Pending, 'run_id' => $run->runId])->save();
+        dispatch($run);
+
+        return true;
+    }
+
+    /**
      * One run of each check, in the order given, under the run's id.
      *
      * @param  list<string>  $codes
      */
-    public function perform(string $runId, array $codes): void
+    public function perform(string $runId, array $codes, RunCause $cause = RunCause::Window): void
     {
         $checks = array_intersect_key($this->registry->applicable(), array_flip($codes));
 
@@ -69,14 +90,14 @@ final readonly class MaintenanceChecks
 
             $lock = Cache::lock(self::lockName($code), RunMaintenanceChecks::TIMEOUT_SECONDS);
 
-            // Another run of the same check (two windows' runs overlapping)
-            // is at work: it answers for both.
+            // Another run of the same check (its window and a manual run) is
+            // at work: it answers for both.
             if (! $lock->get()) {
                 continue;
             }
 
             try {
-                $this->performOne($states->get($code) ?? new MaintenanceCheckState(['code' => $code]), $runId, $check);
+                $this->performOne($states->get($code) ?? new MaintenanceCheckState(['code' => $code]), $runId, $check, $cause);
             } finally {
                 $lock->release();
             }
@@ -137,10 +158,11 @@ final readonly class MaintenanceChecks
         return $overdue;
     }
 
-    private function performOne(MaintenanceCheckState $state, string $runId, MaintenanceCheck $check): void
+    private function performOne(MaintenanceCheckState $state, string $runId, MaintenanceCheck $check, RunCause $cause): void
     {
+        $previous = array_values(array_filter(array_map(CheckLine::fromStored(...), $state->result ?? [])));
         $state->fill(['status' => TaskRunStatus::Started, 'run_id' => $runId, 'started_at' => now()])->save();
-        $report = new CheckReport;
+        $report = new CheckReport($previous, $cause);
         $error = null;
 
         // One check breaking must not take the others with it: its row says
@@ -154,7 +176,7 @@ final readonly class MaintenanceChecks
 
         $state->fill([
             'status' => $error === null ? TaskRunStatus::Success : TaskRunStatus::Failure,
-            'result' => array_map(fn (TaskLine $line): array => $line->stored(), $report->results()),
+            'result' => array_map(fn (CheckLine $line): array => $line->stored(), $report->lines()),
             'error' => $error?->stored(),
             'checked_at' => now(),
         ])->save();

@@ -11,24 +11,22 @@ use App\Tasks\ScheduledTasks;
 use App\Tasks\TaskRunHistory;
 
 /**
- * The "Tasks" settings section: the viewer's recent runs and, for an admin,
- * the recurring schedule with each task's last run — so a "daily" task can be
- * seen really running, not just when it is due next.
+ * The viewer's recent runs and, for an admin, the recurring schedule with
+ * each task's last run — so a "daily" task can be seen really running, not
+ * just when it is due next. Nobody else gets a schedule at all.
  */
 final readonly class BuildTasksPage
 {
     public function __construct(private TaskRunHistory $history) {}
 
     /**
-     * @return array{runs: list<TaskRunItem>, schedule: list<ScheduleEntry>, canClear: bool}
+     * @return array{runs: list<TaskRunItem>, canClear: bool, schedule?: list<ScheduleEntry>}
      */
     public function execute(User $viewer): array
     {
-        return [
-            'runs' => $this->history->recent($viewer),
-            'schedule' => $viewer->isAdmin() ? $this->schedule() : [],
-            'canClear' => $this->history->hasFinished($viewer),
-        ];
+        $page = ['runs' => $this->history->recent($viewer), 'canClear' => $this->history->hasFinished($viewer)];
+
+        return $viewer->isAdmin() ? [...$page, 'schedule' => $this->schedule()] : $page;
     }
 
     /**

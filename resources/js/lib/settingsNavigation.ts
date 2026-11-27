@@ -1,5 +1,5 @@
 import type { NavEntry } from '@/lib/navigation';
-import { identityProviders, passwordLoginEnabled } from '@/lib/pageContext';
+import { identityProviders, passwordLoginEnabled, viewerIsAdmin } from '@/lib/pageContext';
 import type { NonEmpty } from '@/types';
 import {
     Braces,
@@ -11,6 +11,7 @@ import {
     ListChecks,
     Plug,
     Send,
+    Server,
     SlidersHorizontal,
     TriangleAlert,
     Upload,
@@ -114,6 +115,16 @@ export const SETTINGS_NAV: NonEmpty<NavEntry> = [
         label: () => trans('common.tasks'),
         icon: Cog,
         keywords: () => trans('palette.keywords_settings_tasks'),
+        // An admin's tasks are a tab of the Instance page.
+        exists: () => !viewerIsAdmin(),
+    },
+    {
+        id: 'settings.instance',
+        route: 'settings.instance.index',
+        label: () => trans('common.instance'),
+        icon: Server,
+        keywords: () => trans('palette.keywords_settings_instance'),
+        exists: viewerIsAdmin,
     },
     {
         id: 'settings.danger',

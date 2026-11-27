@@ -5,14 +5,17 @@ namespace App\Catalog\Providers\Concerns;
 use App\Catalog\ProviderBusy;
 use App\Catalog\ProviderCredential;
 use App\Catalog\ProviderException;
+use App\Catalog\ProviderKeyRejected;
 use App\Catalog\ProviderRejected;
 use App\Support\ConnectionFailure;
 use App\Support\HttpRetry;
+use App\Support\Payload;
 use Closure;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
 
 /**
  * Outbound-request plumbing shared by the provider HTTP clients: one place for
@@ -27,6 +30,9 @@ trait SendsHttpRequests
     private const HTTP_RETRIES = 2;
 
     private const HTTP_RETRY_DELAY_MS = 250;
+
+    /** How much of a service's own word for a failure the admin is shown. */
+    private const REASON_LENGTH = 80;
 
     /**
      * A pending request pre-configured with the shared timeout, retry and
@@ -53,22 +59,45 @@ trait SendsHttpRequests
     }
 
     /**
-     * What a failed answer means: refused (a 4xx — the key, the grant, the
-     * request), busy (a 429, waited out for as long as `Retry-After` says), or
-     * not available this time (a 5xx). "Not found" (404) is each client's own
-     * case, read before this.
+     * What a failed answer means: the key refused (a 401), the request
+     * refused (another 4xx; a 403 is a scope or an operation the key may not
+     * ask for, not the key), busy (a 429, waited out for as long as
+     * `Retry-After` says), or not available this time (a 5xx). "Not found"
+     * (404) is each client's own case, read before this. The status and the
+     * service's own word for it ride along, for the admin's view of its health.
      */
     protected function failure(Response $response, string $what): ProviderException|ProviderRejected
     {
         $message = "{$what} failed with status {$response->status()}.";
+        $answer = self::answerOf($response);
 
         if ($response->status() === 429) {
-            return new ProviderBusy($message, HttpRetry::retryAfter($response, ProviderBusy::DEFAULT_RETRY_AFTER_SECONDS));
+            return new ProviderBusy($message, HttpRetry::retryAfter($response, ProviderBusy::DEFAULT_RETRY_AFTER_SECONDS), $answer);
         }
 
-        return HttpRetry::isOutage($response) || ! $response->clientError()
-            ? new ProviderException($message)
-            : new ProviderRejected($message);
+        if (HttpRetry::isOutage($response) || ! $response->clientError()) {
+            return new ProviderException($message, $answer);
+        }
+
+        return $response->status() === 401
+            ? new ProviderKeyRejected($message, $answer)
+            : new ProviderRejected($message, $answer);
+    }
+
+    /**
+     * The status of a failed answer and the word the service gave for it
+     * (`invalid_token`), cut short: it is shown to the admin as it came.
+     *
+     * @return array{status: int, reason?: string}
+     */
+    protected static function answerOf(Response $response): array
+    {
+        $body = Payload::map($response->json());
+        $reason = Payload::string($body, 'error') ?? Payload::string($body, 'status_message') ?? Payload::string($body, 'message');
+
+        return $reason === null
+            ? ['status' => $response->status()]
+            : ['status' => $response->status(), 'reason' => Str::limit($reason, self::REASON_LENGTH)];
     }
 
     /**

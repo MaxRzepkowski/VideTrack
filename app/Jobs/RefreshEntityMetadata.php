@@ -6,6 +6,7 @@ use App\Catalog\Creators\CompanyRecords;
 use App\Catalog\Creators\CreditRecords;
 use App\Catalog\Creators\PersonRecords;
 use App\Catalog\Creators\UnknownCreator;
+use App\Catalog\KeyRefusals;
 use App\Jobs\Concerns\RunsAsTask;
 use App\Models\Company;
 use App\Models\Follow;
@@ -59,7 +60,7 @@ class RefreshEntityMetadata implements ShouldQueue
         self::dispatch(TaskRun::queueTask(TaskName::RefreshEntities->value));
     }
 
-    public function handle(PersonRecords $people, CompanyRecords $companies): void
+    public function handle(PersonRecords $people, CompanyRecords $companies, KeyRefusals $refusals): void
     {
         $this->taskRun->markStarted();
         $progress = new ProgressReporter($this->taskRun);
@@ -75,6 +76,12 @@ class RefreshEntityMetadata implements ShouldQueue
         $kept = [];
 
         foreach ($companyRows as $company) {
+            if ($refusals->skips($company->provider)) {
+                $processed++;
+
+                continue;
+            }
+
             try {
                 $companies->refresh($company, $locale);
                 $refreshed++;
@@ -95,6 +102,12 @@ class RefreshEntityMetadata implements ShouldQueue
         }
 
         foreach ($personRows as $person) {
+            if ($refusals->skips($person->provider)) {
+                $processed++;
+
+                continue;
+            }
+
             try {
                 $people->refresh($person, $locale);
                 $refreshed++;
@@ -114,7 +127,7 @@ class RefreshEntityMetadata implements ShouldQueue
             $summary .= ' '.count($kept).' kept as they were.';
         }
 
-        $this->taskRun->markSuccess($summary, $errors, $kept);
+        $this->taskRun->markSuccess($summary, [...$errors, ...$refusals->lines()], $kept);
     }
 
     private function kept(string $label, UnknownCreator|NotFoundAtService $e): string

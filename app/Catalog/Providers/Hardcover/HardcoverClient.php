@@ -4,6 +4,7 @@ namespace App\Catalog\Providers\Hardcover;
 
 use App\Catalog\ProviderCacheContext;
 use App\Catalog\ProviderException;
+use App\Catalog\ProviderHealth;
 use App\Catalog\Providers\Concerns\MakesCachedRequests;
 use App\Catalog\Providers\Concerns\SendsHttpRequests;
 use App\Catalog\Providers\Concerns\ThrottlesRequests;
@@ -15,13 +16,19 @@ use App\Catalog\Providers\Concerns\ThrottlesRequests;
  */
 class HardcoverClient
 {
+    /** The setting the operator writes the key under. */
+    public const KEY_VARIABLE = 'HARDCOVER_API_KEY';
+
     use MakesCachedRequests;
     use SendsHttpRequests;
     use ThrottlesRequests;
 
     private const RATE_LIMIT_PER_MINUTE = 55;
 
-    public function __construct(private readonly ProviderCacheContext $cacheContext) {}
+    public function __construct(
+        private readonly ProviderCacheContext $cacheContext,
+        private readonly ProviderHealth $health,
+    ) {}
 
     /**
      * Cached GraphQL query. TTL in seconds; keys are derived from the query
@@ -57,6 +64,15 @@ class HardcoverClient
     {
         $this->throttle('hardcover-api', self::RATE_LIMIT_PER_MINUTE, 60);
 
+        return $this->health->watch(HardcoverProvider::CODE, fn (): array => $this->send($graphql, $variables));
+    }
+
+    /**
+     * @param  array<string, mixed>  $variables
+     * @return array<string, mixed>
+     */
+    private function send(string $graphql, array $variables): array
+    {
         $response = $this->guardConnection('Hardcover', fn () => $this->httpClient()
             ->withToken($this->apiKey())
             ->post(config()->string('tracker.hardcover.endpoint'), [
@@ -79,6 +95,16 @@ class HardcoverClient
         return (array) $response->json('data', []);
     }
 
+    /**
+     * One query past the cache, as a probe of whether Hardcover answers and takes the key.
+     *
+     * @param  array<string, mixed>  $variables
+     */
+    public function probe(string $graphql, array $variables): void
+    {
+        $this->fetch($graphql, $variables);
+    }
+
     /** Hardcover's account page shows a key as a whole header; a key pasted with its "Bearer " is the same key. */
     public static function bareKey(string $key): string
     {
@@ -87,6 +113,6 @@ class HardcoverClient
 
     private function apiKey(): string
     {
-        return self::bareKey($this->credential('tracker.hardcover.api_key', 'HARDCOVER_API_KEY'));
+        return self::bareKey($this->credential('tracker.hardcover.api_key', self::KEY_VARIABLE));
     }
 }

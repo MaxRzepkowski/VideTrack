@@ -6,6 +6,7 @@ use App\Catalog\Contracts\MetadataProvider;
 use App\Catalog\Contracts\SupportsBulkExternalIdLookup;
 use App\Catalog\Contracts\SupportsCollections;
 use App\Catalog\Contracts\SupportsDiscovery;
+use App\Catalog\Contracts\SupportsHealthProbe;
 use App\Catalog\Contracts\SupportsIsbnLookup;
 use App\Catalog\Contracts\SupportsPersonPage;
 use App\Catalog\Contracts\SupportsSimilarTitles;
@@ -34,8 +35,13 @@ use App\Support\Payload;
  * author's page in HardcoverAuthors, a series in HardcoverSeries, the reading
  * of both answer shapes in HardcoverPayload.
  */
-class HardcoverProvider implements MetadataProvider, SupportsBulkExternalIdLookup, SupportsCollections, SupportsDiscovery, SupportsIsbnLookup, SupportsPersonPage, SupportsSimilarTitles, SupportsSummaryLookup, SupportsTrending
+class HardcoverProvider implements MetadataProvider, SupportsBulkExternalIdLookup, SupportsCollections, SupportsDiscovery, SupportsHealthProbe, SupportsIsbnLookup, SupportsPersonPage, SupportsSimilarTitles, SupportsSummaryLookup, SupportsTrending
 {
+    public const CODE = 'hardcover';
+
+    /** A book that has stood at Hardcover for years (Dune): one title by id, its id alone. */
+    public const PROBE_TITLE = 312460;
+
     /** Pages of one genre offered: more than anyone browses. */
     private const MAX_GENRE_PAGES = 100;
 
@@ -65,6 +71,21 @@ class HardcoverProvider implements MetadataProvider, SupportsBulkExternalIdLooku
     public function code(): string
     {
         return $this->payload->code();
+    }
+
+    public function serviceName(): string
+    {
+        return 'Hardcover';
+    }
+
+    public function credentialVariables(): array
+    {
+        return [HardcoverClient::KEY_VARIABLE];
+    }
+
+    public function probe(): void
+    {
+        $this->client->probe('query Probe($id: Int!) { books_by_pk(id: $id) { id } }', ['id' => self::PROBE_TITLE]);
     }
 
     public function search(string $query, string $locale, MatureContent $mature): array

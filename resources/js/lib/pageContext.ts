@@ -60,6 +60,11 @@ export function imageBase(): string {
     return shared().imageBase;
 }
 
+/** Whether the signed-in user runs this instance: the Instance page is theirs. */
+export function viewerIsAdmin(): boolean {
+    return shared().auth.user?.is_admin === true;
+}
+
 /** Whether a password signs in here; false where identity providers are the only way in. */
 export function passwordLoginEnabled(): boolean {
     return shared().passwordLogin;

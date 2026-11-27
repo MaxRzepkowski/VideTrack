@@ -77,6 +77,8 @@ export interface User {
     bio: string | null;
     avatar: string | null;
     is_private: boolean;
+    /** Opens the Instance page in the menu; the page itself asks again. */
+    is_admin: boolean;
     locale: string | null;
     preferences: UserPreferences;
     /** The password is a way in, so it confirms what cannot be undone; otherwise the username does. */

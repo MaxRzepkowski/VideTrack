@@ -40,7 +40,7 @@ final class HardcoverServiceProvider extends ServiceProvider
 
         $this->callAfterResolving(ProviderRegistry::class, function (ProviderRegistry $providers): void {
             if ($this->configured()) {
-                $providers->register('hardcover', HardcoverProvider::class);
+                $providers->register(HardcoverProvider::CODE, HardcoverProvider::class);
             }
         });
 

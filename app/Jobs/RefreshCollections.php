@@ -6,6 +6,7 @@ use App\Actions\Media\DeleteCollection;
 use App\Actions\Media\RefreshCollection;
 use App\Catalog\Contracts\SupportsCollections;
 use App\Catalog\ItemNotFoundException;
+use App\Catalog\KeyRefusals;
 use App\Catalog\ProviderRegistry;
 use App\Jobs\Concerns\RunsAsTask;
 use App\Models\MediaList;
@@ -39,7 +40,7 @@ class RefreshCollections implements ShouldQueue
         self::dispatch(TaskRun::queueTask(TaskName::RefreshCollections->value));
     }
 
-    public function handle(ProviderRegistry $providers, RefreshCollection $refresh, DeleteCollection $delete): void
+    public function handle(ProviderRegistry $providers, RefreshCollection $refresh, DeleteCollection $delete, KeyRefusals $refusals): void
     {
         $this->taskRun->markStarted();
         $progress = new ProgressReporter($this->taskRun);
@@ -70,7 +71,7 @@ class RefreshCollections implements ShouldQueue
                 continue;
             }
 
-            if (! $provider instanceof SupportsCollections) {
+            if (! $provider instanceof SupportsCollections || $refusals->skips($source['provider'])) {
                 continue;
             }
 
@@ -103,6 +104,6 @@ class RefreshCollections implements ShouldQueue
             $summary .= ' Skipped '.count($skipped).' from a disabled provider.';
         }
 
-        $this->taskRun->markSuccess($summary, $errors, [...$removed, ...$skipped]);
+        $this->taskRun->markSuccess($summary, [...$errors, ...$refusals->lines()], [...$removed, ...$skipped]);
     }
 }

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import Heading from '@/components/Heading.vue';
 import { Button } from '@/components/ui/button';
-import { navHref } from '@/lib/navigation';
+import { isAtOrUnder, navHref } from '@/lib/navigation';
 import { settingsNav } from '@/lib/settingsNavigation';
 import { Link, usePage } from '@inertiajs/vue3';
 import { trans } from 'laravel-vue-i18n';
@@ -21,11 +21,17 @@ withDefaults(
 const page = usePage();
 
 // Labels in a computed: they follow a language switched on this very page.
+// A page with tabs at addresses of its own (the Instance page) is its entry's
+// on every tab.
 const sidebarNavItems = computed(() =>
-    settingsNav().map((entry) => ({ title: entry.label(), href: navHref(entry), icon: entry.icon, destructive: entry.destructive === true })),
+    settingsNav().map((entry) => ({
+        title: entry.label(),
+        href: navHref(entry),
+        icon: entry.icon,
+        destructive: entry.destructive === true,
+        current: isAtOrUnder(page.url, navHref(entry)),
+    })),
 );
-
-const currentPath = computed(() => page.url.split('?')[0]);
 
 // On a phone the menu is one scrolling row: bring the open page's entry into view.
 const nav = useTemplateRef('nav');
@@ -45,11 +51,11 @@ onMounted(() => nav.value?.querySelector('[aria-current="page"]')?.scrollIntoVie
                         variant="ghost"
                         :class="[
                             'h-10 shrink-0 justify-start gap-3 py-2 lg:w-full',
-                            { 'bg-surface-raised': currentPath === item.href, 'text-danger hover:text-danger': item.destructive },
+                            { 'bg-surface-raised': item.current, 'text-danger hover:text-danger': item.destructive },
                         ]"
                         as-child
                     >
-                        <Link :href="item.href" :aria-current="currentPath === item.href ? 'page' : undefined">
+                        <Link :href="item.href" :aria-current="item.current ? 'page' : undefined">
                             <component
                                 :is="item.icon"
                                 :class="['size-4 shrink-0', item.destructive ? 'text-danger' : 'text-ink-muted']"

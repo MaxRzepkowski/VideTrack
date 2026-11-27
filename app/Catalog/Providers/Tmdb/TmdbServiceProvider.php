@@ -59,7 +59,7 @@ final class TmdbServiceProvider extends ServiceProvider
             ));
         });
 
-        $this->callAfterResolving(ProviderRegistry::class, fn (ProviderRegistry $providers) => $providers->register('tmdb', TmdbProvider::class));
+        $this->callAfterResolving(ProviderRegistry::class, fn (ProviderRegistry $providers) => $providers->register(TmdbProvider::CODE, TmdbProvider::class));
         $this->callAfterResolving(DataSources::class, fn (DataSources $sources) => $sources->credit(
             new DataSourceCredit('The Movie Database (TMDB)', 'https://www.themoviedb.org/', ['app.this_product_uses_the_tmdb_api', 'app.all_metadata_and_images_are_provided'], logo: '/images/tmdb.svg', logoWidth: 273, logoHeight: 36),
             new DataSourceCredit('JustWatch', 'https://www.justwatch.com/', ['app.where_to_watch_data_is_provided'], logo: '/images/justwatch.png', logoWidth: 253, logoHeight: 38),

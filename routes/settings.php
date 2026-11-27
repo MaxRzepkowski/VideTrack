@@ -11,6 +11,7 @@ use App\Http\Controllers\Settings\DetectedTimezoneController;
 use App\Http\Controllers\Settings\ExportController;
 use App\Http\Controllers\Settings\IdentitiesController;
 use App\Http\Controllers\Settings\ImportController;
+use App\Http\Controllers\Settings\InstanceController;
 use App\Http\Controllers\Settings\IntegrationsController;
 use App\Http\Controllers\Settings\OutgoingWebhooksController;
 use App\Http\Controllers\Settings\PasswordController;
@@ -20,6 +21,7 @@ use App\Http\Controllers\Settings\PushDeviceController;
 use App\Http\Controllers\Settings\TasksController;
 use App\Http\Controllers\Settings\TrackingController;
 use App\Http\Middleware\EnsurePasswordLoginIsEnabled;
+use App\Http\Middleware\EnsureUserIsAdmin;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth', 'throttle:web'])->name('settings.')->group(function () {
@@ -118,6 +120,14 @@ Route::middleware(['auth', 'throttle:web'])->name('settings.')->group(function (
     Route::post('settings/webhooks/{webhook}/test', [OutgoingWebhooksController::class, 'test'])
         ->middleware('throttle:webhook-test')
         ->name('webhooks.test');
+
+    Route::middleware(EnsureUserIsAdmin::class)->group(function () {
+        Route::get('settings/instance', [InstanceController::class, 'overview'])->name('instance.index');
+        Route::get('settings/instance/tasks', [InstanceController::class, 'tasks'])->name('instance.tasks');
+        Route::get('settings/instance/maintenance', [InstanceController::class, 'maintenance'])->name('instance.maintenance');
+        Route::get('settings/instance/checks', [InstanceController::class, 'checks'])->name('instance.checks.index');
+        Route::post('settings/instance/checks/run', [InstanceController::class, 'runCheck'])->middleware('throttle:library-heavy')->name('instance.checks.run');
+    });
 
     Route::get('settings/tasks', [TasksController::class, 'index'])->name('tasks.index');
     Route::get('settings/tasks/runs', [TasksController::class, 'runs'])->name('tasks.runs');

@@ -1,5 +1,6 @@
-import type { TaskRunStatus } from '@/types/generated';
-import { CircleCheck, CircleX, Clock, LoaderCircle, type LucideIcon } from '@lucide/vue';
+import { formatDateTime, formatTime, localDateKey, todayDateKey } from '@/lib/format';
+import type { CheckLevel, TaskRunStatus, WordedLine } from '@/types/generated';
+import { CircleCheck, CircleX, Clock, LoaderCircle, TriangleAlert, type LucideIcon } from '@lucide/vue';
 import { trans } from 'laravel-vue-i18n';
 
 /** @view How a run's ending reads: its word, its icon and their colour. */
@@ -27,4 +28,35 @@ export function statusLook(status: TaskRunStatus): StatusLook {
 /** Queued or at work: the page asks again until it ends. */
 export function isUnderWay(status: TaskRunStatus | null): boolean {
     return status === 'pending' || status === 'started';
+}
+
+/** @view How a line of a check reads: its icon and the colour of both. */
+export interface LevelLook {
+    icon: LucideIcon;
+    tone: string;
+}
+
+/** A check's line in the run's colours: well as a success, passing as on hold, the admin's to fix as a failure. */
+export function levelLook(level: CheckLevel): LevelLook {
+    switch (level) {
+        case 'ok':
+            return { icon: CircleCheck, tone: 'text-success' };
+        case 'warning':
+            return { icon: TriangleAlert, tone: 'text-status-onhold' };
+        case 'problem':
+            return { icon: CircleX, tone: 'text-danger' };
+    }
+}
+
+/**
+ * A sentence the server worded, its moments written here, as every time on
+ * the page is: in the viewer's timezone and time format, by the hour alone
+ * when it is today.
+ */
+export function wordedText(line: WordedLine): string {
+    return Object.entries(line.moments).reduce((text, [name, moment]) => {
+        const written = (localDateKey(moment) === todayDateKey() ? formatTime(moment) : formatDateTime(moment)) ?? '';
+
+        return text.replaceAll(`:${name}`, written);
+    }, line.text);
 }

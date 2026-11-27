@@ -70,7 +70,7 @@ final readonly class IgdbPayload
 
     public function code(): string
     {
-        return 'igdb';
+        return IgdbProvider::CODE;
     }
 
     /**

@@ -12,6 +12,7 @@ use App\Integrations\Import\ImportSourceRegistry;
 use App\Integrations\Scrobble\ScrobbleSourceRegistry;
 use App\Notifications\Channels\ChannelRegistry;
 use App\Notifications\Events\EventKinds;
+use App\Tasks\Attention\AttentionRegistry;
 use App\Tasks\Maintenance\MaintenanceRegistry;
 use Illuminate\Support\ServiceProvider;
 
@@ -37,5 +38,6 @@ class RegistryServiceProvider extends ServiceProvider
         $this->app->singleton(ChannelRegistry::class);
         $this->app->singleton(EventKinds::class);
         $this->app->singleton(MaintenanceRegistry::class);
+        $this->app->singleton(AttentionRegistry::class);
     }
 }

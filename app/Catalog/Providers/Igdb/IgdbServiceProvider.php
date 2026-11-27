@@ -43,7 +43,7 @@ final class IgdbServiceProvider extends ServiceProvider
 
         $this->callAfterResolving(ProviderRegistry::class, function (ProviderRegistry $providers): void {
             if ($this->configured()) {
-                $providers->register('igdb', IgdbProvider::class);
+                $providers->register(IgdbProvider::CODE, IgdbProvider::class);
             }
         });
 

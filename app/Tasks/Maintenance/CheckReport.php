@@ -3,27 +3,46 @@
 namespace App\Tasks\Maintenance;
 
 use App\Tasks\Data\TaskLine;
+use App\Tasks\Maintenance\Data\CheckLine;
 
 /**
- * What a check tells about its run. The result is what it sees now, shown in
- * its row until the next run; a note is something that happened and is worth
- * the task history (a change, a clean-up done). A run without notes leaves no
- * history behind.
+ * What a check tells about its run. Its lines are what it sees now, shown in
+ * its row until the next run; the lines of the run before are at hand, so a
+ * check can tell what changed. A note is something that happened and is
+ * worth the task history (a change, a clean-up done); a run without notes
+ * leaves no history behind.
  */
 final class CheckReport
 {
-    /** @var list<TaskLine> */
-    private array $results = [];
+    /** @var list<CheckLine> */
+    private array $lines = [];
 
     /** @var list<TaskLine> */
     private array $notes = [];
 
     /**
-     * @param  array<string, string|int>  $params
+     * @param  list<CheckLine>  $previous  what the run before said
      */
-    public function result(string $key, array $params = []): void
+    public function __construct(
+        private readonly array $previous = [],
+        public readonly RunCause $cause = RunCause::Window,
+    ) {}
+
+    /** What the run before said about $subject, if it said anything. */
+    public function previous(string $subject): ?CheckLine
     {
-        $this->results[] = new TaskLine($key, $params);
+        foreach ($this->previous as $line) {
+            if ($line->subject === $subject) {
+                return $line;
+            }
+        }
+
+        return null;
+    }
+
+    public function add(CheckLine $line): void
+    {
+        $this->lines[] = $line;
     }
 
     /**
@@ -35,11 +54,11 @@ final class CheckReport
     }
 
     /**
-     * @return list<TaskLine>
+     * @return list<CheckLine>
      */
-    public function results(): array
+    public function lines(): array
     {
-        return $this->results;
+        return $this->lines;
     }
 
     /**

@@ -5,6 +5,8 @@ namespace App\Catalog\Providers\ComicVine;
 use App\Catalog\ProviderBusy;
 use App\Catalog\ProviderCacheContext;
 use App\Catalog\ProviderException;
+use App\Catalog\ProviderHealth;
+use App\Catalog\ProviderKeyRejected;
 use App\Catalog\ProviderRejected;
 use App\Catalog\Providers\Concerns\MakesCachedRequests;
 use App\Catalog\Providers\Concerns\SendsHttpRequests;
@@ -20,12 +22,18 @@ use App\Support\Payload;
  */
 class ComicVineClient
 {
+    /** The setting the operator writes the key under. */
+    public const KEY_VARIABLE = 'COMICVINE_API_KEY';
+
     use MakesCachedRequests;
     use SendsHttpRequests;
     use ThrottlesRequests;
 
-    /** Invalid API key, malformed URL, jsonp without a callback, bad filter, subscriber-only resource. */
-    private const REFUSALS = [100, 102, 103, 104, 105];
+    /** Malformed URL, jsonp without a callback, bad filter, subscriber-only resource. */
+    private const REFUSALS = [102, 103, 104, 105];
+
+    /** "Invalid API Key". */
+    private const KEY_REFUSED = 100;
 
     private const RATE_LIMIT_PER_SECOND = 1;
 
@@ -39,7 +47,10 @@ class ComicVineClient
     /** "Rate limit exceeded": the hour's quota is gone at ComicVine's end. */
     private const RATE_LIMITED = 107;
 
-    public function __construct(private readonly ProviderCacheContext $cacheContext) {}
+    public function __construct(
+        private readonly ProviderCacheContext $cacheContext,
+        private readonly ProviderHealth $health,
+    ) {}
 
     /**
      * Cached GET request. TTL in seconds; keys are derived from the path +
@@ -78,6 +89,16 @@ class ComicVineClient
     }
 
     /**
+     * One request past the cache, as a probe of whether ComicVine answers and takes the key.
+     *
+     * @param  array<string, string|int>  $query
+     */
+    public function probe(string $path, array $query): void
+    {
+        $this->fetch($path, $query);
+    }
+
+    /**
      * @param  array<string, string|int>  $query
      * @return array<array-key, mixed>|null the `results` member; null when ComicVine reports the object not found
      */
@@ -85,6 +106,15 @@ class ComicVineClient
     {
         $this->guardBudget();
 
+        return $this->health->watch(ComicVineProvider::CODE, fn (): ?array => $this->send($path, $query));
+    }
+
+    /**
+     * @param  array<string, string|int>  $query
+     * @return array<array-key, mixed>|null
+     */
+    private function send(string $path, array $query): ?array
+    {
         // ComicVine turns away requests without a client of their own.
         $response = $this->guardConnection('ComicVine', fn () => $this->httpClient(config()->string('tracker.comicvine.base_url'))
             ->withUserAgent(config()->string('tracker.http.user_agent'))
@@ -114,6 +144,13 @@ class ComicVineClient
             throw new ProviderBusy("ComicVine request [{$path}] hit the rate limit.", self::BUDGET_WINDOW_SECONDS);
         }
 
+        if ($status === self::KEY_REFUSED) {
+            throw new ProviderKeyRejected("ComicVine refused the API key on request [{$path}].", [
+                'status' => $status,
+                ...(($error = Payload::string($answer, 'error')) === null ? [] : ['reason' => $error]),
+            ]);
+        }
+
         if (in_array($status, self::REFUSALS, true)) {
             throw new ProviderRejected("ComicVine refused request [{$path}] with status_code {$status}.");
         }
@@ -127,7 +164,7 @@ class ComicVineClient
 
     private function apiKey(): string
     {
-        return $this->credential('tracker.comicvine.api_key', 'COMICVINE_API_KEY');
+        return $this->credential('tracker.comicvine.api_key', self::KEY_VARIABLE);
     }
 
     private function guardBudget(): void

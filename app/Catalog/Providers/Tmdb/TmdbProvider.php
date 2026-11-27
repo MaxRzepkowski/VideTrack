@@ -15,6 +15,7 @@ use App\Catalog\Contracts\SupportsDiscovery;
 use App\Catalog\Contracts\SupportsEpisodeRatings;
 use App\Catalog\Contracts\SupportsExternalIdLookup;
 use App\Catalog\Contracts\SupportsFilteredDiscovery;
+use App\Catalog\Contracts\SupportsHealthProbe;
 use App\Catalog\Contracts\SupportsHierarchy;
 use App\Catalog\Contracts\SupportsMatureFilter;
 use App\Catalog\Contracts\SupportsNetworkPage;
@@ -52,8 +53,13 @@ use LogicException;
  *
  * Each method is described where it is implemented, not here.
  */
-class TmdbProvider implements MetadataProvider, SupportsChangeFeed, SupportsCharts, SupportsCollections, SupportsCollectionSearch, SupportsCompanyPage, SupportsCompanySearch, SupportsCrewRoles, SupportsDiscovery, SupportsEpisodeRatings, SupportsExternalIdLookup, SupportsFilteredDiscovery, SupportsHierarchy, SupportsMatureFilter, SupportsNetworkPage, SupportsPeopleBrowsing, SupportsPeopleSearch, SupportsPersonPage, SupportsTrending, SupportsWatchProviders
+class TmdbProvider implements MetadataProvider, SupportsChangeFeed, SupportsCharts, SupportsCollections, SupportsCollectionSearch, SupportsCompanyPage, SupportsCompanySearch, SupportsCrewRoles, SupportsDiscovery, SupportsEpisodeRatings, SupportsExternalIdLookup, SupportsFilteredDiscovery, SupportsHealthProbe, SupportsHierarchy, SupportsMatureFilter, SupportsNetworkPage, SupportsPeopleBrowsing, SupportsPeopleSearch, SupportsPersonPage, SupportsTrending, SupportsWatchProviders
 {
+    public const CODE = 'tmdb';
+
+    /** A film that has stood at TMDB since its first days (Fight Club): one title by id, as the app asks every day. */
+    public const PROBE_TITLE = '550';
+
     public function __construct(
         private readonly TmdbClient $client,
         private readonly TmdbPayload $payload,
@@ -71,6 +77,21 @@ class TmdbProvider implements MetadataProvider, SupportsChangeFeed, SupportsChar
     public function code(): string
     {
         return $this->payload->code();
+    }
+
+    public function serviceName(): string
+    {
+        return 'TMDB';
+    }
+
+    public function credentialVariables(): array
+    {
+        return [TmdbKey::VARIABLE];
+    }
+
+    public function probe(): void
+    {
+        $this->client->probe('movie/'.self::PROBE_TITLE);
     }
 
     public function search(string $query, string $locale, MatureContent $mature): array

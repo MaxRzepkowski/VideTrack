@@ -38,6 +38,11 @@ export type ApiTokenItem = {
     readonly createdAt: string | null;
     readonly expiresAt: string | null;
 };
+export type AttentionItem = {
+    readonly title: string;
+    readonly detail: string;
+    readonly since: string | null;
+};
 export type BellEntryKind = 'person' | 'company' | 'collection' | 'manual' | 'via' | 'muted';
 export type BookKind =
     'novella' | 'short_story' | 'graphic_novel' | 'fan_fiction' | 'research' | 'poetry' | 'anthology' | 'web_novel' | 'light_novel';
@@ -108,6 +113,7 @@ export type ChannelsPage = {
     readonly digestHour: number;
     readonly push: PushDevicesData | null;
 };
+export type CheckLevel = 'ok' | 'warning' | 'problem';
 export type ClosesRun = 'series' | 'season';
 export type CollectionBannerData = {
     readonly provider: string;
@@ -511,6 +517,21 @@ export type ListUnitTotal = {
     readonly remainingAmount: number;
     readonly itemsCounted: number;
     readonly itemsTotal: number;
+};
+export type MaintenanceCheckEntry = {
+    readonly code: string;
+    readonly label: string;
+    readonly frequency: string;
+    readonly status: TaskRunStatus | null;
+    readonly lines: MaintenanceCheckLine[];
+    readonly error: string | null;
+    readonly startedAt: string | null;
+    readonly checkedAt: string | null;
+};
+export type MaintenanceCheckLine = {
+    readonly level: CheckLevel;
+    readonly line: WordedLine;
+    readonly details: WordedLine[];
 };
 export type MakerTally = {
     readonly creator: CreatorLink;
@@ -1247,4 +1268,8 @@ export type WholeLength = {
     readonly average: number;
     readonly longest: MediaSummary;
     readonly longestRuntime: number;
+};
+export type WordedLine = {
+    readonly text: string;
+    readonly moments: Record<string, string>;
 };
