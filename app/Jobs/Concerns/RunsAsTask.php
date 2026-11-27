@@ -4,7 +4,7 @@ namespace App\Jobs\Concerns;
 
 use App\Jobs\Middleware\OneRunAtATime;
 use App\Models\TaskRun;
-use App\Support\ExternalServiceException;
+use App\Tasks\RunFailure;
 use Throwable;
 
 /**
@@ -22,9 +22,6 @@ use Throwable;
  */
 trait RunsAsTask
 {
-    /** A translation key: the run's summary is worded in the language it is read in. */
-    public const UNEXPECTED_FAILURE = 'tasks.the_run_stopped_on_an_unexpected_error';
-
     /** A task's `$maxExceptions` unless it says otherwise: the queue worker's own --tries. */
     public const BREAKS_ALLOWED = 3;
 
@@ -59,15 +56,9 @@ trait RunsAsTask
         return $copy;
     }
 
-    /**
-     * An outside service's failure is worded by us and safe to show; any
-     * other exception may carry a query, a path or an address, so the run
-     * says only that it broke — the worker logs the rest.
-     */
+    /** Worded as {@see RunFailure} says: only an outside service's own words are safe to show. */
     public function failed(Throwable $exception): void
     {
-        $this->taskRun->markFailureIfOpen($exception instanceof ExternalServiceException
-            ? $exception->wording()
-            : __(self::UNEXPECTED_FAILURE));
+        $this->taskRun->markFailureIfOpen(RunFailure::of($exception)->wording());
     }
 }

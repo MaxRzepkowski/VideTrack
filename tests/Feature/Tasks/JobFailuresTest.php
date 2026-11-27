@@ -7,6 +7,7 @@ use App\Jobs\PrefetchTrending;
 use App\Jobs\SyncFollowedCreator;
 use App\Models\TaskRun;
 use App\Support\ServiceUnavailable;
+use App\Tasks\RunFailure;
 use App\Tasks\TaskName;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -39,7 +40,7 @@ test('a task that breaks keeps the raw exception out of its run, but says which 
     $unavailable = TaskRun::queueTask(TaskName::Cleanup->value);
     (new CleanupExpiredData($unavailable))->failed(new ServiceUnavailable('TMDB answered 503.'));
 
-    expect($broken->refresh()->summary)->toBe(__(CleanupExpiredData::UNEXPECTED_FAILURE))
+    expect($broken->refresh()->summary)->toBe(__(RunFailure::UNEXPECTED))
         ->and($unavailable->refresh()->summary)->toBe('TMDB answered 503.');
 });
 

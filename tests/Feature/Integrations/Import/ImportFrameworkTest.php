@@ -23,6 +23,7 @@ use App\Models\User;
 use App\Support\ExternalServiceException;
 use App\Support\NotFoundAtService;
 use App\Support\ServiceRejected;
+use App\Tasks\RunFailure;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Event;
@@ -265,7 +266,7 @@ test('a file import that breaks keeps its file for the retry; the last attempt d
 
     expect(is_file($path))->toBeFalse()
         ->and($taskRun->refresh()->status)->toBe(TaskRunStatus::Failure)
-        ->and($taskRun->summary)->toBe(__(RunImport::UNEXPECTED_FAILURE));
+        ->and($taskRun->summary)->toBe(__(RunFailure::UNEXPECTED));
 });
 
 test('a source the service refused or knows nothing about ends the run without a retry, in the user\'s words', function (ExternalServiceException $answer, string $summary) {
