@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import MenuRow from '@/components/MenuRow.vue';
 import { DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
-import { navHref, SETTINGS_NAV, userPanel } from '@/lib/navigation';
+import { navHref, userPanel } from '@/lib/navigation';
+import { SETTINGS_NAV } from '@/lib/settingsNavigation';
 import { rowTint } from '@/lib/ui';
 import type { User } from '@/types';
 import { trans } from 'laravel-vue-i18n';

@@ -1,5 +1,6 @@
-import { menuPlaces, navHref, OTHER_PLACES, settingsNav, USER_PANELS, type NavEntry } from '@/lib/navigation';
+import { menuPlaces, navHref, OTHER_PLACES, USER_PANELS, type NavEntry } from '@/lib/navigation';
 import { viewerUsername } from '@/lib/pageContext';
+import { settingsNav } from '@/lib/settingsNavigation';
 import { router } from '@inertiajs/vue3';
 import { LogOut, type LucideIcon } from '@lucide/vue';
 import { trans } from 'laravel-vue-i18n';

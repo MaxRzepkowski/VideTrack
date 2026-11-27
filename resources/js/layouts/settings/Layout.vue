@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import Heading from '@/components/Heading.vue';
 import { Button } from '@/components/ui/button';
-import { navHref, settingsNav } from '@/lib/navigation';
+import { navHref } from '@/lib/navigation';
+import { settingsNav } from '@/lib/settingsNavigation';
 import { Link, usePage } from '@inertiajs/vue3';
 import { trans } from 'laravel-vue-i18n';
 import { computed, onMounted, useTemplateRef } from 'vue';
