@@ -4,14 +4,12 @@ namespace App\Integrations\Hardcover;
 
 use App\Integrations\Connections\ConnectionExpired;
 use App\Integrations\Connections\ConnectionRejected;
+use App\Integrations\ServiceHttpClient;
 use App\Models\ServiceConnection;
-use App\Support\ConnectionFailure;
 use App\Support\HttpRetry;
 use App\Support\Payload;
-use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\Response;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Sleep;
 
 /**
@@ -36,8 +34,6 @@ class HardcoverLibraryClient
 
     /** One page a second keeps a run inside the per-minute limit. */
     private const PAGE_INTERVAL_SECONDS = 1;
-
-    private const TIMEOUT_SECONDS = 30;
 
     private const RETRIES = 4;
 
@@ -67,6 +63,8 @@ class HardcoverLibraryClient
 
     private const CHECK_QUERY = '{ me { username user_books(limit: 1) { book_id } } }';
 
+    public function __construct(private readonly ServiceHttpClient $http) {}
+
     /** Where the reader makes a key with the scopes the import needs. */
     public static function newKeyUrl(): string
     {
@@ -84,11 +82,7 @@ class HardcoverLibraryClient
      */
     public function accept(string $key): ?string
     {
-        try {
-            $response = $this->http($key)->post($this->graphqlUrl(), ['query' => self::CHECK_QUERY]);
-        } catch (ConnectionException $e) {
-            throw new HardcoverUnavailable('import.service_unreachable', ['service' => HardcoverService::NAME, 'reason' => ConnectionFailure::reason($e)]);
-        }
+        $response = $this->http->reach(HardcoverService::NAME, HardcoverUnavailable::class, fn (): Response => $this->request($key)->post($this->graphqlUrl(), ['query' => self::CHECK_QUERY]));
 
         $me = Payload::list($response->json('data.me'))[0] ?? [];
 
@@ -149,21 +143,14 @@ class HardcoverLibraryClient
      */
     private function query(string $key, array $variables): Response
     {
-        try {
-            return $this->http($key)
-                ->retry(self::RETRIES, fn (int $attempt): int => self::FIRST_RETRY_MS * 2 ** ($attempt - 1), HttpRetry::isTransientOrThrottled(...), throw: false)
-                ->post($this->graphqlUrl(), ['query' => self::LIBRARY_QUERY, 'variables' => $variables]);
-        } catch (ConnectionException $e) {
-            throw new HardcoverUnavailable('import.service_unreachable', ['service' => HardcoverService::NAME, 'reason' => ConnectionFailure::reason($e)]);
-        }
+        $request = $this->http->retrying($this->request($key), self::RETRIES, self::FIRST_RETRY_MS, HttpRetry::isTransientOrThrottled(...));
+
+        return $this->http->reach(HardcoverService::NAME, HardcoverUnavailable::class, fn (): Response => $request->post($this->graphqlUrl(), ['query' => self::LIBRARY_QUERY, 'variables' => $variables]));
     }
 
-    private function http(string $key): PendingRequest
+    private function request(string $key): PendingRequest
     {
-        return Http::timeout(self::TIMEOUT_SECONDS)
-            ->acceptJson()
-            ->withUserAgent(config()->string('tracker.http.user_agent'))
-            ->withToken($key);
+        return $this->http->request()->withToken($key);
     }
 
     private function graphqlUrl(): string

@@ -2,11 +2,11 @@
 
 namespace App\Integrations\Steam;
 
+use App\Integrations\ServiceHttpClient;
 use App\Support\HttpRetry;
 use App\Support\Payload;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\Response;
-use Illuminate\Support\Facades\Http;
 
 /**
  * The two Steam Web API calls an import needs, with the user's own key:
@@ -24,7 +24,11 @@ class SteamClient
     /** Where a user makes their own Steam Web API key. */
     public const KEY_URL = 'https://steamcommunity.com/dev/apikey';
 
-    private const TIMEOUT_SECONDS = 30;
+    private const TRIES = 3;
+
+    private const FIRST_RETRY_MS = 2000;
+
+    public function __construct(private readonly ServiceHttpClient $http) {}
 
     /**
      * The SteamID64 behind a profile's custom name.
@@ -76,11 +80,7 @@ class SteamClient
     private function get(string $key, string $path, array $query): Response
     {
         try {
-            $response = Http::baseUrl(rtrim(config()->string('tracker.steam.base_url'), '/'))
-                ->timeout(self::TIMEOUT_SECONDS)
-                ->acceptJson()
-                ->withUserAgent(config()->string('tracker.http.user_agent'))
-                ->retry(3, fn (int $attempt): int => 2000 * 2 ** ($attempt - 1), HttpRetry::isTransientOrThrottled(...), throw: false)
+            $response = $this->http->retrying($this->http->request(config()->string('tracker.steam.base_url')), self::TRIES, self::FIRST_RETRY_MS, HttpRetry::isTransientOrThrottled(...))
                 ->get($path, [...$query, 'key' => $key, 'format' => 'json']);
         } catch (ConnectionException) {
             throw new SteamUnavailable('import.steam_could_not_be_reached_try');

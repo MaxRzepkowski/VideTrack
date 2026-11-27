@@ -6,14 +6,13 @@ use App\Integrations\Connections\ConnectionExpired;
 use App\Integrations\Connections\Data\DeviceGrant;
 use App\Integrations\Connections\GrantUnavailable;
 use App\Integrations\Connections\TokenGrantClient;
+use App\Integrations\ServiceHttpClient;
 use App\Models\ServiceConnection;
-use App\Support\ConnectionFailure;
 use App\Support\HttpRetry;
 use App\Support\Payload;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\Response;
-use Illuminate\Support\Facades\Http;
 use LogicException;
 
 /**
@@ -39,7 +38,11 @@ class SimklClient
 
     private const TIMEOUT_SECONDS = 60;
 
-    public function __construct(private readonly TokenGrantClient $tokens) {}
+    private const TRIES = 5;
+
+    private const FIRST_RETRY_MS = 1000;
+
+    public function __construct(private readonly TokenGrantClient $tokens, private readonly ServiceHttpClient $http) {}
 
     /**
      * The account name, for the card — read with a token straight from the
@@ -88,13 +91,9 @@ class SimklClient
      */
     private function send(string $token, string $clientId, string $path, array $query): Response
     {
-        try {
-            return $this->api($token)
-                ->retry(5, fn (int $attempt): int => min(60000, 1000 * 2 ** ($attempt - 1)), HttpRetry::isTransientOrThrottled(...), throw: false)
-                ->get($path, [...$query, ...$this->appQuery($clientId)]);
-        } catch (ConnectionException $e) {
-            throw new SimklUnavailable('import.service_unreachable', ['service' => SimklService::NAME, 'reason' => ConnectionFailure::reason($e)]);
-        }
+        $request = $this->http->retrying($this->api($token), self::TRIES, self::FIRST_RETRY_MS, HttpRetry::isTransientOrThrottled(...));
+
+        return $this->http->reach(SimklService::NAME, SimklUnavailable::class, fn (): Response => $request->get($path, [...$query, ...$this->appQuery($clientId)]));
     }
 
     /** Where the user's app keeps its device grant, for connecting and for every call made with it. */
@@ -117,11 +116,7 @@ class SimklClient
 
     private function api(string $token): PendingRequest
     {
-        return Http::baseUrl(rtrim(config()->string('tracker.simkl.base_url'), '/'))
-            ->timeout(self::TIMEOUT_SECONDS)
-            ->acceptJson()
-            ->withUserAgent(config()->string('tracker.http.user_agent'))
-            ->withToken($token);
+        return $this->http->request(config()->string('tracker.simkl.base_url'), self::TIMEOUT_SECONDS)->withToken($token);
     }
 
     /**

@@ -4,16 +4,14 @@ namespace App\Integrations\MdbList;
 
 use App\Integrations\Connections\ConnectionExpired;
 use App\Integrations\Connections\ConnectionRejected;
+use App\Integrations\ServiceHttpClient;
 use App\Models\ServiceConnection;
-use App\Support\ConnectionFailure;
 use App\Support\HttpRetry;
 use App\Support\Payload;
 use App\Support\ServiceBusy;
 use Generator;
-use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\Response;
-use Illuminate\Support\Facades\Http;
 
 /**
  * MDBList's API as its reference describes it (api.mdblist.com/docs,
@@ -44,6 +42,8 @@ class MdbListClient
 
     public const PREFERENCES_URL = 'https://mdblist.com/preferences/';
 
+    public function __construct(private readonly ServiceHttpClient $http) {}
+
     /**
      * Whether MDBList takes a key, asked with one request each time the
      * form is checked.
@@ -54,11 +54,7 @@ class MdbListClient
      */
     public function accept(string $key): ?string
     {
-        try {
-            $response = $this->http()->get('/user', ['apikey' => $key]);
-        } catch (ConnectionException $e) {
-            throw new MdbListUnavailable('import.service_unreachable', ['service' => MdbListService::NAME, 'reason' => ConnectionFailure::reason($e)]);
-        }
+        $response = $this->http->reach(MdbListService::NAME, MdbListUnavailable::class, fn (): Response => $this->request()->get('/user', ['apikey' => $key]));
 
         match (true) {
             HttpRetry::isOutage($response) => throw new MdbListUnavailable('import.service_answered_try_later', ['service' => MdbListService::NAME, 'status' => $response->status()]),
@@ -128,26 +124,14 @@ class MdbListClient
      */
     private function send(string $key, string $path, array $query): Response
     {
-        try {
-            return $this->http()
-                ->retry(self::RETRIES, fn (int $attempt): int => self::FIRST_RETRY_MS * 2 ** ($attempt - 1), HttpRetry::isTransient(...), throw: false)
-                ->get($path, [...$query, 'apikey' => $key]);
-        } catch (ConnectionException $e) {
-            throw new MdbListUnavailable('import.service_unreachable', ['service' => MdbListService::NAME, 'reason' => ConnectionFailure::reason($e)]);
-        }
+        $request = $this->http->retrying($this->request(), self::RETRIES, self::FIRST_RETRY_MS, HttpRetry::isTransient(...));
+
+        return $this->http->reach(MdbListService::NAME, MdbListUnavailable::class, fn (): Response => $request->get($path, [...$query, 'apikey' => $key]));
     }
 
     /** The key rides in each request's query, as MDBList asks; ConnectionFailure keeps it out of every message. */
-    private function http(): PendingRequest
+    private function request(): PendingRequest
     {
-        return Http::baseUrl($this->baseUrl())
-            ->timeout(self::TIMEOUT_SECONDS)
-            ->acceptJson()
-            ->withUserAgent(config()->string('tracker.http.user_agent'));
-    }
-
-    private function baseUrl(): string
-    {
-        return rtrim(config()->string('tracker.mdblist.base_url'), '/');
+        return $this->http->request(config()->string('tracker.mdblist.base_url'), self::TIMEOUT_SECONDS);
     }
 }

@@ -3,15 +3,13 @@
 namespace App\Integrations\Connections;
 
 use App\Integrations\Connections\Data\TokenGrant;
+use App\Integrations\ServiceHttpClient;
 use App\Models\ServiceConnection;
-use App\Support\ConnectionFailure;
 use App\Support\Payload;
 use Closure;
 use Illuminate\Contracts\Cache\LockTimeoutException;
-use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Http;
 use LogicException;
 
 /**
@@ -49,7 +47,7 @@ class TokenGrantClient
 
     private const REFRESH_WAIT_SECONDS = self::REFRESH_LOCK_SECONDS;
 
-    public function __construct(private readonly TokenStore $tokenStore) {}
+    public function __construct(private readonly TokenStore $tokenStore, private readonly ServiceHttpClient $http) {}
 
     /**
      * One request with the connection's access token, refreshed when due
@@ -171,16 +169,7 @@ class TokenGrantClient
     {
         $signed = [...$form, 'client_id' => $grant->clientId, ...($grant->clientSecret === null ? [] : ['client_secret' => $grant->clientSecret])];
 
-        try {
-            return Http::baseUrl(rtrim($grant->baseUrl, '/'))
-                ->timeout(self::TIMEOUT_SECONDS)
-                ->acceptJson()
-                ->withUserAgent(config()->string('tracker.http.user_agent'))
-                ->asForm()
-                ->post($path, $signed);
-        } catch (ConnectionException $e) {
-            throw new GrantUnavailable('import.service_unreachable', ['service' => $grant->service, 'reason' => ConnectionFailure::reason($e)]);
-        }
+        return $this->http->reach($grant->service, GrantUnavailable::class, fn (): Response => $this->http->request($grant->baseUrl, self::TIMEOUT_SECONDS)->asForm()->post($path, $signed));
     }
 
     /**
