@@ -464,6 +464,7 @@ function boot(string $dir): Application
     $app->make(ConsoleKernel::class)->call('migrate', ['--force' => true]);
     // As the container's boot does after migrating.
     $app->make(ConsoleKernel::class)->call('vide:library:rebuild');
+    $app->make(ConsoleKernel::class)->call('vide:database:optimize');
 
     return $app;
 }

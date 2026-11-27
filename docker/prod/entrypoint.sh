@@ -84,6 +84,11 @@ as_app php artisan vide:webpush:keys
 as_app php artisan vide:library:rebuild \
     || echo "entrypoint: library rebuild failed; run vide:library:rebuild once the cause is fixed" >&2
 
+# After the rebuild, so the tables it fills get statistics too: a query plan
+# picked without them can be slow on a large library.
+as_app php artisan vide:database:optimize \
+    || echo "entrypoint: refreshing the query planner statistics failed" >&2
+
 # Recover any recurring runs missed while the container was down (a daily
 # refresh does not wait for the next 04:00 after a late start). Never blocks
 # boot — it only enqueues; the queue worker drains once supervisord is up.

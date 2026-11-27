@@ -15,7 +15,8 @@ On start the container:
 1. takes a consistent snapshot of the database into `/data/backups/pre-migrate-<time>.sqlite`
    (the last five are kept), and refuses to start if it cannot;
 2. runs the migrations;
-3. rebuilds the library's read model and catches up on scheduled work it missed while it was down.
+3. rebuilds the library's read model, refreshes the database's query planner statistics and catches
+   up on scheduled work it missed while it was down.
 
 `docker compose ps` shows `healthy` once the app answers.
 
