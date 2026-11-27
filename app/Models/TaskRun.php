@@ -100,10 +100,11 @@ class TaskRun extends Model
 
     /**
      * @param  list<string>  $errors
+     * @param  list<string>  $details  what the run noted before it broke
      */
-    public function markFailure(string $summary, array $errors = []): void
+    public function markFailure(string $summary, array $errors = [], array $details = []): void
     {
-        $this->finish(TaskRunStatus::Failure, $summary, $errors, []);
+        $this->finish(TaskRunStatus::Failure, $summary, $errors, $details);
     }
 
     /** A run ends once: a second ending would rewrite what the first reported. */
