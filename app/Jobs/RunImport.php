@@ -16,11 +16,11 @@ use App\Library\MutationSource;
 use App\Models\ServiceConnection;
 use App\Models\TaskRun;
 use App\Models\User;
-use App\Support\ExternalServiceException;
 use App\Support\NotFoundAtService;
 use App\Support\ServiceBusy;
 use App\Support\ServiceRejected;
 use App\Tasks\ProgressReporter;
+use App\Tasks\RunFailure;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Foundation\Queue\Queueable;
@@ -178,9 +178,7 @@ class RunImport implements HandsOverWork, ShouldQueue
     /** As every task job words it (RunsAsTask): a raw exception's message stays in the log. */
     public function failed(Throwable $exception): void
     {
-        $reason = $exception instanceof ExternalServiceException
-            ? $exception->wording($this->locale())
-            : __(self::UNEXPECTED_FAILURE, [], $this->locale());
+        $reason = RunFailure::of($exception)->wording($this->locale());
 
         $this->taskRun->markFailureIfOpen($reason);
         $this->connection()?->update(['last_error' => $reason]);

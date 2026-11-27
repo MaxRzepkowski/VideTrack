@@ -10,6 +10,7 @@ use App\Jobs\RunImport;
 use App\Models\ServiceConnection;
 use App\Models\TaskRun;
 use App\Models\User;
+use App\Tasks\RunFailure;
 use App\Tasks\ScheduledTasks;
 use Illuminate\Support\Facades\Queue;
 use Tests\Fakes\FakeConnectionImportSource;
@@ -110,7 +111,7 @@ test('a task job keeps one run per task and user, and a failure closes its row',
     $job->failed(new RuntimeException('worker died'));
 
     expect($taskRun->refresh()->status)->toBe(TaskRunStatus::Failure)
-        ->and($taskRun->summary)->toBe(__(QueueAutoImports::UNEXPECTED_FAILURE));
+        ->and($taskRun->summary)->toBe(__(RunFailure::UNEXPECTED));
 });
 
 test('the real paces: Simkl daily, Tracearr hourly', function () {

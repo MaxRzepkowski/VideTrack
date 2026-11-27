@@ -37,9 +37,15 @@ abstract class ExternalServiceException extends RuntimeException
         return $this->replace;
     }
 
+    /** The i18n key of what happened, for whoever keeps it to word it later. */
+    public function key(): string
+    {
+        return $this->getMessage();
+    }
+
     /** What happened, in the reader's language (the app's when none is given). */
     public function wording(?string $locale = null): string
     {
-        return __($this->getMessage(), $this->replace, $locale);
+        return __($this->key(), $this->replace, $locale);
     }
 }
