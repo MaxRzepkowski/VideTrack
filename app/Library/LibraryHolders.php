@@ -2,6 +2,7 @@
 
 namespace App\Library;
 
+use App\Catalog\Creators\CreatorKind;
 use App\Catalog\Hierarchy;
 use App\Models\Favorite;
 use App\Models\Follow;
@@ -23,6 +24,12 @@ use Illuminate\Support\Collection;
  */
 final readonly class LibraryHolders
 {
+    /** How many items one question names: well under the database's bound on parameters. */
+    private const CHUNK = 5000;
+
+    /** How many trees are climbed together. */
+    private const ROOTS_AT_ONCE = 50;
+
     public function __construct(private Hierarchy $hierarchy) {}
 
     /**
@@ -137,6 +144,77 @@ final readonly class LibraryHolders
         ])->flatten();
 
         return collect(Numbers::ints($held))->unique()->values();
+    }
+
+    /**
+     * Of these roots, those nothing points at, asked of each whole tree in
+     * one go: nobody holds anything in it, no list (a user's or a
+     * collection's) lists it, and no bell is on it, not even one a followed
+     * creator rang. That bell is on its way to a notification, so the title
+     * is not one merely opened once.
+     *
+     * @param  list<int>  $rootIds
+     * @return list<int>
+     */
+    public function unreferencedOf(array $rootIds): array
+    {
+        // A few roots at a time: a show's episodes are many, and each level
+        // of its tree is asked by its ids.
+        return array_merge(...array_map($this->unreferencedAmong(...), array_chunk($rootIds, self::ROOTS_AT_ONCE)));
+    }
+
+    /**
+     * @param  list<int>  $rootIds
+     * @return list<int>
+     */
+    private function unreferencedAmong(array $rootIds): array
+    {
+        $rootOf = $this->hierarchy->treesOf($rootIds);
+        $pointed = [];
+
+        foreach (array_chunk(array_keys($rootOf), self::CHUNK) as $chunk) {
+            $ids = collect($chunk);
+
+            foreach ([
+                ...Numbers::ints(Play::query()->whereIn('media_item_id', $chunk)->distinct()->pluck('media_item_id')),
+                ...Numbers::ints(ListItem::query()->whereIn('media_item_id', $chunk)->distinct()->pluck('media_item_id')),
+                ...Numbers::ints(Follow::query()->whereIn('media_item_id', $chunk)->distinct()->pluck('media_item_id')),
+                ...$this->heldBesidesHistory(null, $ids)->all(),
+            ] as $item) {
+                $pointed[$rootOf[$item]] = true;
+            }
+        }
+
+        return array_values(array_filter($rootIds, fn (int $root): bool => ! isset($pointed[$root])));
+    }
+
+    /**
+     * Narrows a query of people, companies or collections to those nothing
+     * in a library points at: no bell on them, no bell they back, and, for a
+     * person or company, no entry on anyone's list. Whether the catalog still
+     * needs one (a credit, a collection's parts) is the catalog's question.
+     *
+     * @template TModel of \Illuminate\Database\Eloquent\Model
+     *
+     * @param  Builder<TModel>  $creators
+     * @return Builder<TModel>
+     */
+    public function unheldCreators(Builder $creators, CreatorKind $kind): Builder
+    {
+        $table = $creators->getModel()->getTable();
+        $column = Follow::creatorColumn($kind);
+        [$pivot, $pivotColumn] = Follow::sponsorPivot($kind);
+
+        $creators
+            ->whereNotExists(fn (QueryBuilder $bells) => $bells->selectRaw('1')->from('follows')->whereColumn("follows.{$column}", "{$table}.id"))
+            ->whereNotExists(fn (QueryBuilder $backing) => $backing->selectRaw('1')->from($pivot)->whereColumn("{$pivot}.{$pivotColumn}", "{$table}.id"));
+
+        // A list entry names a person or a company; a collection is a list itself.
+        if ($kind !== CreatorKind::Collection) {
+            $creators->whereNotExists(fn (QueryBuilder $listed) => $listed->selectRaw('1')->from('list_items')->whereColumn("list_items.{$column}", "{$table}.id"));
+        }
+
+        return $creators;
     }
 
     /**

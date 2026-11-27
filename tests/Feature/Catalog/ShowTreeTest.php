@@ -102,7 +102,7 @@ function storedShowTree(): array
 
     return MediaItem::query()->orderBy('type')->orderBy('provider_ref')->get()
         ->mapWithKeys(function (MediaItem $item) use ($refs): array {
-            $row = array_diff_key($item->getAttributes(), array_flip(['id', 'parent_id', 'created_at', 'updated_at', 'refreshed_at']));
+            $row = array_diff_key($item->getAttributes(), array_flip(['id', 'parent_id', 'created_at', 'updated_at', 'refreshed_at', 'viewed_at']));
             $row['parent'] = $item->parent_id === null ? null : $refs[$item->parent_id];
             $row['metadata'] = json_decode((string) $row['metadata'], true);
             ksort($row);

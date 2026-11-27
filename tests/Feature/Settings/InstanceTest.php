@@ -9,6 +9,7 @@ use App\Models\MaintenanceCheckState;
 use App\Models\User;
 use App\Tasks\Maintenance\CheckLevel;
 use App\Tasks\Maintenance\Checks\ProviderProbe;
+use App\Tasks\Maintenance\MaintenanceRegistry;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Queue;
@@ -97,7 +98,7 @@ test('the maintenance tab lists each check with what its last run found', functi
         ->get(route('settings.instance.maintenance'))
         ->assertInertia(fn (Assert $page) => $page
             ->component('settings/instance/Maintenance')
-            ->has('checks', 1)
+            ->has('checks', count(app(MaintenanceRegistry::class)->applicable()))
             ->where('checks.0.code', ProviderProbe::CODE)
             ->where('checks.0.label', __('tasks.provider_health'))
             ->where('checks.0.frequency', 'tasks.every_15_minutes')

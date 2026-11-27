@@ -8,6 +8,7 @@ use App\Tasks\Attention\ProblemsFromChecks;
 use App\Tasks\Attention\RecentlyFailedJobs;
 use App\Tasks\Attention\StalledProcesses;
 use App\Tasks\Attention\StorageSetup;
+use App\Tasks\Maintenance\Checks\OrphanSweep;
 use App\Tasks\Maintenance\Checks\ProviderProbe;
 use Illuminate\Support\ServiceProvider;
 
@@ -22,6 +23,7 @@ final class MaintenanceServiceProvider extends ServiceProvider
     {
         $this->callAfterResolving(MaintenanceRegistry::class, function (MaintenanceRegistry $checks): void {
             $checks->register(ProviderProbe::CODE, ProviderProbe::class);
+            $checks->register(OrphanSweep::CODE, OrphanSweep::class);
         });
         $this->callAfterResolving(AttentionRegistry::class, function (AttentionRegistry $attention): void {
             $attention->register('stalled-processes', StalledProcesses::class);

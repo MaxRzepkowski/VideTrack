@@ -516,6 +516,15 @@ return [
         'notifications_days' => 30,
         'webhook_deliveries_days' => (int) env('SCROBBLE_DELIVERY_RETENTION_DAYS', 30),
         'webhook_deliveries_per_endpoint' => 100,
+        // What nobody holds (titles, people, companies, empty collections)
+        // is removed at night only once it has stood this long and nobody
+        // opened it for so long. It goes so many at a time, each chunk a short
+        // write, for at most so long a night; a backlog beyond it goes the
+        // nights after.
+        'orphan_grace_days' => 30,
+        'orphan_recent_view_days' => 90,
+        'orphan_chunk' => 500,
+        'orphan_seconds_per_night' => 300,
     ],
 
     // Showcases and shows of a medium (Summer Game Fest, a Nintendo Direct).

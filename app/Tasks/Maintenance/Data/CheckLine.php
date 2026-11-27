@@ -27,7 +27,7 @@ final readonly class CheckLine
         public array $details = [],
         public ?string $subject = null,
         public ?CarbonImmutable $since = null,
-        public ?string $label = null,
+        public ?TaskLine $label = null,
         public ?TaskLine $state = null,
     ) {}
 
@@ -48,7 +48,7 @@ final readonly class CheckLine
             array_values(array_filter(array_map(TaskLine::fromStored(...), Payload::list($kept['details'] ?? null)))),
             Payload::string($kept, 'subject'),
             Payload::instant($kept['since'] ?? null),
-            Payload::string($kept, 'label'),
+            TaskLine::fromStored($kept['label'] ?? null),
             TaskLine::fromStored($kept['state'] ?? null),
         );
     }
@@ -65,7 +65,7 @@ final readonly class CheckLine
     }
 
     /**
-     * @return array{level: string, line: array<string, mixed>, details: list<array<string, mixed>>, subject: string|null, since: string|null, label: string|null, state: array<string, mixed>|null}
+     * @return array{level: string, line: array<string, mixed>, details: list<array<string, mixed>>, subject: string|null, since: string|null, label: array<string, mixed>|null, state: array<string, mixed>|null}
      */
     public function stored(): array
     {
@@ -75,7 +75,7 @@ final readonly class CheckLine
             'details' => array_map(fn (TaskLine $detail): array => $detail->stored(), $this->details),
             'subject' => $this->subject,
             'since' => $this->since?->toIso8601String(),
-            'label' => $this->label,
+            'label' => $this->label?->stored(),
             'state' => $this->state?->stored(),
         ];
     }

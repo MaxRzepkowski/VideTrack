@@ -1,8 +1,10 @@
 <?php
 
 use App\Catalog\Data\MediaSummary;
+use App\Catalog\MediaItemSummaries;
 use App\Jobs\CleanupExpiredData;
 use App\Library\RecentViews;
+use App\Models\MediaItem;
 use App\Models\RecentView;
 use App\Models\User;
 
@@ -66,4 +68,14 @@ test('recent excludes the current item and is scoped per user', function () {
         ->toContain('9')
         ->not->toContain('2')
         ->not->toContain('7');
+});
+
+test('opening a title marks it opened, beside the user\'s own recently viewed, and leaves the row unchanged', function () {
+    $movie = MediaItem::factory()->movie()->create(['updated_at' => now()->subDay()]);
+
+    $this->travel(1)->minutes();
+    app(RecentViews::class)->record(User::factory()->create(), MediaItemSummaries::summary($movie));
+
+    expect($movie->refresh()->viewed_at?->eq(now()))->toBeTrue()
+        ->and($movie->updated_at->lt(now()->subHour()))->toBeTrue();
 });
