@@ -203,7 +203,6 @@ return [
     'spreadsheets_csv' => 'Spreadsheets (CSV)',
     'start_import' => 'Start import',
     'steam' => 'Steam',
-    'steam_could_not_be_reached_try' => 'Steam could not be reached. Try again later.',
     'steam_knows_no_profile_by_that' => 'Steam knows no profile by that name.',
     'steam_profile' => 'Steam profile',
     'steam_shows_no_games_on_this' => 'Steam shows no games on this profile. In Steam, set Privacy → Game details to Public.',

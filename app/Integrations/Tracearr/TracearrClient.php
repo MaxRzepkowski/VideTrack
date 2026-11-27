@@ -11,6 +11,7 @@ use App\Integrations\Connections\OwnServerRejected;
 use App\Integrations\Connections\OwnServerUnavailable;
 use App\Models\ServiceConnection;
 use App\Support\Payload;
+use App\Support\ServiceBusy;
 use Illuminate\Http\Client\PendingRequest;
 
 /**
@@ -87,7 +88,7 @@ class TracearrClient extends OwnServerApi
      * @param  array<string, string|int>  $query
      * @return array{data: list<array<array-key, mixed>>, nextCursor: string|null}
      *
-     * @throws OwnServerUnavailable|OwnServerRejected|OwnServerNotFound|ConnectionExpired
+     * @throws OwnServerUnavailable|OwnServerRejected|OwnServerNotFound|ServiceBusy|ConnectionExpired
      */
     public function page(ServiceConnection $connection, PinnedAddress $address, string $path, array $query): array
     {
@@ -103,7 +104,7 @@ class TracearrClient extends OwnServerApi
      * @param  array<string, string|int>  $query
      * @return array<mixed>|null null when Tracearr does not know the thing
      *
-     * @throws OwnServerUnavailable|OwnServerRejected|ConnectionExpired
+     * @throws OwnServerUnavailable|OwnServerRejected|ServiceBusy|ConnectionExpired
      */
     public function find(ServiceConnection $connection, PinnedAddress $address, string $path, array $query = []): ?array
     {
@@ -118,7 +119,7 @@ class TracearrClient extends OwnServerApi
      * @param  array<string, string|int>  $query
      * @return array<mixed>
      *
-     * @throws OwnServerUnavailable|OwnServerRejected|OwnServerNotFound|ConnectionExpired
+     * @throws OwnServerUnavailable|OwnServerRejected|OwnServerNotFound|ServiceBusy|ConnectionExpired
      */
     private function get(ServiceConnection $connection, PinnedAddress $address, string $path, array $query): array
     {

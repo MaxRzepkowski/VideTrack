@@ -203,7 +203,6 @@ return [
     'spreadsheets_csv' => 'Tabellen (CSV)',
     'start_import' => 'Import starten',
     'steam' => 'Steam',
-    'steam_could_not_be_reached_try' => 'Steam war nicht erreichbar. Versuche es später erneut.',
     'steam_knows_no_profile_by_that' => 'Steam kennt kein Profil mit diesem Namen.',
     'steam_profile' => 'Steam-Profil',
     'steam_shows_no_games_on_this' => 'Steam zeigt für dieses Profil keine Spiele. Stelle in Steam Privatsphäre → Spieldetails auf Öffentlich.',

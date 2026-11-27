@@ -11,6 +11,7 @@ use App\Integrations\Connections\OwnServerRejected;
 use App\Integrations\Connections\OwnServerUnavailable;
 use App\Models\ServiceConnection;
 use App\Support\Payload;
+use App\Support\ServiceBusy;
 use Illuminate\Http\Client\PendingRequest;
 
 /**
@@ -47,7 +48,7 @@ class AudiobookshelfClient extends OwnServerApi implements NamesKeyOwner
      *
      * @return array<array-key, mixed>
      *
-     * @throws OwnServerUnavailable|OwnServerRejected|OwnServerNotFound|ConnectionExpired
+     * @throws OwnServerUnavailable|OwnServerRejected|OwnServerNotFound|ServiceBusy|ConnectionExpired
      */
     public function me(ServiceConnection $connection, PinnedAddress $address): array
     {
@@ -61,7 +62,7 @@ class AudiobookshelfClient extends OwnServerApi implements NamesKeyOwner
      *
      * @return array<array-key, mixed>|null
      *
-     * @throws OwnServerUnavailable|OwnServerRejected|ConnectionExpired
+     * @throws OwnServerUnavailable|OwnServerRejected|ServiceBusy|ConnectionExpired
      */
     public function item(ServiceConnection $connection, PinnedAddress $address, string $id): ?array
     {

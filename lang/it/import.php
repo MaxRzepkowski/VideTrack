@@ -203,7 +203,6 @@ return [
     'spreadsheets_csv' => 'Fogli di calcolo (CSV)',
     'start_import' => 'Avvia importazione',
     'steam' => 'Steam',
-    'steam_could_not_be_reached_try' => 'Impossibile raggiungere Steam. Riprova più tardi.',
     'steam_knows_no_profile_by_that' => 'Steam non conosce nessun profilo con quel nome.',
     'steam_profile' => 'Profilo Steam',
     'steam_shows_no_games_on_this' => 'Steam non mostra giochi su questo profilo. In Steam imposta Privacy → Dettagli dei giochi su Pubblico.',

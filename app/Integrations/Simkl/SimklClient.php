@@ -10,6 +10,7 @@ use App\Integrations\ServiceHttpClient;
 use App\Models\ServiceConnection;
 use App\Support\HttpRetry;
 use App\Support\Payload;
+use App\Support\ServiceBusy;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\Response;
@@ -38,9 +39,12 @@ class SimklClient
 
     private const TIMEOUT_SECONDS = 60;
 
-    private const TRIES = 5;
+    public const TRIES = 5;
 
     private const FIRST_RETRY_MS = 1000;
+
+    /** A 429 still standing after the tries waits a minute, unless Simkl names a wait. */
+    private const DEFAULT_WAIT_SECONDS = 60;
 
     public function __construct(private readonly TokenGrantClient $tokens, private readonly ServiceHttpClient $http) {}
 
@@ -67,12 +71,16 @@ class SimklClient
      * @param  array<string, string>  $query
      * @return array<mixed>
      *
-     * @throws SimklUnavailable|SimklRejected|ConnectionExpired|GrantUnavailable
+     * @throws SimklUnavailable|SimklRejected|ServiceBusy|ConnectionExpired|GrantUnavailable
      */
     public function get(ServiceConnection $connection, string $path, array $query = []): array
     {
         $clientId = $connection->credential(self::CLIENT_ID) ?? throw new LogicException('A Simkl connection without the app it was made with.');
-        $response = $this->tokens->call($this->grant($clientId)->tokenGrant(), $connection, fn (string $token): Response => $this->send($token, $clientId, $path, $query));
+        $response = $this->http->unlessBusy(
+            SimklService::NAME,
+            $this->tokens->call($this->grant($clientId)->tokenGrant(), $connection, fn (string $token): Response => $this->send($token, $clientId, $path, $query)),
+            self::DEFAULT_WAIT_SECONDS,
+        );
 
         if (HttpRetry::isOutage($response)) {
             throw new SimklUnavailable('import.service_answered_try_later', ['service' => SimklService::NAME, 'status' => $response->status()]);

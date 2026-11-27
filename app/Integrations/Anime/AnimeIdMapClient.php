@@ -2,15 +2,20 @@
 
 namespace App\Integrations\Anime;
 
-use App\Support\ConnectionFailure;
+use App\Integrations\ServiceHttpClient;
 use App\Support\HttpRetry;
-use Illuminate\Http\Client\ConnectionException;
-use Illuminate\Support\Facades\Http;
+use Illuminate\Http\Client\Response;
 
 /** The community anime id map (Kometa-Team/Anime-IDs) at a given revision, from its raw-file host. */
-final class AnimeIdMapClient
+final readonly class AnimeIdMapClient
 {
     private const SERVICE = 'Anime-IDs';
+
+    private const TRIES = 2;
+
+    private const RETRY_MS = 500;
+
+    public function __construct(private ServiceHttpClient $http) {}
 
     /**
      * The map's file at that revision.
@@ -19,13 +24,8 @@ final class AnimeIdMapClient
      */
     public function revision(string $revision): string
     {
-        try {
-            $response = Http::timeout(30)
-                ->retry(2, 500, HttpRetry::isTransient(...), throw: false)
-                ->get(rtrim(config()->string('tracker.imports.anime_ids_url'), '/')."/{$revision}/anime_ids.json");
-        } catch (ConnectionException $e) {
-            throw new AnimeIdMapUnavailable('import.service_unreachable', ['service' => self::SERVICE, 'reason' => ConnectionFailure::reason($e)]);
-        }
+        $request = $this->http->retrying($this->http->request(), self::TRIES, self::RETRY_MS, HttpRetry::isTransient(...));
+        $response = $this->http->reach(self::SERVICE, AnimeIdMapUnavailable::class, fn (): Response => $request->get(rtrim(config()->string('tracker.imports.anime_ids_url'), '/')."/{$revision}/anime_ids.json"));
 
         if ($response->failed()) {
             throw new AnimeIdMapUnavailable('import.service_answered_try_later', ['service' => self::SERVICE, 'status' => $response->status()]);

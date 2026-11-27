@@ -2,30 +2,30 @@
 
 namespace App\Integrations\Anime;
 
-use App\Catalog\Providers\Concerns\SendsHttpRequests;
 use App\Catalog\Providers\Concerns\ThrottlesRequests;
 use App\Support\Payload;
+use App\Support\ServiceBusy;
 
 /** A user's AniList lists, in one GraphQL request. */
 final class AnilistClient
 {
-    use ReadsAnimeLists;
-    use SendsHttpRequests;
     use ThrottlesRequests;
 
     /** AniList allows 30 requests a minute; an import sends one. */
     private const RATE_LIMIT_PER_MINUTE = 25;
+
+    public function __construct(private readonly AnimeListRequests $requests) {}
 
     /**
      * The `data` of a GraphQL answer to `$query` for this user.
      *
      * @return array<array-key, mixed>
      *
-     * @throws AnimeListUnavailable|AnimeListRefused|AnimeListNotFound
+     * @throws AnimeListUnavailable|AnimeListRefused|AnimeListNotFound|ServiceBusy
      */
     public function query(string $query, string $username): array
     {
-        $response = $this->send('AniList', fn () => $this->throttle('anilist-api', self::RATE_LIMIT_PER_MINUTE, 60), fn () => $this->httpClient()
+        $response = $this->requests->send('AniList', fn () => $this->throttle('anilist-api', self::RATE_LIMIT_PER_MINUTE, 60), fn () => $this->requests->to()
             ->post(config()->string('tracker.imports.anilist_url'), [
                 'query' => $query,
                 'variables' => ['userName' => $username],
@@ -42,7 +42,7 @@ final class AnilistClient
             throw new AnimeListRefused('import.anime_list_private', ['service' => 'AniList', 'username' => $username]);
         }
 
-        $this->refuseFailed('AniList', $response);
+        $this->requests->refuseFailed('AniList', $response);
 
         $data = $body['data'] ?? null;
 

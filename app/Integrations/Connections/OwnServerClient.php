@@ -7,6 +7,7 @@ use App\Integrations\ServiceHttpClient;
 use App\Models\ServiceConnection;
 use App\Models\User;
 use App\Support\HttpRetry;
+use App\Support\ServiceBusy;
 use Closure;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\PendingRequest;
@@ -27,6 +28,9 @@ final readonly class OwnServerClient
     private const TRIES = 3;
 
     private const FIRST_RETRY_MS = 1000;
+
+    /** A 429 still standing after the tries waits a minute, unless the server names a wait. */
+    public const DEFAULT_WAIT_SECONDS = 60;
 
     public function __construct(private UserAddresses $addresses, private ServiceHttpClient $http) {}
 
@@ -111,7 +115,7 @@ final readonly class OwnServerClient
      * @param  array<string, mixed>  $query
      * @return array<array-key, mixed>
      *
-     * @throws OwnServerUnavailable|OwnServerRejected|OwnServerNotFound|ConnectionExpired
+     * @throws OwnServerUnavailable|OwnServerRejected|OwnServerNotFound|ServiceBusy|ConnectionExpired
      */
     public function read(PendingRequest $request, string $service, string $path, array $query = []): array
     {
@@ -126,7 +130,7 @@ final readonly class OwnServerClient
      * @param  array<string, mixed>  $query
      * @return array<array-key, mixed>
      *
-     * @throws OwnServerUnavailable|OwnServerRejected|OwnServerNotFound|ConnectionExpired
+     * @throws OwnServerUnavailable|OwnServerRejected|OwnServerNotFound|ServiceBusy|ConnectionExpired
      */
     public function search(PendingRequest $request, string $service, string $path, array $body, array $query = []): array
     {
@@ -142,7 +146,7 @@ final readonly class OwnServerClient
      * @param  array<string, mixed>  $query
      * @return array<array-key, mixed>|null
      *
-     * @throws OwnServerUnavailable|OwnServerRejected|ConnectionExpired
+     * @throws OwnServerUnavailable|OwnServerRejected|ServiceBusy|ConnectionExpired
      */
     public function find(PendingRequest $request, string $service, string $path, array $query = []): ?array
     {
@@ -158,12 +162,12 @@ final readonly class OwnServerClient
      * @param  list<int>  $absent  statuses that mean the thing is not there for this key, beside a 404
      * @return array<array-key, mixed>
      *
-     * @throws OwnServerUnavailable|OwnServerRejected|OwnServerNotFound|ConnectionExpired
+     * @throws OwnServerUnavailable|OwnServerRejected|OwnServerNotFound|ServiceBusy|ConnectionExpired
      */
     private function answer(PendingRequest $request, string $service, string $path, Closure $send, array $absent): array
     {
         $retrying = $this->http->retrying($request, self::TRIES, self::FIRST_RETRY_MS, HttpRetry::isTransientOrThrottled(...));
-        $response = $this->http->reach($service, OwnServerUnavailable::class, fn (): Response => $send($retrying));
+        $response = $this->http->unlessBusy($service, $this->http->reach($service, OwnServerUnavailable::class, fn (): Response => $send($retrying)), self::DEFAULT_WAIT_SECONDS);
 
         if ($response->status() === 404 || in_array($response->status(), $absent, true)) {
             throw new OwnServerNotFound('import.service_knows_nothing_at', ['service' => $service, 'path' => $path]);

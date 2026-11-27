@@ -203,7 +203,6 @@ return [
     'spreadsheets_csv' => 'Tabulky (CSV)',
     'start_import' => 'Spustit import',
     'steam' => 'Steam',
-    'steam_could_not_be_reached_try' => 'Steam se nepodařilo zastihnout. Zkus to později.',
     'steam_knows_no_profile_by_that' => 'Steam nezná žádný profil s tímto jménem.',
     'steam_profile' => 'Profil na Steamu',
     'steam_shows_no_games_on_this' => 'Steam u tohoto profilu neukazuje žádné hry. Ve Steamu nastav Soukromí → Podrobnosti o hrách na Veřejné.',

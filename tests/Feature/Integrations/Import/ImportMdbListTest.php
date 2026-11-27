@@ -5,7 +5,6 @@ use App\Enums\TaskRunStatus;
 use App\Integrations\Connections\ConnectionStatus;
 use App\Integrations\Connections\ConnectMethod;
 use App\Integrations\Import\Data\ImportInput;
-use App\Integrations\Import\Data\ImportSelection;
 use App\Integrations\Import\ImportSourceRegistry;
 use App\Integrations\MdbList\MdbListClient;
 use App\Integrations\MdbList\MdbListService;
@@ -162,14 +161,9 @@ test('reading the same account again adds nothing', function () {
 test('a 429 leaves a fresh run for as long as MDBList asks, and nothing is asked again meanwhile', function () {
     Http::fake(['api.mdblist.com/*' => Http::response(['error' => 'API rate limit exceeded!'], 429, ['Retry-After' => '120'])]);
     $connection = mdbListConnection(User::factory()->create());
-    $taskRun = TaskRun::queueTask(ImportSourceRegistry::taskName(MdbListSource::CODE), $connection->user_id);
-    $job = new RunImport($taskRun, MdbListSource::CODE, ImportInput::connection($connection->id), ImportSelection::everything());
 
-    app()->call([$job, 'handle']);
-
-    $later = $job->handOver();
-    expect($taskRun->refresh()->status)->not->toBe(TaskRunStatus::Failure)
-        ->and($later instanceof RunImport ? $later->delay : null)->toBe(120)
+    expect(postponedBy($connection->user, MdbListSource::CODE, ImportInput::connection($connection->id)))->toBe(120)
+        ->and(TaskRun::query()->sole()->status)->not->toBe(TaskRunStatus::Failure)
         ->and(requestsTo('/sync/watched'))->toBe(1);
 });
 

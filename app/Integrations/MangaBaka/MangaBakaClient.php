@@ -86,15 +86,11 @@ class MangaBakaClient
         do {
             // In the order entries were added, so a save during the run moves no entry between pages.
             $query = ['page' => (string) $page++, 'limit' => (string) self::PAGE_SIZE, 'sort_by' => 'created_at_asc'];
-            $response = $this->send($token, '/v2/my/library', $query);
+            $response = $this->http->unlessBusy(MangaBakaService::NAME, $this->send($token, '/v2/my/library', $query), self::DEFAULT_WAIT_SECONDS);
 
             // The token was deleted on MangaBaka; only a new one fixes it.
             if ($response->status() === 401) {
                 throw new ConnectionExpired('import.mangabaka_stopped_accepting_this_connection');
-            }
-
-            if ($response->status() === 429) {
-                throw new ServiceBusy('import.service_asked_to_wait', HttpRetry::retryAfter($response, self::DEFAULT_WAIT_SECONDS), ['service' => MangaBakaService::NAME]);
             }
 
             if (HttpRetry::isOutage($response)) {

@@ -3,6 +3,8 @@
 namespace App\Integrations;
 
 use App\Support\ConnectionFailure;
+use App\Support\HttpRetry;
+use App\Support\ServiceBusy;
 use App\Support\ServiceUnavailable;
 use Closure;
 use Illuminate\Http\Client\ConnectionException;
@@ -14,8 +16,9 @@ use Throwable;
 /**
  * How an integration's client asks a service: a bounded wait, JSON, the
  * instance's User-Agent, another try only after a failure worth one, and a
- * connection that stays dropped told the same way for every service. What an
- * answered status means is each client's own.
+ * connection that stays dropped or a 429 that outlasts the tries told the
+ * same way for every service. What any other answered status means is each
+ * client's own.
  */
 final readonly class ServiceHttpClient
 {
@@ -64,5 +67,21 @@ final readonly class ServiceHttpClient
         } catch (ConnectionException $e) {
             throw new $unavailable('import.service_unreachable', ['service' => $service, 'reason' => ConnectionFailure::reason($e)]);
         }
+    }
+
+    /**
+     * $response, unless it is a 429 still standing after the tries: then the
+     * run waits out the service's Retry-After ($defaultWaitSeconds when it
+     * names none) instead of spending a try of its own on it.
+     *
+     * @throws ServiceBusy
+     */
+    public function unlessBusy(string $service, Response $response, int $defaultWaitSeconds): Response
+    {
+        if ($response->status() === 429) {
+            throw new ServiceBusy('import.service_asked_to_wait', HttpRetry::retryAfter($response, $defaultWaitSeconds), ['service' => $service]);
+        }
+
+        return $response;
     }
 }

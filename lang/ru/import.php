@@ -203,7 +203,6 @@ return [
     'spreadsheets_csv' => 'Таблицы (CSV)',
     'start_import' => 'Начать импорт',
     'steam' => 'Steam',
-    'steam_could_not_be_reached_try' => 'Не удалось связаться со Steam. Попробуй позже.',
     'steam_knows_no_profile_by_that' => 'В Steam нет профиля с таким именем.',
     'steam_profile' => 'Профиль Steam',
     'steam_shows_no_games_on_this' => 'Steam не показывает игры этого профиля. В Steam открой настройки приватности и сделай игровую информацию открытой.',

@@ -6,15 +6,12 @@ use App\Enums\TaskRunStatus;
 use App\Integrations\Connections\ConnectionStatus;
 use App\Integrations\Connections\ConnectMethod;
 use App\Integrations\Import\Data\ImportInput;
-use App\Integrations\Import\Data\ImportSelection;
 use App\Integrations\Import\ImportSourceRegistry;
 use App\Integrations\MangaBaka\MangaBakaClient;
 use App\Integrations\MangaBaka\MangaBakaService;
 use App\Integrations\MangaBaka\MangaBakaSource;
-use App\Jobs\RunImport;
 use App\Models\MediaItem;
 use App\Models\ServiceConnection;
-use App\Models\TaskRun;
 use App\Models\User;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
@@ -197,11 +194,6 @@ test('a library read MangaBaka refuses ends the run once; a token it no longer h
 test('a 429 leaves a fresh run for as long as MangaBaka asks', function () {
     $connection = mangaBakaConnection(User::factory()->create());
     Http::fake(['api.mangabaka.org/*' => Http::response(['status' => 429, 'message' => 'Slow down.'], 429, ['Retry-After' => '30'])]);
-    $taskRun = TaskRun::queueTask(ImportSourceRegistry::taskName(MangaBakaSource::CODE), $connection->user_id);
-    $job = new RunImport($taskRun, MangaBakaSource::CODE, ImportInput::connection($connection->id), ImportSelection::everything());
 
-    app()->call([$job, 'handle']);
-
-    $later = $job->handOver();
-    expect($later instanceof RunImport ? $later->delay : null)->toBe(30);
+    expect(postponedBy($connection->user, MangaBakaSource::CODE, ImportInput::connection($connection->id)))->toBe(30);
 });

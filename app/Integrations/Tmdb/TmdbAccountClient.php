@@ -212,10 +212,6 @@ class TmdbAccountClient
             throw new TmdbUnavailable('import.service_answered_try_later', ['service' => TmdbService::NAME, 'status' => $response->status()]);
         }
 
-        if ($response->status() === 429) {
-            throw new ServiceBusy('import.service_asked_to_wait', HttpRetry::retryAfter($response, self::DEFAULT_WAIT_SECONDS), ['service' => TmdbService::NAME]);
-        }
-
-        return $response;
+        return $this->http->unlessBusy(TmdbService::NAME, $response, self::DEFAULT_WAIT_SECONDS);
     }
 }

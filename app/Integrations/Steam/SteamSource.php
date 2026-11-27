@@ -19,6 +19,7 @@ use App\Library\PlayDating;
 use App\Support\Forms\CredentialField;
 use App\Support\Forms\CredentialFieldType;
 use App\Support\Payload;
+use App\Support\ServiceUnavailable;
 use Carbon\CarbonImmutable;
 use Generator;
 use LogicException;
@@ -40,6 +41,8 @@ use LogicException;
 class SteamSource implements ExplainsSetup, ReadsCredentials
 {
     public const CODE = 'steam';
+
+    public const SERVICE = 'Steam';
 
     /** @var array<string, list<array<array-key, mixed>>> profile key => its library, fetched once per run */
     private array $games = [];
@@ -90,7 +93,7 @@ class SteamSource implements ExplainsSetup, ReadsCredentials
 
         try {
             $games = $this->games($input->credential('key'), $profile);
-        } catch (SteamNotFound|SteamRejected|SteamUnavailable $e) {
+        } catch (SteamNotFound|SteamRejected|ServiceUnavailable $e) {
             return ImportManifest::invalid($e->wording());
         }
 

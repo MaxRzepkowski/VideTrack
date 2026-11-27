@@ -62,12 +62,15 @@ class RetroAchievementsClient
     private function get(string $path, string $key, array $query): array
     {
         $request = $this->http->retrying($this->http->request(config()->string('tracker.retroachievements.base_url')), self::RETRIES, self::FIRST_RETRY_MS, HttpRetry::isTransient(...));
-        $response = $this->http->reach(RetroAchievementsSource::SERVICE, RetroAchievementsUnavailable::class, fn (): Response => $request->get($path, [...$query, 'y' => $key]));
+        $response = $this->http->unlessBusy(
+            RetroAchievementsSource::SERVICE,
+            $this->http->reach(RetroAchievementsSource::SERVICE, RetroAchievementsUnavailable::class, fn (): Response => $request->get($path, [...$query, 'y' => $key])),
+            self::DEFAULT_WAIT_SECONDS,
+        );
 
         return match (true) {
             in_array($response->status(), [401, 403], true) => throw new RetroAchievementsRejected('import.retroachievements_did_not_accept_this_key'),
             $response->status() === 422 => throw new RetroAchievementsRejected('import.retroachievements_does_not_take_this_username'),
-            $response->status() === 429 => throw new ServiceBusy('import.service_asked_to_wait', HttpRetry::retryAfter($response, self::DEFAULT_WAIT_SECONDS), ['service' => RetroAchievementsSource::SERVICE]),
             ! $response->successful() => throw new RetroAchievementsUnavailable('import.service_answered_try_later', ['service' => RetroAchievementsSource::SERVICE, 'status' => $response->status()]),
             default => Payload::map($response->json()),
         };

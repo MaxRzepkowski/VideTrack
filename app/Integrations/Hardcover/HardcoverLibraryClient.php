@@ -8,6 +8,7 @@ use App\Integrations\ServiceHttpClient;
 use App\Models\ServiceConnection;
 use App\Support\HttpRetry;
 use App\Support\Payload;
+use App\Support\ServiceBusy;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Sleep;
@@ -38,6 +39,9 @@ class HardcoverLibraryClient
     private const RETRIES = 4;
 
     private const FIRST_RETRY_MS = 2000;
+
+    /** A 429 still standing after the tries waits out a minute's allowance, unless Hardcover names a wait. */
+    private const DEFAULT_WAIT_SECONDS = 60;
 
     private const LIBRARY_QUERY = <<<'GRAPHQL'
         query Library($limit: Int!, $offset: Int!) {
@@ -103,7 +107,7 @@ class HardcoverLibraryClient
      *
      * @return list<array<array-key, mixed>>
      *
-     * @throws HardcoverUnavailable|HardcoverRejected|ConnectionExpired
+     * @throws HardcoverUnavailable|HardcoverRejected|ServiceBusy|ConnectionExpired
      */
     public function libraryPage(ServiceConnection $connection, int $page): array
     {
@@ -114,7 +118,7 @@ class HardcoverLibraryClient
         }
 
         $variables = ['limit' => self::PAGE_SIZE, 'offset' => $page * self::PAGE_SIZE];
-        $response = $this->query($key, $variables);
+        $response = $this->http->unlessBusy(HardcoverService::NAME, $this->query($key, $variables), self::DEFAULT_WAIT_SECONDS);
 
         // The key was deleted on Hardcover, or ran out; only a new one fixes it.
         if ($response->status() === 401) {

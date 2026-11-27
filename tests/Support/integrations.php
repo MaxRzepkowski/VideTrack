@@ -195,3 +195,18 @@ function requestsTo(string $path): int
 {
     return Http::recorded(fn (Request $request) => str_contains((string) parse_url($request->url(), PHP_URL_PATH), $path))->count();
 }
+
+/**
+ * Runs an import once and hands back how long the fresh run a busy service
+ * left behind waits, or null when the run left none.
+ */
+function postponedBy(User $user, string $source, ImportInput $input): ?int
+{
+    $job = new RunImport(TaskRun::queueTask(ImportSourceRegistry::taskName($source), $user->id), $source, $input, ImportSelection::everything());
+
+    app()->call([$job, 'handle']);
+
+    $later = $job->handOver();
+
+    return $later instanceof RunImport && is_int($later->delay) ? $later->delay : null;
+}
