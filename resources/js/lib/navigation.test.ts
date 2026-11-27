@@ -10,14 +10,12 @@ import {
     NAV_GROUPS,
     navHref,
     OTHER_PLACES,
-    SETTINGS_NAV,
-    settingsNav,
     STATISTICS,
     SUGGESTIONS,
     USER_PANELS,
     userPanel,
 } from '@/lib/navigation';
-import { setPageProps } from '@/test/page';
+import { SETTINGS_NAV } from '@/lib/settingsNavigation';
 import { describe, expect, it } from 'vitest';
 
 const ALL = [...menuPlaces(), ...OTHER_PLACES, ...USER_PANELS, ...SETTINGS_NAV];
@@ -47,18 +45,6 @@ describe('the navigation tree', () => {
     it('gives the profile the rounded person and following the bell', () => {
         expect(userPanel('show').icon).toBe(SETTINGS_NAV[0].icon);
         expect(FOLLOWING.icon).toBe(OTHER_PLACES.find((entry) => entry.id === 'notifications')?.icon);
-    });
-
-    it('lists connected accounts only where a provider is configured, and the password only where it signs in', () => {
-        const ids = () => settingsNav().map((entry) => entry.id);
-
-        expect(ids()).toContain('settings.password');
-        expect(ids()).not.toContain('settings.identities');
-
-        setPageProps({ passwordLogin: false, identityProviders: [{ code: 'oidc', label: 'Home SSO', glyph: 'openid' }] });
-
-        expect(ids()).not.toContain('settings.password');
-        expect(ids()).toContain('settings.identities');
     });
 
     it('puts each place of the main menu in one group, with a line saying what is there', () => {

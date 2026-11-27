@@ -13,5 +13,5 @@
     "lines of PHP classes over 400": 200,
     "lines of controllers over 150": 7,
     "lines of Vue components over 400": 220,
-    "lines of TS modules over 400": 370
+    "lines of TS modules over 400": 299
 }
