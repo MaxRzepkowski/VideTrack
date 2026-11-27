@@ -52,14 +52,14 @@ test('a title nobody holds goes with its tree, and the row and the history say s
     $state = sweepOrphans();
 
     expect(MediaItem::query()->count())->toBe(0)
-        ->and(sweptState($state, OrphanKind::Titles))->toBe(__('tasks.orphan_state_removed', ['count' => 1]))
+        ->and(sweptState($state, OrphanKind::Titles))->toBe(__('tasks.removed_count', ['count' => 1]))
         ->and(TaskRun::query()->sole()->summary)->toBe(__('tasks.removed_orphans', ['titles' => 1, 'people' => 0, 'companies' => 0, 'collections' => 0]));
 });
 
 test('a quiet night leaves no history', function () {
     $state = sweepOrphans();
 
-    expect(sweptState($state, OrphanKind::Titles))->toBe(__('tasks.orphan_state_none'))
+    expect(sweptState($state, OrphanKind::Titles))->toBe(__('tasks.removed_none'))
         ->and(TaskRun::query()->count())->toBe(0);
 });
 
@@ -119,7 +119,7 @@ test('people a removed title leaves without credits go the same night, and the r
     $state = sweepOrphans();
 
     expect(Person::query()->count())->toBe(0)
-        ->and(sweptState($state, OrphanKind::People))->toBe(__('tasks.orphan_state_removed', ['count' => 1]));
+        ->and(sweptState($state, OrphanKind::People))->toBe(__('tasks.removed_count', ['count' => 1]));
 });
 
 test('a collection left with no part and no bell goes; a part or a bell keeps it', function () {
@@ -142,7 +142,7 @@ test('a night removes the whole backlog, chunk after chunk', function () {
     $state = sweepOrphans();
 
     expect(MediaItem::query()->count())->toBe(0)
-        ->and(sweptState($state, OrphanKind::Titles))->toBe(__('tasks.orphan_state_removed', ['count' => 3]));
+        ->and(sweptState($state, OrphanKind::Titles))->toBe(__('tasks.removed_count', ['count' => 3]));
 });
 
 test('a night past its time leaves the rest for the nights after, and says so', function () {

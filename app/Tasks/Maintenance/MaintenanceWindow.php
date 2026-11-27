@@ -21,7 +21,7 @@ enum MaintenanceWindow: string
             // Off the round minutes the hourly digest and the trending
             // prefetch take.
             self::Frequent => '7-59/15 * * * *',
-            // Clear of the night's catalog work and its clean-up.
+            // Clear of the night's catalog work.
             self::Nightly => '30 2 * * *',
             self::Weekly => '0 2 * * 0',
         };

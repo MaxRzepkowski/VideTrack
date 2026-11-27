@@ -1,9 +1,9 @@
 <?php
 
 use App\Catalog\Creators\CreatorTable;
-use App\Jobs\CleanupExpiredData;
 use App\Jobs\EnrichShowSchedule;
 use App\Jobs\PrefetchTrending;
+use App\Jobs\RefreshCollections;
 use App\Jobs\SyncFollowedCreator;
 use App\Models\TaskRun;
 use App\Support\ServiceUnavailable;
@@ -34,11 +34,11 @@ test('a show whose air times could not be read after the last try is logged with
 });
 
 test('a task that breaks keeps the raw exception out of its run, but says which service failed', function () {
-    $broken = TaskRun::queueTask(TaskName::Cleanup->value);
-    (new CleanupExpiredData($broken))->failed(new RuntimeException('SQLSTATE[HY000]: /var/www/database/database.sqlite'));
+    $broken = TaskRun::queueTask(TaskName::RefreshCollections->value);
+    (new RefreshCollections($broken))->failed(new RuntimeException('SQLSTATE[HY000]: /var/www/database/database.sqlite'));
 
-    $unavailable = TaskRun::queueTask(TaskName::Cleanup->value);
-    (new CleanupExpiredData($unavailable))->failed(new ServiceUnavailable('TMDB answered 503.'));
+    $unavailable = TaskRun::queueTask(TaskName::RefreshCollections->value);
+    (new RefreshCollections($unavailable))->failed(new ServiceUnavailable('TMDB answered 503.'));
 
     expect($broken->refresh()->summary)->toBe(__(RunFailure::UNEXPECTED))
         ->and($unavailable->refresh()->summary)->toBe('TMDB answered 503.');

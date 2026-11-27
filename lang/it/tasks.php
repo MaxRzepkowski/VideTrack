@@ -4,7 +4,6 @@ return [
     'refresh_saved_titles' => 'Aggiornamento dei titoli salvati',
     'background_task_runs_and_the_recurring' => 'Esecuzioni delle attività in background e programmazione ricorrente',
     'count_newly_aired_episodes' => 'Conteggio dei nuovi episodi andati in onda',
-    'clean_up_expired_data' => 'Pulizia dei dati scaduti',
     'clear_finished_runs' => 'Cancella esecuzioni concluse',
     'clear_the_finished_task_history' => 'Cancellare la cronologia delle attività concluse?',
     'every_3_hours' => 'Ogni 3 ore',

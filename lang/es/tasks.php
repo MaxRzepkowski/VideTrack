@@ -4,7 +4,6 @@ return [
     'refresh_saved_titles' => 'Actualizar títulos guardados',
     'background_task_runs_and_the_recurring' => 'Ejecuciones de tareas en segundo plano y la programación periódica',
     'count_newly_aired_episodes' => 'Contar episodios recién emitidos',
-    'clean_up_expired_data' => 'Limpiar datos caducados',
     'clear_finished_runs' => 'Borrar ejecuciones terminadas',
     'clear_the_finished_task_history' => '¿Borrar el historial de tareas terminadas?',
     'every_3_hours' => 'Cada 3 horas',

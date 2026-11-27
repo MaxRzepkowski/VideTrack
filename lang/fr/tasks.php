@@ -4,7 +4,6 @@ return [
     'refresh_saved_titles' => 'Actualiser les titres enregistrés',
     'background_task_runs_and_the_recurring' => 'Exécutions des tâches en arrière-plan et planification récurrente',
     'count_newly_aired_episodes' => 'Compter les épisodes nouvellement diffusés',
-    'clean_up_expired_data' => 'Nettoyer les données expirées',
     'clear_finished_runs' => 'Effacer les exécutions terminées',
     'clear_the_finished_task_history' => 'Effacer l’historique des tâches terminées ?',
     'every_3_hours' => 'Toutes les 3 heures',

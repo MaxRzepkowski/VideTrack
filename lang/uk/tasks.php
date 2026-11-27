@@ -4,7 +4,6 @@ return [
     'refresh_saved_titles' => 'Оновлення збережених творів',
     'background_task_runs_and_the_recurring' => 'Запуски фонових завдань і регулярний розклад',
     'count_newly_aired_episodes' => 'Підрахунок нових епізодів в ефірі',
-    'clean_up_expired_data' => 'Очищення застарілих даних',
     'clear_finished_runs' => 'Очистити завершені запуски',
     'clear_the_finished_task_history' => 'Очистити історію завершених завдань?',
     'every_3_hours' => 'Кожні 3 години',

@@ -4,7 +4,7 @@ use App\Tasks\ScheduledTask;
 use App\Tasks\TaskName;
 
 test('the next run is counted from the app clock, which tests and snapshots can freeze', function () {
-    $task = new ScheduledTask(TaskName::Cleanup, '0 */6 * * *', 'tasks.every_six_hours', fn () => null);
+    $task = new ScheduledTask(TaskName::RefreshCollections, '0 */6 * * *', 'tasks.every_six_hours', fn () => null);
 
     $this->travelTo('2026-10-10 07:30:00');
 

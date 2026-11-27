@@ -17,8 +17,10 @@ docker compose exec -u www-data videtrack php artisan vide:user:promote <user> [
 revokes its API tokens. `-u www-data` runs the command as the user the app runs as, so the files
 it leaves in storage stay writable for it.
 
-The status of background jobs (metadata refresh, cleanup and so on) is visible to every user
-under **Settings → Tasks**. Administrators also see system jobs and the schedule there.
+The status of a user's own background jobs (imports and so on) is visible to them under
+**Settings → Tasks**. Administrators have **Settings → Instance** instead: what needs their
+attention, the schedule with every run, and the maintenance checks (provider health, removing what
+nobody holds in the catalog, clearing expired data), each with **Run now**.
 
 ## Backup
 

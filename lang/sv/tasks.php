@@ -4,7 +4,6 @@ return [
     'refresh_saved_titles' => 'Uppdatera sparade titlar',
     'background_task_runs_and_the_recurring' => 'Körningar av bakgrundsuppgifter och det återkommande schemat',
     'count_newly_aired_episodes' => 'Räkna nysända avsnitt',
-    'clean_up_expired_data' => 'Rensa utgångna data',
     'clear_finished_runs' => 'Rensa avslutade körningar',
     'clear_the_finished_task_history' => 'Rensa historiken över avslutade uppgifter?',
     'every_3_hours' => 'Var tredje timme',

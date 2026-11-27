@@ -4,7 +4,6 @@ return [
     'refresh_saved_titles' => '저장된 작품 새로 고침',
     'background_task_runs_and_the_recurring' => '백그라운드 작업 실행 기록과 반복 일정',
     'count_newly_aired_episodes' => '새로 방영된 에피소드 집계',
-    'clean_up_expired_data' => '만료된 데이터 정리',
     'clear_finished_runs' => '끝난 실행 기록 지우기',
     'clear_the_finished_task_history' => '끝난 작업 기록을 지울까요?',
     'every_3_hours' => '3시간마다',

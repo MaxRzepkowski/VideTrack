@@ -7,7 +7,6 @@ use App\Enums\PlayOutcome;
 use App\Enums\WebhookDeliveryStatus;
 use App\Integrations\Scrobble\Data\ScrobbleEvent;
 use App\Integrations\Scrobble\ScrobbleEventKind;
-use App\Jobs\CleanupExpiredData;
 use App\Jobs\ProcessScrobbleEvent;
 use App\Library\Events\PlayRecorded;
 use App\Library\ScrobbleDedup;
@@ -20,6 +19,8 @@ use App\Models\User;
 use App\Models\WebhookDelivery;
 use App\Models\WebhookEndpoint;
 use App\Support\ExternalServiceException;
+use App\Tasks\Maintenance\Checks\ExpiredDataCleanup;
+use App\Tasks\Maintenance\MaintenanceChecks;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
@@ -357,7 +358,7 @@ test('deliveries are pruned by age and by count', function () {
         ]);
     }
 
-    CleanupExpiredData::queueTask();
+    app(MaintenanceChecks::class)->perform('run-of-alex', [ExpiredDataCleanup::CODE]);
 
     expect(WebhookDelivery::query()->count())->toBe($kept);
 });

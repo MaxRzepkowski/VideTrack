@@ -4,7 +4,6 @@ return [
     'refresh_saved_titles' => 'Opgeslagen titels vernieuwen',
     'background_task_runs_and_the_recurring' => 'Uitvoeringen van achtergrondtaken en het vaste schema',
     'count_newly_aired_episodes' => 'Pas uitgezonden afleveringen tellen',
-    'clean_up_expired_data' => 'Verlopen gegevens opruimen',
     'clear_finished_runs' => 'Afgeronde uitvoeringen wissen',
     'clear_the_finished_task_history' => 'De geschiedenis van afgeronde taken wissen?',
     'every_3_hours' => 'Elke 3 uur',

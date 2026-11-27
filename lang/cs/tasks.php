@@ -4,7 +4,6 @@ return [
     'refresh_saved_titles' => 'Obnova uložených titulů',
     'background_task_runs_and_the_recurring' => 'Běhy úloh na pozadí a pravidelný rozvrh',
     'count_newly_aired_episodes' => 'Počítání nově odvysílaných epizod',
-    'clean_up_expired_data' => 'Úklid prošlých dat',
     'clear_finished_runs' => 'Vymazat dokončené běhy',
     'clear_the_finished_task_history' => 'Vymazat historii dokončených úloh?',
     'every_3_hours' => 'Každé 3 hodiny',
