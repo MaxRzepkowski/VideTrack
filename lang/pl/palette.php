@@ -46,4 +46,5 @@ return [
     'keywords_settings_webhooks' => 'webhook, webhooki, n8n, home assistant, automatyzacja, ustawienia, settings',
     'keywords_trending' => 'na czasie, popularne, trendy, trending, popular',
     'keywords_backlog' => 'backlog, na później, do obejrzenia, watchlist',
+    'keywords_settings_instance' => 'instancja, serwer, zadania, kolejka, utrzymanie, zdrowie, ustawienia, instance, server, tasks, maintenance',
 ];

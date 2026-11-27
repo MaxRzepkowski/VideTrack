@@ -5,6 +5,7 @@ namespace App\Jobs;
 use App\Actions\Media\SyncCreatorTitles;
 use App\Catalog\Creators\Creators;
 use App\Catalog\Creators\CreatorTable;
+use App\Catalog\KeyRefusals;
 use App\Jobs\Concerns\RunsAsTask;
 use App\Models\TaskRun;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -34,7 +35,7 @@ class RefreshFollowedCreators implements ShouldQueue
         self::dispatch(TaskRun::queueTask($table->sweepTask()->value), $table);
     }
 
-    public function handle(Creators $creators, SyncCreatorTitles $sync): void
+    public function handle(Creators $creators, SyncCreatorTitles $sync, KeyRefusals $refusals): void
     {
         $this->taskRun->markStarted();
 
@@ -44,6 +45,10 @@ class RefreshFollowedCreators implements ShouldQueue
         $errors = [];
 
         foreach ($creators->followed($this->table) as $creator) {
+            if ($refusals->skips($creator->provider)) {
+                continue;
+            }
+
             $result = $sync->execute($creator);
 
             $created += $result->created;
@@ -54,7 +59,7 @@ class RefreshFollowedCreators implements ShouldQueue
 
         $this->taskRun->markSuccess(
             "Checked {$checked} followed {$this->table->value}; auto-followed {$created} upcoming titles, withdrew {$removed} with vanished credits.",
-            $errors,
+            [...$errors, ...$refusals->lines()],
         );
     }
 }

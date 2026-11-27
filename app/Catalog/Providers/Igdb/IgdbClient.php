@@ -4,7 +4,8 @@ namespace App\Catalog\Providers\Igdb;
 
 use App\Catalog\ProviderCacheContext;
 use App\Catalog\ProviderException;
-use App\Catalog\ProviderRejected;
+use App\Catalog\ProviderHealth;
+use App\Catalog\ProviderKeyRejected;
 use App\Catalog\Providers\Concerns\MakesCachedRequests;
 use App\Catalog\Providers\Concerns\SendsHttpRequests;
 use App\Catalog\Providers\Concerns\ThrottlesRequests;
@@ -23,6 +24,11 @@ use LogicException;
  */
 class IgdbClient
 {
+    /** The settings the operator writes the Twitch client under. */
+    public const CLIENT_ID_VARIABLE = 'IGDB_CLIENT_ID';
+
+    public const CLIENT_SECRET_VARIABLE = 'IGDB_CLIENT_SECRET';
+
     use MakesCachedRequests;
     use SendsHttpRequests;
     use ThrottlesRequests;
@@ -36,7 +42,10 @@ class IgdbClient
     /** The most queries IGDB runs in one multiquery. */
     private const MULTIQUERY_LIMIT = 10;
 
-    public function __construct(private readonly ProviderCacheContext $cacheContext) {}
+    public function __construct(
+        private readonly ProviderCacheContext $cacheContext,
+        private readonly ProviderHealth $health,
+    ) {}
 
     /**
      * Cached query. TTL in seconds; keys are derived from endpoint + body so
@@ -102,6 +111,12 @@ class IgdbClient
         return $results;
     }
 
+    /** One query past the cache, as a probe of whether IGDB answers and takes the key. */
+    public function probe(string $endpoint, string $body): void
+    {
+        $this->fetch($endpoint, $body);
+    }
+
     /**
      * Row count for a filter — IGDB serves it on the /count sub-resource.
      */
@@ -161,6 +176,14 @@ class IgdbClient
      */
     private function send(string $endpoint, string $body): array
     {
+        return $this->health->watch(IgdbProvider::CODE, fn (): array => $this->post($endpoint, $body));
+    }
+
+    /**
+     * @return array<array-key, mixed>
+     */
+    private function post(string $endpoint, string $body): array
+    {
         $response = $this->guardConnection('IGDB', fn () => $this->httpClient(config()->string('tracker.igdb.base_url'))
             ->withHeaders(['Client-ID' => $this->clientId()])
             ->withToken($this->token())
@@ -202,11 +225,11 @@ class IgdbClient
 
         // Twitch refusing the client id or secret is a wrong key: asking again will not help.
         if ($response->clientError() && $response->status() !== 429) {
-            throw new ProviderRejected("IGDB authentication failed with status {$response->status()}. Check IGDB_CLIENT_ID / IGDB_CLIENT_SECRET.");
+            throw new ProviderKeyRejected("IGDB authentication failed with status {$response->status()}. Check ".self::CLIENT_ID_VARIABLE.' / '.self::CLIENT_SECRET_VARIABLE.'.', self::answerOf($response));
         }
 
         if ($response->failed() || $token === '') {
-            throw new ProviderException("IGDB authentication failed with status {$response->status()}. Check IGDB_CLIENT_ID / IGDB_CLIENT_SECRET.");
+            throw new ProviderException("IGDB authentication failed with status {$response->status()}. Check ".self::CLIENT_ID_VARIABLE.' / '.self::CLIENT_SECRET_VARIABLE.'.');
         }
 
         // Tokens live ~60 days; renew a day early so no request ever runs
@@ -237,11 +260,11 @@ class IgdbClient
 
     private function clientId(): string
     {
-        return $this->credential('tracker.igdb.client_id', 'IGDB_CLIENT_ID');
+        return $this->credential('tracker.igdb.client_id', self::CLIENT_ID_VARIABLE);
     }
 
     private function clientSecret(): string
     {
-        return $this->credential('tracker.igdb.client_secret', 'IGDB_CLIENT_SECRET');
+        return $this->credential('tracker.igdb.client_secret', self::CLIENT_SECRET_VARIABLE);
     }
 }

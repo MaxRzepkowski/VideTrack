@@ -10,6 +10,7 @@ use App\Catalog\Contracts\SupportsEvents;
 use App\Catalog\Contracts\SupportsExternalIdLookup;
 use App\Catalog\Contracts\SupportsFilteredDiscovery;
 use App\Catalog\Contracts\SupportsFranchises;
+use App\Catalog\Contracts\SupportsHealthProbe;
 use App\Catalog\Contracts\SupportsPlatforms;
 use App\Catalog\Contracts\SupportsRelatedReleases;
 use App\Catalog\Contracts\SupportsTrending;
@@ -39,8 +40,13 @@ use Carbon\CarbonImmutable;
  *
  * Each method is described where it is implemented, not here.
  */
-class IgdbProvider implements MetadataProvider, SupportsCollections, SupportsCompanyPage, SupportsDiscovery, SupportsEvents, SupportsExternalIdLookup, SupportsFilteredDiscovery, SupportsFranchises, SupportsPlatforms, SupportsRelatedReleases, SupportsTrending
+class IgdbProvider implements MetadataProvider, SupportsCollections, SupportsCompanyPage, SupportsDiscovery, SupportsEvents, SupportsExternalIdLookup, SupportsFilteredDiscovery, SupportsFranchises, SupportsHealthProbe, SupportsPlatforms, SupportsRelatedReleases, SupportsTrending
 {
+    public const CODE = 'igdb';
+
+    /** A game that has stood at IGDB for years (The Witcher 3): one title by id, its id alone. */
+    public const PROBE_TITLE = '1942';
+
     /**
      * Steam in /external_game_sources. The per-row `category` enum that named
      * it (steam = 1) is deprecated in favour of this reference (api-docs.igdb.com,
@@ -72,6 +78,21 @@ class IgdbProvider implements MetadataProvider, SupportsCollections, SupportsCom
     public function code(): string
     {
         return $this->payload->code();
+    }
+
+    public function serviceName(): string
+    {
+        return 'IGDB';
+    }
+
+    public function credentialVariables(): array
+    {
+        return [IgdbClient::CLIENT_ID_VARIABLE, IgdbClient::CLIENT_SECRET_VARIABLE];
+    }
+
+    public function probe(): void
+    {
+        $this->client->probe('games', 'fields id; where id = '.self::PROBE_TITLE.';');
     }
 
     public function externalIdSources(): array

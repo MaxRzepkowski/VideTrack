@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Accounts\LocalesInUse;
 use App\Catalog\Contracts\SupportsTrending;
+use App\Catalog\KeyRefusals;
 use App\Catalog\ProviderRegistry;
 use App\Jobs\Concerns\RunsAsTask;
 use App\Models\TaskRun;
@@ -34,7 +35,7 @@ class PrefetchTrending implements ShouldQueue
         self::dispatch(TaskRun::queueTask(TaskName::PrefetchTrending->value));
     }
 
-    public function handle(ProviderRegistry $providers, LocalesInUse $localesInUse): void
+    public function handle(ProviderRegistry $providers, LocalesInUse $localesInUse, KeyRefusals $refusals): void
     {
         $this->taskRun->markStarted();
 
@@ -56,6 +57,10 @@ class PrefetchTrending implements ShouldQueue
         // first paint of each row is instant.
         foreach ($supporting as $code => $provider) {
             foreach ($locales as $locale) {
+                if ($refusals->skips($code)) {
+                    continue;
+                }
+
                 try {
                     $fetched += count($provider->trending($locale));
                 } catch (ExternalServiceException $e) {
@@ -66,7 +71,7 @@ class PrefetchTrending implements ShouldQueue
 
         $this->taskRun->markSuccess(
             __('tasks.summary_trending', ['titles' => $fetched, 'locales' => count($locales)]),
-            $errors,
+            [...$errors, ...$refusals->lines()],
         );
     }
 }

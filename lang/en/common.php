@@ -163,4 +163,5 @@ return [
     'webhooks' => 'Webhooks',
     'yesterday' => 'Yesterday',
     'back' => 'Back',
+    'instance' => 'Instance',
 ];

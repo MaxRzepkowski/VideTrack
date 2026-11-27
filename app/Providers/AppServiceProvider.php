@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Catalog\ProviderCacheContext;
+use App\Catalog\ProviderHealth;
 use App\Library\LibraryProjector;
 use App\Library\MutationContext;
 use App\Policies\PersonalAccessTokenPolicy;
@@ -36,6 +37,10 @@ class AppServiceProvider extends ServiceProvider
         // Shared, request-scoped flag the cache decorator reads to bypass the
         // response cache when a manual refresh needs genuinely fresh data.
         $this->app->singleton(ProviderCacheContext::class);
+
+        // One for the process: what it last wrote of each provider's health
+        // spares a refresh writing the same state for every request it sends.
+        $this->app->singleton(ProviderHealth::class);
 
         // Where the current mutation came from. Scoped, not singleton: the
         // queue worker resets scoped instances between jobs, so one import

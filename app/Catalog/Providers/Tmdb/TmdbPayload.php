@@ -63,7 +63,7 @@ final readonly class TmdbPayload
 
     public function code(): string
     {
-        return 'tmdb';
+        return TmdbProvider::CODE;
     }
 
     /**

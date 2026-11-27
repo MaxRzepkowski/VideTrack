@@ -6,6 +6,7 @@ import PlayingCard from '@/components/dashboard/PlayingCard.vue';
 import StatTile from '@/components/dashboard/StatTile.vue';
 import UpNextCard from '@/components/dashboard/UpNextCard.vue';
 import EmptyState from '@/components/EmptyState.vue';
+import ErrorBanner from '@/components/ErrorBanner.vue';
 import MediaGrid from '@/components/media/MediaGrid.vue';
 import PageSection from '@/components/PageSection.vue';
 import ScrollRow from '@/components/ScrollRow.vue';
@@ -22,7 +23,7 @@ import { signedInUser } from '@/lib/pageContext';
 import { isPositionCounter } from '@/lib/progress';
 import type { CalendarDay, PlayingEntry, UpNextEntry, WatchStats } from '@/types/media';
 import { Head, Link } from '@inertiajs/vue3';
-import { trans } from 'laravel-vue-i18n';
+import { trans, transChoice } from 'laravel-vue-i18n';
 import { BookOpenText, CalendarDays, ChartNoAxesColumnIncreasing, Gamepad2, ListVideo, Search } from '@lucide/vue';
 import { computed, ref } from 'vue';
 
@@ -31,6 +32,8 @@ const props = defineProps<{
     upNext: UpNextEntry[];
     playing: PlayingEntry[];
     calendar: CalendarDay[];
+    /** How much of the instance needs its admin: zero for everyone else. */
+    attention: number;
 }>();
 
 // Up Next, now playing, the calendar and the stats all move with a write.
@@ -79,6 +82,13 @@ const statKinds = computed(() => inRegistryOrder(Object.keys(props.stats)));
         <!-- The page is a list of full-width bands; each one holds its own
              container, so a band's background reaches both screen edges. -->
         <div class="flex w-full flex-1 flex-col">
+            <!-- The admin's one word about the instance: what it says is on the Instance page. -->
+            <div v-if="attention > 0" class="max-w-content mx-auto w-full px-4 pt-6 md:px-10">
+                <ErrorBanner
+                    :message="transChoice('dashboard.count_issues_need_your_attention', attention, { count: String(attention) })"
+                    :link="{ href: route('settings.instance.index'), label: trans('dashboard.see_what_needs_attention') }"
+                />
+            </div>
             <PageSection>
                 <!-- The stat band names itself like every other section, at the
                      same scale — the page has no separate page-level title. -->

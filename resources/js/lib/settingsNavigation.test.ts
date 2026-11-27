@@ -14,4 +14,16 @@ describe('the settings menu', () => {
         expect(ids()).not.toContain('settings.password');
         expect(ids()).toContain('settings.identities');
     });
+
+    it('gives an admin the Instance page where everyone else has their tasks', () => {
+        const ids = () => settingsNav().map((entry) => entry.id);
+
+        expect(ids()).toContain('settings.tasks');
+        expect(ids()).not.toContain('settings.instance');
+
+        setPageProps({ auth: { user: { id: 1, name: 'Alex', username: 'alex', is_admin: true } } });
+
+        expect(ids()).not.toContain('settings.tasks');
+        expect(ids()).toContain('settings.instance');
+    });
 });

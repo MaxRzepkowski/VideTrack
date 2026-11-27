@@ -36,7 +36,7 @@ final class ComicVineServiceProvider extends ServiceProvider
 
         $this->callAfterResolving(ProviderRegistry::class, function (ProviderRegistry $providers): void {
             if ($this->configured()) {
-                $providers->register('comicvine', ComicVineProvider::class);
+                $providers->register(ComicVineProvider::CODE, ComicVineProvider::class);
             }
         });
 

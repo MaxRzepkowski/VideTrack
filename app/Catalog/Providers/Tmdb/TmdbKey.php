@@ -14,12 +14,15 @@ use Illuminate\Http\Client\PendingRequest;
  */
 final class TmdbKey
 {
+    /** The setting the operator writes the key under. */
+    public const VARIABLE = 'TMDB_API_KEY';
+
     /**
      * @throws ProviderException when the instance has no key
      */
     public static function on(PendingRequest $request): PendingRequest
     {
-        $key = ProviderCredential::read('tracker.tmdb.api_key', 'TMDB_API_KEY');
+        $key = ProviderCredential::read('tracker.tmdb.api_key', self::VARIABLE);
 
         return str_starts_with($key, 'eyJ') ? $request->withToken($key) : $request->withQueryParameters(['api_key' => $key]);
     }

@@ -57,6 +57,7 @@ use App\Providers\AppServiceProvider;
 use App\Providers\RegistryServiceProvider;
 use App\Providers\TypeScriptServiceProvider;
 use App\Suggestions\SuggestionServiceProvider;
+use App\Tasks\Maintenance\MaintenanceServiceProvider;
 use Spatie\LaravelTypeScriptTransformer\TypeScriptTransformerApplicationServiceProvider;
 
 return [
@@ -124,6 +125,9 @@ return [
     OutgoingWebhooksServiceProvider::class,
 
     SuggestionServiceProvider::class,
+
+    // The instance's own upkeep.
+    MaintenanceServiceProvider::class,
 
     // The identity providers the operator configured, for signing in.
     IdentityServiceProvider::class,

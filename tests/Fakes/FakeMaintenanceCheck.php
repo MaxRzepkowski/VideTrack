@@ -2,13 +2,16 @@
 
 namespace Tests\Fakes;
 
+use App\Tasks\Data\TaskLine;
+use App\Tasks\Maintenance\CheckLevel;
 use App\Tasks\Maintenance\CheckReport;
 use App\Tasks\Maintenance\Contracts\MaintenanceCheck;
+use App\Tasks\Maintenance\Data\CheckLine;
 use App\Tasks\Maintenance\MaintenanceWindow;
 use Throwable;
 
 /**
- * A check that does what the test told it to: says a result, notes
+ * A check that does what the test told it to: says what is well, notes
  * something, or breaks. Every run of a fake joins one shared log, so a test
  * can read the order checks ran in.
  */
@@ -58,7 +61,7 @@ class FakeMaintenanceCheck implements MaintenanceCheck
         self::$ran[] = static::class;
 
         foreach (static::$results as $key) {
-            $report->result($key);
+            $report->add(new CheckLine(CheckLevel::Ok, new TaskLine($key)));
         }
 
         foreach (static::$notes as $key) {

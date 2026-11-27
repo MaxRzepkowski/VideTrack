@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\Tasks\Maintenance\MaintenanceChecks;
+use App\Tasks\Maintenance\RunCause;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Foundation\Queue\Queueable;
@@ -10,7 +11,8 @@ use Illuminate\Support\Str;
 use Throwable;
 
 /**
- * One run of a window's maintenance checks, one after another.
+ * One run of maintenance checks, one after another: a window's, or the one
+ * check an admin asked for.
  */
 class RunMaintenanceChecks implements ShouldQueue
 {
@@ -30,14 +32,14 @@ class RunMaintenanceChecks implements ShouldQueue
     /**
      * @param  list<string>  $codes
      */
-    public function __construct(public readonly array $codes)
+    public function __construct(public readonly array $codes, public readonly RunCause $cause = RunCause::Window)
     {
         $this->runId = (string) Str::uuid();
     }
 
     public function handle(MaintenanceChecks $checks): void
     {
-        $checks->perform($this->runId, $this->codes);
+        $checks->perform($this->runId, $this->codes, $this->cause);
     }
 
     public function failed(Throwable $exception): void

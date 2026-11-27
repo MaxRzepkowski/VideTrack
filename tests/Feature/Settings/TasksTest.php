@@ -28,9 +28,9 @@ test('system runs are visible to admins only', function () {
     $run->markSuccess('Refreshed 2 of 2 items.');
 
     $this->actingAs(User::factory()->admin()->create())
-        ->get('/settings/tasks')
+        ->get(route('settings.instance.tasks'))
         ->assertInertia(fn (Assert $page) => $page
-            ->component('settings/Tasks')
+            ->component('settings/instance/Tasks')
             ->has('runs', 1)
             ->where('runs.0.name', 'refresh-catalog')
             ->where('runs.0.status', 'success')
@@ -81,7 +81,7 @@ test("each scheduled task shows its newest system run, never a user's", function
     TaskRun::query()->create(['user_id' => $admin->id, 'name' => 'refresh-catalog', 'status' => TaskRunStatus::Failure, 'queued_at' => now()]);
 
     $this->actingAs($admin)
-        ->get('/settings/tasks')
+        ->get(route('settings.instance.tasks'))
         ->assertInertia(fn (Assert $page) => $page
             ->where('schedule', fn ($schedule) => collect($schedule)->firstWhere('name', 'refresh-catalog')['lastStatus'] === 'success'
                 && collect($schedule)->firstWhere('name', 'refresh-entities')['lastStatus'] === null));
@@ -89,7 +89,7 @@ test("each scheduled task shows its newest system run, never a user's", function
 
 test('admins get the recurring schedule with next run, others do not', function () {
     $this->actingAs(User::factory()->admin()->create())
-        ->get('/settings/tasks')
+        ->get(route('settings.instance.tasks'))
         ->assertInertia(fn (Assert $page) => $page
             ->has('schedule', count(ScheduledTasks::all()))
             ->where('schedule.0.name', 'refresh-catalog')
@@ -99,7 +99,7 @@ test('admins get the recurring schedule with next run, others do not', function 
 
     $this->actingAs(User::factory()->create())
         ->get('/settings/tasks')
-        ->assertInertia(fn (Assert $page) => $page->has('schedule', 0));
+        ->assertInertia(fn (Assert $page) => $page->missing('schedule'));
 });
 
 test('failure runs expose their errors', function () {
@@ -109,7 +109,7 @@ test('failure runs expose their errors', function () {
     $run->markFailure('Boom.', ['disk full']);
 
     $this->actingAs($admin)
-        ->get('/settings/tasks')
+        ->get(route('settings.instance.tasks'))
         ->assertInertia(fn (Assert $page) => $page
             ->where('runs.0.status', 'failure')
             ->where('runs.0.errors', ['disk full']));
@@ -160,7 +160,7 @@ test('the schedule reports each task last run and status', function () {
     $run->markSuccess('Refreshed 2 of 2 items.');
 
     $this->actingAs(User::factory()->admin()->create())
-        ->get('/settings/tasks')
+        ->get(route('settings.instance.tasks'))
         ->assertInertia(fn (Assert $page) => $page
             ->where('schedule.0.name', 'refresh-catalog')
             ->where('schedule.0.lastStatus', 'success')

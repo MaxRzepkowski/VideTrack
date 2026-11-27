@@ -4,6 +4,7 @@ namespace App\Catalog\Providers\ComicVine;
 
 use App\Catalog\Contracts\MetadataProvider;
 use App\Catalog\Contracts\SupportsChangeFeed;
+use App\Catalog\Contracts\SupportsHealthProbe;
 use App\Catalog\Data\ChangeReport;
 use App\Catalog\Data\MediaDetails;
 use App\Catalog\Data\MediaSummary;
@@ -25,13 +26,18 @@ use LogicException;
  * signal, so the provider stops at search + details. Covers are absolute
  * ComicVine CDN URLs (`mediaImage` passes `http…` through).
  */
-class ComicVineProvider implements MetadataProvider, SupportsChangeFeed
+class ComicVineProvider implements MetadataProvider, SupportsChangeFeed, SupportsHealthProbe
 {
+    public const CODE = 'comicvine';
+
+    /** A volume that has stood at ComicVine for years (Batman, 1940): one title by id, its id alone. */
+    public const PROBE_TITLE = '796';
+
     /** Creators a comic names. */
     private const CREATORS_KEPT = 8;
 
     /** ComicVine's resource-type prefix for volume detail endpoints. */
-    private const VOLUME_PREFIX = '4050';
+    public const VOLUME_PREFIX = '4050';
 
     /** The most volumes ComicVine lists a page. */
     private const PAGE_SIZE = 100;
@@ -47,7 +53,22 @@ class ComicVineProvider implements MetadataProvider, SupportsChangeFeed
 
     public function code(): string
     {
-        return 'comicvine';
+        return self::CODE;
+    }
+
+    public function serviceName(): string
+    {
+        return 'ComicVine';
+    }
+
+    public function credentialVariables(): array
+    {
+        return [ComicVineClient::KEY_VARIABLE];
+    }
+
+    public function probe(): void
+    {
+        $this->client->probe('/volume/'.self::VOLUME_PREFIX.'-'.self::PROBE_TITLE.'/', ['field_list' => 'id']);
     }
 
     public function search(string $query, string $locale, MatureContent $mature): array

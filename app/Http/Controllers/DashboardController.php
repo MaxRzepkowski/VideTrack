@@ -9,6 +9,7 @@ use App\Library\Data\PlayingEntry;
 use App\Library\Data\UpNextEntry;
 use App\Library\LibraryStates;
 use App\Models\User;
+use App\Tasks\Attention\AttentionRegistry;
 use App\Tracking\Surfaces\CalendarDays;
 use Illuminate\Container\Attributes\CurrentUser;
 use Inertia\Inertia;
@@ -23,6 +24,7 @@ class DashboardController extends Controller
         CalendarDays $calendar,
         BuildWatchStats $stats,
         LibraryStates $states,
+        AttentionRegistry $attention,
     ): Response {
         $entries = $upNext->execute($viewer);
         $playing = $nowPlaying->execute($viewer);
@@ -45,6 +47,8 @@ class DashboardController extends Controller
             'playing' => $playing,
             'calendar' => $calendar->nearest($viewer),
             'userStates' => $states->resolve($viewer, [...$playingMedia, ...$episodes, ...$closing]),
+            // The admin's one reminder of the instance: how much needs them.
+            'attention' => $viewer->isAdmin() ? count($attention->items()) : 0,
         ]);
     }
 }

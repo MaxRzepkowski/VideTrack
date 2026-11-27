@@ -5,6 +5,7 @@ namespace App\Catalog\Providers\Tmdb;
 use App\Catalog\ItemNotFoundException;
 use App\Catalog\ProviderCacheContext;
 use App\Catalog\ProviderException;
+use App\Catalog\ProviderHealth;
 use App\Catalog\Providers\Concerns\MakesCachedRequests;
 use App\Catalog\Providers\Concerns\SendsHttpRequests;
 use App\Catalog\Providers\Concerns\ThrottlesRequests;
@@ -29,7 +30,10 @@ class TmdbClient
 
     public const RATE_LIMIT_PER_SECOND = 30;
 
-    public function __construct(private readonly ProviderCacheContext $cacheContext) {}
+    public function __construct(
+        private readonly ProviderCacheContext $cacheContext,
+        private readonly ProviderHealth $health,
+    ) {}
 
     /**
      * Cached GET. TTL in seconds; keys are derived from path + params so the
@@ -76,6 +80,12 @@ class TmdbClient
         ));
     }
 
+    /** One request past the cache, as a probe of whether TMDB answers and takes the key. */
+    public function probe(string $path): void
+    {
+        $this->fetch($path, []);
+    }
+
     /**
      * Seed the canonical cache entry from an append_to_response sub-payload.
      * This lets a capability resolver read the child endpoint without turning
@@ -106,6 +116,15 @@ class TmdbClient
         // Spread bursts (e.g. a cold locale-fallback cascade) across seconds.
         $this->throttle(self::RATE_LIMITER, self::RATE_LIMIT_PER_SECOND);
 
+        return $this->health->watch(TmdbProvider::CODE, fn (): array => $this->send($path, $params));
+    }
+
+    /**
+     * @param  array<string, string|int|bool>  $params
+     * @return array<array-key, mixed>
+     */
+    private function send(string $path, array $params): array
+    {
         $response = $this->guardConnection('TMDB', fn () => $this->request()->get($path, $params));
 
         if ($response->status() === 404) {

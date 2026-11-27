@@ -41,7 +41,7 @@ final readonly class HardcoverPayload
 
     public function code(): string
     {
-        return 'hardcover';
+        return HardcoverProvider::CODE;
     }
 
     /** The part Hardcover's word names; null for one it has no case for. */

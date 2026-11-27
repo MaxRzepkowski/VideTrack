@@ -1,5 +1,5 @@
 import { jsonFetch } from '@/lib/http';
-import Tasks from '@/pages/settings/Tasks.vue';
+import Tasks from '@/pages/settings/instance/Tasks.vue';
 import { router } from '@inertiajs/vue3';
 import { flushPromises, mount } from '@vue/test-utils';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';

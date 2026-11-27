@@ -27,6 +27,16 @@ enum MaintenanceWindow: string
         };
     }
 
+    /** A translation key: how often the window runs. */
+    public function frequency(): string
+    {
+        return match ($this) {
+            self::Frequent => 'tasks.every_15_minutes',
+            self::Nightly => 'common.daily',
+            self::Weekly => 'tasks.weekly',
+        };
+    }
+
     /** The most recent time the window was due on or before $now. */
     public function previousRunAt(Carbon $now): Carbon
     {

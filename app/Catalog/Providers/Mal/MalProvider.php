@@ -4,6 +4,7 @@ namespace App\Catalog\Providers\Mal;
 
 use App\Catalog\Contracts\MetadataProvider;
 use App\Catalog\Contracts\SupportsFilteredDiscovery;
+use App\Catalog\Contracts\SupportsHealthProbe;
 use App\Catalog\Contracts\SupportsMatureFilter;
 use App\Catalog\Contracts\SupportsTrending;
 use App\Catalog\Data\MediaDetails;
@@ -28,7 +29,7 @@ use LogicException;
  * and its rankings as the discover page's filtered listing. Covers are
  * absolute MAL CDN URLs (`mediaImage` passes `http…` through).
  */
-class MalProvider implements MetadataProvider, SupportsFilteredDiscovery, SupportsMatureFilter, SupportsTrending
+class MalProvider implements MetadataProvider, SupportsFilteredDiscovery, SupportsHealthProbe, SupportsMatureFilter, SupportsTrending
 {
     /** Below this length a refused search is an empty one. */
     private const SHORT_QUERY = 3;
@@ -59,6 +60,9 @@ class MalProvider implements MetadataProvider, SupportsFilteredDiscovery, Suppor
     /** The provider's code, on every card it makes. */
     public const CODE = 'mal';
 
+    /** The first manga MyAnimeList lists (Monster): one title by id, its id alone. */
+    public const PROBE_TITLE = '1';
+
     public function __construct(
         private readonly MalClient $client,
         private readonly MalPayload $payload,
@@ -68,6 +72,21 @@ class MalProvider implements MetadataProvider, SupportsFilteredDiscovery, Suppor
     public function code(): string
     {
         return self::CODE;
+    }
+
+    public function serviceName(): string
+    {
+        return 'MyAnimeList';
+    }
+
+    public function credentialVariables(): array
+    {
+        return [MalClient::CLIENT_ID_VARIABLE];
+    }
+
+    public function probe(): void
+    {
+        $this->client->probe('manga/'.self::PROBE_TITLE, ['fields' => 'id']);
     }
 
     public function search(string $query, string $locale, MatureContent $mature): array

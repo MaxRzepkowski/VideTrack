@@ -3,6 +3,7 @@
 namespace App\Catalog\Providers\Mal;
 
 use App\Catalog\ProviderCacheContext;
+use App\Catalog\ProviderHealth;
 use App\Catalog\Providers\Concerns\MakesCachedRequests;
 use App\Catalog\Providers\Concerns\SendsHttpRequests;
 use App\Catalog\Providers\Concerns\ThrottlesRequests;
@@ -16,6 +17,9 @@ use App\Support\Payload;
  */
 class MalClient
 {
+    /** The setting the operator writes the key under. */
+    public const CLIENT_ID_VARIABLE = 'MAL_CLIENT_ID';
+
     use MakesCachedRequests;
     use SendsHttpRequests;
     use ThrottlesRequests;
@@ -34,7 +38,10 @@ class MalClient
      */
     public const ALL_RATINGS = ['nsfw' => 'true'];
 
-    public function __construct(private readonly ProviderCacheContext $cacheContext) {}
+    public function __construct(
+        private readonly ProviderCacheContext $cacheContext,
+        private readonly ProviderHealth $health,
+    ) {}
 
     /**
      * Cached GET request. TTL in seconds; keys are derived from the path +
@@ -58,6 +65,16 @@ class MalClient
         ));
     }
 
+    /**
+     * One request past the cache, as a probe of whether MyAnimeList answers and takes the client id.
+     *
+     * @param  array<string, string|int>  $query
+     */
+    public function probe(string $path, array $query): void
+    {
+        $this->fetch($path, $query);
+    }
+
     /** Seconds an answer of this kind (search, details, listing) is kept. */
     public function ttl(string $kind): int
     {
@@ -72,6 +89,15 @@ class MalClient
     {
         $this->throttle(self::RATE_LIMITER, self::RATE_LIMIT_PER_MINUTE, 60);
 
+        return $this->health->watch(MalProvider::CODE, fn (): array => $this->send($path, $query));
+    }
+
+    /**
+     * @param  array<string, string|int>  $query
+     * @return array<array-key, mixed>
+     */
+    private function send(string $path, array $query): array
+    {
         $response = $this->guardConnection('MyAnimeList', fn () => $this->httpClient(config()->string('tracker.mal.base_url'))
             ->withHeaders(['X-MAL-CLIENT-ID' => $this->clientId()])
             ->get($path, $query));
@@ -92,6 +118,6 @@ class MalClient
 
     private function clientId(): string
     {
-        return $this->credential('tracker.mal.client_id', 'MAL_CLIENT_ID');
+        return $this->credential('tracker.mal.client_id', self::CLIENT_ID_VARIABLE);
     }
 }

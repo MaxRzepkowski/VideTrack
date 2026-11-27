@@ -16,14 +16,19 @@ use Inertia\Inertia;
 use Inertia\Response;
 
 /**
- * The "Tasks" settings section: recent task runs, and for admins the
- * recurring schedule. System runs (user_id = null) are admin-only; per-user
- * runs belong to their owner.
+ * The "Tasks" settings section: a user's recent task runs. An admin's are a
+ * tab of the Instance page, with the system runs (user_id = null) and the
+ * recurring schedule; per-user runs belong to their owner.
  */
 class TasksController extends Controller
 {
-    public function index(#[CurrentUser] User $viewer, BuildTasksPage $page): Response
+    /** An admin's tasks live on the Instance page, beside the rest of the instance. */
+    public function index(#[CurrentUser] User $viewer, BuildTasksPage $page): Response|RedirectResponse
     {
+        if ($viewer->isAdmin()) {
+            return to_route('settings.instance.tasks');
+        }
+
         return Inertia::render('settings/Tasks', $page->execute($viewer));
     }
 

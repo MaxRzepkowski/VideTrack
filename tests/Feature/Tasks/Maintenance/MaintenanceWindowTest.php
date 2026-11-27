@@ -7,6 +7,8 @@ use App\Models\TaskRun;
 use App\Models\User;
 use App\Support\ExternalServiceException;
 use App\Tasks\Data\TaskLine;
+use App\Tasks\Maintenance\CheckLevel;
+use App\Tasks\Maintenance\Data\CheckLine;
 use App\Tasks\Maintenance\MaintenanceChecks;
 use App\Tasks\Maintenance\MaintenanceRegistry;
 use App\Tasks\Maintenance\MaintenanceWindow;
@@ -19,7 +21,9 @@ use Tests\Fakes\FakeMaintenanceCheck;
 use Tests\Fakes\SecondFakeMaintenanceCheck;
 
 beforeEach(function () {
-    $registry = app(MaintenanceRegistry::class);
+    // The fakes alone, without the instance's own checks.
+    $registry = new MaintenanceRegistry(app());
+    app()->instance(MaintenanceRegistry::class, $registry);
     $registry->register(SecondFakeMaintenanceCheck::CODE, SecondFakeMaintenanceCheck::class);
     $registry->register(FakeMaintenanceCheck::CODE, FakeMaintenanceCheck::class);
 });
@@ -38,7 +42,7 @@ test('a window runs its checks by their order and keeps what each saw', function
 
     expect($state->status)->toBe(TaskRunStatus::Success)
         ->and($state->checked_at->eq(now()))->toBeTrue()
-        ->and($state->result)->toBe([(new TaskLine(FakeMaintenanceCheck::$results[0]))->stored()])
+        ->and($state->result)->toBe([(new CheckLine(CheckLevel::Ok, new TaskLine(FakeMaintenanceCheck::$results[0])))->stored()])
         ->and($state->error)->toBeNull();
 });
 
@@ -72,7 +76,7 @@ test('a check this instance does not need is never run', function () {
 test('a window without checks queues nothing', function () {
     Queue::fake();
 
-    app(MaintenanceChecks::class)->queueWindow(MaintenanceWindow::Frequent);
+    app(MaintenanceChecks::class)->queueWindow(MaintenanceWindow::Weekly);
 
     Queue::assertNothingPushed();
 });
