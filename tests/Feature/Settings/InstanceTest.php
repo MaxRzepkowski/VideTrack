@@ -14,6 +14,11 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Queue;
 use Inertia\Testing\AssertableInertia as Assert;
 
+// A checkout has no public storage link, a development instance does: the
+// list is read from a setup that is sound wherever the tests run, and the
+// test of the link check sets its own.
+beforeEach(fn () => config(['filesystems.links' => [storage_path() => storage_path('app/public')]]));
+
 /** TMDB has turned the instance's key away, as a refused request leaves it. */
 function tmdbRefusesTheKey(): void
 {

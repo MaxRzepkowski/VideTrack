@@ -26,6 +26,11 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Inertia\Testing\AssertableInertia as Assert;
 
+// A checkout has no public storage link, a development instance does: the
+// list is read from a setup that is sound wherever the tests run, and the
+// test of the link check sets its own.
+beforeEach(fn () => config(['filesystems.links' => [storage_path() => storage_path('app/public')]]));
+
 /** @return list<string> the titles of what needs the admin now, on a page opened at $root */
 function attentionTitles(string $root = 'http://localhost'): array
 {
