@@ -2,13 +2,13 @@
 
 namespace App\Integrations\Apprise;
 
+use App\Integrations\ServiceHttpClient;
 use App\Support\Delivery\DeliveryAnswer;
 use App\Support\Delivery\DeliveryHttpClient;
 use App\Support\Payload;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\Response;
-use Illuminate\Support\Facades\Http;
 
 /**
  * Talks to the instance's apprise-api container: what services it delivers
@@ -29,7 +29,7 @@ final readonly class AppriseClient
      */
     private const DETAILS_TIMEOUT_SECONDS = 3;
 
-    public function __construct(private DeliveryHttpClient $http) {}
+    public function __construct(private DeliveryHttpClient $delivery, private ServiceHttpClient $http) {}
 
     /**
      * What the container says about every service it delivers to: their
@@ -41,10 +41,7 @@ final readonly class AppriseClient
     public function details(): ?array
     {
         try {
-            $response = Http::timeout(self::DETAILS_TIMEOUT_SECONDS)
-                ->withUserAgent(config()->string('tracker.http.user_agent'))
-                ->accept('application/json')
-                ->get($this->url('/details/'), ['all' => 'yes']);
+            $response = $this->http->request(timeoutSeconds: self::DETAILS_TIMEOUT_SECONDS)->get($this->url('/details/'), ['all' => 'yes']);
         } catch (ConnectionException) {
             return null;
         }
@@ -56,7 +53,7 @@ final readonly class AppriseClient
     {
         // A 424 (the service behind the URL did not take it) stays a refusal:
         // whatever went through would arrive twice if asked again.
-        return $this->http->deliver(self::TIMEOUT_SECONDS, self::GONE, fn (PendingRequest $request): Response => $request->asJson()->post($this->url('/notify'), [
+        return $this->delivery->deliver(self::TIMEOUT_SECONDS, self::GONE, fn (PendingRequest $request): Response => $request->asJson()->post($this->url('/notify'), [
             'urls' => $urls,
             'title' => $title,
             'body' => $body,

@@ -4,16 +4,14 @@ namespace App\Integrations\MangaBaka;
 
 use App\Integrations\Connections\ConnectionExpired;
 use App\Integrations\Connections\ConnectionRejected;
+use App\Integrations\ServiceHttpClient;
 use App\Models\ServiceConnection;
-use App\Support\ConnectionFailure;
 use App\Support\HttpRetry;
 use App\Support\Payload;
 use App\Support\ServiceBusy;
 use Generator;
-use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\Response;
-use Illuminate\Support\Facades\Http;
 
 /**
  * A MangaBaka library read with its owner's personal access token
@@ -34,14 +32,14 @@ class MangaBakaClient
 
     private const LIBRARY_SCOPE = 'library.read';
 
-    private const TIMEOUT_SECONDS = 30;
-
     private const RETRIES = 3;
 
     private const FIRST_RETRY_MS = 1000;
 
     /** A 429 without a Retry-After waits out a minute's allowance. */
     private const DEFAULT_WAIT_SECONDS = 60;
+
+    public function __construct(private readonly ServiceHttpClient $http) {}
 
     /**
      * Whether MangaBaka takes a token for reading the library, asked with one
@@ -58,11 +56,7 @@ class MangaBakaClient
             throw new ConnectionRejected('import.a_mangabaka_token_starts_with');
         }
 
-        try {
-            $response = $this->http($token)->get('/v1/my/profile');
-        } catch (ConnectionException $e) {
-            throw new MangaBakaUnavailable('import.service_unreachable', ['service' => MangaBakaService::NAME, 'reason' => ConnectionFailure::reason($e)]);
-        }
+        $response = $this->http->reach(MangaBakaService::NAME, MangaBakaUnavailable::class, fn (): Response => $this->request($token)->get('/v1/my/profile'));
 
         $profile = Payload::map(Payload::map($response->json())['data'] ?? null);
 
@@ -125,21 +119,13 @@ class MangaBakaClient
      */
     private function send(string $token, string $path, array $query): Response
     {
-        try {
-            return $this->http($token)
-                ->retry(self::RETRIES, fn (int $attempt): int => self::FIRST_RETRY_MS * 2 ** ($attempt - 1), HttpRetry::isTransient(...), throw: false)
-                ->get($path, $query);
-        } catch (ConnectionException $e) {
-            throw new MangaBakaUnavailable('import.service_unreachable', ['service' => MangaBakaService::NAME, 'reason' => ConnectionFailure::reason($e)]);
-        }
+        $request = $this->http->retrying($this->request($token), self::RETRIES, self::FIRST_RETRY_MS, HttpRetry::isTransient(...));
+
+        return $this->http->reach(MangaBakaService::NAME, MangaBakaUnavailable::class, fn (): Response => $request->get($path, $query));
     }
 
-    private function http(string $token): PendingRequest
+    private function request(string $token): PendingRequest
     {
-        return Http::baseUrl(rtrim(config()->string('tracker.mangabaka.api_url'), '/'))
-            ->timeout(self::TIMEOUT_SECONDS)
-            ->acceptJson()
-            ->withHeader('x-api-key', $token)
-            ->withUserAgent(config()->string('tracker.http.user_agent'));
+        return $this->http->request(config()->string('tracker.mangabaka.api_url'))->withHeader('x-api-key', $token);
     }
 }

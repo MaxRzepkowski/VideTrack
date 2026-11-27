@@ -5,17 +5,15 @@ namespace App\Integrations\Tmdb;
 use App\Catalog\Providers\Tmdb\TmdbKey;
 use App\Integrations\Connections\ConnectionExpired;
 use App\Integrations\Connections\ConnectionRejected;
+use App\Integrations\ServiceHttpClient;
 use App\Models\ServiceConnection;
-use App\Support\ConnectionFailure;
 use App\Support\HttpRetry;
 use App\Support\Payload;
 use App\Support\ServiceBusy;
 use Closure;
 use Generator;
-use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\Response;
-use Illuminate\Support\Facades\Http;
 
 /**
  * A TMDB account read through API v3 with the instance's key and the
@@ -30,14 +28,14 @@ use Illuminate\Support\Facades\Http;
  */
 class TmdbAccountClient
 {
-    private const TIMEOUT_SECONDS = 30;
-
     private const RETRIES = 3;
 
     private const FIRST_RETRY_MS = 1000;
 
     /** A 429 without a Retry-After waits ten seconds: TMDB's limits are per second. */
     private const DEFAULT_WAIT_SECONDS = 10;
+
+    public function __construct(private readonly ServiceHttpClient $http) {}
 
     /**
      * A request token for the user to approve.
@@ -207,17 +205,8 @@ class TmdbAccountClient
      */
     private function send(callable $request): Response
     {
-        try {
-            $response = $request(TmdbKey::on(
-                Http::baseUrl(rtrim(config()->string('tracker.tmdb.base_url'), '/'))
-                    ->timeout(self::TIMEOUT_SECONDS)
-                    ->acceptJson()
-                    ->withUserAgent(config()->string('tracker.http.user_agent'))
-                    ->retry(self::RETRIES, fn (int $attempt): int => self::FIRST_RETRY_MS * 2 ** ($attempt - 1), HttpRetry::isTransient(...), throw: false),
-            ));
-        } catch (ConnectionException $e) {
-            throw new TmdbUnavailable('import.service_unreachable', ['service' => TmdbService::NAME, 'reason' => ConnectionFailure::reason($e)]);
-        }
+        $http = TmdbKey::on($this->http->retrying($this->http->request(config()->string('tracker.tmdb.base_url')), self::RETRIES, self::FIRST_RETRY_MS, HttpRetry::isTransient(...)));
+        $response = $this->http->reach(TmdbService::NAME, TmdbUnavailable::class, fn (): Response => $request($http));
 
         if ($response->serverError()) {
             throw new TmdbUnavailable('import.service_answered_try_later', ['service' => TmdbService::NAME, 'status' => $response->status()]);

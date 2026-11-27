@@ -3,15 +3,14 @@
 namespace App\Integrations\Connections;
 
 use App\Integrations\Connections\Data\PinnedAddress;
+use App\Integrations\ServiceHttpClient;
 use App\Models\ServiceConnection;
 use App\Models\User;
-use App\Support\ConnectionFailure;
 use App\Support\HttpRetry;
 use Closure;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\Response;
-use Illuminate\Support\Facades\Http;
 
 /**
  * The transport to a server the user runs (Tracearr and the like) at an
@@ -25,13 +24,11 @@ use Illuminate\Support\Facades\Http;
  */
 final readonly class OwnServerClient
 {
-    private const TIMEOUT_SECONDS = 30;
-
     private const TRIES = 3;
 
     private const FIRST_RETRY_MS = 1000;
 
-    public function __construct(private UserAddresses $addresses) {}
+    public function __construct(private UserAddresses $addresses, private ServiceHttpClient $http) {}
 
     /**
      * The stored address, checked again before every run: the operator's
@@ -71,10 +68,7 @@ final readonly class OwnServerClient
     /** A request to `$base` (the API's path under the address) at the approved IP. */
     public function to(PinnedAddress $address, string $base): PendingRequest
     {
-        return $address->hold(Http::baseUrl($address->url.$base))
-            ->timeout(self::TIMEOUT_SECONDS)
-            ->acceptJson()
-            ->withUserAgent(config()->string('tracker.http.user_agent'));
+        return $address->hold($this->http->request($address->url.$base));
     }
 
     /**
@@ -168,11 +162,8 @@ final readonly class OwnServerClient
      */
     private function answer(PendingRequest $request, string $service, string $path, Closure $send, array $absent): array
     {
-        try {
-            $response = $send($request->retry(self::TRIES, fn (int $attempt): int => self::FIRST_RETRY_MS * 2 ** ($attempt - 1), HttpRetry::isTransientOrThrottled(...), throw: false));
-        } catch (ConnectionException $e) {
-            throw new OwnServerUnavailable('import.service_unreachable', ['service' => $service, 'reason' => ConnectionFailure::reason($e)]);
-        }
+        $retrying = $this->http->retrying($request, self::TRIES, self::FIRST_RETRY_MS, HttpRetry::isTransientOrThrottled(...));
+        $response = $this->http->reach($service, OwnServerUnavailable::class, fn (): Response => $send($retrying));
 
         if ($response->status() === 404 || in_array($response->status(), $absent, true)) {
             throw new OwnServerNotFound('import.service_knows_nothing_at', ['service' => $service, 'path' => $path]);

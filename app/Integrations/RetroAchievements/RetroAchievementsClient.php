@@ -2,12 +2,11 @@
 
 namespace App\Integrations\RetroAchievements;
 
-use App\Support\ConnectionFailure;
+use App\Integrations\ServiceHttpClient;
 use App\Support\HttpRetry;
 use App\Support\Payload;
 use App\Support\ServiceBusy;
-use Illuminate\Http\Client\ConnectionException;
-use Illuminate\Support\Facades\Http;
+use Illuminate\Http\Client\Response;
 
 /**
  * RetroAchievements' web API as its documentation and source describe it
@@ -25,14 +24,14 @@ class RetroAchievementsClient
 {
     public const PAGE_SIZE = 500;
 
-    private const TIMEOUT_SECONDS = 30;
-
     private const RETRIES = 3;
 
     private const FIRST_RETRY_MS = 2000;
 
     /** A 429 without a Retry-After waits a minute. */
     private const DEFAULT_WAIT_SECONDS = 60;
+
+    public function __construct(private readonly ServiceHttpClient $http) {}
 
     /**
      * Every game the player has progress in, page by page.
@@ -62,16 +61,8 @@ class RetroAchievementsClient
      */
     private function get(string $path, string $key, array $query): array
     {
-        try {
-            $response = Http::baseUrl(rtrim(config()->string('tracker.retroachievements.base_url'), '/'))
-                ->timeout(self::TIMEOUT_SECONDS)
-                ->acceptJson()
-                ->withUserAgent(config()->string('tracker.http.user_agent'))
-                ->retry(self::RETRIES, fn (int $attempt): int => self::FIRST_RETRY_MS * 2 ** ($attempt - 1), HttpRetry::isTransient(...), throw: false)
-                ->get($path, [...$query, 'y' => $key]);
-        } catch (ConnectionException $e) {
-            throw new RetroAchievementsUnavailable('import.service_unreachable', ['service' => RetroAchievementsSource::SERVICE, 'reason' => ConnectionFailure::reason($e)]);
-        }
+        $request = $this->http->retrying($this->http->request(config()->string('tracker.retroachievements.base_url')), self::RETRIES, self::FIRST_RETRY_MS, HttpRetry::isTransient(...));
+        $response = $this->http->reach(RetroAchievementsSource::SERVICE, RetroAchievementsUnavailable::class, fn (): Response => $request->get($path, [...$query, 'y' => $key]));
 
         return match (true) {
             in_array($response->status(), [401, 403], true) => throw new RetroAchievementsRejected('import.retroachievements_did_not_accept_this_key'),
