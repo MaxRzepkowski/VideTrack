@@ -29,9 +29,24 @@ test('a moment is left for the page to write, and goes to it as an instant', fun
         ->and(CarbonImmutable::parse($line->momentsOnTheWire()['time'])->eq(CarbonImmutable::parse('2026-10-10T10:30:00Z')))->toBeTrue();
 });
 
-test('a check line reads back with its level, details and subject', function () {
-    $line = new CheckLine(CheckLevel::Problem, new TaskLine('tasks.provider_refuses_the_key', ['provider' => 'TMDB']), [new TaskLine('tasks.put_a_new_key_in_variables', ['variables' => 'TMDB_API_KEY'])], 'tmdb');
+test('a check line reads back with its level, details, subject, since, name and state', function () {
+    $line = new CheckLine(
+        CheckLevel::Problem,
+        new TaskLine('tasks.provider_refuses_the_key', ['provider' => 'TMDB']),
+        [new TaskLine('tasks.put_a_new_key_in_variables', ['variables' => 'TMDB_API_KEY'])],
+        'tmdb',
+        CarbonImmutable::parse('2026-10-10T10:30:00Z'),
+        'TMDB',
+        new TaskLine('tasks.provider_state_refuses_the_key'),
+    );
 
     expect(CheckLine::fromStored(json_decode((string) json_encode($line->stored()), true)))->toEqual($line)
         ->and(CheckLine::fromStored(['level' => 'unknown', 'line' => ['key' => 'tasks.x']]))->toBeNull();
+});
+
+test('the kept lines of a row read back without the ones that are not lines', function () {
+    $kept = new CheckLine(CheckLevel::Ok, new TaskLine('tasks.provider_answers', ['provider' => 'TMDB']));
+
+    expect(CheckLine::listFromStored([$kept->stored(), ['level' => 'ok'], 'broken']))->toEqual([$kept])
+        ->and(CheckLine::listFromStored(null))->toBe([]);
 });

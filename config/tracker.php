@@ -483,13 +483,15 @@ return [
     |
     */
 
+    // Hosts that name the computer they are read on: an address on one of
+    // them (a webhook a media server in its own container sends, a link in a
+    // notification) never leaves it. `app` is this instance's service name in
+    // the shipped docker-compose.yml.
+    'loopback_hosts' => ['localhost', '127.0.0.1', '::1', '0.0.0.0', 'app'],
+
     'scrobble' => [
         'completion_threshold' => (int) env('SCROBBLE_COMPLETION_THRESHOLD', 85),
         'dedup_window_hours' => (int) env('SCROBBLE_DEDUP_WINDOW_HOURS', 6),
-        // Hosts a media server in a container of its own hears as itself: a
-        // webhook address on one of them never leaves the sender. `app` is
-        // this instance's service name in the shipped docker-compose.yml.
-        'loopback_hosts' => ['localhost', '127.0.0.1', '::1', '0.0.0.0', 'app'],
         // Addresses one account may have for one server: enough for every
         // server and player in a home, short of an unbounded pile of tokens.
         'endpoints_per_source' => 10,

@@ -50,20 +50,29 @@ test('nothing needing the admin reads as checked when the checks last looked', f
             ->where('checkedAt', now()->subMinutes(5)->toIso8601String()));
 });
 
-test('a refused provider key needs the admin, since it was refused', function () {
+/** The provider check has run and found TMDB refusing the key. */
+function checkFindsTmdbRefusingTheKey(): void
+{
     tmdbRefusesTheKey();
+    Http::fake(['api.themoviedb.org/*' => Http::response([], 401)]);
+    dispatch(new RunMaintenanceChecks([ProviderProbe::CODE]));
+}
+
+test('a refused provider key the check found needs the admin, since it was refused', function () {
+    checkFindsTmdbRefusingTheKey();
 
     $this->actingAs(User::factory()->admin()->create())
         ->get(route('settings.instance.index'))
         ->assertInertia(fn (Assert $page) => $page
             ->has('attention', 1)
-            ->where('attention.0.title', __('tasks.provider_refuses_its_key', ['provider' => 'TMDB']))
-            ->where('attention.0.since', now()->toIso8601String()));
+            ->where('attention.0.level', CheckLevel::Problem->value)
+            ->where('attention.0.title', __('tasks.provider_refuses_the_key', ['provider' => 'TMDB']))
+            ->where('attention.0.since', now()->toIso8601String())
+            ->where('attention.0.details.2.text', __('tasks.put_a_new_key_in_variables', ['variables' => TmdbKey::VARIABLE])));
 });
 
-test('the home page counts what needs the admin, and only for the admin', function () {
-    Http::fake();
-    tmdbRefusesTheKey();
+test('the home page counts the problems that need the admin, and only for the admin', function () {
+    checkFindsTmdbRefusingTheKey();
 
     $this->actingAs(User::factory()->admin()->create())
         ->get(route('dashboard'))
@@ -91,7 +100,7 @@ test('the maintenance tab lists each check with what its last run found', functi
             ->has('checks.0.lines', 1)
             ->where('checks.0.lines.0.level', CheckLevel::Problem->value)
             ->where('checks.0.lines.0.line.text', __('tasks.provider_refuses_the_key', ['provider' => 'TMDB']))
-            ->where('checks.0.lines.0.details.1.text', __('tasks.put_a_new_key_in_variables', ['variables' => TmdbKey::VARIABLE])));
+            ->where('checks.0.lines.0.details.2.text', __('tasks.put_a_new_key_in_variables', ['variables' => TmdbKey::VARIABLE])));
 });
 
 test('the moments of a check go to the page to be written in the viewer\'s time', function () {

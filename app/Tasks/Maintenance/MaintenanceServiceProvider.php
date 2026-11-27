@@ -3,13 +3,17 @@
 namespace App\Tasks\Maintenance;
 
 use App\Tasks\Attention\AttentionRegistry;
-use App\Tasks\Attention\RefusedProviderKeys;
+use App\Tasks\Attention\LoopbackAppUrl;
+use App\Tasks\Attention\ProblemsFromChecks;
+use App\Tasks\Attention\RecentlyFailedJobs;
+use App\Tasks\Attention\StalledProcesses;
+use App\Tasks\Attention\StorageSetup;
 use App\Tasks\Maintenance\Checks\ProviderProbe;
 use Illuminate\Support\ServiceProvider;
 
 /**
- * The upkeep of the instance itself: its maintenance checks and what of them
- * needs the admin, beside what its modules register from their own service
+ * The upkeep of the instance itself: its maintenance checks and what needs
+ * the admin, beside what its modules register from their own service
  * providers.
  */
 final class MaintenanceServiceProvider extends ServiceProvider
@@ -20,7 +24,11 @@ final class MaintenanceServiceProvider extends ServiceProvider
             $checks->register(ProviderProbe::CODE, ProviderProbe::class);
         });
         $this->callAfterResolving(AttentionRegistry::class, function (AttentionRegistry $attention): void {
-            $attention->register('refused-provider-keys', RefusedProviderKeys::class);
+            $attention->register('stalled-processes', StalledProcesses::class);
+            $attention->register('problems-from-checks', ProblemsFromChecks::class);
+            $attention->register('storage-setup', StorageSetup::class);
+            $attention->register('recently-failed-jobs', RecentlyFailedJobs::class);
+            $attention->register('app-url', LoopbackAppUrl::class);
         });
     }
 }

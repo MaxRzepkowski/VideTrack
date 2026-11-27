@@ -13,7 +13,7 @@ function check(overrides: Partial<MaintenanceCheckEntry> = {}): MaintenanceCheck
         label: 'Metadata provider health',
         frequency: 'tasks.every_15_minutes',
         status: 'success',
-        lines: [{ level: 'ok', line: { text: 'TMDB answers.', moments: {} }, details: [] }],
+        lines: [{ level: 'ok', line: { text: 'TMDB answers.', moments: {} }, details: [], label: 'TMDB', state: { text: 'answers', moments: {} } }],
         error: null,
         startedAt: '2026-10-10T11:52:00+00:00',
         checkedAt: '2026-10-10T11:52:00+00:00',
@@ -42,14 +42,21 @@ describe('Maintenance', () => {
 
         expect(text).toContain('Metadata provider health');
         expect(text).toContain('Every 15 minutes');
-        expect(text).toContain('TMDB answers.');
+        expect(text).toContain('TMDB');
+        expect(text).toContain('answers');
     });
 
-    it('gives each provider its own line, in the colour of how it answers, with what to do', () => {
+    it('lists each provider by name and state, with colour and an icon only where something is wrong', () => {
         const wrapper = page([
             check({
                 lines: [
-                    { level: 'ok', line: { text: 'TMDB answers.', moments: {} }, details: [] },
+                    {
+                        level: 'ok',
+                        line: { text: 'TMDB answers.', moments: {} },
+                        details: [],
+                        label: 'TMDB',
+                        state: { text: 'answers', moments: {} },
+                    },
                     {
                         level: 'problem',
                         line: { text: "Hardcover refuses this instance's key.", moments: {} },
@@ -57,21 +64,27 @@ describe('Maintenance', () => {
                             { text: 'Answered 401 invalid_token at :time.', moments: { time: '2026-10-10T11:30:00Z' } },
                             { text: 'Put a new key in HARDCOVER_API_KEY in the .env file.', moments: {} },
                         ],
+                        label: 'Hardcover',
+                        state: { text: 'refuses the key', moments: {} },
                     },
                 ],
             }),
         ]);
 
-        expect(wrapper.find('span.text-danger').text()).toBe("Hardcover refuses this instance's key.");
-        expect(wrapper.text()).toContain('Answered 401 invalid_token at 11:30 AM.');
+        expect(wrapper.findAll('dt').map((name) => name.text())).toEqual(['TMDB', 'Hardcover']);
+        expect(wrapper.find('dd .text-danger').text()).toBe('refuses the key');
+        expect(wrapper.findAll('dd svg')).toHaveLength(1);
         expect(wrapper.text()).toContain('Answered 401 invalid_token at 11:30 AM.');
         expect(wrapper.text()).toContain('Put a new key in HARDCOVER_API_KEY in the .env file.');
-        expect(wrapper.findAll('svg.text-success')).toHaveLength(2);
     });
 
     it('says a check at work runs, and asks for the rows again until it ends', async () => {
         vi.mocked(jsonFetch).mockResolvedValue(
-            new Response(JSON.stringify({ checks: [check({ lines: [{ level: 'ok', line: { text: 'Done again.', moments: {} }, details: [] }] })] })),
+            new Response(
+                JSON.stringify({
+                    checks: [check({ lines: [{ level: 'ok', line: { text: 'Done again.', moments: {} }, details: [], label: null, state: null }] })],
+                }),
+            ),
         );
         const wrapper = page([check({ status: 'started', lines: [] })]);
 

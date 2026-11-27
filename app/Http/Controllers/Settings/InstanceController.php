@@ -7,6 +7,7 @@ use App\Actions\BuildMaintenanceChecks;
 use App\Actions\BuildTasksPage;
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Tasks\Attention\Data\PageVisit;
 use App\Tasks\Maintenance\MaintenanceChecks;
 use App\Tasks\Maintenance\MaintenanceRegistry;
 use Illuminate\Container\Attributes\CurrentUser;
@@ -22,9 +23,9 @@ use Inertia\Response;
  */
 class InstanceController extends Controller
 {
-    public function overview(BuildInstanceOverview $overview): Response
+    public function overview(Request $request, BuildInstanceOverview $overview): Response
     {
-        return Inertia::render('settings/instance/Overview', $overview->execute());
+        return Inertia::render('settings/instance/Overview', $overview->execute(new PageVisit($request->root())));
     }
 
     public function tasks(#[CurrentUser] User $viewer, BuildTasksPage $page): Response

@@ -9,13 +9,18 @@ use App\Library\MutationContext;
 use App\Policies\PersonalAccessTokenPolicy;
 use App\Support\LangFiles;
 use App\Support\PublicUrl;
+use App\Tasks\Liveness\BeatingProcess;
+use App\Tasks\Liveness\Heartbeat;
 use Dedoc\Scramble\Scramble;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Contracts\Auth\CanResetPassword;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
+use Illuminate\Queue\Events\JobProcessed;
+use Illuminate\Queue\Events\Looping;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Route;
@@ -42,6 +47,10 @@ class AppServiceProvider extends ServiceProvider
         // spares a refresh writing the same state for every request it sends.
         $this->app->singleton(ProviderHealth::class);
 
+        // One for the process, like the health above: what it last wrote of
+        // its sign of life spares the worker a write on every loop.
+        $this->app->singleton(Heartbeat::class);
+
         // Where the current mutation came from. Scoped, not singleton: the
         // queue worker resets scoped instances between jobs, so one import
         // cannot stamp its source onto the next job's mutations.
@@ -62,6 +71,10 @@ class AppServiceProvider extends ServiceProvider
         // A relation read inside a loop is an N+1; outside production it
         // throws, so tests and dev catch it before a big library does.
         Model::preventLazyLoading(! $this->app->isProduction());
+
+        // The worker's sign of life: every loop, idle or not, and every job
+        // it finishes.
+        Event::listen([Looping::class, JobProcessed::class], fn () => $this->app->make(Heartbeat::class)->beat(BeatingProcess::Worker));
 
         // Everything a signed-in person clicks: pages, and the writes the
         // pages send through ui/v1. A ceiling for a runaway tab, not a pace

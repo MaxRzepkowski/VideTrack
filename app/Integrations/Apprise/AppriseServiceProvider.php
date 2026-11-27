@@ -3,6 +3,7 @@
 namespace App\Integrations\Apprise;
 
 use App\Notifications\Channels\ChannelRegistry;
+use App\Tasks\Maintenance\MaintenanceRegistry;
 use Illuminate\Support\ServiceProvider;
 
 /**
@@ -21,5 +22,6 @@ final class AppriseServiceProvider extends ServiceProvider
                 $channels->register(AppriseChannel::CODE, AppriseChannel::class);
             }
         });
+        $this->callAfterResolving(MaintenanceRegistry::class, fn (MaintenanceRegistry $checks) => $checks->register(AppriseReach::CODE, AppriseReach::class));
     }
 }

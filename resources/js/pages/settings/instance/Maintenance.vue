@@ -9,7 +9,7 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import SettingsLayout from '@/layouts/settings/Layout.vue';
 import { formatDateTime, relativeTime } from '@/lib/format';
 import { isUnderWay, levelLook, statusLook, wordedText } from '@/lib/tasks';
-import type { MaintenanceCheckEntry } from '@/types/generated';
+import type { MaintenanceCheckEntry, MaintenanceCheckLine } from '@/types/generated';
 import { Head, router } from '@inertiajs/vue3';
 import { LoaderCircle, Play } from '@lucide/vue';
 import { trans } from 'laravel-vue-i18n';
@@ -44,6 +44,16 @@ function runNow(code: string): void {
             onFinish: () => running.value.delete(code),
         },
     );
+}
+
+// A line about one of several named things (a provider) stands in the
+// check's table; any other line reads as a sentence of its own.
+function named(check: MaintenanceCheckEntry): MaintenanceCheckLine[] {
+    return check.lines.filter((line) => line.label !== null);
+}
+
+function sentences(check: MaintenanceCheckEntry): MaintenanceCheckLine[] {
+    return check.lines.filter((line) => line.label === null);
 }
 
 function busy(check: MaintenanceCheckEntry): boolean {
@@ -97,15 +107,36 @@ function busy(check: MaintenanceCheckEntry): boolean {
 
                                 <p v-if="check.error" class="text-danger mt-2 text-sm">{{ check.error }}</p>
 
-                                <ul v-if="check.lines.length > 0" class="mt-3 space-y-2 text-sm">
-                                    <li v-for="(line, index) in check.lines" :key="index" class="flex items-start gap-2">
+                                <!-- Named things side by side, their names in one column, as a table reads;
+                                     colour and an icon only for what is not well. -->
+                                <dl v-if="named(check).length > 0" class="mt-3 grid grid-cols-[max-content_1fr] gap-x-6 gap-y-2 text-sm">
+                                    <template v-for="(line, index) in named(check)" :key="index">
+                                        <dt class="text-ink">{{ line.label }}</dt>
+                                        <dd class="min-w-0">
+                                            <span v-if="line.level === 'ok'" class="text-ink-muted">{{
+                                                line.state ? wordedText(line.state) : ''
+                                            }}</span>
+                                            <span v-else :class="['flex items-start gap-1.5', levelLook(line.level).tone]">
+                                                <component :is="levelLook(line.level).icon" class="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+                                                {{ line.state ? wordedText(line.state) : '' }}
+                                            </span>
+                                            <p v-for="(detail, at) in line.details" :key="at" class="text-ink-muted">{{ wordedText(detail) }}</p>
+                                        </dd>
+                                    </template>
+                                </dl>
+
+                                <ul v-if="sentences(check).length > 0" class="mt-3 space-y-2 text-sm">
+                                    <li v-for="(line, index) in sentences(check)" :key="index" class="flex items-start gap-2">
                                         <component
                                             :is="levelLook(line.level).icon"
+                                            v-if="line.level !== 'ok'"
                                             :class="['mt-0.5 size-4 shrink-0', levelLook(line.level).tone]"
                                             aria-hidden="true"
                                         />
                                         <div class="min-w-0">
-                                            <span :class="levelLook(line.level).tone">{{ wordedText(line.line) }}</span>
+                                            <span :class="line.level === 'ok' ? 'text-ink-muted' : levelLook(line.level).tone">{{
+                                                wordedText(line.line)
+                                            }}</span>
                                             <p v-for="(detail, at) in line.details" :key="at" class="text-ink-muted">{{ wordedText(detail) }}</p>
                                         </div>
                                     </li>

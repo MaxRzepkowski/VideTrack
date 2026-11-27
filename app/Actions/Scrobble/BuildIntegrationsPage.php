@@ -11,6 +11,7 @@ use App\Integrations\Scrobble\ScrobbleSourceRegistry;
 use App\Models\User;
 use App\Models\WebhookDelivery;
 use App\Models\WebhookEndpoint;
+use App\Support\LoopbackAddress;
 use App\Support\StoredReason;
 use Illuminate\Database\Eloquent\Relations\Relation;
 
@@ -75,7 +76,7 @@ final readonly class BuildIntegrationsPage
             // localhost, and a media server in its own container hears that
             // as itself. The delivery then never leaves the sender, so
             // there is no log row to explain the silence.
-            loopback: $this->pointsAtItself($url),
+            loopback: LoopbackAddress::is($url),
             lastReceivedAt: $endpoint->last_received_at?->toIso8601String(),
             // The job stores a translation key, never exception text.
             lastError: StoredReason::worded($endpoint->last_error),
@@ -98,13 +99,5 @@ final readonly class BuildIntegrationsPage
                 ))
                 ->all()),
         );
-    }
-
-    /** Whether this address only means anything from inside this container. */
-    private function pointsAtItself(string $url): bool
-    {
-        $host = mb_strtolower((string) parse_url($url, PHP_URL_HOST));
-
-        return in_array($host, (array) config('tracker.scrobble.loopback_hosts'), true);
     }
 }

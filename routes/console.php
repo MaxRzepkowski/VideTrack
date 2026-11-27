@@ -1,5 +1,7 @@
 <?php
 
+use App\Tasks\Liveness\BeatingProcess;
+use App\Tasks\Liveness\Heartbeat;
 use App\Tasks\Maintenance\MaintenanceChecks;
 use App\Tasks\Maintenance\MaintenanceWindow;
 use App\Tasks\ScheduledTasks;
@@ -13,6 +15,10 @@ use Illuminate\Support\Facades\Schedule;
 foreach (ScheduledTasks::all() as $task) {
     Schedule::call($task->queue)->cron($task->cron)->name($task->name->value);
 }
+
+// The scheduler's sign of life, so the Instance page can tell it is running
+// without asking the scheduler itself.
+Schedule::call(fn (Heartbeat $heartbeat) => $heartbeat->beat(BeatingProcess::Scheduler))->everyMinute()->name('heartbeat');
 
 // The maintenance checks, window by window: a window queues its checks one
 // after another. They keep their own state instead of a task run each, so a
