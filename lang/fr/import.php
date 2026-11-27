@@ -203,7 +203,6 @@ return [
     'spreadsheets_csv' => 'Tableurs (CSV)',
     'start_import' => 'Lancer l’import',
     'steam' => 'Steam',
-    'steam_could_not_be_reached_try' => 'Impossible de joindre Steam. Réessaie plus tard.',
     'steam_knows_no_profile_by_that' => 'Steam ne connaît aucun profil à ce nom.',
     'steam_profile' => 'Profil Steam',
     'steam_shows_no_games_on_this' => 'Steam n’affiche aucun jeu sur ce profil. Dans Steam, règle Confidentialité → Détails des jeux sur Public.',

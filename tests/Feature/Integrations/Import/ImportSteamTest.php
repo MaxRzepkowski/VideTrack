@@ -12,6 +12,7 @@ use App\Jobs\RunImport;
 use App\Models\MediaItem;
 use App\Models\TaskRun;
 use App\Models\User;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Queue;
@@ -191,6 +192,32 @@ test('a rejected key is asked about once', function () {
 
     expect(Http::recorded(fn (Request $request) => str_contains($request->url(), 'steampowered'))->count())->toBe(1);
 });
+
+test('a Steam still busy after the tries says it asked to wait', function () {
+    enableSteam();
+    Http::fake(['api.steampowered.com/*' => Http::response('Too Many Requests', 429)]);
+
+    $this->actingAs(User::factory()->create())
+        ->post(route('settings.import.analyze', ['source' => 'steam']), ['credentials' => ['profile' => '76561197960287930', 'key' => 'steam-key-of-alex']])
+        ->assertJsonPath('valid', false)
+        ->assertJsonPath('error', 'Steam asked to wait before more requests. Try again later.');
+
+    expect(Http::recorded(fn (Request $request) => str_contains($request->url(), 'steampowered'))->count())->toBe(SteamClient::TRIES);
+});
+
+test('a Steam out of reach, failing or refusing is said the way every service says it', function (Closure $answer, string $error) {
+    enableSteam();
+    Http::fake(['api.steampowered.com/*' => $answer]);
+
+    $this->actingAs(User::factory()->create())
+        ->post(route('settings.import.analyze', ['source' => 'steam']), ['credentials' => ['profile' => '76561197960287930', 'key' => 'steam-key-of-alex']])
+        ->assertJsonPath('valid', false)
+        ->assertJsonPath('error', $error);
+})->with([
+    'out of reach' => [fn () => fn () => throw new ConnectionException('cURL error 28: Operation timed out after 30001 milliseconds for https://api.steampowered.com/?key=steam-key-of-alex'), 'Steam is unreachable: Operation timed out after 30001 milliseconds'],
+    'failing' => [fn () => fn () => Http::response('', 503), 'Steam answered 503; try again later.'],
+    'refusing' => [fn () => fn () => Http::response('', 404), 'Steam answered 404 to /IPlayerService/GetOwnedGames/v1/.'],
+]);
 
 test('the watchlist box is optional and travels with the run', function () {
     enableSteam();

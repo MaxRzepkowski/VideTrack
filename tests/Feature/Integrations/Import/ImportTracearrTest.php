@@ -3,9 +3,11 @@
 use App\Actions\Library\MarkWatched;
 use App\Enums\TaskRunStatus;
 use App\Integrations\Connections\ConnectionStatus;
+use App\Integrations\Connections\OwnServerClient;
 use App\Integrations\Connections\OwnServerUnavailable;
 use App\Integrations\Import\Data\ImportInput;
 use App\Integrations\Import\Data\ImportSelection;
+use App\Integrations\Tracearr\TracearrSource;
 use App\Jobs\RunImport;
 use App\Library\WatchedAt;
 use App\Models\MediaItem;
@@ -241,6 +243,13 @@ test('a busy Tracearr is waited out', function () {
         ->and(requestsTo('/history'))->toBe(2);
 
     Sleep::assertSleptTimes(1);
+});
+
+test('a Tracearr still busy after the tries leaves a fresh run, a minute later when it names no wait', function () {
+    Http::fake(['tracearr.lan:3000/*' => Http::response([], 429)]);
+    $user = User::factory()->create();
+
+    expect(postponedBy($user, TracearrSource::CODE, ImportInput::connection(tracearrConnection($user)->id)))->toBe(OwnServerClient::DEFAULT_WAIT_SECONDS);
 });
 
 test('an ordinary account cannot point the server at itself', function (string $address) {

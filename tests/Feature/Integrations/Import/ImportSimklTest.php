@@ -4,7 +4,9 @@ use App\Enums\MediaUserStatus;
 use App\Enums\PlayOutcome;
 use App\Enums\TaskRunStatus;
 use App\Integrations\Connections\ConnectionStatus;
+use App\Integrations\Import\Data\ImportInput;
 use App\Integrations\Simkl\SimklClient;
+use App\Integrations\Simkl\SimklSource;
 use App\Integrations\Simkl\SimklUnavailable;
 use App\Models\MediaItem;
 use App\Models\ServiceConnection;
@@ -419,6 +421,14 @@ test('a 429 is waited out', function () {
         ->and(requestsTo('/sync/activities'))->toBe(2);
 
     Sleep::assertSleptTimes(1);
+});
+
+test('a 429 still standing after the tries leaves a fresh run for as long as Simkl asks', function () {
+    Http::fake(['api.simkl.com/*' => Http::response([], 429, ['Retry-After' => '30'])]);
+    $user = User::factory()->create();
+
+    expect(postponedBy($user, SimklSource::CODE, ImportInput::connection(simklConnection($user)->id)))->toBe(30)
+        ->and(requestsTo('/sync/activities'))->toBe(SimklClient::TRIES);
 });
 
 test('an answered 4xx other than 401 is final: the run ends with it, and the job is not retried', function () {

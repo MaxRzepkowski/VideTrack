@@ -4,14 +4,10 @@ use App\Enums\TaskRunStatus;
 use App\Integrations\Connections\ConnectionStatus;
 use App\Integrations\Connections\RedirectAttempts;
 use App\Integrations\Import\Data\ImportInput;
-use App\Integrations\Import\Data\ImportSelection;
-use App\Integrations\Import\ImportSourceRegistry;
 use App\Integrations\Tmdb\TmdbAccountSource;
 use App\Integrations\Tmdb\TmdbService;
-use App\Jobs\RunImport;
 use App\Models\MediaItem;
 use App\Models\ServiceConnection;
-use App\Models\TaskRun;
 use App\Models\User;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
@@ -267,12 +263,7 @@ test('a connection missing its account or session expires before asking anything
 test('a 429 leaves a fresh run for as long as TMDB asks', function () {
     $connection = tmdbConnection(User::factory()->create());
     Http::fake(['api.themoviedb.org/3/*' => Http::response(['success' => false, 'status_code' => 25], 429, ['Retry-After' => '10'])]);
-    $taskRun = TaskRun::queueTask(ImportSourceRegistry::taskName(TmdbAccountSource::CODE), $connection->user_id);
-    $job = new RunImport($taskRun, TmdbAccountSource::CODE, ImportInput::connection($connection->id), ImportSelection::everything());
 
-    app()->call([$job, 'handle']);
-
-    $later = $job->handOver();
-    expect($later instanceof RunImport ? $later->delay : null)->toBe(10)
+    expect(postponedBy($connection->user, TmdbAccountSource::CODE, ImportInput::connection($connection->id)))->toBe(10)
         ->and($connection->refresh()->status)->toBe(ConnectionStatus::Active);
 });

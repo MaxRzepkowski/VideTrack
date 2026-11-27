@@ -203,7 +203,6 @@ return [
     'spreadsheets_csv' => '电子表格（CSV）',
     'start_import' => '开始导入',
     'steam' => 'Steam',
-    'steam_could_not_be_reached_try' => '无法连接 Steam。请稍后再试。',
     'steam_knows_no_profile_by_that' => 'Steam 上没有这个名称的个人资料。',
     'steam_profile' => 'Steam 个人资料',
     'steam_shows_no_games_on_this' => 'Steam 没有显示这个个人资料的任何游戏。请在 Steam 中把“隐私设置 → 游戏详情”设为公开。',

@@ -9,6 +9,7 @@ use App\Integrations\Hardcover\HardcoverLibraryClient;
 use App\Integrations\Hardcover\HardcoverLibrarySource;
 use App\Integrations\Hardcover\HardcoverReadingStatus;
 use App\Integrations\Hardcover\HardcoverService;
+use App\Integrations\Import\Data\ImportInput;
 use App\Integrations\Import\ImportSourceRegistry;
 use App\Models\MediaItem;
 use App\Models\ServiceConnection;
@@ -229,6 +230,13 @@ test('a 429 is waited out', function () {
 
     expect(runConnectionImport(hardcoverConnection($user), HardcoverLibrarySource::CODE)->status)->toBe(TaskRunStatus::Success)
         ->and(requestsTo('/v1/graphql'))->toBe(2);
+});
+
+test('a 429 still standing after the tries leaves a fresh run for as long as Hardcover asks', function () {
+    Http::fake(['api.hardcover.app/v1/graphql' => Http::response(['error' => 'Too Many Requests'], 429, ['Retry-After' => '90'])]);
+    $user = User::factory()->create();
+
+    expect(postponedBy($user, HardcoverLibrarySource::CODE, ImportInput::connection(hardcoverConnection($user)->id)))->toBe(90);
 });
 
 test('a query Hardcover refuses ends the run once, without its wording', function (int $status, array $body) {

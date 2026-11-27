@@ -182,6 +182,16 @@ test('a private AniList profile ends the run with the reason', function () {
         ->and($taskRun->summary)->toBe('The AniList profile of hidden is private.');
 });
 
+test('a tracker still busy after the tries says it asked to wait', function () {
+    seedAnimeIdMap();
+    Http::fake(['graphql.anilist.co*' => Http::response([], 429)]);
+
+    $taskRun = runListImport(User::factory()->create(), 'anilist', 'tester');
+
+    expect($taskRun->status)->toBe(TaskRunStatus::Failure)
+        ->and($taskRun->summary)->toBe('AniList asked to wait before more requests. Try again later.');
+});
+
 test('a Kitsu library is read page by page and placed by its MyAnimeList mappings', function () {
     // More requests than the provider allows per second: its rate limiter
     // waits for the window to pass, which a frozen clock never lets happen.

@@ -11,6 +11,7 @@ use App\Integrations\Connections\OwnServerRejected;
 use App\Integrations\Connections\OwnServerUnavailable;
 use App\Models\ServiceConnection;
 use App\Support\Payload;
+use App\Support\ServiceBusy;
 use Generator;
 use Illuminate\Http\Client\PendingRequest;
 
@@ -66,7 +67,7 @@ class KavitaClient extends OwnServerApi implements NamesKeyOwner
      *
      * @return list<array<array-key, mixed>>
      *
-     * @throws OwnServerUnavailable|OwnServerRejected|OwnServerNotFound|ConnectionExpired
+     * @throws OwnServerUnavailable|OwnServerRejected|OwnServerNotFound|ServiceBusy|ConnectionExpired
      */
     public function libraries(ServiceConnection $connection, PinnedAddress $address): array
     {
@@ -78,7 +79,7 @@ class KavitaClient extends OwnServerApi implements NamesKeyOwner
      *
      * @return Generator<int, list<array<array-key, mixed>>>
      *
-     * @throws OwnServerUnavailable|OwnServerRejected|OwnServerNotFound|ConnectionExpired
+     * @throws OwnServerUnavailable|OwnServerRejected|OwnServerNotFound|ServiceBusy|ConnectionExpired
      */
     public function begunSeries(ServiceConnection $connection, PinnedAddress $address): Generator
     {
@@ -93,7 +94,7 @@ class KavitaClient extends OwnServerApi implements NamesKeyOwner
      *
      * @return array<int, true>
      *
-     * @throws OwnServerUnavailable|OwnServerRejected|OwnServerNotFound|ConnectionExpired
+     * @throws OwnServerUnavailable|OwnServerRejected|OwnServerNotFound|ServiceBusy|ConnectionExpired
      */
     public function begunAndOver(ServiceConnection $connection, PinnedAddress $address): array
     {

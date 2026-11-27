@@ -96,15 +96,11 @@ class MdbListClient
     public function get(ServiceConnection $connection, string $path, array $query = []): mixed
     {
         $key = $connection->credential('key') ?? throw new ConnectionExpired('import.mdblist_stopped_accepting_this_connection');
-        $response = $this->send($key, $path, $query);
+        $response = $this->http->unlessBusy(MdbListService::NAME, $this->send($key, $path, $query), self::DEFAULT_WAIT_SECONDS);
 
         // The key was regenerated on MDBList; only the new one fixes it.
         if ($response->status() === 401) {
             throw new ConnectionExpired('import.mdblist_stopped_accepting_this_connection');
-        }
-
-        if ($response->status() === 429) {
-            throw new ServiceBusy('import.service_asked_to_wait', HttpRetry::retryAfter($response, self::DEFAULT_WAIT_SECONDS), ['service' => MdbListService::NAME]);
         }
 
         if (HttpRetry::isOutage($response)) {

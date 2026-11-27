@@ -203,7 +203,6 @@ return [
     'spreadsheets_csv' => '스프레드시트 (CSV)',
     'start_import' => '가져오기 시작',
     'steam' => 'Steam',
-    'steam_could_not_be_reached_try' => 'Steam에 연결할 수 없어요. 나중에 다시 시도하세요.',
     'steam_knows_no_profile_by_that' => 'Steam에 그 이름의 프로필이 없어요.',
     'steam_profile' => 'Steam 프로필',
     'steam_shows_no_games_on_this' => '이 프로필에서 Steam이 게임을 보여 주지 않아요. Steam에서 개인정보 설정 → 게임 세부 정보를 공개로 바꾸세요.',

@@ -12,6 +12,7 @@ use App\Integrations\Connections\OwnServerRejected;
 use App\Integrations\Connections\OwnServerUnavailable;
 use App\Models\ServiceConnection;
 use App\Support\Payload;
+use App\Support\ServiceBusy;
 use Illuminate\Http\Client\PendingRequest;
 
 /**
@@ -69,7 +70,7 @@ class StorytellerClient extends OwnServerApi implements NamesKeyOwner
      *
      * @return list<array<array-key, mixed>>
      *
-     * @throws OwnServerUnavailable|OwnServerRejected|OwnServerNotFound|ConnectionExpired
+     * @throws OwnServerUnavailable|OwnServerRejected|OwnServerNotFound|ServiceBusy|ConnectionExpired
      */
     public function books(ServiceConnection $connection, PinnedAddress $address): array
     {

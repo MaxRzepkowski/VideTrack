@@ -66,6 +66,17 @@ test('HTTP to outside services goes through a *Client', function () {
     expect(array_values($offenders))->toBe([]);
 });
 
+test('an integration asks a service through ServiceHttpClient', function () {
+    // One place for the wait, the instance's User-Agent, which failures are
+    // asked again and how a dropped connection or a lingering 429 is told.
+    $offenders = array_filter(
+        filesMatching('/\bHttp::|->retry\(|withUserAgent\(/', ['app/Integrations/ServiceHttpClient.php']),
+        fn (string $path): bool => str_starts_with($path, 'app/Integrations/'),
+    );
+
+    expect(array_values($offenders))->toBe([]);
+});
+
 test('provider codes are spoken only by providers, integrations and service providers', function () {
     $codes = implode('|', ['tmdb', 'igdb', 'hardcover', 'mal', 'comicvine', 'tvmaze', 'wikidata', 'justwatch']);
 

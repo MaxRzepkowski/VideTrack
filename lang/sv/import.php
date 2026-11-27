@@ -203,7 +203,6 @@ return [
     'spreadsheets_csv' => 'Kalkylblad (CSV)',
     'start_import' => 'Starta import',
     'steam' => 'Steam',
-    'steam_could_not_be_reached_try' => 'Steam gick inte att nå. Försök igen senare.',
     'steam_knows_no_profile_by_that' => 'Steam känner inte till någon profil med det namnet.',
     'steam_profile' => 'Steam-profil',
     'steam_shows_no_games_on_this' => 'Steam visar inga spel för den här profilen. Ställ in Privacy → Game details på Public i Steam.',

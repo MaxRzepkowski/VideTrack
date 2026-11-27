@@ -203,7 +203,6 @@ return [
     'spreadsheets_csv' => '表計算（CSV）',
     'start_import' => 'インポートを開始',
     'steam' => 'Steam',
-    'steam_could_not_be_reached_try' => 'Steamに接続できませんでした。しばらくしてからもう一度お試しください。',
     'steam_knows_no_profile_by_that' => 'その名前のプロフィールはSteamにありません。',
     'steam_profile' => 'Steamのプロフィール',
     'steam_shows_no_games_on_this' => 'Steamではこのプロフィールのゲームが表示されません。Steamでプライバシー設定の「ゲームの詳細」を「公開」にしてください。',
