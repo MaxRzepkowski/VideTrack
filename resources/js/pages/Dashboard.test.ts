@@ -15,7 +15,7 @@ describe('Dashboard', () => {
         const banner = page(2).findComponent(ErrorBanner);
 
         expect(banner.props('message')).toBe('2 issues need your attention.');
-        expect(banner.props('link')).toEqual({ href: '/settings.instance.index', label: 'See' });
+        expect(banner.props('link')).toEqual({ href: '/settings.instance.index', label: 'Show details' });
     });
 
     it('says nothing when nothing needs anyone', () => {

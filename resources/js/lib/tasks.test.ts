@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { isUnderWay, levelLook, statusLook, wordedText } from './tasks';
+import { isUnderWay, levelLook, statusLook, wordedText, writtenMoment } from './tasks';
 
 describe('statusLook', () => {
     it("words every ending in the reader's language", () => {
@@ -27,9 +27,15 @@ describe('levelLook', () => {
     });
 });
 
-describe('wordedText', () => {
+describe('writtenMoment', () => {
     it('writes a moment of today by its hour, and one of another day with its date', () => {
-        expect(wordedText({ text: 'Answered 401 at :time.', moments: { time: '2026-10-10T10:30:00Z' } })).toBe('Answered 401 at 10:30 AM.');
+        expect(writtenMoment('2026-10-10T10:30:00Z')).toBe('10:30 AM');
+        expect(writtenMoment('2026-10-08T10:30:00Z')).toBe('Oct 8, 2026, 10:30 AM');
+    });
+});
+
+describe('wordedText', () => {
+    it('writes its moments into the sentence', () => {
         expect(wordedText({ text: 'Last answered at :time.', moments: { time: '2026-10-08T10:30:00Z' } })).toBe(
             'Last answered at Oct 8, 2026, 10:30 AM.',
         );

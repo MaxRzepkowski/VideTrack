@@ -8,8 +8,9 @@ use Illuminate\Support\Facades\Cache;
 
 /**
  * The last sign of life of each background process, written by the process
- * itself: the scheduler on its tick, the worker on every loop and job. A
- * process that left no fresh sign is not running; no other process is asked.
+ * itself: the scheduler on its start and every tick, the worker on every
+ * loop and job. A process that left no fresh sign is not running; no other
+ * process is asked.
  */
 final class Heartbeat
 {
