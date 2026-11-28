@@ -2,6 +2,8 @@
 
 namespace App\Integrations\Anime;
 
+use LogicException;
+
 /**
  * Where one MyAnimeList entry sits in the TVDB/IMDb world, per the Kometa
  * anime id map: a season of a TVDB series (with the episode offset at which
@@ -29,6 +31,21 @@ final readonly class AnimeMapping
     public function isSeason(): bool
     {
         return $this->tvdbId !== null && $this->tvdbSeason !== null && $this->tvdbSeason > 0;
+    }
+
+    /**
+     * Where the entry's episode $number sits in the TVDB series: the season,
+     * and the number there, past the episodes the entry starts after.
+     *
+     * @return array{int, int}
+     */
+    public function episode(int $number): array
+    {
+        if (! $this->isSeason()) {
+            throw new LogicException('An anime entry placed by episode maps to no regular TVDB season.');
+        }
+
+        return [$this->tvdbSeason, $this->episodeOffset + $number];
     }
 
     /** A film or special with an unambiguous id of its own. */
