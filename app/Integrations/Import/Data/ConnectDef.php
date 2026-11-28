@@ -2,8 +2,13 @@
 
 namespace App\Integrations\Import\Data;
 
+use App\Integrations\Connections\ConnectionRegistry;
 use App\Integrations\Connections\ConnectMethod;
+use App\Integrations\Connections\Contracts\HasConnectionFields;
 use App\Integrations\Connections\Data\ConnectionCard;
+use App\Integrations\Connections\RedirectAttempts;
+use App\Integrations\Import\Contracts\ReadsFromConnection;
+use App\Models\ServiceConnection;
 use App\Support\Forms\CredentialField;
 use Spatie\TypeScriptTransformer\Attributes\TypeScript;
 
@@ -27,4 +32,21 @@ final readonly class ConnectDef
         /** Where the page holds why a trip to the service came back without connecting. */
         public string $errorKey,
     ) {}
+
+    /** The card of a source reading through the service, with what the user already holds there. */
+    public static function of(ReadsFromConnection $source, ConnectionRegistry $connections, ?ServiceConnection $held): self
+    {
+        $service = $source->connectionService();
+        $connectable = $connections->get($service);
+
+        return new self(
+            service: $service,
+            name: $connectable->name(),
+            method: ConnectMethod::of($connectable),
+            fields: $connectable instanceof HasConnectionFields ? $connectable->connectionFields() : [],
+            autoImportMinutes: $source->autoImportMinutes(),
+            connection: $held === null ? null : ConnectionCard::of($held),
+            errorKey: RedirectAttempts::errorKey($service),
+        );
+    }
 }

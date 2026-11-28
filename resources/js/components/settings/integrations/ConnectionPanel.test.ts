@@ -1,4 +1,4 @@
-import ConnectionPanel from '@/components/settings/import/ConnectionPanel.vue';
+import ConnectionPanel from '@/components/settings/integrations/ConnectionPanel.vue';
 import { jsonFetch } from '@/lib/http';
 import { testPage } from '@/test/page';
 import type { ConnectDef, ConnectionCard } from '@/types/integrations';

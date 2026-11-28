@@ -6,10 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Settings\AnalyzeImportRequest;
 use App\Http\Requests\Settings\ImportRequest;
 use App\Integrations\Connections\ConnectionRegistry;
-use App\Integrations\Connections\ConnectMethod;
-use App\Integrations\Connections\Contracts\HasConnectionFields;
-use App\Integrations\Connections\Data\ConnectionCard;
-use App\Integrations\Connections\RedirectAttempts;
 use App\Integrations\Import\Contracts\ExplainsSetup;
 use App\Integrations\Import\Contracts\ImportSource;
 use App\Integrations\Import\Contracts\ReadsCredentials;
@@ -20,7 +16,6 @@ use App\Integrations\Import\Data\ImportSourceDef;
 use App\Integrations\Import\ImportInputKind;
 use App\Integrations\Import\ImportSourceRegistry;
 use App\Jobs\RunImport;
-use App\Models\ServiceConnection;
 use App\Models\User;
 use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\JsonResponse;
@@ -50,7 +45,7 @@ class ImportController extends Controller
                 credentials: $source instanceof ReadsCredentials ? $source->credentialsSchema() : [],
                 notes: $source instanceof ExplainsSetup ? $source->notes() : [],
                 connect: $source instanceof ReadsFromConnection
-                    ? $this->connect($connections, $source, $held->get($source->connectionService()))
+                    ? ConnectDef::of($source, $connections, $held->get($source->connectionService()))
                     : null,
             ), $sources->all()),
             // The upload limit the request enforces, so the page says the same number.
@@ -76,26 +71,5 @@ class ImportController extends Controller
     public function analyze(AnalyzeImportRequest $request): JsonResponse
     {
         return response()->json($request->source()->analyze($request->analysisInput())->toArray());
-    }
-
-    /**
-     * How the source's card connects (a code typed at the service, or a
-     * pasted address and key), what it asks for first and what the user
-     * already holds there.
-     */
-    private function connect(ConnectionRegistry $connections, ReadsFromConnection $source, ?ServiceConnection $held): ConnectDef
-    {
-        $service = $source->connectionService();
-        $connectable = $connections->get($service);
-
-        return new ConnectDef(
-            service: $service,
-            name: $connectable->name(),
-            method: ConnectMethod::of($connectable),
-            fields: $connectable instanceof HasConnectionFields ? $connectable->connectionFields() : [],
-            autoImportMinutes: $source->autoImportMinutes(),
-            connection: $held === null ? null : ConnectionCard::of($held),
-            errorKey: RedirectAttempts::errorKey($service),
-        );
     }
 }
