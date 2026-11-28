@@ -19,8 +19,8 @@ import { computed, onBeforeUnmount, ref, watch } from 'vue';
  * Connecting the account an import source reads through, and what is held
  * once it is connected. Everything this card asks while it waits (the device
  * code, its approval, a key check) goes through plain fetch() against JSON
- * endpoints — never router.*, whose redirect would repaint the import page
- * under the user. Only their own clicks (save, disconnect) go through Inertia.
+ * endpoints — never router.*, whose redirect would repaint the page under
+ * the user. Only their own clicks (save, disconnect) go through Inertia.
  */
 const props = defineProps<{ connect: ConnectDef }>();
 const connection = defineModel<ConnectionCard | null>('connection', { required: true });
@@ -198,6 +198,7 @@ function readErrors(data: Refusal): void {
 }
 
 async function verify(): Promise<void> {
+    let nothingToPick = false;
     failure.value = null;
     fieldErrors.value = {};
     choices.value = null;
@@ -216,10 +217,15 @@ async function verify(): Promise<void> {
             return;
         }
 
-        choices.value = data.choices;
+        // Nothing to pick: the key alone is the account, so checking it is connecting.
+        nothingToPick = data.choices.length === 0;
+        choices.value = nothingToPick ? null : data.choices;
         choice.value = data.choices.length === 1 ? (data.choices[0]?.id ?? '') : '';
     } finally {
         busy.value = false;
+    }
+    if (nothingToPick) {
+        await connectByForm();
     }
 }
 
