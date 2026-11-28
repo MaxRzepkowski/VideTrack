@@ -116,6 +116,28 @@ test('an episode another source logged on the day the season was finished stays 
         ->and($user->plays()->where('media_item_id', episodeOf($show, 1, 2)->id)->count())->toBe(1);
 });
 
+test('an entry the map starts part-way into a TVDB season ticks the episodes after the offset', function () {
+    enableMangaModule();
+    // The MAL entry is the second half of the season: its first episode is the season's second.
+    seedAnimeIdMap(['9541' => ['tvdb_id' => 267440, 'tvdb_season' => 1, 'tvdb_epoffset' => 1, 'mal_id' => 16498]]);
+
+    Http::fake([
+        '*/users/tester/animelist*' => Http::response(['data' => [
+            malItem(16498, 'Shingeki no Kyojin', ['status' => 'watching', 'num_episodes_watched' => 1, 'start_date' => '2021-05-01']),
+        ], 'paging' => []]),
+        '*/users/tester/mangalist*' => Http::response(['data' => [], 'paging' => []]),
+        ...tmdbAnimeFakes(),
+    ]);
+
+    ['show' => $show] = animeCatalogue();
+    $user = User::factory()->create();
+
+    runListImport($user, 'mal', 'tester');
+
+    expect($user->plays()->where('media_item_id', episodeOf($show, 1, 1)->id)->exists())->toBeFalse()
+        ->and($user->plays()->where('media_item_id', episodeOf($show, 1, 2)->id)->count())->toBe(1);
+});
+
 test('a dropped season keeps its drop after the watched episodes', function () {
     enableMangaModule();
     seedAnimeIdMap();

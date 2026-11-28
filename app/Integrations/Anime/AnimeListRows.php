@@ -114,15 +114,8 @@ final readonly class AnimeListRows
 
         if ($watched > 0) {
             [$at, $dating] = $this->episodeDate($entry);
-            $rows[] = new EpisodeRunRow(
-                $label,
-                $series,
-                (int) $mapping->tvdbSeason,
-                $mapping->episodeOffset + 1,
-                $mapping->episodeOffset + $watched,
-                $at,
-                $dating,
-            );
+            [$season, $first] = $mapping->episode(1);
+            $rows[] = new EpisodeRunRow($label, $series, $season, $first, $mapping->episode($watched)[1], $at, $dating);
         }
 
         $show = new MediaRow(MediaSubject::external(MediaKind::Show, $series, $label), ...$this->beyondViewings($entry));

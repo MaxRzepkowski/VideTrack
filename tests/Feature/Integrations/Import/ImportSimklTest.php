@@ -495,3 +495,29 @@ test('activities without their moment stop the run and keep the position, rather
         ->and(requestsTo('/sync/all-items'))->toBe(0)
         ->and($connection->refresh()->state)->toBe(['activities_all' => '2026-05-15T00:20:00Z']);
 });
+
+test('an anime episode Simkl gives no TVDB numbering for is placed by the map\'s offset', function () {
+    simklCatalogue();
+    // The Simkl entry is the second half of the season: its first episode is the season's second.
+    seedAnimeIdMap(['9541' => ['tvdb_id' => 267440, 'tvdb_season' => 1, 'tvdb_epoffset' => 1, 'mal_id' => 16498]]);
+
+    $anime = jsonFixture('transfer/simkl/all-items-anime');
+    $anime['anime'] = [[
+        ...$anime['anime'][0],
+        'seasons' => [['number' => 1, 'episodes' => [['number' => 1, 'watched_at' => '2026-05-10T18:00:00Z']]]],
+    ]];
+
+    Http::fake([
+        ...simklLibraryFakes(),
+        'api.simkl.com/sync/all-items/anime*' => Http::response($anime),
+        ...simklTmdbFakes(),
+    ]);
+    $user = User::factory()->create();
+
+    runConnectionImport(simklConnection($user), 'simkl');
+
+    $episodes = $user->plays()->whereHas('mediaItem', fn ($q) => $q->where('provider_ref', 'like', '1429:1:%'))->get();
+
+    expect($episodes)->toHaveCount(1)
+        ->and($episodes->sole()->mediaItem->provider_ref)->toBe('1429:1:2');
+});

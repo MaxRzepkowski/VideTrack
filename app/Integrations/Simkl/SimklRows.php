@@ -188,7 +188,7 @@ final readonly class SimklRows
                 if ($mapping !== null) {
                     $episodes[] = is_int($tvdb['season'] ?? null) && is_int($tvdb['episode'] ?? null)
                         ? [$tvdb['season'], $tvdb['episode'], $at]
-                        : [(int) $mapping->tvdbSeason, $mapping->episodeOffset + $episode['number'], $at];
+                        : [...$mapping->episode($episode['number']), $at];
                 } elseif (is_int($season['number'] ?? null)) {
                     $episodes[] = [$season['number'], $episode['number'], $at];
                 }
