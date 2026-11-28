@@ -34,7 +34,7 @@ return [
     'keywords_settings_identities' => 'connected accounts, sso, oidc, google, github, gitlab, login, settings',
     'keywords_settings_preferences' => 'preferences, settings',
     'keywords_settings_tracking' => 'tracking, settings',
-    'keywords_settings_integrations' => 'integrations, plex, jellyfin, emby, webhook, settings',
+    'keywords_settings_integrations' => 'integrations, plex, jellyfin, emby, webhook, accounts, settings',
     'keywords_settings_import' => 'import, trakt, settings',
     'keywords_settings_calendar' => 'calendar, subscription, ical, rss, feed, settings',
     'keywords_settings_export' => 'export, backup, settings',

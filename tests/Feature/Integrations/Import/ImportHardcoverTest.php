@@ -66,12 +66,11 @@ test('without books from Hardcover there is nothing to import into', function ()
     expect(app(ImportSourceRegistry::class)->has(HardcoverLibrarySource::CODE))->toBeFalse();
 });
 
-test('the import page offers Hardcover with a key form and the link that makes the key', function () {
+test('the integrations page offers Hardcover with a key form and the link that makes the key', function () {
     $this->actingAs(User::factory()->create())
-        ->get(route('settings.import.index'))
+        ->get(route('settings.integrations.index'))
         ->assertInertia(fn (AssertableInertia $page) => $page
-            ->where('sources', fn ($sources) => collect($sources)->contains(fn ($source) => $source['code'] === HardcoverLibrarySource::CODE
-                && $source['inputKind'] === 'connection'
+            ->where('page.accounts', fn ($sources) => collect($sources)->contains(fn ($source) => $source['code'] === HardcoverLibrarySource::CODE
                 && $source['connect']['method'] === ConnectMethod::Form->value
                 && array_column($source['connect']['fields'], 'key') === ['key']
                 && $source['notes'][0]['url'] === 'https://hardcover.app/account/api/keys/new?scope=read%3Ame%3Acontent+read%3Alibrary'

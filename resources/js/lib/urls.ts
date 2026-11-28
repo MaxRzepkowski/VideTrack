@@ -65,6 +65,11 @@ export function feedVariantUrl(feed: SubscriptionFeed, variant: FeedVariant, off
     return query.length === 0 ? feed.url : `${feed.url}?${query.join('&')}`;
 }
 
+/** An address as a person reads it: without the scheme. */
+export function displayUrl(url: string): string {
+    return url.replace(/^https?:\/\//, '');
+}
+
 /** The same address under webcal://, which makes a calendar app offer to subscribe on click. */
 export function webcalUrl(url: string): string {
     return url.replace(/^https?:\/\//, 'webcal://');

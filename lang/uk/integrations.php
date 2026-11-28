@@ -42,7 +42,6 @@ return [
     'laptop_script' => 'Скрипт на ноутбуці',
     'last_delivery_time' => 'Останній запит :time',
     'last_used_time' => 'Востаннє використано :time',
-    'let_your_media_server_tell_this' => 'Хай медіасервер сам повідомляє цьому екземпляру, що ти переглядаєш',
     'limit_it_to_movies_and_episodes' => 'Обмежити фільмами й епізодами',
     'living_room' => 'Вітальня',
     'marking_watched_rating_statuses_progress_favorites' => 'Позначки переглянутого, оцінки, статуси, прогрес, улюблене та списки.',

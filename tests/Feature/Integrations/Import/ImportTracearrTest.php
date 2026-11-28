@@ -68,11 +68,11 @@ function tracearrHistoryFakes(): array
     ];
 }
 
-test('the import page offers Tracearr with an address and key form', function () {
+test('the integrations page offers Tracearr with an address and key form', function () {
     $this->actingAs(User::factory()->create())
-        ->get('/settings/import')
+        ->get(route('settings.integrations.index'))
         ->assertInertia(fn (AssertableInertia $page) => $page
-            ->where('sources', fn ($sources) => collect($sources)->contains(fn ($source) => $source['code'] === 'tracearr'
+            ->where('page.accounts', fn ($sources) => collect($sources)->contains(fn ($source) => $source['code'] === 'tracearr'
                 && $source['connect']['method'] === 'form'
                 && array_column($source['connect']['fields'], 'key') === ['url', 'key'])));
 });

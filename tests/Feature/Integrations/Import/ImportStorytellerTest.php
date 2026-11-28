@@ -32,13 +32,13 @@ test('Storyteller is only offered when the books module is on', function () {
     expect(app(ImportSourceRegistry::class)->has('storyteller'))->toBeFalse();
 });
 
-test('the import page offers Storyteller with an address and token form', function () {
+test('the integrations page offers Storyteller with an address and token form', function () {
     enableBooksModule();
 
     $this->actingAs(User::factory()->create())
-        ->get(route('settings.import.index'))
+        ->get(route('settings.integrations.index'))
         ->assertInertia(fn (AssertableInertia $page) => $page
-            ->where('sources', fn ($sources) => collect($sources)->contains(fn ($source) => $source['code'] === 'storyteller'
+            ->where('page.accounts', fn ($sources) => collect($sources)->contains(fn ($source) => $source['code'] === 'storyteller'
                 && $source['connect']['method'] === ConnectMethod::Form->value
                 && array_column($source['connect']['fields'], 'key') === ['url', 'key'])));
 });

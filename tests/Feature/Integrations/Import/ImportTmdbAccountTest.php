@@ -71,11 +71,11 @@ function tmdbAccountCatalogue(): array
     ];
 }
 
-test('the import page offers TMDB with a trip to themoviedb.org', function () {
+test('the integrations page offers TMDB with a trip to themoviedb.org', function () {
     $this->actingAs(User::factory()->create())
-        ->get(route('settings.import.index'))
+        ->get(route('settings.integrations.index'))
         ->assertInertia(fn (AssertableInertia $page) => $page
-            ->where('sources', fn ($sources) => collect($sources)->contains(fn ($source) => $source['code'] === TmdbAccountSource::CODE
+            ->where('page.accounts', fn ($sources) => collect($sources)->contains(fn ($source) => $source['code'] === TmdbAccountSource::CODE
                 && $source['connect']['method'] === 'redirect'
                 && $source['connect']['name'] === TmdbService::NAME)));
 });
@@ -112,7 +112,7 @@ test('an approved token becomes a session and a connection named after the accou
 
     // TMDB's own query on the way back names another token: the kept one is the one exchanged.
     $this->get($back.'?request_token=token-of-someone-else&approved=true')
-        ->assertRedirect(route('settings.import.index', ['source' => TmdbAccountSource::CODE]));
+        ->assertRedirect(route('settings.integrations.index', ['source' => TmdbAccountSource::CODE]));
 
     $connection = $user->serviceConnections()->sole();
 

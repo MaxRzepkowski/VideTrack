@@ -1,7 +1,15 @@
 <?php
 
-namespace App\Actions\Scrobble;
+namespace App\Actions\Integrations;
 
+use App\Http\Data\IntegrationRef;
+use App\Http\Data\IntegrationsPage;
+use App\Integrations\Connections\ConnectionRegistry;
+use App\Integrations\Import\Contracts\ExplainsSetup;
+use App\Integrations\Import\Data\ConnectDef;
+use App\Integrations\Import\Data\ConnectionSourceData;
+use App\Integrations\Import\ImportSourceRegistry;
+use App\Integrations\IntegrationKind;
 use App\Integrations\Scrobble\Contracts\ProvidesSamplePayload;
 use App\Integrations\Scrobble\Data\DeliveryRow;
 use App\Integrations\Scrobble\Data\ScrobbleSourceData;
@@ -13,24 +21,27 @@ use App\Models\WebhookDelivery;
 use App\Models\WebhookEndpoint;
 use App\Support\LoopbackAddress;
 use App\Support\StoredReason;
+use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Relations\Relation;
 
 /**
- * The integrations page: one card per registered scrobble source, so a new
- * source is a class and a registration — the card, the address, the
- * instructions and the log come for free.
+ * The integrations page: a card per registered media server and per import
+ * source that reads through an account, so a new one of either is a class
+ * and a registration. What is set up leads, in the order it was set up;
+ * the rest waits to be added, by name.
  */
 final readonly class BuildIntegrationsPage
 {
     /** How much of an endpoint's history the card shows. */
     private const LOG_ROWS = 20;
 
-    public function __construct(private ScrobbleSourceRegistry $registry) {}
+    public function __construct(
+        private ScrobbleSourceRegistry $scrobbleSources,
+        private ImportSourceRegistry $importSources,
+        private ConnectionRegistry $connections,
+    ) {}
 
-    /**
-     * @return list<ScrobbleSourceData>
-     */
-    public function execute(User $viewer): array
+    public function execute(User $viewer, ?string $selected): IntegrationsPage
     {
         $endpoints = WebhookEndpoint::query()
             ->where('user_id', $viewer->id)
@@ -39,13 +50,18 @@ final readonly class BuildIntegrationsPage
             ->orderBy('id')
             ->get()
             ->groupBy('source');
+        $held = $viewer->serviceConnections()->get()->keyBy('service');
 
-        $sources = [];
+        $webhooks = [];
+        $accounts = [];
+        /** @var list<array{ref: IntegrationRef, name: string, since: CarbonInterface|null}> $entries */
+        $entries = [];
 
-        foreach ($this->registry->codes() as $code) {
-            $source = $this->registry->get($code);
+        foreach ($this->scrobbleSources->codes() as $code) {
+            $source = $this->scrobbleSources->get($code);
+            $addresses = $endpoints->get($code);
 
-            $sources[] = new ScrobbleSourceData(
+            $webhooks[] = new ScrobbleSourceData(
                 code: $code,
                 name: $source->name(),
                 description: $source->description(),
@@ -53,13 +69,39 @@ final readonly class BuildIntegrationsPage
                 instructions: $source->instructions(),
                 canTest: $source instanceof ProvidesSamplePayload,
                 endpointLimit: config()->integer('tracker.scrobble.endpoints_per_source'),
-                endpoints: array_values($endpoints->get($code)
+                endpoints: array_values($addresses
                     ?->map(fn (WebhookEndpoint $endpoint): WebhookEndpointData => $this->endpoint($endpoint))
                     ->all() ?? []),
             );
+            // Set up once its first address was made.
+            $entries[] = ['ref' => new IntegrationRef(IntegrationKind::Webhook, $code), 'name' => $source->name(), 'since' => $addresses?->first()?->created_at];
         }
 
-        return $sources;
+        foreach ($this->importSources->readingFromConnection() as $source) {
+            $connection = $held->get($source->connectionService());
+
+            $accounts[] = new ConnectionSourceData(
+                code: $source->code(),
+                label: $source->label(),
+                description: $source->description(),
+                notes: $source instanceof ExplainsSetup ? $source->notes() : [],
+                connect: ConnectDef::of($source, $this->connections, $connection),
+            );
+            $entries[] = ['ref' => new IntegrationRef(IntegrationKind::Account, $source->code()), 'name' => $source->label(), 'since' => $connection?->created_at];
+        }
+
+        $connected = array_values(array_filter($entries, fn (array $entry): bool => $entry['since'] !== null));
+        usort($connected, fn (array $a, array $b): int => $a['since'] <=> $b['since']);
+        $available = array_values(array_filter($entries, fn (array $entry): bool => $entry['since'] === null));
+        usort($available, fn (array $a, array $b): int => strnatcasecmp($a['name'], $b['name']));
+
+        return new IntegrationsPage(
+            webhooks: $webhooks,
+            accounts: $accounts,
+            connected: array_column($connected, 'ref'),
+            available: array_column($available, 'ref'),
+            selected: collect($accounts)->first(fn (ConnectionSourceData $account): bool => $account->code === $selected)?->code,
+        );
     }
 
     private function endpoint(WebhookEndpoint $endpoint): WebhookEndpointData

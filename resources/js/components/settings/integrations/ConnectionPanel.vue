@@ -7,6 +7,7 @@ import { ToggleSwitch } from '@/components/ui/toggle-switch';
 import { confirm } from '@/composables/useConfirm';
 import { formatDateTime, relativeTime } from '@/lib/format';
 import { jsonFetch } from '@/lib/http';
+import { displayUrl } from '@/lib/urls';
 import { SETTINGS_FIELD_CLASS } from '@/lib/ui';
 import type { ConnectAttemptStatus } from '@/types/generated';
 import type { ConnectDef, ConnectionCard } from '@/types/integrations';
@@ -292,10 +293,6 @@ async function disconnect(): Promise<void> {
 }
 
 const pace = computed(() => (props.connect.autoImportMinutes >= 1440 ? trans('common.daily') : trans('common.hourly')));
-
-function displayUrl(url: string): string {
-    return url.replace(/^https?:\/\//, '');
-}
 </script>
 
 <template>

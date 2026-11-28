@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers\Settings;
 
+use App\Actions\Integrations\BuildIntegrationsPage;
 use App\Actions\Scrobble\AddWebhookEndpoint;
-use App\Actions\Scrobble\BuildIntegrationsPage;
 use App\Actions\Scrobble\IssueWebhookToken;
 use App\Actions\Scrobble\TestWebhookEndpoint;
 use App\Actions\Scrobble\UpdateWebhookEndpoint;
@@ -15,18 +15,21 @@ use App\Models\User;
 use App\Models\WebhookEndpoint;
 use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
 
 /**
- * Where the user connects the things that already know what they watched.
+ * Where the user connects what keeps feeding the library on its own: media
+ * servers that send what was watched, and accounts imports read through.
  */
 class IntegrationsController extends Controller
 {
-    public function index(#[CurrentUser] User $viewer, BuildIntegrationsPage $page): Response
+    public function index(#[CurrentUser] User $viewer, Request $request, BuildIntegrationsPage $page): Response
     {
-        return Inertia::render('settings/Integrations', ['sources' => $page->execute($viewer)]);
+        // A trip to a service's site comes back here naming its source.
+        return Inertia::render('settings/Integrations', ['page' => $page->execute($viewer, $request->string('source')->value() ?: null)]);
     }
 
     public function store(#[CurrentUser] User $viewer, ScrobbleSourceRegistry $registry, AddWebhookEndpoint $add, string $source): RedirectResponse

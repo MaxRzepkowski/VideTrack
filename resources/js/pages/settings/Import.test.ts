@@ -17,7 +17,6 @@ const source: ImportSourceDef = {
     accept: '.zip',
     credentials: [],
     notes: [],
-    connect: null,
 };
 
 function manifest(preselected: [boolean, boolean, boolean]): ImportManifest {

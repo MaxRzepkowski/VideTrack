@@ -42,7 +42,6 @@ return [
     'laptop_script' => 'Skrypt na laptopie',
     'last_delivery_time' => 'Ostatnie zgłoszenie :time',
     'last_used_time' => 'Ostatnio użyty :time',
-    'let_your_media_server_tell_this' => 'Niech serwer mediów sam zgłasza tej instancji, co zostało obejrzane',
     'limit_it_to_movies_and_episodes' => 'Ogranicz do filmów i odcinków',
     'living_room' => 'Salon',
     'marking_watched_rating_statuses_progress_favorites' => 'Oznaczanie jako obejrzane, oceny, statusy, postęp, ulubione i listy.',
@@ -129,4 +128,8 @@ return [
     'ids_of_the_show' => '(serialu)',
     'up_to_count_addresses_for_one_server' => 'Najwyżej :count adres dla jednego serwera.|Najwyżej :count adresy dla jednego serwera.|Najwyżej :count adresów dla jednego serwera.',
     'api_documentation' => 'Dokumentacja API',
+    'add' => 'Dodaj',
+    'connected' => 'Połączone',
+    'import_now' => 'Importuj teraz',
+    'media_servers_that_report_what_you' => 'Serwery mediów, które same zgłaszają, co obejrzano, i konta, z których ta instancja pobiera historię',
 ];

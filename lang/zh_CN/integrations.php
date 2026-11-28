@@ -42,7 +42,6 @@ return [
     'laptop_script' => '笔记本电脑脚本',
     'last_delivery_time' => '上次推送：:time',
     'last_used_time' => '上次使用：:time',
-    'let_your_media_server_tell_this' => '让你的媒体服务器告诉这个实例你看了什么',
     'limit_it_to_movies_and_episodes' => '只限电影和单集',
     'living_room' => '客厅',
     'marking_watched_rating_statuses_progress_favorites' => '标记看过、评分、状态、进度、收藏和列表。',

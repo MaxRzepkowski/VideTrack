@@ -91,12 +91,11 @@ function simklLibraryFakes(): array
     ];
 }
 
-test('the import page offers Simkl with a field for the user\'s own app and a code to type at simkl.com', function () {
+test('the integrations page offers Simkl with a field for the user\'s own app and a code to type at simkl.com', function () {
     $this->actingAs(User::factory()->create())
-        ->get(route('settings.import.index'))
+        ->get(route('settings.integrations.index'))
         ->assertInertia(fn (AssertableInertia $page) => $page
-            ->where('sources', fn ($sources) => collect($sources)->contains(fn ($source) => $source['code'] === 'simkl'
-                && $source['inputKind'] === 'connection'
+            ->where('page.accounts', fn ($sources) => collect($sources)->contains(fn ($source) => $source['code'] === 'simkl'
                 && $source['connect']['method'] === 'device'
                 && $source['connect']['name'] === 'Simkl'
                 && array_column($source['connect']['fields'], 'key') === [SimklClient::CLIENT_ID]

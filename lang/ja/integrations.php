@@ -42,7 +42,6 @@ return [
     'laptop_script' => 'ノートPCのスクリプト',
     'last_delivery_time' => '最終受信：:time',
     'last_used_time' => '最終使用：:time',
-    'let_your_media_server_tell_this' => 'メディアサーバーから、視聴した内容をこのインスタンスに知らせます',
     'limit_it_to_movies_and_episodes' => '映画とエピソードに限定',
     'living_room' => 'リビング',
     'marking_watched_rating_statuses_progress_favorites' => '視聴済みの記録、評価、ステータス、進捗、お気に入り、リスト。',

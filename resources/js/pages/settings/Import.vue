@@ -4,7 +4,7 @@ import InputError from '@/components/InputError.vue';
 import ServiceLogo from '@/components/ServiceLogo.vue';
 import ServiceTile from '@/components/settings/ServiceTile.vue';
 import CredentialFields from '@/components/settings/CredentialFields.vue';
-import ConnectionPanel from '@/components/settings/integrations/ConnectionPanel.vue';
+import SetupNotes from '@/components/settings/SetupNotes.vue';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import AppLayout from '@/layouts/AppLayout.vue';
@@ -12,7 +12,6 @@ import SettingsLayout from '@/layouts/settings/Layout.vue';
 import { jsonFetch } from '@/lib/http';
 import { SETTINGS_CARD_CLASS } from '@/lib/ui';
 import type { ImportManifest, ImportSourceDef } from '@/types/generated';
-import type { ConnectionCard } from '@/types/integrations';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import { FileUp } from '@lucide/vue';
 import { trans, transChoice } from 'laravel-vue-i18n';
@@ -23,7 +22,7 @@ import { computed, nextTick, ref, useTemplateRef, watch } from 'vue';
 const props = defineProps<{
     sources: ImportSourceDef[];
     maxFileMegabytes: number;
-    // The source a trip to a service's site came back to, preselected.
+    // The source the address names, preselected.
     selected: string | null;
 }>();
 
@@ -42,22 +41,6 @@ const form = useForm<{
 });
 
 const source = computed(() => props.sources.find((candidate) => candidate.code === form.source) ?? null);
-
-// What each connection source holds, kept here so a connect finished on the
-// card enables the import at once; refreshed whenever the page props change
-// (after saving auto-import or disconnecting).
-function heldConnections(): Record<string, ConnectionCard | null> {
-    return Object.fromEntries(
-        props.sources.filter((candidate) => candidate.connect).map((candidate) => [candidate.code, candidate.connect?.connection ?? null]),
-    );
-}
-
-const connections = ref<Record<string, ConnectionCard | null>>(heldConnections());
-
-watch(
-    () => props.sources,
-    () => (connections.value = heldConnections()),
-);
 
 const dragging = ref(false);
 const analyzing = ref(false);
@@ -80,10 +63,6 @@ const anySelection = computed(() => Object.values(selectedCategories.value).some
 const canSubmit = computed(() => {
     if (!source.value || form.processing || analyzing.value) {
         return false;
-    }
-
-    if (source.value.inputKind === 'connection') {
-        return connections.value[source.value.code]?.status === 'active';
     }
 
     if (source.value.inputKind === 'credentials') {
@@ -198,10 +177,6 @@ function credentialError(key: string): string | undefined {
     return (form.errors as Record<string, string | undefined>)[`credentials.${key}`];
 }
 
-function displayUrl(url: string): string {
-    return url.replace(/^https?:\/\//, '');
-}
-
 function submit(): void {
     const categories = manifest.value?.categories ?? [];
 
@@ -262,19 +237,7 @@ function submit(): void {
                             </div>
                         </header>
 
-                        <div v-if="source.notes.length" class="text-ink-muted space-y-1 text-sm">
-                            <p v-for="(note, index) in source.notes" :key="index">
-                                {{ note.text }}
-                                <a
-                                    v-if="note.url"
-                                    :href="note.url"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    class="text-brand-soft font-medium hover:underline"
-                                    >{{ note.linkText ?? displayUrl(note.url) }}</a
-                                >
-                            </p>
-                        </div>
+                        <SetupNotes :notes="source.notes" />
 
                         <div v-if="source?.inputKind === 'credentials'" class="space-y-4">
                             <CredentialFields
@@ -284,14 +247,6 @@ function submit(): void {
                                 :error-of="credentialError"
                             />
                         </div>
-
-                        <ConnectionPanel
-                            v-else-if="source?.inputKind === 'connection' && source.connect"
-                            :key="source.code"
-                            :connection="connections[source.code] ?? null"
-                            :connect="source.connect"
-                            @update:connection="connections[source.code] = $event"
-                        />
 
                         <div
                             v-else-if="source?.inputKind === 'file'"

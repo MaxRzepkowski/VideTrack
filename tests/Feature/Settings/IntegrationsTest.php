@@ -19,17 +19,17 @@ test('the page offers every registered source, with nothing connected yet', func
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->component('settings/Integrations')
-            ->where('sources.0.code', 'jellyfin')
-            ->where('sources.0.name', 'Jellyfin')
-            ->where('sources.0.endpoints', [])
-            ->where('sources.0.canTest', true)
-            ->has('sources.0.instructions')
+            ->where('page.webhooks.0.code', 'jellyfin')
+            ->where('page.webhooks.0.name', 'Jellyfin')
+            ->where('page.webhooks.0.endpoints', [])
+            ->where('page.webhooks.0.canTest', true)
+            ->has('page.webhooks.0.instructions')
             // Plex webhooks cost money and the page has to say so.
-            ->where('sources.1.code', 'plex')
-            ->whereNot('sources.1.notice', null)
+            ->where('page.webhooks.1.code', 'plex')
+            ->whereNot('page.webhooks.1.notice', null)
             // …and the free way round it sits right under it.
-            ->where('sources.2.code', 'tautulli')
-            ->where('sources.3.code', 'emby')
+            ->where('page.webhooks.2.code', 'tautulli')
+            ->where('page.webhooks.3.code', 'emby')
         );
 });
 
@@ -49,11 +49,11 @@ test('connecting a server mints an address nobody could guess', function () {
     $this->actingAs($user)
         ->get('/settings/integrations')
         ->assertInertia(fn (Assert $page) => $page
-            ->where('sources.0.endpoints.0.url', route('webhooks.ingest', [
+            ->where('page.webhooks.0.endpoints.0.url', route('webhooks.ingest', [
                 'source' => 'jellyfin',
                 'token' => $endpoint->token,
             ]))
-            ->where('sources.0.endpoints.0.serverUsername', null)
+            ->where('page.webhooks.0.endpoints.0.serverUsername', null)
         );
 });
 
@@ -66,7 +66,7 @@ test('an address only this machine understands says so', function () {
 
     $this->actingAs($user)
         ->get('/settings/integrations')
-        ->assertInertia(fn (Assert $page) => $page->where('sources.0.endpoints.0.loopback', true));
+        ->assertInertia(fn (Assert $page) => $page->where('page.webhooks.0.endpoints.0.loopback', true));
 
     // An instance reachable by name or by LAN address needs no warning,
     // and gets none.
@@ -74,7 +74,7 @@ test('an address only this machine understands says so', function () {
 
     $this->actingAs($user)
         ->get('/settings/integrations')
-        ->assertInertia(fn (Assert $page) => $page->where('sources.0.endpoints.0.loopback', false));
+        ->assertInertia(fn (Assert $page) => $page->where('page.webhooks.0.endpoints.0.loopback', false));
 
     expect($endpoint->refresh()->token)->toHaveLength(48);
 });
@@ -96,7 +96,7 @@ test('one server takes up to ten addresses per account, and the page says so', f
 
     $this->actingAs($user)
         ->get('/settings/integrations')
-        ->assertInertia(fn (Assert $page) => $page->where('sources.0.endpointLimit', 10));
+        ->assertInertia(fn (Assert $page) => $page->where('page.webhooks.0.endpointLimit', 10));
 });
 
 test('a source nobody registered cannot be connected', function () {
@@ -256,8 +256,8 @@ test("each endpoint shows its own latest deliveries, every endpoint's read in on
     $newest = $endpoints[0]->deliveries()->max('id');
 
     $queries = queriesRunBy(fn () => $this->actingAs($user)->get(route('settings.integrations.index'))->assertInertia(fn (Assert $page) => $page
-        ->where('sources.0.endpoints.0.deliveries.0.id', $newest)
-        ->where('sources.0.endpoints.0.deliveries', fn ($deliveries) => count($deliveries) < 25)));
+        ->where('page.webhooks.0.endpoints.0.deliveries.0.id', $newest)
+        ->where('page.webhooks.0.endpoints.0.deliveries', fn ($deliveries) => count($deliveries) < 25)));
 
     expect(collect($queries)->filter(fn (QueryExecuted $query) => str_contains($query->sql, 'webhook_deliveries')))->toHaveCount(1);
 });

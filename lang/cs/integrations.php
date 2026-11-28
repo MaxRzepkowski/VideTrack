@@ -42,7 +42,6 @@ return [
     'laptop_script' => 'Skript na notebooku',
     'last_delivery_time' => 'Poslední hlášení :time',
     'last_used_time' => 'Naposledy použito :time',
-    'let_your_media_server_tell_this' => 'Ať tvůj mediální server sám hlásí této instanci, co bylo zhlédnuto',
     'limit_it_to_movies_and_episodes' => 'Omez to na filmy a epizody',
     'living_room' => 'Obývák',
     'marking_watched_rating_statuses_progress_favorites' => 'Označování jako zhlédnuté, hodnocení, stavy, postup, oblíbené a seznamy.',

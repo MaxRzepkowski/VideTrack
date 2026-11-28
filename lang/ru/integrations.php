@@ -42,7 +42,6 @@ return [
     'laptop_script' => 'Скрипт на ноутбуке',
     'last_delivery_time' => 'Последний запрос: :time',
     'last_used_time' => 'Последнее использование: :time',
-    'let_your_media_server_tell_this' => 'Пусть медиасервер сам сообщает этому экземпляру, что посмотрено',
     'limit_it_to_movies_and_episodes' => 'Ограничь фильмами и эпизодами',
     'living_room' => 'Гостиная',
     'marking_watched_rating_statuses_progress_favorites' => 'Отметки о просмотре, оценки, статусы, прогресс, избранное и списки.',
