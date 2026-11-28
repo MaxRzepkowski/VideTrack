@@ -76,15 +76,10 @@ final readonly class AnimeListRows
     private function anime(AnimeListEntry $entry): array
     {
         $label = $this->label($entry);
+        $mapping = $this->map->place($entry->malId, $label);
 
-        if (! $this->map->isAvailable()) {
-            return [new SkipRow('import.skip_anime_map_unavailable', ['label' => $label])];
-        }
-
-        $mapping = $this->map->forMal($entry->malId);
-
-        if ($mapping === null) {
-            return [new SkipRow('import.skip_anime_not_in_map', ['label' => $label])];
+        if ($mapping instanceof SkipRow) {
+            return [$mapping];
         }
 
         if ($mapping->isSeason()) {

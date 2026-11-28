@@ -4,9 +4,11 @@ use App\Enums\MediaUserStatus;
 use App\Enums\PlayOutcome;
 use App\Enums\TaskRunStatus;
 use App\Integrations\Anime\AnimeIdMap;
+use App\Integrations\Anime\AnimeMapping;
 use App\Integrations\Import\Data\ImportInput;
 use App\Integrations\Import\Data\ImportSelection;
 use App\Integrations\Import\ImportSourceRegistry;
+use App\Integrations\Import\Rows\SkipRow;
 use App\Jobs\RunImport;
 use App\Library\MutationSource;
 use App\Models\MediaItem;
@@ -384,3 +386,18 @@ test('a tracker out of reach, or one refusing the request, is said in the user\'
     'out of reach' => [fn () => fn () => throw new ConnectionException('cURL error 28: Operation timed out after 15001 milliseconds (see https://curl.haxx.se/libcurl/c/libcurl-errors.html) for https://graphql.anilist.co'), 'AniList jest nieosiągalny: Operation timed out after 15001 milliseconds'],
     'refusing' => [fn () => fn () => Http::response(['errors' => [['message' => 'Forbidden']]], 403), 'AniList odrzucił żądanie (403).'],
 ]);
+
+test('the map places an entry, or says why it cannot', function () {
+    seedAnimeIdMap();
+    $map = app(AnimeIdMap::class);
+
+    expect($map->place(16498, 'Shingeki no Kyojin'))->toBeInstanceOf(AnimeMapping::class)
+        ->and($map->place(99999, 'Unknown Anime'))->toEqual(new SkipRow('import.skip_anime_not_in_map', ['label' => 'Unknown Anime']));
+});
+
+test('a map that cannot be had says so, whatever the entry', function () {
+    Storage::fake('local');
+    Http::fake(['raw.githubusercontent.com/*' => Http::response('', 503)]);
+
+    expect(app(AnimeIdMap::class)->place(16498, 'Shingeki no Kyojin'))->toEqual(new SkipRow('import.skip_anime_map_unavailable', ['label' => 'Shingeki no Kyojin']));
+});

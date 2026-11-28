@@ -2,6 +2,7 @@
 
 namespace App\Integrations\Anime;
 
+use App\Integrations\Import\Rows\SkipRow;
 use App\Support\Payload;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
@@ -50,6 +51,22 @@ final class AnimeIdMap
     public function isAvailable(): bool
     {
         return $this->index() !== [];
+    }
+
+    /**
+     * Where a MyAnimeList entry sits, or why it cannot be placed: the map
+     * could not be loaded, or it holds no such entry. The skip is labelled
+     * with what the source calls the entry.
+     */
+    public function place(int $malId, string $label): AnimeMapping|SkipRow
+    {
+        $mapping = $this->forMal($malId);
+
+        return match (true) {
+            $mapping !== null => $mapping,
+            ! $this->isAvailable() => new SkipRow('import.skip_anime_map_unavailable', ['label' => $label]),
+            default => new SkipRow('import.skip_anime_not_in_map', ['label' => $label]),
+        };
     }
 
     /**
