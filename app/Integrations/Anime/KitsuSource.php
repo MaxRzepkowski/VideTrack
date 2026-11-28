@@ -101,11 +101,10 @@ final class KitsuSource extends AnimeProfileSource
         ];
 
         while ($url !== null) {
-            $page = $this->client->get($url, $query);
-            $included = $this->included($page);
+            $document = KitsuDocument::of($this->client->get($url, $query));
 
-            foreach (Payload::list($page['data'] ?? null) as $item) {
-                $entry = $this->entry($item, $medium, $included);
+            foreach (Payload::list($document->page['data'] ?? null) as $item) {
+                $entry = $this->entry($item, $medium, $document);
 
                 if ($entry !== null) {
                     $entries[] = $entry;
@@ -115,7 +114,7 @@ final class KitsuSource extends AnimeProfileSource
             // The next link is absolute and carries the whole query itself —
             // and must travel without a query of ours, since even an empty
             // one replaces the link's own.
-            $url = Payload::string(Payload::map($page['links'] ?? null), 'next');
+            $url = Payload::string(Payload::map($document->page['links'] ?? null), 'next');
             $query = null;
         }
 
@@ -123,32 +122,9 @@ final class KitsuSource extends AnimeProfileSource
     }
 
     /**
-     * Included records by "type:id".
-     *
-     * @param  array<array-key, mixed>  $page
-     * @return array<string, array<array-key, mixed>>
-     */
-    private function included(array $page): array
-    {
-        $index = [];
-
-        foreach (Payload::list($page['included'] ?? null) as $record) {
-            $type = Payload::string($record, 'type');
-            $id = Payload::id($record['id'] ?? null);
-
-            if ($type !== null && $id !== null) {
-                $index["{$type}:{$id}"] = $record;
-            }
-        }
-
-        return $index;
-    }
-
-    /**
      * @param  array<array-key, mixed>  $item
-     * @param  array<string, array<array-key, mixed>>  $included
      */
-    private function entry(array $item, ListMedium $medium, array $included): AnimeListEntry|SkipRow|null
+    private function entry(array $item, ListMedium $medium, KitsuDocument $document): AnimeListEntry|SkipRow|null
     {
         // Kitsu names its relationships and resources by the list's word.
         $kind = $medium->value;
@@ -160,7 +136,7 @@ final class KitsuSource extends AnimeProfileSource
         }
 
         $refId = Payload::id(data_get($item, "relationships.{$kind}.data.id"));
-        $media = $refId === null ? null : ($included["{$kind}:{$refId}"] ?? null);
+        $media = $refId === null ? null : $document->included($kind, $refId);
 
         // Kitsu leaves the relationship empty for titles it hides as adult.
         if ($media === null) {
@@ -169,7 +145,7 @@ final class KitsuSource extends AnimeProfileSource
 
         $mediaAttributes = Payload::map($media['attributes'] ?? null);
         $title = Payload::string($mediaAttributes, 'canonicalTitle') ?? "Kitsu {$kind} {$refId}";
-        $malId = $this->malId($media, $medium, $included);
+        $malId = $document->malId($media, $medium);
 
         if ($malId === null) {
             return new SkipRow('import.skip_kitsu_no_mal_id', ['label' => $title]);
@@ -192,28 +168,5 @@ final class KitsuSource extends AnimeProfileSource
             Payload::calendarDay($attributes['finishedAt'] ?? null),
             Payload::instant($attributes['updatedAt'] ?? null),
         );
-    }
-
-    /**
-     * @param  array<array-key, mixed>  $media
-     * @param  array<string, array<array-key, mixed>>  $included
-     */
-    private function malId(array $media, ListMedium $medium, array $included): ?int
-    {
-        foreach (Payload::list(data_get($media, 'relationships.mappings.data')) as $ref) {
-            $mappingId = Payload::id($ref['id'] ?? null);
-            $mapping = $mappingId === null ? [] : ($included["mappings:{$mappingId}"] ?? []);
-            $attributes = Payload::map($mapping['attributes'] ?? null);
-            $externalId = Payload::string($attributes, 'externalId');
-
-            // Some mappings carry junk (Farmagia's MAL id reads "anime").
-            if (Payload::string($attributes, 'externalSite') === "myanimelist/{$medium->value}"
-                && $externalId !== null
-                && ctype_digit($externalId)) {
-                return (int) $externalId;
-            }
-        }
-
-        return null;
     }
 }
