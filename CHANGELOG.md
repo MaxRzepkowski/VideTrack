@@ -2,6 +2,34 @@
 
 Written by release-please from the pull request titles on `main`. The first release is summarized by hand.
 
+## [0.6.0](https://github.com/MaxRzepkowski/VideTrack/compare/v0.5.0...v0.6.0) (2026-11-28)
+
+
+### Features
+
+* import what you watch in Nuvio, every quarter hour ([173e585](https://github.com/MaxRzepkowski/VideTrack/commit/173e5857a45eb4a4368b182bd6d65dc407e1939b))
+* move connected accounts from Import to Integrations ([1f62a7b](https://github.com/MaxRzepkowski/VideTrack/commit/1f62a7b05ee380240eb1d9bac76fa74b3ed8cada))
+* move the expired data clean-up to the Maintenance tab ([e6ccee6](https://github.com/MaxRzepkowski/VideTrack/commit/e6ccee68ce0c00b8cf5fd726eb5c9a9aed71beca))
+* remove titles, people and companies nobody holds, every night ([214762a](https://github.com/MaxRzepkowski/VideTrack/commit/214762a54bd8f432033e2fde14e07f5e1c25fed9))
+* save a settings card with plain buttons under its fields ([8e2b881](https://github.com/MaxRzepkowski/VideTrack/commit/8e2b8814d9db95ce1c91674f36b0b44452a19127))
+* show the admin an Instance page that flags a refused provider key ([19901f9](https://github.com/MaxRzepkowski/VideTrack/commit/19901f9fc452b0b9f8dbb706739a78590d35bedb))
+* warn the admin when background work, storage or Apprise fail ([1e7e271](https://github.com/MaxRzepkowski/VideTrack/commit/1e7e271997aaf00a9e060950ea863cb14090e249))
+
+
+### Bug Fixes
+
+* clear expired cache rows left in the database after the cache moved to files ([83965ac](https://github.com/MaxRzepkowski/VideTrack/commit/83965ac16adce0e3903ab3b1503cdeddfd93e6cf))
+* connect an account whose key is all a service asks for ([07911a1](https://github.com/MaxRzepkowski/VideTrack/commit/07911a1f8c3bf031bc1c117432b308394e2707be))
+* right-clicking a watched title no longer shows a loader ([#139](https://github.com/MaxRzepkowski/VideTrack/issues/139)) ([66f131f](https://github.com/MaxRzepkowski/VideTrack/commit/66f131f66c5f545453305dba0b5f8fa2479da01a))
+* stop imports logging a viewing another source already logged ([fb95cd8](https://github.com/MaxRzepkowski/VideTrack/commit/fb95cd87b4b9f69763e44b9532fc42947a50f79b))
+* stop the false scheduler alarm on start and calm error banners ([#137](https://github.com/MaxRzepkowski/VideTrack/issues/137)) ([1fdc8ad](https://github.com/MaxRzepkowski/VideTrack/commit/1fdc8ad9d02b8a77cd40df4812e4c34288a0cfa7))
+* wait out a service that asks for a pause the same way in every import ([3cd7237](https://github.com/MaxRzepkowski/VideTrack/commit/3cd723758cf38d8ebbfa0417e9b8b39f31033351))
+
+
+### Performance
+
+* refresh the query planner statistics on every start ([#134](https://github.com/MaxRzepkowski/VideTrack/issues/134)) ([cea87b1](https://github.com/MaxRzepkowski/VideTrack/commit/cea87b1155778a15bfff64ce35a54cdc08439c6d))
+
 ## [0.5.0](https://github.com/MaxRzepkowski/VideTrack/compare/v0.4.0...v0.5.0) (2026-11-26)
 
 
