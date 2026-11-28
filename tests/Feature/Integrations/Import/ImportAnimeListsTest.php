@@ -8,9 +8,12 @@ use App\Integrations\Import\Data\ImportInput;
 use App\Integrations\Import\Data\ImportSelection;
 use App\Integrations\Import\ImportSourceRegistry;
 use App\Jobs\RunImport;
+use App\Library\MutationSource;
 use App\Models\MediaItem;
+use App\Models\Play;
 use App\Models\TaskRun;
 use App\Models\User;
+use Carbon\CarbonImmutable;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
@@ -85,6 +88,32 @@ test('a MyAnimeList profile ticks watched seasons and places films through the a
     // The client id travels as the header MAL reads it from.
     Http::assertSent(fn (Request $request) => str_contains($request->url(), '/users/tester/animelist')
         && $request->header('X-MAL-CLIENT-ID') === ['testing-id']);
+});
+
+test('an episode another source logged on the day the season was finished stays one viewing', function () {
+    enableMangaModule();
+    seedAnimeIdMap();
+
+    Http::fake([
+        '*/users/tester/animelist*' => Http::response(['data' => [
+            malItem(16498, 'Shingeki no Kyojin', ['status' => 'completed', 'num_episodes_watched' => 2, 'finish_date' => '2021-05-01'], ['num_episodes' => 2]),
+        ], 'paging' => []]),
+        '*/users/tester/mangalist*' => Http::response(['data' => [], 'paging' => []]),
+        ...tmdbAnimeFakes(),
+    ]);
+
+    ['show' => $show] = animeCatalogue();
+    $user = User::factory()->create();
+    $first = episodeOf($show, 1, 1);
+    $finished = CarbonImmutable::parse('2021-05-01 12:00', 'UTC');
+
+    Play::factory()->create(['user_id' => $user->id, 'media_item_id' => $first->id, 'watched_at' => $finished->addHours(2), 'source' => MutationSource::scrobble('jellyfin')->value()]);
+    projectLibrary($user);
+
+    runListImport($user, 'mal', 'tester');
+
+    expect($user->plays()->where('media_item_id', $first->id)->count())->toBe(1)
+        ->and($user->plays()->where('media_item_id', episodeOf($show, 1, 2)->id)->count())->toBe(1);
 });
 
 test('a dropped season keeps its drop after the watched episodes', function () {

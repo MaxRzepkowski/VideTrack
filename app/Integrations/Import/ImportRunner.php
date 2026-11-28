@@ -162,9 +162,7 @@ final readonly class ImportRunner
         }
 
         foreach ($row->plays as $play) {
-            // A viewing a media server reported, which a webhook may have
-            // logged already at a slightly different time.
-            if ($play->scrobbled && $play->at !== null && $this->dedup->alreadyPlayed($user, $item, $play->at)) {
+            if ($this->dedup->heardBefore($user, $item, $play->at, $play->dating, $play->outcome, $play->record)) {
                 continue;
             }
 
@@ -258,7 +256,9 @@ final readonly class ImportRunner
                 return;
             }
 
-            $run->wrote('plays', $this->play->execute($run->user, $item, $row->at, dating: $row->dating));
+            if (! $this->dedup->reportedElsewhere($run->user, $item, $row->at, $row->dating)) {
+                $run->wrote('plays', $this->play->execute($run->user, $item, $row->at, dating: $row->dating));
+            }
         }
     }
 
