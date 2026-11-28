@@ -5,13 +5,11 @@ namespace App\Http\Controllers\Settings;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Settings\AnalyzeImportRequest;
 use App\Http\Requests\Settings\ImportRequest;
-use App\Integrations\Connections\ConnectionRegistry;
 use App\Integrations\Import\Contracts\ExplainsSetup;
 use App\Integrations\Import\Contracts\ImportSource;
 use App\Integrations\Import\Contracts\ReadsCredentials;
 use App\Integrations\Import\Contracts\ReadsFile;
 use App\Integrations\Import\Contracts\ReadsFromConnection;
-use App\Integrations\Import\Data\ConnectDef;
 use App\Integrations\Import\Data\ImportSourceDef;
 use App\Integrations\Import\ImportInputKind;
 use App\Integrations\Import\ImportSourceRegistry;
@@ -31,9 +29,14 @@ use Inertia\Response;
  */
 class ImportController extends Controller
 {
-    public function index(#[CurrentUser] User $viewer, Request $request, ImportSourceRegistry $sources, ConnectionRegistry $connections): Response
+    public function index(Request $request, ImportSourceRegistry $sources): Response|RedirectResponse
     {
-        $held = $viewer->serviceConnections()->get()->keyBy('service');
+        $selected = $sources->find($request->string('source')->value());
+
+        // An account source's card is in Integrations: a link naming it (a bookmark) follows it there.
+        if ($selected instanceof ReadsFromConnection) {
+            return to_route('settings.integrations.index', ['source' => $selected->code()]);
+        }
 
         return Inertia::render('settings/Import', [
             'sources' => array_map(fn (ImportSource $source) => new ImportSourceDef(
@@ -44,14 +47,10 @@ class ImportController extends Controller
                 accept: $source instanceof ReadsFile ? $source->accept() : null,
                 credentials: $source instanceof ReadsCredentials ? $source->credentialsSchema() : [],
                 notes: $source instanceof ExplainsSetup ? $source->notes() : [],
-                connect: $source instanceof ReadsFromConnection
-                    ? ConnectDef::of($source, $connections, $held->get($source->connectionService()))
-                    : null,
-            ), $sources->all()),
+            ), $sources->fromFileOrForm()),
             // The upload limit the request enforces, so the page says the same number.
             'maxFileMegabytes' => intdiv(ImportRequest::MAX_FILE_KB, 1024),
-            // A trip to a service's site comes back here naming its source.
-            'selected' => $sources->find($request->string('source')->value())?->code(),
+            'selected' => $selected?->code(),
         ]);
     }
 

@@ -42,7 +42,6 @@ return [
     'laptop_script' => 'Laptop script',
     'last_delivery_time' => 'Last delivery :time',
     'last_used_time' => 'Last used :time',
-    'let_your_media_server_tell_this' => 'Let your media server tell this instance what you watched',
     'limit_it_to_movies_and_episodes' => 'Limit it to movies and episodes',
     'living_room' => 'Living room',
     'marking_watched_rating_statuses_progress_favorites' => 'Marking watched, rating, statuses, progress, favorites and lists.',
@@ -129,4 +128,8 @@ return [
     'ids_of_the_show' => '(the show\'s)',
     'up_to_count_addresses_for_one_server' => 'Up to :count address for one server.|Up to :count addresses for one server.',
     'api_documentation' => 'API documentation',
+    'add' => 'Add',
+    'connected' => 'Connected',
+    'import_now' => 'Import now',
+    'media_servers_that_report_what_you' => 'Media servers that report what you watch, and accounts this instance reads your history from',
 ];

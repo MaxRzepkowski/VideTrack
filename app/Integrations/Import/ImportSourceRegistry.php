@@ -33,6 +33,28 @@ final class ImportSourceRegistry extends ServiceRegistry
         return null;
     }
 
+    /**
+     * The sources that read through an account the user connects in
+     * Integrations, where their cards live.
+     *
+     * @return list<ReadsFromConnection>
+     */
+    public function readingFromConnection(): array
+    {
+        return array_values(array_filter($this->all(), fn (ImportSource $source): bool => $source instanceof ReadsFromConnection));
+    }
+
+    /**
+     * The sources the import page offers: an export file or a form, run by
+     * hand. One reading through an account lives in Integrations.
+     *
+     * @return list<ImportSource>
+     */
+    public function fromFileOrForm(): array
+    {
+        return array_values(array_filter($this->all(), fn (ImportSource $source): bool => ! $source instanceof ReadsFromConnection));
+    }
+
     protected function kind(): string
     {
         return 'import source';

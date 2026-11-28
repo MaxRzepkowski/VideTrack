@@ -42,7 +42,6 @@ return [
     'laptop_script' => 'Skript på laptopen',
     'last_delivery_time' => 'Senaste leverans :time',
     'last_used_time' => 'Senast använd :time',
-    'let_your_media_server_tell_this' => 'Låt din mediaserver berätta för den här instansen vad du har sett',
     'limit_it_to_movies_and_episodes' => 'Begränsa till filmer och avsnitt',
     'living_room' => 'Vardagsrum',
     'marking_watched_rating_statuses_progress_favorites' => 'Markera som sett, betyg, statusar, framsteg, favoriter och listor.',

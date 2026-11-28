@@ -22,8 +22,8 @@ use Illuminate\Validation\ValidationException;
 /**
  * The trip to a service's site and back that connects it. Starting answers
  * the address for the card to send the browser to; the way back is a GET,
- * as the service sends it, and lands on the import page with the source it
- * connected for, or with the reason it did not.
+ * as the service sends it, and lands on the integrations page with the source
+ * it connected for, or with the reason it did not.
  */
 class ConnectionRedirectController extends Controller
 {
@@ -48,7 +48,7 @@ class ConnectionRedirectController extends Controller
         string $service,
     ): RedirectResponse {
         $connectable = $this->redirectService($registry, $service);
-        $back = to_route('settings.import.index', array_filter(['source' => $sources->readingThrough($service)?->code()]));
+        $back = to_route('settings.integrations.index', array_filter(['source' => $sources->readingThrough($service)?->code()]));
 
         $answer = Payload::stringMap($request->query());
         $state = $request->route('state');

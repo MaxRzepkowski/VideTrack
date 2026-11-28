@@ -42,7 +42,6 @@ return [
     'laptop_script' => '노트북 스크립트',
     'last_delivery_time' => '마지막 전송: :time',
     'last_used_time' => '마지막 사용: :time',
-    'let_your_media_server_tell_this' => '미디어 서버가 내가 본 것을 이 인스턴스에 알려 주도록 설정하세요',
     'limit_it_to_movies_and_episodes' => '영화와 에피소드로 제한',
     'living_room' => '거실',
     'marking_watched_rating_statuses_progress_favorites' => '시청 완료 표시, 평점, 상태, 진행 상황, 즐겨찾기, 목록.',

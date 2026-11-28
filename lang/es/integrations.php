@@ -42,7 +42,6 @@ return [
     'laptop_script' => 'Script del portátil',
     'last_delivery_time' => 'Último envío: :time',
     'last_used_time' => 'Último uso: :time',
-    'let_your_media_server_tell_this' => 'Deja que tu servidor multimedia le diga a esta instancia lo que viste',
     'limit_it_to_movies_and_episodes' => 'Limítalo a películas y episodios',
     'living_room' => 'Sala de estar',
     'marking_watched_rating_statuses_progress_favorites' => 'Marcar como visto, puntuaciones, estados, progreso, favoritos y listas.',

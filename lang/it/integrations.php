@@ -42,7 +42,6 @@ return [
     'laptop_script' => 'Script sul portatile',
     'last_delivery_time' => 'Ultimo invio :time',
     'last_used_time' => 'Ultimo utilizzo :time',
-    'let_your_media_server_tell_this' => 'Lascia che il tuo media server dica a questa istanza cosa hai visto',
     'limit_it_to_movies_and_episodes' => 'Limitalo a film ed episodi',
     'living_room' => 'Soggiorno',
     'marking_watched_rating_statuses_progress_favorites' => 'Segnare come visto, voti, stati, progressi, preferiti e liste.',

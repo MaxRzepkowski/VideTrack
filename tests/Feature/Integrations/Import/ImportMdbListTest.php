@@ -67,12 +67,11 @@ function mdbListCatalogue(): array
     ];
 }
 
-test('the import page offers MDBList with a key form and where the key is, nothing for the operator to set up', function () {
+test('the integrations page offers MDBList with a key form and where the key is, nothing for the operator to set up', function () {
     $this->actingAs(User::factory()->create())
-        ->get(route('settings.import.index'))
+        ->get(route('settings.integrations.index'))
         ->assertInertia(fn (AssertableInertia $page) => $page
-            ->where('sources', fn ($sources) => collect($sources)->contains(fn ($source) => $source['code'] === MdbListSource::CODE
-                && $source['inputKind'] === 'connection'
+            ->where('page.accounts', fn ($sources) => collect($sources)->contains(fn ($source) => $source['code'] === MdbListSource::CODE
                 && $source['connect']['method'] === ConnectMethod::Form->value
                 && array_column($source['connect']['fields'], 'key') === ['key']
                 && $source['notes'][0]['url'] === MdbListClient::PREFERENCES_URL)));

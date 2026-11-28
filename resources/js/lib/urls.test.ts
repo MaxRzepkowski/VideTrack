@@ -1,4 +1,4 @@
-import { creatorHref, feedVariantUrl, listUrl, mediaUrl, seasonUrlOf, webcalUrl } from '@/lib/urls';
+import { creatorHref, displayUrl, feedVariantUrl, listUrl, mediaUrl, seasonUrlOf, webcalUrl } from '@/lib/urls';
 import { useMediaTypes } from '@/test/factories';
 import { beforeEach, describe, expect, it } from 'vitest';
 
@@ -73,6 +73,14 @@ describe('feedVariantUrl', () => {
     it('leaves out a type not offered here, and narrows nothing when none is left', () => {
         expect(feedVariantUrl(calendar, { scope: 'all', types: ['podcast', 'movie'] }, offered)).toBe(`${calendar.url}?types=movie`);
         expect(feedVariantUrl(calendar, { scope: 'all', types: ['podcast'] }, offered)).toBe(calendar.url);
+    });
+});
+
+describe('displayUrl', () => {
+    it('drops the scheme and keeps the rest', () => {
+        expect(displayUrl('https://trakt.tv/settings/data')).toBe('trakt.tv/settings/data');
+        expect(displayUrl('http://192.168.1.10:3000/')).toBe('192.168.1.10:3000/');
+        expect(displayUrl('example.com/pin')).toBe('example.com/pin');
     });
 });
 

@@ -42,7 +42,6 @@ return [
     'laptop_script' => 'Laptopscript',
     'last_delivery_time' => 'Laatste bericht :time',
     'last_used_time' => 'Laatst gebruikt :time',
-    'let_your_media_server_tell_this' => 'Laat je mediaserver aan deze instantie doorgeven wat je hebt gekeken',
     'limit_it_to_movies_and_episodes' => 'Beperk het tot films en afleveringen',
     'living_room' => 'Woonkamer',
     'marking_watched_rating_statuses_progress_favorites' => 'Markeren als gezien, beoordelen, statussen, voortgang, favorieten en lijsten.',

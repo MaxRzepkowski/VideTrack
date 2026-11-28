@@ -203,6 +203,13 @@ export type ConnectionCard = {
     readonly lastImportedAt: string | null;
     readonly lastError: string | null;
 };
+export type ConnectionSourceData = {
+    readonly code: string;
+    readonly label: string;
+    readonly description: string;
+    readonly notes: SetupNote[];
+    readonly connect: ConnectDef;
+};
 export type ConnectionStatus = 'active' | 'expired';
 export type CountdownEntry = {
     readonly media: MediaSummary;
@@ -437,7 +444,18 @@ export type ImportSourceDef = {
     readonly accept: string | null;
     readonly credentials: CredentialField[];
     readonly notes: SetupNote[];
-    readonly connect: ConnectDef | null;
+};
+export type IntegrationKind = 'webhook' | 'account';
+export type IntegrationRef = {
+    readonly kind: IntegrationKind;
+    readonly code: string;
+};
+export type IntegrationsPage = {
+    readonly webhooks: ScrobbleSourceData[];
+    readonly accounts: ConnectionSourceData[];
+    readonly connected: IntegrationRef[];
+    readonly available: IntegrationRef[];
+    readonly selected: string | null;
 };
 export type KeywordData = {
     readonly name: string;

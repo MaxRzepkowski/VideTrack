@@ -66,11 +66,11 @@ test('without manga from MyAnimeList, MangaBaka is not offered', function () {
     expect(app(ImportSourceRegistry::class)->has(MangaBakaSource::CODE))->toBeFalse();
 });
 
-test('the import page offers MangaBaka with a token form, nothing for the operator to set up', function () {
+test('the integrations page offers MangaBaka with a token form, nothing for the operator to set up', function () {
     $this->actingAs(User::factory()->create())
-        ->get(route('settings.import.index'))
+        ->get(route('settings.integrations.index'))
         ->assertInertia(fn (AssertableInertia $page) => $page
-            ->where('sources', fn ($sources) => collect($sources)->contains(fn ($source) => $source['code'] === MangaBakaSource::CODE
+            ->where('page.accounts', fn ($sources) => collect($sources)->contains(fn ($source) => $source['code'] === MangaBakaSource::CODE
                 && $source['connect']['method'] === ConnectMethod::Form->value
                 && array_column($source['connect']['fields'], 'key') === ['token'])));
 });

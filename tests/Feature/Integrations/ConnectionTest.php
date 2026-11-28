@@ -407,29 +407,29 @@ test('someone else cannot disconnect a connection', function () {
     expect(ServiceConnection::query()->count())->toBe(1);
 });
 
-test('the import page shows how a connection source connects and what the user holds', function () {
+test('the integrations page shows how an account source connects and what the user holds', function () {
     $user = User::factory()->create();
+    $card = fn (AssertableInertia $page): array => collect($page->toArray()['props']['page']['accounts'])->firstWhere('code', FakeConnectionImportSource::CODE)['connect'];
 
     $this->actingAs($user)
-        ->get('/settings/import')
-        ->assertInertia(fn (AssertableInertia $page) => $page
-            ->where('sources.0.connect', null)
-            ->where('sources.'.(count(app(ImportSourceRegistry::class)->codes()) - 1).'.connect', [
-                'service' => 'fake-device',
-                'name' => 'Fake Device',
-                'method' => 'device',
-                'fields' => [],
-                'autoImportMinutes' => 60,
-                'connection' => null,
-                'errorKey' => RedirectAttempts::errorKey('fake-device'),
-            ]));
+        ->get(route('settings.integrations.index'))
+        ->assertInertia(fn (AssertableInertia $page) => expect($card($page))->toBe([
+            'service' => 'fake-device',
+            'name' => 'Fake Device',
+            'method' => 'device',
+            'fields' => [],
+            'autoImportMinutes' => 60,
+            'connection' => null,
+            'errorKey' => RedirectAttempts::errorKey('fake-device'),
+        ]));
 
     connectionFor($user);
 
-    $this->get('/settings/import')
-        ->assertInertia(fn (AssertableInertia $page) => $page
-            ->where('sources.'.(count(app(ImportSourceRegistry::class)->codes()) - 1).'.connect.connection.account', 'someone')
-            ->missing('sources.'.(count(app(ImportSourceRegistry::class)->codes()) - 1).'.connect.connection.credentials'));
+    $this->get(route('settings.integrations.index'))
+        ->assertInertia(function (AssertableInertia $page) use ($card): void {
+            expect($card($page)['connection']['account'])->toBe('someone')
+                ->and($card($page)['connection'])->not->toHaveKey('credentials');
+        });
 });
 
 test('a connection source needs a connection that still reads', function () {
@@ -584,7 +584,7 @@ function startTrip(User $user): string
     return is_string($query['state'] ?? null) ? $query['state'] : throw new LogicException('A trip carries its state.');
 }
 
-test('a service connected by a trip to its site sends the user there, and the way back connects it on the import page', function () {
+test('a service connected by a trip to its site sends the user there, and the way back connects it on the integrations page', function () {
     app(ConnectionRegistry::class)->register(FakeRedirectService::CODE, FakeRedirectService::class);
     FakeConnectionImportSource::$service = FakeRedirectService::CODE;
     $user = User::factory()->create();
@@ -594,7 +594,7 @@ test('a service connected by a trip to its site sends the user there, and the wa
     expect(strlen($state))->toBeGreaterThanOrEqual(32);
 
     $this->get(route('settings.connections.callback', [FakeRedirectService::CODE, 'state' => $state, 'code' => 'code-1']))
-        ->assertRedirect(route('settings.import.index', ['source' => FakeConnectionImportSource::CODE]));
+        ->assertRedirect(route('settings.integrations.index', ['source' => FakeConnectionImportSource::CODE]));
 
     $connection = $user->serviceConnections()->sole();
 
@@ -607,10 +607,11 @@ test('a service connected by a trip to its site sends the user there, and the wa
             PublicUrl::to(route('settings.connections.callback', FakeRedirectService::CODE, absolute: false)),
         ]);
 
-    $this->get(route('settings.import.index', ['source' => FakeConnectionImportSource::CODE]))
+    $this->get(route('settings.integrations.index', ['source' => FakeConnectionImportSource::CODE]))
         ->assertInertia(fn (AssertableInertia $page) => $page
-            ->where('selected', FakeConnectionImportSource::CODE)
-            ->where('sources', fn ($sources) => collect($sources)->contains(fn ($source) => $source['code'] === FakeConnectionImportSource::CODE
+            ->where('page.selected', FakeConnectionImportSource::CODE)
+            ->where('page.connected', fn ($connected) => collect($connected)->contains(['kind' => 'account', 'code' => FakeConnectionImportSource::CODE]))
+            ->where('page.accounts', fn ($sources) => collect($sources)->contains(fn ($source) => $source['code'] === FakeConnectionImportSource::CODE
                 && $source['connect']['method'] === ConnectMethod::Redirect->value)));
 });
 
@@ -620,7 +621,7 @@ test('a way back without the attempt\'s state leaves the attempt standing; the r
     $state = startTrip($user);
 
     $this->get(route('settings.connections.callback', [FakeRedirectService::CODE, 'state' => 'someone-elses', 'code' => 'code-1']))
-        ->assertRedirect(route('settings.import.index'))
+        ->assertRedirect(route('settings.integrations.index'))
         ->assertSessionHasErrors([RedirectAttempts::errorKey(FakeRedirectService::CODE) => 'The connection attempt expired or was already used. Connect again.']);
 
     expect($user->serviceConnections()->exists())->toBeFalse();

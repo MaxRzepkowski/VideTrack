@@ -68,13 +68,13 @@ function kavitaFakes(?array $begun = null): void
     ]);
 }
 
-test('the import page offers Kavita with an address and auth key form', function () {
+test('the integrations page offers Kavita with an address and auth key form', function () {
     enableMangaModule();
 
     $this->actingAs(User::factory()->create())
-        ->get(route('settings.import.index'))
+        ->get(route('settings.integrations.index'))
         ->assertInertia(fn (AssertableInertia $page) => $page
-            ->where('sources', fn ($sources) => collect($sources)->contains(fn ($source) => $source['code'] === 'kavita'
+            ->where('page.accounts', fn ($sources) => collect($sources)->contains(fn ($source) => $source['code'] === 'kavita'
                 && $source['connect']['method'] === ConnectMethod::Form->value
                 && array_column($source['connect']['fields'], 'key') === ['url', 'key'])));
 });

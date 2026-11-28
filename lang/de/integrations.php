@@ -42,7 +42,6 @@ return [
     'laptop_script' => 'Laptop-Skript',
     'last_delivery_time' => 'Letzte Zustellung :time',
     'last_used_time' => 'Zuletzt verwendet :time',
-    'let_your_media_server_tell_this' => 'Lass deinen Medienserver dieser Instanz melden, was du gesehen hast',
     'limit_it_to_movies_and_episodes' => 'Auf Filme und Folgen beschränken',
     'living_room' => 'Wohnzimmer',
     'marking_watched_rating_statuses_progress_favorites' => 'Gesehen-Markierungen, Bewertungen, Status, Fortschritt, Favoriten und Listen.',

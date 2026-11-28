@@ -45,13 +45,13 @@ test('Audiobookshelf is only offered when the books module is on', function () {
     expect(app(ImportSourceRegistry::class)->has('audiobookshelf'))->toBeFalse();
 });
 
-test('the import page offers Audiobookshelf with an address and key form', function () {
+test('the integrations page offers Audiobookshelf with an address and key form', function () {
     enableBooksModule();
 
     $this->actingAs(User::factory()->create())
-        ->get(route('settings.import.index'))
+        ->get(route('settings.integrations.index'))
         ->assertInertia(fn (AssertableInertia $page) => $page
-            ->where('sources', fn ($sources) => collect($sources)->contains(fn ($source) => $source['code'] === 'audiobookshelf'
+            ->where('page.accounts', fn ($sources) => collect($sources)->contains(fn ($source) => $source['code'] === 'audiobookshelf'
                 && $source['connect']['method'] === 'form'
                 && array_column($source['connect']['fields'], 'key') === ['url', 'key'])));
 });

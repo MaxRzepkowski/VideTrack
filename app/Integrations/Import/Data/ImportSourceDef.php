@@ -7,8 +7,9 @@ use App\Support\Forms\CredentialField;
 use Spatie\TypeScriptTransformer\Attributes\TypeScript;
 
 /**
- * An import source's card on the import page: what it reads (a file, a form,
- * a connected account) and how the user gets it there.
+ * An import source's card on the import page: what it reads (a file or a
+ * form) and how the user gets it there. A source reading through an account
+ * has its card in Integrations instead.
  */
 #[TypeScript]
 final readonly class ImportSourceDef
@@ -26,6 +27,5 @@ final readonly class ImportSourceDef
         public ?string $accept,
         public array $credentials,
         public array $notes,
-        public ?ConnectDef $connect,
     ) {}
 }
