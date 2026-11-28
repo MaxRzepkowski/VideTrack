@@ -13,9 +13,10 @@ enum RecordKind
     case History;
 
     /**
-     * A media server's playback log: one viewing may be several sessions,
-     * and its webhook may have logged it already, so it is weighed as the
-     * webhook is, against its own source too.
+     * A playback log: one viewing may be several records (a media server's
+     * sessions, a player that records a viewing again each time playback
+     * passes the end), and a webhook may have logged it already, so it is
+     * weighed as the webhook is, against its own source too.
      */
     case PlaybackLog;
 

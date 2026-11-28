@@ -8,13 +8,16 @@ use App\Models\ServiceConnection;
 use App\Support\Payload;
 use Closure;
 use Illuminate\Contracts\Cache\LockTimeoutException;
+use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Cache;
 use LogicException;
 
 /**
- * A connection's OAuth tokens, kept fresh the same way whichever flow made
- * the grant (a device code, a trip through the service's site).
+ * A connection's tokens, kept fresh the same way whichever flow made the
+ * grant (a device code, a trip through the service's site, a sign-in form)
+ * and whichever dialect the service's token endpoint speaks
+ * ({@see TokenRequestStyle}).
  *
  * Refreshing is the delicate part. Some services rotate the refresh token
  * on every use and revoke the whole grant when a spent one comes back;
@@ -30,9 +33,6 @@ use LogicException;
 class TokenGrantClient
 {
     private const TIMEOUT_SECONDS = 60;
-
-    /** Refresh this long before expiry rather than on the first 401. */
-    public const REFRESH_MARGIN_SECONDS = 86400;
 
     /** How long an access token holds when the service does not say: refreshed a day early, it is never relied on long. */
     private const DEFAULT_TOKEN_SECONDS = 604800;
@@ -74,17 +74,41 @@ class TokenGrantClient
     }
 
     /**
-     * Ends the grant at the service. It answers 200 whatever happened
-     * (RFC 7009), so there is nothing to check.
+     * Ends the grant at the service. An OAuth service answers 200 whatever
+     * happened (RFC 7009), so there is nothing to check; a Supabase session
+     * is ended with its own access token, refreshed first when it lapsed.
      *
      * @throws GrantUnavailable
      */
     public function revoke(TokenGrant $grant, ServiceConnection $connection): void
     {
+        match ($grant->style) {
+            TokenRequestStyle::OAuthForm => $this->revokeGrant($grant, $connection),
+            TokenRequestStyle::SupabaseJson => $this->endSession($grant, $connection),
+        };
+    }
+
+    /** @throws GrantUnavailable */
+    private function revokeGrant(TokenGrant $grant, ServiceConnection $connection): void
+    {
         $token = $connection->credential('refresh_token') ?? $connection->credential('access_token');
 
         if ($token !== null) {
             $this->post($grant, $grant->revokePath, ['token' => $token]);
+        }
+    }
+
+    /** @throws GrantUnavailable */
+    private function endSession(TokenGrant $grant, ServiceConnection $connection): void
+    {
+        try {
+            $this->call($grant, $connection, fn (string $token): Response => $this->http->reach(
+                $grant->service,
+                GrantUnavailable::class,
+                fn (): Response => $this->signed($grant)->withToken($token)->post($grant->revokePath),
+            ));
+        } catch (ConnectionExpired) {
+            // A session the service already let go of has nothing left to end.
         }
     }
 
@@ -98,7 +122,7 @@ class TokenGrantClient
     {
         $expiresAt = (int) ($connection->credential('expires_at') ?? 0);
 
-        if ($expiresAt - now()->getTimestamp() > self::REFRESH_MARGIN_SECONDS) {
+        if ($expiresAt - now()->getTimestamp() > $grant->refreshMarginSeconds) {
             return (string) $connection->credential('access_token');
         }
 
@@ -128,10 +152,11 @@ class TokenGrantClient
                 }
 
                 $refreshToken = (string) $connection->credential('refresh_token');
-                $response = $this->post($grant, $grant->tokenPath, [
-                    'grant_type' => 'refresh_token',
-                    'refresh_token' => $refreshToken,
-                ]);
+                $response = $this->post($grant, $grant->tokenPath, match ($grant->style) {
+                    TokenRequestStyle::OAuthForm => ['grant_type' => 'refresh_token', 'refresh_token' => $refreshToken],
+                    // The grant type rides in the token path's own query.
+                    TokenRequestStyle::SupabaseJson => ['refresh_token' => $refreshToken],
+                });
 
                 // A 429 is busy, not refused: the refresh token was not spent.
                 if ($response->clientError() && $response->status() !== 429) {
@@ -158,18 +183,39 @@ class TokenGrantClient
     }
 
     /**
-     * A form posted to the service's OAuth endpoints, signed by the app: its
-     * client id, and its secret when it has one.
+     * A request to the service's token endpoints, signed by the app as the
+     * service's dialect has it.
      *
-     * @param  array<string, string>  $form
+     * @param  array<string, string>  $fields
      *
      * @throws GrantUnavailable
      */
-    public function post(TokenGrant $grant, string $path, array $form): Response
+    public function post(TokenGrant $grant, string $path, array $fields): Response
     {
-        $signed = [...$form, 'client_id' => $grant->clientId, ...($grant->clientSecret === null ? [] : ['client_secret' => $grant->clientSecret])];
+        return $this->http->reach($grant->service, GrantUnavailable::class, fn (): Response => match ($grant->style) {
+            TokenRequestStyle::OAuthForm => $this->signed($grant)->asForm()->post($path, [
+                ...$fields,
+                'client_id' => $grant->clientId,
+                ...($grant->clientSecret === null ? [] : ['client_secret' => $grant->clientSecret]),
+            ]),
+            TokenRequestStyle::SupabaseJson => $this->signed($grant)->asJson()->post($path, $fields),
+        });
+    }
 
-        return $this->http->reach($grant->service, GrantUnavailable::class, fn (): Response => $this->http->request($grant->baseUrl, self::TIMEOUT_SECONDS)->asForm()->post($path, $signed));
+    /**
+     * The request every token call starts from, held to a user's own server
+     * when the grant lives on one; a Supabase project also wants its key on
+     * every one.
+     */
+    private function signed(TokenGrant $grant): PendingRequest
+    {
+        $request = $this->http->request($grant->baseUrl, self::TIMEOUT_SECONDS);
+        $request = $grant->pinned === null ? $request : $grant->pinned->hold($request);
+
+        return match ($grant->style) {
+            TokenRequestStyle::OAuthForm => $request,
+            TokenRequestStyle::SupabaseJson => $request->withHeaders(['apikey' => $grant->clientId]),
+        };
     }
 
     /**

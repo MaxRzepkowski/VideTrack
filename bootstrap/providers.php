@@ -35,6 +35,7 @@ use App\Integrations\Mail\MailServiceProvider;
 use App\Integrations\MangaBaka\MangaBakaLibraryServiceProvider;
 use App\Integrations\MdbList\MdbListServiceProvider;
 use App\Integrations\Netflix\NetflixServiceProvider;
+use App\Integrations\Nuvio\NuvioServiceProvider;
 use App\Integrations\OutgoingWebhooks\OutgoingWebhooksServiceProvider;
 use App\Integrations\Playnite\PlayniteServiceProvider;
 use App\Integrations\Plex\PlexServiceProvider;
@@ -105,6 +106,7 @@ return [
     SimklServiceProvider::class,
     MdbListServiceProvider::class,
     TracearrServiceProvider::class,
+    NuvioServiceProvider::class,
     AudiobookshelfServiceProvider::class,
     StorytellerServiceProvider::class,
     KavitaServiceProvider::class,

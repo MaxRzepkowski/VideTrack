@@ -95,11 +95,11 @@ class ScheduledTasks
                 queue: fn () => SendChannelDigests::queueTask(),
             ),
             // Imports through connected accounts; each source keeps its own
-            // pace (Simkl daily, Tracearr hourly), this only looks for due ones.
+            // pace, from daily to every quarter hour, this only looks for due ones.
             new ScheduledTask(
                 name: TaskName::AutoImport,
-                cron: '15 * * * *',
-                frequency: 'common.hourly',
+                cron: '*/15 * * * *',
+                frequency: 'tasks.every_15_minutes',
                 queue: fn () => QueueAutoImports::queueTask(),
             ),
             // Just past midnight, when yesterday's "airs today" becomes aired:

@@ -1,4 +1,5 @@
 import type { ConnectionCard, IntegrationRef, IntegrationsPage } from '@/types/integrations';
+import { trans, transChoice } from 'laravel-vue-i18n';
 
 /** What each account source holds right now, by source code: null for none. */
 export type HeldAccounts = Record<string, ConnectionCard | null>;
@@ -25,4 +26,16 @@ export function integrationSections(page: IntegrationsPage, held: HeldAccounts):
 /** What every account card holds as the page props say, for the page to keep while cards connect. */
 export function heldAccounts(page: IntegrationsPage): HeldAccounts {
     return Object.fromEntries(page.accounts.map((account) => [account.code, account.connect.connection]));
+}
+
+export const MINUTES_IN_HOUR = 60;
+export const MINUTES_IN_DAY = 1440;
+
+/** How often a source imports on its own, as the card says it: daily, hourly, or every so many minutes. */
+export function importPace(minutes: number): string {
+    if (minutes >= MINUTES_IN_DAY) {
+        return trans('common.daily');
+    }
+
+    return minutes >= MINUTES_IN_HOUR ? trans('common.hourly') : transChoice('common.every_count_minutes', minutes, { count: String(minutes) });
 }

@@ -25,9 +25,10 @@ use Illuminate\Http\Client\Response;
  */
 final readonly class OwnServerClient
 {
-    private const TRIES = 3;
+    /** How a run asks again: three tries, waiting twice as long each time from a second. */
+    public const TRIES = 3;
 
-    private const FIRST_RETRY_MS = 1000;
+    public const FIRST_RETRY_MS = 1000;
 
     /** A 429 still standing after the tries waits a minute, unless the server names a wait. */
     public const DEFAULT_WAIT_SECONDS = 60;

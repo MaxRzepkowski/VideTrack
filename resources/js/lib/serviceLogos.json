@@ -776,6 +776,13 @@
         "source": "apprise-docs",
         "licence": "CC BY 4.0"
     },
+    "nuvio": {
+        "file": "nuvio.png",
+        "width": 175,
+        "height": 192,
+        "source": "https://nuvio.tv/assets/Logo_1080x1080.png",
+        "licence": "none stated (the apps are GPL-3.0); trademark of its owner"
+    },
     "octopush": {
         "file": "octopush.svg",
         "width": 146,

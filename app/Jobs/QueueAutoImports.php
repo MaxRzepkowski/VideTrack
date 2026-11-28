@@ -17,8 +17,8 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Foundation\Queue\Queueable;
 
 /**
- * Hourly: queues an import for every connection with auto-import on whose
- * source is due (each source sets its own pace). Data only comes in — the
+ * Every quarter hour: queues an import for every connection with
+ * auto-import on whose source is due (each source sets its own pace). Data only comes in — the
  * connections read, nothing is written back.
  *
  * A connection the service let go of (expired) waits for the user; one
@@ -34,8 +34,8 @@ class QueueAutoImports implements ShouldQueue
     public int $maxExceptions = self::BREAKS_ALLOWED;
 
     /**
-     * Started a few minutes early so an hourly source whose last run took
-     * a minute does not slip to every other hour.
+     * Started a few minutes early so a source whose last run took a minute
+     * does not slip to the following check.
      */
     private const SLACK_MINUTES = 5;
 

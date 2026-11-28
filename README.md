@@ -31,7 +31,7 @@ tells you when the next episode or release is out, and keeps all of it on your o
 - 📊 See your statistics for any year or range of days: time spent, activity, genres, where titles come from, who made them and how your ratings compare with everyone else's.
 - ✨ Get suggestions based on what you finished. They wait on their own page and never nag.
 - 📥 Import from Trakt, Letterboxd, TV Time, Simkl, IMDb, Goodreads, StoryGraph, MyAnimeList, AniList, Kitsu, Steam and more.
-- 📡 Log what you watch automatically from Plex, Jellyfin, Emby or Tautulli.
+- 📡 Log what you watch automatically from Plex, Jellyfin, Emby, Tautulli or Nuvio.
 - 📤 Export everything as a backup, as CSV, or as files for IMDb, Letterboxd, Goodreads and MyAnimeList.
 - 📱 Install it as an app on your phone or computer.
 - 🤖 Ask an AI assistant what to watch next or what comes out this week, and let it tick off what you watched ([MCP](docs/api.md#mcp-server-for-ai-assistants)).

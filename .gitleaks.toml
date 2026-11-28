@@ -1,11 +1,14 @@
-# Secret scanning: gitleaks' own rules, plus one exception. The webhook
+# Secret scanning: gitleaks' own rules, plus two exceptions. The webhook
 # signature is tested against the vector the Standard Webhooks libraries test
 # themselves against (tests/Unit/Integrations/OutgoingWebhooks/WebhookSignatureTest.php):
 # public test values, nobody's secret, and they stay in that test's history.
+# Nuvio's publishable key (app/Integrations/Nuvio/NuvioClient.php) is printed
+# in Nuvio's public API documentation for every outside client to send: it
+# names the project, it grants nothing.
 
 [extend]
 useDefault = true
 
 [allowlist]
-description = "The public Standard Webhooks test vector"
-regexes = ['''MfKQ9r8GKYqrTwjUPD8ILPZIo2LaLaSw''', '''msg_p5jXN8AQM9LWM0D4loKWxJek''']
+description = "The public Standard Webhooks test vector, and Nuvio's published publishable key"
+regexes = ['''MfKQ9r8GKYqrTwjUPD8ILPZIo2LaLaSw''', '''msg_p5jXN8AQM9LWM0D4loKWxJek''', '''sb_publishable_1Clq8rlTVACkdcZuqr6_AD__xUUC_EN''']
