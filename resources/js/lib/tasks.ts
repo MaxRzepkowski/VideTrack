@@ -49,14 +49,14 @@ export function levelLook(level: CheckLevel): LevelLook {
 }
 
 /**
- * A sentence the server worded, its moments written here, as every time on
- * the page is: in the viewer's timezone and time format, by the hour alone
- * when it is today.
+ * A moment as every time on these pages is written: in the viewer's timezone
+ * and time format, by the hour alone when it is today.
  */
-export function wordedText(line: WordedLine): string {
-    return Object.entries(line.moments).reduce((text, [name, moment]) => {
-        const written = (localDateKey(moment) === todayDateKey() ? formatTime(moment) : formatDateTime(moment)) ?? '';
+export function writtenMoment(moment: string): string {
+    return (localDateKey(moment) === todayDateKey() ? formatTime(moment) : formatDateTime(moment)) ?? '';
+}
 
-        return text.replaceAll(`:${name}`, written);
-    }, line.text);
+/** A sentence the server worded, its moments written here. */
+export function wordedText(line: WordedLine): string {
+    return Object.entries(line.moments).reduce((text, [name, moment]) => text.replaceAll(`:${name}`, writtenMoment(moment)), line.text);
 }

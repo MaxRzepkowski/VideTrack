@@ -20,11 +20,14 @@ use App\Tasks\Maintenance\Data\CheckLine;
 use App\Tasks\Maintenance\MaintenanceChecks;
 use App\Tasks\RunFailure;
 use App\Tasks\TaskName;
+use Illuminate\Console\Events\CommandStarting;
 use Illuminate\Http\Client\Factory;
 use Illuminate\Queue\Events\Looping;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Inertia\Testing\AssertableInertia as Assert;
+use Symfony\Component\Console\Input\ArrayInput;
+use Symfony\Component\Console\Output\NullOutput;
 
 // A checkout has no public storage link, a development instance does: the
 // list is read from a setup that is sound wherever the tests run, and the
@@ -85,6 +88,30 @@ test('a scheduler gone quiet needs the admin', function () {
     expect(attentionTitles())->not->toContain(__('tasks.the_scheduler_is_not_running'));
 
     $this->travel(1)->seconds();
+
+    expect(attentionTitles())->toContain(__('tasks.the_scheduler_is_not_running'));
+});
+
+test('a scheduler started after a night off is not read as stalled before its first tick', function () {
+    app(Heartbeat::class)->beat(BeatingProcess::Scheduler);
+    TaskRun::queueTask(TaskName::RefreshCollections->value);
+    $this->travel(10)->hours();
+
+    event(new CommandStarting('schedule:work', new ArrayInput([]), new NullOutput));
+
+    expect(attentionTitles())->not->toContain(__('tasks.the_scheduler_is_not_running'));
+
+    $this->travel(StalledProcesses::SCHEDULER_QUIET_SECONDS)->seconds();
+
+    expect(attentionTitles())->toContain(__('tasks.the_scheduler_is_not_running'));
+});
+
+test('another command starting is no sign of the scheduler', function () {
+    app(Heartbeat::class)->beat(BeatingProcess::Scheduler);
+    TaskRun::queueTask(TaskName::RefreshCollections->value);
+    $this->travel(10)->hours();
+
+    event(new CommandStarting('tasks:catch-up', new ArrayInput([]), new NullOutput));
 
     expect(attentionTitles())->toContain(__('tasks.the_scheduler_is_not_running'));
 });

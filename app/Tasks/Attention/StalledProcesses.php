@@ -63,8 +63,7 @@ final readonly class StalledProcesses implements AttentionSource
     {
         return new AttentionItem(CheckLevel::Problem, __($title), [
             WordedLine::of(new TaskLine($consequence)),
-            ...($lastBeat === null ? [] : [WordedLine::of(new TaskLine('tasks.last_sign_of_life_at', moments: ['time' => $lastBeat]))]),
-            WordedLine::of(new TaskLine('tasks.restart_the_container')),
+            WordedLine::of(new TaskLine('tasks.restart_the_container_or_the_stopped_one')),
         ], $lastBeat?->toIso8601String());
     }
 

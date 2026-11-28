@@ -20,5 +20,5 @@ return [
     'your_stats' => 'Your stats',
     'your_viewing_gaming_and_reading_activity' => 'Your viewing, gaming and reading activity at a glance.',
     'count_issues_need_your_attention' => ':count issue needs your attention.|:count issues need your attention.',
-    'see_what_needs_attention' => 'See',
+    'see_what_needs_attention' => 'Show details',
 ];

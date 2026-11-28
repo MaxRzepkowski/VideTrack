@@ -19,7 +19,7 @@ describe('Overview', () => {
                     level: 'problem',
                     title: 'The scheduler is not running',
                     details: [
-                        { text: 'Last sign of life at :time.', moments: { time: '2026-10-10T11:00:00Z' } },
+                        { text: 'Nothing refreshes and no notifications or digests go out.', moments: {} },
                         { text: 'Restart the container.', moments: {} },
                     ],
                     since: '2026-10-10T11:00:00+00:00',
@@ -29,9 +29,25 @@ describe('Overview', () => {
         }).text();
 
         expect(text).toContain('The scheduler is not running');
-        expect(text).toContain('Last sign of life at 11:00 AM.');
-        expect(text).toContain('Restart the container.');
-        expect(text).toContain('since');
+        expect(text).toContain('Nothing refreshes and no notifications or digests go out. Restart the container.');
+        expect(text).toContain('since 11:00 AM');
+    });
+
+    it('writes a moment in a detail and since when of another day with its date', () => {
+        const text = page({
+            attention: [
+                {
+                    level: 'warning',
+                    title: 'TMDB refuses the key',
+                    details: [{ text: 'Answered 401 at :time.', moments: { time: '2026-10-08T10:30:00Z' } }],
+                    since: '2026-10-08T10:30:00+00:00',
+                },
+            ],
+            checkedAt: null,
+        }).text();
+
+        expect(text).toContain('Answered 401 at Oct 8, 2026, 10:30 AM.');
+        expect(text).toContain('since Oct 8, 2026, 10:30 AM');
     });
 
     it('reads an empty list as checked when the checks have looked', () => {

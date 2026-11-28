@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
-import { ArrowRight } from '@lucide/vue';
+import { ArrowRight, CircleAlert } from '@lucide/vue';
 
 // Something gone wrong, said once above the page's content: a source that
 // failed in part, or what needs the admin, with where to see more.
@@ -12,12 +12,18 @@ defineProps<{
 </script>
 
 <template>
-    <div
-        class="border-danger-line bg-danger-surface text-danger mb-8 flex flex-wrap items-center justify-between gap-x-4 gap-y-2 rounded-xl border p-6 text-base"
-        role="alert"
-    >
-        <span>{{ message }}</span>
-        <Link v-if="link" :href="link.href" class="flex shrink-0 items-center gap-1.5 font-semibold hover:underline">
+    <!-- A card like the page's others: the icon alone carries the colour, so the
+         sentence reads as calmly as the rest of the page. -->
+    <div class="border-line bg-surface mb-8 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-xl border px-5 py-4 text-base" role="alert">
+        <div class="flex min-w-0 flex-1 items-start gap-3">
+            <CircleAlert class="text-danger mt-0.5 size-5 shrink-0" aria-hidden="true" />
+            <span class="text-ink">{{ message }}</span>
+        </div>
+        <Link
+            v-if="link"
+            :href="link.href"
+            class="text-ink-secondary hover:text-ink flex shrink-0 items-center gap-1.5 font-medium transition-colors"
+        >
             {{ link.label }}
             <ArrowRight class="size-4" aria-hidden="true" />
         </Link>

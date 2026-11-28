@@ -14,6 +14,7 @@ use App\Tasks\Liveness\Heartbeat;
 use Dedoc\Scramble\Scramble;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Console\Events\CommandStarting;
 use Illuminate\Contracts\Auth\CanResetPassword;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
@@ -75,6 +76,15 @@ class AppServiceProvider extends ServiceProvider
         // The worker's sign of life: every loop, idle or not, and every job
         // it finishes.
         Event::listen([Looping::class, JobProcessed::class], fn () => $this->app->make(Heartbeat::class)->beat(BeatingProcess::Worker));
+
+        // The scheduler's first tick waits for the next whole minute; its
+        // start is a sign of life too, or an instance back after a night off
+        // reads the last beat from before it went down as a stall.
+        Event::listen(CommandStarting::class, function (CommandStarting $event): void {
+            if ($event->command === 'schedule:work') {
+                $this->app->make(Heartbeat::class)->beat(BeatingProcess::Scheduler);
+            }
+        });
 
         // Everything a signed-in person clicks: pages, and the writes the
         // pages send through ui/v1. A ceiling for a runaway tab, not a pace

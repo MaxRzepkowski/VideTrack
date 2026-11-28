@@ -20,5 +20,5 @@ return [
     'your_stats' => 'Twoje statystyki',
     'your_viewing_gaming_and_reading_activity' => 'Twoja aktywność związana z oglądaniem, graniem i czytaniem w skrócie.',
     'count_issues_need_your_attention' => ':count sprawa wymaga Twojej uwagi.|:count sprawy wymagają Twojej uwagi.|:count spraw wymaga Twojej uwagi.',
-    'see_what_needs_attention' => 'Zobacz',
+    'see_what_needs_attention' => 'Pokaż szczegóły',
 ];
