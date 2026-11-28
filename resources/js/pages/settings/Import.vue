@@ -4,7 +4,7 @@ import InputError from '@/components/InputError.vue';
 import ServiceLogo from '@/components/ServiceLogo.vue';
 import ServiceTile from '@/components/settings/ServiceTile.vue';
 import CredentialFields from '@/components/settings/CredentialFields.vue';
-import ConnectionPanel from '@/components/settings/import/ConnectionPanel.vue';
+import ConnectionPanel from '@/components/settings/integrations/ConnectionPanel.vue';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import AppLayout from '@/layouts/AppLayout.vue';
