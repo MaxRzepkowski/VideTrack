@@ -5,6 +5,7 @@ namespace App\Integrations\Import\Data;
 use App\Enums\PlayOutcome;
 use App\Library\MutationSource;
 use App\Library\PlayDating;
+use App\Library\RecordKind;
 use Carbon\CarbonImmutable;
 
 /**
@@ -14,9 +15,9 @@ use Carbon\CarbonImmutable;
  * (1 the first, 2 and up a rewatch); null places the play in the run under
  * way on its date.
  *
- * $scrobbled marks a viewing a media server reported (Tracearr): the same
- * viewing may already be here through a webhook, at a slightly different
- * time, so a completed play within the scrobble dedup window stands for it.
+ * $record says what the entry comes from, and so what a completed viewing
+ * is weighed against: one another source already logged a few hours off
+ * stands for it ({@see RecordKind}).
  *
  * $dating says what $at is: the viewing's moment, or only the source's last
  * activity on the title — which moves from one export to the next.
@@ -33,10 +34,10 @@ final readonly class ImportPlay
         public PlayOutcome $outcome = PlayOutcome::Completed,
         public ?int $amount = null,
         public ?int $cycle = null,
-        public bool $scrobbled = false,
         public PlayDating $dating = PlayDating::Viewing,
         public ?int $playedSeconds = null,
         /** Where the entry first came in, for a history that kept it (a backup); null for the import itself. */
         public ?MutationSource $source = null,
+        public RecordKind $record = RecordKind::History,
     ) {}
 }

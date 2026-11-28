@@ -17,6 +17,7 @@ use App\Integrations\Import\Data\TitleQuery;
 use App\Integrations\Import\Rows\MediaRow;
 use App\Integrations\Import\Rows\SkipRow;
 use App\Library\PlaybackCompletion;
+use App\Library\RecordKind;
 use App\Library\ScrobbleDedup;
 use App\Support\Payload;
 use Generator;
@@ -124,7 +125,7 @@ final class PlaybackReportingSource implements ExplainsSetup, ReadsFile
     private function row(array $playback): MediaRow|SkipRow
     {
         $at = Payload::instant($playback['at']);
-        $play = new ImportPlay($at, scrobbled: true, playedSeconds: $playback['seconds']);
+        $play = new ImportPlay($at, playedSeconds: $playback['seconds'], record: RecordKind::PlaybackLog);
         $name = trim($playback['name']);
 
         if ($playback['type'] === self::MOVIE) {

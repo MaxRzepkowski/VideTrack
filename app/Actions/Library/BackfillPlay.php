@@ -91,7 +91,7 @@ final readonly class BackfillPlay
             ->when(
                 $undated,
                 fn (Builder $plays) => $plays->where('outcome', $outcome->value),
-                fn (Builder $plays) => $plays->whereIn('watched_at', $this->stampsOf($at)),
+                fn (Builder $plays) => $plays->whereIn('watched_at', BackfillRules::stampsOf($at)),
             )
             ->inCycle($cycleId)
             ->first();
@@ -193,18 +193,5 @@ final readonly class BackfillPlay
     private function numberedCycle(User $user, MediaItem $root, int $number, CarbonImmutable $startedAt): ?int
     {
         return $this->cycles->execute($user, $root, $number, $startedAt)?->id;
-    }
-
-    /**
-     * The wall clocks one viewing may be stamped with: the clock it is written
-     * on, and UTC's. A bare day is written as noon UTC, and a library on an
-     * instance outside UTC may hold a service's moment written as UTC's wall
-     * clock; met again, either is found instead of being logged twice.
-     *
-     * @return list<CarbonImmutable>
-     */
-    private function stampsOf(CarbonImmutable $at): array
-    {
-        return [$at, $at->utc()];
     }
 }

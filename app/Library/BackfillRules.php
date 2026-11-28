@@ -115,4 +115,17 @@ final readonly class BackfillRules
     {
         return $at === null ? [] : ['created_at' => $at, 'updated_at' => $at];
     }
+
+    /**
+     * The wall clocks one viewing may be stamped with: the clock it is written
+     * on, and UTC's. A bare day is written as noon UTC, and a library on an
+     * instance outside UTC may hold a service's moment written as UTC's wall
+     * clock; met again, either is found instead of being logged twice.
+     *
+     * @return list<CarbonImmutable>
+     */
+    public static function stampsOf(CarbonImmutable $at): array
+    {
+        return [$at, $at->utc()];
+    }
 }

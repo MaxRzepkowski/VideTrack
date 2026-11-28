@@ -4,11 +4,13 @@ use App\Integrations\Connections\ConnectionStatus;
 use App\Integrations\Connections\TokenGrantClient;
 use App\Integrations\Import\Data\ImportInput;
 use App\Integrations\Import\Data\ImportSelection;
+use App\Integrations\Import\Data\MediaSubject;
 use App\Integrations\Import\ImportSourceRegistry;
 use App\Integrations\Import\Rows\ImportRow;
 use App\Integrations\Scrobble\ScrobbleSourceRegistry;
 use App\Integrations\VideTrack\Backup\BackupWriter;
 use App\Jobs\RunImport;
+use App\Models\MediaItem;
 use App\Models\ServiceConnection;
 use App\Models\TaskRun;
 use App\Models\User;
@@ -94,6 +96,12 @@ function runFakeImport(User $user, array $rows, string $username = 'someone'): T
     ]);
 
     return $taskRun->refresh();
+}
+
+/** An import row's subject naming the catalog title straight away, as a source with the provider's own ids does. */
+function subjectOf(MediaItem $item): MediaSubject
+{
+    return MediaSubject::direct($item->type, $item->provider, $item->provider_ref, $item->title);
 }
 
 /** A fixture file under tests/Fixtures/transfer put on the fake local disk; its path there. */

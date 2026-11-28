@@ -17,6 +17,7 @@ use App\Integrations\Import\Data\MediaSubject;
 use App\Integrations\Import\Rows\MediaRow;
 use App\Integrations\Import\Rows\SkipRow;
 use App\Integrations\TitleLabel;
+use App\Library\RecordKind;
 use App\Models\ServiceConnection;
 use App\Support\Payload;
 use Carbon\CarbonImmutable;
@@ -34,8 +35,8 @@ use Generator;
  * season and number — never by title.
  *
  * A viewing may already be here through the media server's own webhook, at
- * a slightly different time; plays are marked as scrobbled so the import
- * leaves that one viewing alone.
+ * a slightly different time: its history is a playback log, weighed as the
+ * webhook is, so the import leaves that one viewing alone.
  *
  * The read position is `since`: one day before the last run started, so a
  * viewing Tracearr files late is still picked up; re-reading it is harmless.
@@ -131,7 +132,7 @@ class TracearrSource extends ConnectionSource
         }
 
         $at = Payload::instant($viewing['stopped_at'] ?? null) ?? Payload::instant($viewing['started_at'] ?? null);
-        $play = [new ImportPlay($at, scrobbled: true)];
+        $play = [new ImportPlay($at, record: RecordKind::PlaybackLog)];
 
         return match ($viewing['media_type'] ?? null) {
             'movie' => $this->movie($viewing, $play),

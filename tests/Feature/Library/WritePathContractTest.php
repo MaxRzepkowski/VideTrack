@@ -25,7 +25,6 @@ use App\Integrations\Import\Data\ImportDrop;
 use App\Integrations\Import\Data\ImportPlay;
 use App\Integrations\Import\Data\ImportRating;
 use App\Integrations\Import\Data\ImportStatus;
-use App\Integrations\Import\Data\MediaSubject;
 use App\Integrations\Import\Rows\MediaRow;
 use App\Integrations\Scrobble\Data\ScrobbleEvent;
 use App\Integrations\Scrobble\DeliveryNote;
@@ -351,11 +350,6 @@ function bothWays(array $items, Closure $clicks, array $rows): array
     return [librarySnapshot($clicked, $items), librarySnapshot($imported, $items)];
 }
 
-function subjectOf(MediaItem $item): MediaSubject
-{
-    return MediaSubject::direct($item->type, $item->provider, $item->provider_ref, $item->title);
-}
-
 test('a drop without a date lands on the release date either way', function () {
     $movie = MediaItem::factory()->movie()->create(['release_date' => '2024-05-01']);
 
@@ -449,10 +443,10 @@ test('a viewing a media server reported is one play, whichever of the webhook an
 
     $webhookFirst = User::factory()->create();
     app(MarkWatched::class)->execute($webhookFirst, $movie, WatchedAt::at($watched));
-    runFakeImport($webhookFirst, [new MediaRow(subjectOf($movie), plays: [new ImportPlay($watched->addHours(2), scrobbled: true)])]);
+    runFakeImport($webhookFirst, [new MediaRow(subjectOf($movie), plays: [new ImportPlay($watched->addHours(2))])]);
 
     $importFirst = User::factory()->create();
-    runFakeImport($importFirst, [new MediaRow(subjectOf($movie), plays: [new ImportPlay($watched->addHours(2), scrobbled: true)])]);
+    runFakeImport($importFirst, [new MediaRow(subjectOf($movie), plays: [new ImportPlay($watched->addHours(2))])]);
     $outcome = app(ApplyScrobbleEvent::class)->execute($importFirst, $movie, new ScrobbleEvent(ScrobbleEventKind::Complete, MediaKind::Movie, [], occurredAt: $watched));
 
     expect($webhookFirst->plays()->count())->toBe(1)

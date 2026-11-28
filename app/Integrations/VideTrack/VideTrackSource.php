@@ -34,6 +34,7 @@ use App\Integrations\VideTrack\Backup\BackupRating;
 use App\Integrations\VideTrack\Backup\BackupSection;
 use App\Integrations\VideTrack\Backup\BackupStatus;
 use App\Integrations\VideTrack\Backup\InvalidBackupEntry;
+use App\Library\RecordKind;
 use App\Support\Payload;
 use Generator;
 use LogicException;
@@ -190,7 +191,7 @@ final class VideTrackSource implements ReadsFile
 
     private function play(BackupPlay $play): MediaRow
     {
-        return new MediaRow($play->position->subject(), plays: [new ImportPlay($play->watchedAt, $play->outcome, $play->amount, $play->cycle, source: $play->source)]);
+        return new MediaRow($play->position->subject(), plays: [new ImportPlay($play->watchedAt, $play->outcome, $play->amount, $play->cycle, source: $play->source, record: RecordKind::Backup)]);
     }
 
     private function rating(BackupRating $rating): MediaRow
