@@ -49,12 +49,23 @@ function runAutoImport(): array
         ->all();
 }
 
-test('auto-import is an hourly scheduled task', function () {
+test('auto-import looks for due connections every quarter hour', function () {
     $task = collect(ScheduledTasks::all())->firstWhere('name', 'auto-import');
 
     expect($task)->not->toBeNull()
-        ->and($task->cron)->toBe('15 * * * *');
+        ->and($task->cron)->toBe('*/15 * * * *')
+        ->and($task->frequency)->toBe('tasks.every_15_minutes');
 });
+
+test('a quarter-hour source is due at every check, an hourly one keeps its hour', function (int $pace, bool $due) {
+    FakeConnectionImportSource::$autoImportMinutes = $pace;
+    $connection = autoConnection(['last_imported_at' => now()->subMinutes(14)]);
+
+    expect(runAutoImport())->toBe($due ? [$connection->id] : []);
+})->with([
+    'every quarter hour' => [15, true],
+    'hourly' => [60, false],
+]);
 
 test('a due connection with auto-import on gets a run', function () {
     $never = autoConnection();

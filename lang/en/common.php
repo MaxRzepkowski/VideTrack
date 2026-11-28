@@ -164,4 +164,5 @@ return [
     'yesterday' => 'Yesterday',
     'back' => 'Back',
     'instance' => 'Instance',
+    'every_count_minutes' => 'Every :count minute|Every :count minutes',
 ];

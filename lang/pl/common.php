@@ -164,4 +164,5 @@ return [
     'yesterday' => 'Wczoraj',
     'back' => 'Wstecz',
     'instance' => 'Instancja',
+    'every_count_minutes' => 'Co :count minutę|Co :count minuty|Co :count minut',
 ];

@@ -1,4 +1,4 @@
-import { heldAccounts, integrationKey, integrationSections } from '@/lib/integrations';
+import { MINUTES_IN_DAY, MINUTES_IN_HOUR, heldAccounts, importPace, integrationKey, integrationSections } from '@/lib/integrations';
 import type { ConnectionCard, ConnectionSourceData, IntegrationsPage } from '@/types/integrations';
 import { describe, expect, it } from 'vitest';
 
@@ -60,5 +60,13 @@ describe('integrationSections', () => {
 describe('heldAccounts', () => {
     it('reads each account card, connected or not', () => {
         expect(heldAccounts(page())).toEqual({ simkl: card('simkl'), tracearr: null });
+    });
+});
+
+describe('importPace', () => {
+    it("says a source's own rhythm", () => {
+        expect(importPace(MINUTES_IN_DAY)).toBe('Daily');
+        expect(importPace(MINUTES_IN_HOUR)).toBe('Hourly');
+        expect(importPace(15)).toBe('Every 15 minutes');
     });
 });

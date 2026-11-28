@@ -7,6 +7,7 @@ import { ToggleSwitch } from '@/components/ui/toggle-switch';
 import { confirm } from '@/composables/useConfirm';
 import { formatDateTime, relativeTime } from '@/lib/format';
 import { jsonFetch } from '@/lib/http';
+import { importPace } from '@/lib/integrations';
 import { displayUrl } from '@/lib/urls';
 import { SETTINGS_FIELD_CLASS } from '@/lib/ui';
 import type { ConnectAttemptStatus } from '@/types/generated';
@@ -297,8 +298,6 @@ async function disconnect(): Promise<void> {
 
     router.delete(route('settings.connections.destroy', { connection: held.id }), { preserveScroll: true });
 }
-
-const pace = computed(() => (props.connect.autoImportMinutes >= 1440 ? trans('common.daily') : trans('common.hourly')));
 </script>
 
 <template>
@@ -314,7 +313,7 @@ const pace = computed(() => (props.connect.autoImportMinutes >= 1440 ? trans('co
             <label class="flex items-center justify-between gap-3">
                 <span class="min-w-0">
                     <span class="text-ink block text-sm">{{ trans('import.import_automatically') }}</span>
-                    <span class="text-ink-muted block text-sm">{{ pace }}</span>
+                    <span class="text-ink-muted block text-sm">{{ importPace(connect.autoImportMinutes) }}</span>
                 </span>
                 <ToggleSwitch v-model="settings.auto_import" />
             </label>

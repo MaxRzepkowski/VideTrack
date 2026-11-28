@@ -18,6 +18,8 @@ class FakeHostResolver extends HostResolver
         'rebound.example.com' => ['93.184.215.14', '127.0.0.1'],
         'push.example.com' => ['93.184.215.14'],
         'n8n.example.com' => ['93.184.215.14'],
+        'api.nuvio.tv' => ['93.184.215.30'],
+        'nuvio.lan' => ['192.168.1.24'],
         // A container beside the server, in its Docker network.
         'apprise' => ['172.18.0.5'],
         'tracearr' => ['172.18.0.6'],

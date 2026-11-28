@@ -8,6 +8,7 @@ use App\Integrations\Connections\DeviceGrantClient;
 use App\Integrations\Connections\DevicePoll;
 use App\Integrations\Connections\GrantUnavailable;
 use App\Integrations\Connections\TokenGrantClient;
+use App\Integrations\Connections\TokenRequestStyle;
 use App\Models\ServiceConnection;
 use App\Models\User;
 use Illuminate\Http\Client\Request;
@@ -17,8 +18,9 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Sleep;
 
 /*
- * The device flow every connected service shares, against a made-up
- * service at auth.example.test.
+ * The device flow every connected service shares, and the token upkeep
+ * behind every grant (in both dialects), against a made-up service at
+ * auth.example.test.
  */
 
 beforeEach(fn () => Http::preventStrayRequests());
@@ -40,7 +42,7 @@ function exampleGrant(?string $verificationUri = null): DeviceGrant
     );
 }
 
-function exampleConnection(int $expiresInSeconds = TokenGrantClient::REFRESH_MARGIN_SECONDS * 2): ServiceConnection
+function exampleConnection(int $expiresInSeconds = TokenGrant::DEFAULT_REFRESH_MARGIN_SECONDS * 2): ServiceConnection
 {
     return deviceConnection(User::factory()->create(), 'example', [
         'access_token' => 'access-one',
@@ -80,7 +82,7 @@ test('a poll reads pending, slow down, a refusal and an app the service does not
 ]);
 
 test('a busy service at refresh time leaves the grant alone, and the refresh is not sent again', function (int $status) {
-    $connection = exampleConnection(expiresInSeconds: TokenGrantClient::REFRESH_MARGIN_SECONDS - 3600);
+    $connection = exampleConnection(expiresInSeconds: TokenGrant::DEFAULT_REFRESH_MARGIN_SECONDS - 3600);
 
     Http::fake(['auth.example.test/token' => Http::response(['error' => 'Too Many Requests'], $status)]);
 
@@ -92,7 +94,7 @@ test('a busy service at refresh time leaves the grant alone, and the refresh is 
 })->with([429, 503]);
 
 test('a refused refresh means the grant is gone', function () {
-    $connection = exampleConnection(expiresInSeconds: TokenGrantClient::REFRESH_MARGIN_SECONDS - 3600);
+    $connection = exampleConnection(expiresInSeconds: TokenGrant::DEFAULT_REFRESH_MARGIN_SECONDS - 3600);
 
     Http::fake(['auth.example.test/token' => Http::response(['error' => 'invalid_grant'], 400)]);
 
@@ -101,7 +103,7 @@ test('a refused refresh means the grant is gone', function () {
 });
 
 test('a rotated refresh token is kept, and the call goes with the new access token', function () {
-    $connection = exampleConnection(expiresInSeconds: TokenGrantClient::REFRESH_MARGIN_SECONDS - 3600);
+    $connection = exampleConnection(expiresInSeconds: TokenGrant::DEFAULT_REFRESH_MARGIN_SECONDS - 3600);
 
     Http::fake([
         'auth.example.test/token' => Http::response(['access_token' => 'access-two', 'refresh_token' => 'refresh-two', 'expires_in' => 604800]),
@@ -121,7 +123,7 @@ test('a rotated refresh token is kept, and the call goes with the new access tok
 });
 
 test('a refresh answer without a refresh token keeps the one just used', function () {
-    $connection = exampleConnection(expiresInSeconds: TokenGrantClient::REFRESH_MARGIN_SECONDS - 3600);
+    $connection = exampleConnection(expiresInSeconds: TokenGrant::DEFAULT_REFRESH_MARGIN_SECONDS - 3600);
 
     Http::fake([
         'auth.example.test/token' => Http::response(['access_token' => 'access-two', 'expires_in' => 604800]),
@@ -135,7 +137,7 @@ test('a refresh answer without a refresh token keeps the one just used', functio
 });
 
 test('an answer without an access token stores nothing', function () {
-    $connection = exampleConnection(expiresInSeconds: TokenGrantClient::REFRESH_MARGIN_SECONDS - 3600);
+    $connection = exampleConnection(expiresInSeconds: TokenGrant::DEFAULT_REFRESH_MARGIN_SECONDS - 3600);
 
     Http::fake(['auth.example.test/token' => Http::response(['token_type' => 'Bearer'])]);
 
@@ -146,7 +148,7 @@ test('an answer without an access token stores nothing', function () {
 });
 
 test('a refresh another worker still holds is waited for, then given up on without a token request', function () {
-    $connection = exampleConnection(expiresInSeconds: TokenGrantClient::REFRESH_MARGIN_SECONDS - 3600);
+    $connection = exampleConnection(expiresInSeconds: TokenGrant::DEFAULT_REFRESH_MARGIN_SECONDS - 3600);
     Http::fake();
     // The wait is counted on the clock: a faked sleep moves it.
     Sleep::fake(syncWithCarbon: true);
@@ -164,7 +166,7 @@ test('a refresh another worker still holds is waited for, then given up on witho
 });
 
 test('a confidential app signs its refresh with its secret, a public one with its id alone', function (?string $secret) {
-    $connection = exampleConnection(expiresInSeconds: TokenGrantClient::REFRESH_MARGIN_SECONDS - 3600);
+    $connection = exampleConnection(expiresInSeconds: TokenGrant::DEFAULT_REFRESH_MARGIN_SECONDS - 3600);
     $grant = new TokenGrant('Example', 'https://auth.example.test', 'example-client', $secret, '/token', '/revoke', 'import.simkl_stopped_accepting_this_connection_connect');
 
     Http::fake([
@@ -180,4 +182,86 @@ test('a confidential app signs its refresh with its secret, a public one with it
 })->with([
     'confidential' => ['secret-of-the-app'],
     'public' => [null],
+]);
+
+/** A Supabase project's session: an hour-long token, refreshed five minutes ahead. */
+function supabaseGrant(): TokenGrant
+{
+    return new TokenGrant(
+        service: 'Example',
+        baseUrl: 'https://auth.example.test',
+        clientId: 'publishable-key-of-the-project',
+        clientSecret: null,
+        tokenPath: '/auth/v1/token?grant_type=refresh_token',
+        revokePath: '/auth/v1/logout?scope=local',
+        expiredKey: 'import.simkl_stopped_accepting_this_connection_connect',
+        style: TokenRequestStyle::SupabaseJson,
+        refreshMarginSeconds: 300,
+    );
+}
+
+test('a Supabase session is refreshed as JSON under the project\'s key, its rotated token kept', function () {
+    $connection = exampleConnection(expiresInSeconds: 120);
+
+    Http::fake([
+        'auth.example.test/auth/v1/token*' => Http::response(['access_token' => 'access-two', 'refresh_token' => 'refresh-two', 'expires_in' => 3600]),
+        'api.example.test/*' => Http::response(['ok' => true]),
+    ]);
+
+    app(TokenGrantClient::class)->call(supabaseGrant(), $connection, fn (string $token): Response => Http::withToken($token)->get('https://api.example.test/me'));
+
+    Http::assertSent(fn (Request $request) => $request->url() === 'https://auth.example.test/auth/v1/token?grant_type=refresh_token'
+        && $request->isJson()
+        && $request->data() === ['refresh_token' => 'refresh-one']
+        && $request->header('apikey') === ['publishable-key-of-the-project']);
+    Http::assertSent(fn (Request $request) => $request->url() === 'https://api.example.test/me' && $request->hasHeader('Authorization', 'Bearer access-two'));
+
+    expect($connection->refresh()->credential('refresh_token'))->toBe('refresh-two')
+        ->and((int) $connection->credential('expires_at'))->toBe(now()->addSeconds(3600)->getTimestamp());
+});
+
+test('an hour-long token is relied on until its own margin, not a day ahead', function () {
+    $left = supabaseGrant()->refreshMarginSeconds * 6;
+    $connection = exampleConnection(expiresInSeconds: $left);
+
+    Http::fake(['api.example.test/*' => Http::response(['ok' => true])]);
+
+    app(TokenGrantClient::class)->call(supabaseGrant(), $connection, fn (string $token): Response => Http::withToken($token)->get('https://api.example.test/me'));
+
+    expect($left)->toBeLessThan(TokenGrant::DEFAULT_REFRESH_MARGIN_SECONDS)
+        ->and(requestsTo('/auth/v1/token'))->toBe(0);
+});
+
+test('a Supabase session ends with its own access token and the project\'s key', function () {
+    $connection = exampleConnection(expiresInSeconds: supabaseGrant()->refreshMarginSeconds * 6);
+
+    Http::fake(['auth.example.test/auth/v1/logout*' => Http::response(null, 204)]);
+
+    app(TokenGrantClient::class)->revoke(supabaseGrant(), $connection);
+
+    Http::assertSent(fn (Request $request) => str_contains($request->url(), '/auth/v1/logout')
+        && $request->hasHeader('Authorization', 'Bearer access-one')
+        && $request->header('apikey') === ['publishable-key-of-the-project']);
+});
+
+test('a lapsed Supabase session is refreshed to be ended; one the service let go of has nothing to end', function (int $refreshStatus, int $logouts) {
+    $connection = exampleConnection(expiresInSeconds: -60);
+
+    Http::fake([
+        'auth.example.test/auth/v1/token*' => $refreshStatus === 200
+            ? Http::response(['access_token' => 'access-two', 'refresh_token' => 'refresh-two', 'expires_in' => 3600])
+            : Http::response(['error_code' => 'refresh_token_already_used'], $refreshStatus),
+        'auth.example.test/auth/v1/logout*' => Http::response(null, 204),
+    ]);
+
+    app(TokenGrantClient::class)->revoke(supabaseGrant(), $connection);
+
+    expect(requestsTo('/auth/v1/logout'))->toBe($logouts);
+
+    if ($logouts > 0) {
+        Http::assertSent(fn (Request $request) => str_contains($request->url(), '/auth/v1/logout') && $request->hasHeader('Authorization', 'Bearer access-two'));
+    }
+})->with([
+    'refreshed, then ended' => [200, 1],
+    'already let go of' => [400, 0],
 ]);

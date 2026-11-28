@@ -28,6 +28,9 @@ class FakeConnectionImportSource implements ReadsFromConnection
     /** @var array<string, mixed>|null the connection state the last run started from */
     public static ?array $startedFrom = null;
 
+    /** Its pace between automatic runs. */
+    public static int $autoImportMinutes = 60;
+
     /** The connectable service it reads through. */
     public static string $service = FakeDeviceService::CODE;
 
@@ -61,7 +64,7 @@ class FakeConnectionImportSource implements ReadsFromConnection
 
     public function autoImportMinutes(): int
     {
-        return 60;
+        return self::$autoImportMinutes;
     }
 
     public function analyze(ImportInput $input): ImportManifest

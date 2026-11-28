@@ -1,7 +1,7 @@
 <?php
 
 use App\Integrations\Connections\ConnectionStatus;
-use App\Integrations\Connections\TokenGrantClient;
+use App\Integrations\Connections\Data\TokenGrant;
 use App\Integrations\Import\Data\ImportInput;
 use App\Integrations\Import\Data\ImportSelection;
 use App\Integrations\Import\Data\MediaSubject;
@@ -180,7 +180,7 @@ function deviceConnection(User $user, string $service, array $credentials = [], 
     return activeConnection($user, $service, [
         'access_token' => 'access-of-alex-one',
         'refresh_token' => 'refresh-of-alex-one',
-        'expires_at' => now()->addSeconds(TokenGrantClient::REFRESH_MARGIN_SECONDS * 2)->getTimestamp(),
+        'expires_at' => now()->addSeconds(TokenGrant::DEFAULT_REFRESH_MARGIN_SECONDS * 2)->getTimestamp(),
         ...$credentials,
     ], $attributes);
 }
