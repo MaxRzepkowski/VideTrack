@@ -153,7 +153,7 @@ function endBusy(key: string): void {
     );
 }
 
-function isBusyKey(key: string): boolean {
+export function isBusyKey(key: string): boolean {
     return (busyWrites.get(key) ?? 0) > 0 || busyTail.has(key);
 }
 

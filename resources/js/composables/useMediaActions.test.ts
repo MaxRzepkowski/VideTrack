@@ -418,6 +418,31 @@ describe('the requests', () => {
         expect(nth(calls, 2).body).toEqual({ watched_at: 'now', amount: null, new_attempt: false, merge_hours: true });
     });
 
+    it.each([
+        ['watched', { watched: true }],
+        ['given a status', { status: 'dropped' }],
+    ] as const)('leaves a title %s alone on a right-click, with no loader', async (_, state) => {
+        setPageProps({ userStates: { 'movie:m1': userState(state) } });
+        const busy = useCardBusy(movie());
+
+        useMediaActions().markWatchedIfUntouched(movie());
+        await nextTick();
+
+        expect(busy.value).toBe(false);
+        expect(calls).toEqual([]);
+    });
+
+    it('marks a watched title once the write clearing it lands, on a right-click made meanwhile', async () => {
+        setPageProps({ userStates: { 'movie:m1': userState({ watched: true }) } });
+        const actions = useMediaActions();
+
+        actions.unmarkWatched(movie());
+        actions.markWatchedIfUntouched(movie());
+        await nth(calls, 0).answer(200, { states: { 'movie:m1': userState() } });
+
+        expect(nth(calls, 1)).toMatchObject({ url: '/ui.media.plays.store/movie/m1', body: { watched_at: 'now' } });
+    });
+
     it('lets a refused write through to the next one', async () => {
         vi.spyOn(toast, 'error').mockImplementation(() => 1);
         const actions = useMediaActions();

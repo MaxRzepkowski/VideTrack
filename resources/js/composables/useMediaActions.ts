@@ -2,7 +2,7 @@ import { jsonFetch, type JsonFetchOptions } from '@/lib/http';
 import { backlogOf } from '@/lib/lists';
 import { mediaTypeDefinition } from '@/lib/mediaTypes';
 import { nextFollowMode } from '@/lib/tracking';
-import { absorbUserStates, displayedState, settledState, stateKey, writeState } from '@/stores/library';
+import { absorbUserStates, displayedState, isBusyKey, settledState, stateKey, writeState } from '@/stores/library';
 import type { SharedData } from '@/types';
 import type { UserMediaState } from '@/types/generated';
 import type { MediaPosition, MediaSummary, UserStatesMap, WatchedAtChoice } from '@/types/media';
@@ -53,16 +53,26 @@ export function useMediaActions() {
         });
     };
 
+    const watchedOrGivenStatus = (media: MediaPosition): boolean => {
+        const state = settledState(stateKey(media));
+
+        return state.status !== null || state.watched;
+    };
+
     /**
      * The right-click shortcut: a title with no status that is not watched yet
      * is marked watched now. Read when the request would go out, so a second
-     * quick click finds the first one landed and adds no extra viewing.
+     * quick click finds the first one landed and adds no extra viewing. With
+     * nothing to send and no write under way, the click puts up no loader:
+     * a card that spins and comes back unchanged reads as a failed save.
      */
     const markWatchedIfUntouched = (media: MediaPosition): void => {
-        void writeState(media, async () => {
-            const state = settledState(stateKey(media));
+        if (!isBusyKey(stateKey(media)) && watchedOrGivenStatus(media)) {
+            return;
+        }
 
-            if (state.status !== null || state.watched) {
+        void writeState(media, async () => {
+            if (watchedOrGivenStatus(media)) {
                 return null;
             }
 
