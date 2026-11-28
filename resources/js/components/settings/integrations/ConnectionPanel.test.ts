@@ -202,6 +202,38 @@ describe('ConnectionPanel', () => {
         expect(panel.emitted('update:connection')).toBeUndefined();
     });
 
+    it('connects at once when the key checks out and the service holds nothing to pick', async () => {
+        fetchMock.mockResolvedValueOnce(json({ choices: [] })).mockResolvedValueOnce(json({ status: 'connected', connection: card }));
+        const panel = mountPanel(tracearr);
+
+        await panel.find('input[type="url"]').setValue('https://tracearr.example.test');
+        await panel.find('input[type="password"]').setValue('trr_pub_alex');
+        await panel.find('form').trigger('submit');
+        await flushPromises();
+
+        expect(fetchMock).toHaveBeenLastCalledWith('/settings.connections.connect/tracearr', {
+            method: 'POST',
+            body: { values: { url: 'https://tracearr.example.test', key: 'trr_pub_alex' }, choice: null },
+        });
+        expect(panel.emitted('update:connection')?.[0]).toEqual([card]);
+    });
+
+    it('keeps the form ready to send again when connecting after a check with nothing to pick is refused', async () => {
+        fetchMock
+            .mockResolvedValueOnce(json({ choices: [] }))
+            .mockResolvedValueOnce(json({ message: 'Tracearr is unreachable.', errors: { connection: ['Tracearr is unreachable.'] } }, 422));
+        const panel = mountPanel(tracearr);
+
+        await panel.find('input[type="url"]').setValue('https://tracearr.example.test');
+        await panel.find('input[type="password"]').setValue('trr_pub_alex');
+        await panel.find('form').trigger('submit');
+        await flushPromises();
+
+        expect(panel.text()).toContain('Tracearr is unreachable.');
+        expect(panel.find('select').exists()).toBe(false);
+        expect(panel.find('button[type="submit"]').attributes('disabled')).toBeUndefined();
+    });
+
     it('lets go of a connection once the user confirms', async () => {
         const destroy = vi.spyOn(router, 'delete').mockImplementation(() => undefined);
         const panel = mountPanel(tracearr, card);
