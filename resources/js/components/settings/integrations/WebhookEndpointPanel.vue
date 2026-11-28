@@ -133,6 +133,8 @@ async function disconnect(): Promise<void> {
 
         <p v-if="props.endpoint.lastError" class="text-danger text-sm">{{ props.endpoint.lastError }}</p>
 
+        <SettingsSaveBar placement="card" :dirty="form.isDirty" :processing="form.processing" @save="save" @discard="discard" />
+
         <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
             <span v-if="props.endpoint.lastReceivedAt" v-tooltip="formatDateTime(props.endpoint.lastReceivedAt)" class="text-ink-muted text-sm">
                 {{ trans('integrations.last_delivery_time', { time: relativeTime(props.endpoint.lastReceivedAt) ?? '' }) }}
@@ -153,7 +155,5 @@ async function disconnect(): Promise<void> {
         </div>
 
         <DeliveryLog v-if="props.endpoint.deliveries.length > 0" :deliveries="props.endpoint.deliveries" />
-
-        <SettingsSaveBar placement="card" :dirty="form.isDirty" :processing="form.processing" @save="save" @discard="discard" />
     </div>
 </template>
